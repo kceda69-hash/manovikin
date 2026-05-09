@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight } from "lucide-react";
-import logo from "@/assets/nova-x-logo.png";
+import logo from "@/assets/nova-x-logo.webp";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
