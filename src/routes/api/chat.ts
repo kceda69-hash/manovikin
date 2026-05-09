@@ -3,6 +3,48 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createClient } from "@supabase/supabase-js";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
+import { redactMessage } from "@/lib/redact";
+
+// Allow-list of tool/action capabilities the agent may perform.
+// Any future tool calls must be checked against this set before execution.
+const ALLOWED_TOOLS = new Set<string>([
+  "text.respond",
+  "code.generate",
+  "markdown.render",
+]);
+
+function summarize(msg: { parts?: Array<{ type: string; text?: string }> }): string {
+  if (!msg?.parts) return "";
+  return msg.parts
+    .map((p) => (p.type === "text" ? p.text ?? "" : `[${p.type}]`))
+    .join(" ")
+    .trim()
+    .slice(0, 200);
+}
+
+async function audit(
+  supabase: ReturnType<typeof createClient>,
+  entry: {
+    user_id: string;
+    thread_id: string | null;
+    event_type: string;
+    summary?: string;
+    ip?: string;
+    user_agent?: string;
+    metadata?: Record<string, unknown>;
+  },
+) {
+  const { error } = await supabase.from("audit_logs").insert({
+    user_id: entry.user_id,
+    thread_id: entry.thread_id,
+    event_type: entry.event_type,
+    summary: entry.summary ?? null,
+    ip: entry.ip ?? null,
+    user_agent: entry.user_agent ?? null,
+    metadata: entry.metadata ?? {},
+  });
+  if (error) console.error("[audit] insert failed:", error.message);
+}
 
 const SYSTEM_PROMPT = `You are NOVA-X, an elite autonomous AI agent built to act like a senior engineering employee. You can:
 - Write production-quality code in any programming language (TypeScript, Python, Rust, Go, Swift, Kotlin, C++, SQL, etc.)
