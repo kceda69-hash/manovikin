@@ -96,24 +96,49 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Thread not found", { status: 404 });
         }
 
-        // Save the latest user message
+        const ip =
+          request.headers.get("cf-connecting-ip") ||
+          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+          undefined;
+        const ua = request.headers.get("user-agent") || undefined;
+
+        // Save the latest user message (with secret redaction)
         const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
         if (lastUserMsg) {
+          const { msg: safeUserMsg, hits } = redactMessage(lastUserMsg);
+          if (hits.length) {
+            await audit(supabase, {
+              user_id: userId,
+              thread_id: threadId,
+              event_type: "secret.redacted",
+              summary: `Redacted ${hits.length} secret(s) from user message`,
+              ip,
+              user_agent: ua,
+              metadata: { kinds: hits },
+            });
+          }
+
           const { error: insertErr } = await supabase.from("messages").insert({
             thread_id: threadId,
             user_id: userId,
             role: "user",
-            message: lastUserMsg as unknown as Record<string, unknown>,
+            message: safeUserMsg as unknown as Record<string, unknown>,
           });
           if (insertErr) console.error("[chat] save user msg:", insertErr);
 
+          await audit(supabase, {
+            user_id: userId,
+            thread_id: threadId,
+            event_type: "message.user",
+            summary: summarize(safeUserMsg),
+            ip,
+            user_agent: ua,
+            metadata: { allowed_tools: Array.from(ALLOWED_TOOLS) },
+          });
+
           // Auto-title if still default
           if (thread.title === "New conversation") {
-            const text = lastUserMsg.parts
-              .map((p) => (p.type === "text" ? p.text : ""))
-              .join(" ")
-              .trim()
-              .slice(0, 60);
+            const text = summarize(safeUserMsg).slice(0, 60);
             if (text) {
               await supabase
                 .from("threads")
@@ -138,21 +163,51 @@ export const Route = createFileRoute("/api/chat")({
             onFinish: async ({ messages: finalMessages }) => {
               const lastAssistant = [...finalMessages].reverse().find((m) => m.role === "assistant");
               if (!lastAssistant) return;
+              const { msg: safeAssistant, hits } = redactMessage(lastAssistant);
+              if (hits.length) {
+                await audit(supabase, {
+                  user_id: userId,
+                  thread_id: threadId,
+                  event_type: "secret.redacted",
+                  summary: `Redacted ${hits.length} secret(s) from assistant message`,
+                  ip,
+                  user_agent: ua,
+                  metadata: { kinds: hits, source: "assistant" },
+                });
+              }
               const { error } = await supabase.from("messages").insert({
                 thread_id: threadId,
                 user_id: userId,
                 role: "assistant",
-                message: lastAssistant as unknown as Record<string, unknown>,
+                message: safeAssistant as unknown as Record<string, unknown>,
               });
               if (error) console.error("[chat] save assistant msg:", error);
               await supabase
                 .from("threads")
                 .update({ updated_at: new Date().toISOString() })
                 .eq("id", threadId);
+
+              await audit(supabase, {
+                user_id: userId,
+                thread_id: threadId,
+                event_type: "message.assistant",
+                summary: summarize(safeAssistant),
+                ip,
+                user_agent: ua,
+                metadata: { model: "google/gemini-3-flash-preview" },
+              });
             },
           });
         } catch (err) {
           console.error("[chat] stream error:", err);
+          await audit(supabase, {
+            user_id: userId,
+            thread_id: threadId,
+            event_type: "error.stream",
+            summary: String((err as Error)?.message ?? err).slice(0, 200),
+            ip,
+            user_agent: ua,
+          });
           return new Response("AI gateway error", { status: 500 });
         }
       },
