@@ -25,11 +25,11 @@ function Landing() {
 
   useEffect(() => {
     let cancelled = false;
-    // Defer Supabase auth import off the critical landing-page bundle.
-    import("@/hooks/useAuth").then(({ getCurrentUser }) => {
+    // Defer Supabase client off the critical landing-page bundle.
+    import("@/integrations/supabase/client").then(({ supabase }) => {
       if (cancelled) return;
-      getCurrentUser().then((user) => {
-        if (!cancelled && user) navigate({ to: "/chat" });
+      supabase.auth.getSession().then(({ data }) => {
+        if (!cancelled && data.session?.user) navigate({ to: "/chat" });
       });
     });
     return () => {
