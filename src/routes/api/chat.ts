@@ -147,13 +147,8 @@ export const Route = createFileRoute("/api/chat")({
         // Build AI SDK tools from the sandbox registry. Every tool execution
         // is routed through the sandbox (timeout, output cap, rate limit,
         // input validation, allow-list) and audited.
-        const aiTools = Object.fromEntries(
-          (sandbox as unknown as { ["registry"]: Map<string, any> }).registry
-            ? Array.from(((sandbox as unknown) as { registry: Map<string, any> }).registry.entries())
-            : [],
-        ) as Record<string, any>;
         const tools = Object.fromEntries(
-          Object.entries(aiTools).map(([name, def]) => [
+          sandbox.entries().map(([name, def]) => [
             name,
             tool({
               description: def.description,

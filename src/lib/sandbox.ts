@@ -70,6 +70,10 @@ export class Sandbox {
     }));
   }
 
+  entries(): Array<[string, ToolDef<unknown>]> {
+    return Array.from(this.registry.entries());
+  }
+
   has(name: string) {
     return this.registry.has(name);
   }
