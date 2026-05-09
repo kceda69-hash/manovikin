@@ -23,7 +23,7 @@ function summarize(msg: { parts?: Array<{ type: string; text?: string }> }): str
 }
 
 async function audit(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   entry: {
     user_id: string;
     thread_id: string | null;
