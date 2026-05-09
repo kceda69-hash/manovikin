@@ -21,12 +21,21 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/chat" });
-  }, [loading, user, navigate]);
+    let cancelled = false;
+    // Defer Supabase auth import off the critical landing-page bundle.
+    import("@/hooks/useAuth").then(({ getCurrentUser }) => {
+      if (cancelled) return;
+      getCurrentUser().then((user) => {
+        if (!cancelled && user) navigate({ to: "/chat" });
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   return (
     <main className="relative min-h-screen overflow-hidden">
