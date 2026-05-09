@@ -3,6 +3,48 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createClient } from "@supabase/supabase-js";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
+import { redactMessage } from "@/lib/redact";
+
+// Allow-list of tool/action capabilities the agent may perform.
+// Any future tool calls must be checked against this set before execution.
+const ALLOWED_TOOLS = new Set<string>([
+  "text.respond",
+  "code.generate",
+  "markdown.render",
+]);
+
+function summarize(msg: { parts?: Array<{ type: string; text?: string }> }): string {
+  if (!msg?.parts) return "";
+  return msg.parts
+    .map((p) => (p.type === "text" ? p.text ?? "" : `[${p.type}]`))
+    .join(" ")
+    .trim()
+    .slice(0, 200);
+}
+
+async function audit(
+  supabase: any,
+  entry: {
+    user_id: string;
+    thread_id: string | null;
+    event_type: string;
+    summary?: string;
+    ip?: string;
+    user_agent?: string;
+    metadata?: Record<string, unknown>;
+  },
+) {
+  const { error } = await (supabase.from("audit_logs" as never) as any).insert({
+    user_id: entry.user_id,
+    thread_id: entry.thread_id,
+    event_type: entry.event_type,
+    summary: entry.summary ?? null,
+    ip: entry.ip ?? null,
+    user_agent: entry.user_agent ?? null,
+    metadata: entry.metadata ?? {},
+  });
+  if (error) console.error("[audit] insert failed:", error.message);
+}
 
 const SYSTEM_PROMPT = `You are NOVA-X, an elite autonomous AI agent built to act like a senior engineering employee. You can:
 - Write production-quality code in any programming language (TypeScript, Python, Rust, Go, Swift, Kotlin, C++, SQL, etc.)
@@ -54,24 +96,49 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Thread not found", { status: 404 });
         }
 
-        // Save the latest user message
+        const ip =
+          request.headers.get("cf-connecting-ip") ||
+          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+          undefined;
+        const ua = request.headers.get("user-agent") || undefined;
+
+        // Save the latest user message (with secret redaction)
         const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
         if (lastUserMsg) {
+          const { msg: safeUserMsg, hits } = redactMessage(lastUserMsg);
+          if (hits.length) {
+            await audit(supabase, {
+              user_id: userId,
+              thread_id: threadId,
+              event_type: "secret.redacted",
+              summary: `Redacted ${hits.length} secret(s) from user message`,
+              ip,
+              user_agent: ua,
+              metadata: { kinds: hits },
+            });
+          }
+
           const { error: insertErr } = await supabase.from("messages").insert({
             thread_id: threadId,
             user_id: userId,
             role: "user",
-            message: lastUserMsg as unknown as Record<string, unknown>,
+            message: safeUserMsg as unknown as Record<string, unknown>,
           });
           if (insertErr) console.error("[chat] save user msg:", insertErr);
 
+          await audit(supabase, {
+            user_id: userId,
+            thread_id: threadId,
+            event_type: "message.user",
+            summary: summarize(safeUserMsg),
+            ip,
+            user_agent: ua,
+            metadata: { allowed_tools: Array.from(ALLOWED_TOOLS) },
+          });
+
           // Auto-title if still default
           if (thread.title === "New conversation") {
-            const text = lastUserMsg.parts
-              .map((p) => (p.type === "text" ? p.text : ""))
-              .join(" ")
-              .trim()
-              .slice(0, 60);
+            const text = summarize(safeUserMsg).slice(0, 60);
             if (text) {
               await supabase
                 .from("threads")
@@ -96,21 +163,51 @@ export const Route = createFileRoute("/api/chat")({
             onFinish: async ({ messages: finalMessages }) => {
               const lastAssistant = [...finalMessages].reverse().find((m) => m.role === "assistant");
               if (!lastAssistant) return;
+              const { msg: safeAssistant, hits } = redactMessage(lastAssistant);
+              if (hits.length) {
+                await audit(supabase, {
+                  user_id: userId,
+                  thread_id: threadId,
+                  event_type: "secret.redacted",
+                  summary: `Redacted ${hits.length} secret(s) from assistant message`,
+                  ip,
+                  user_agent: ua,
+                  metadata: { kinds: hits, source: "assistant" },
+                });
+              }
               const { error } = await supabase.from("messages").insert({
                 thread_id: threadId,
                 user_id: userId,
                 role: "assistant",
-                message: lastAssistant as unknown as Record<string, unknown>,
+                message: safeAssistant as unknown as Record<string, unknown>,
               });
               if (error) console.error("[chat] save assistant msg:", error);
               await supabase
                 .from("threads")
                 .update({ updated_at: new Date().toISOString() })
                 .eq("id", threadId);
+
+              await audit(supabase, {
+                user_id: userId,
+                thread_id: threadId,
+                event_type: "message.assistant",
+                summary: summarize(safeAssistant),
+                ip,
+                user_agent: ua,
+                metadata: { model: "google/gemini-3-flash-preview" },
+              });
             },
           });
         } catch (err) {
           console.error("[chat] stream error:", err);
+          await audit(supabase, {
+            user_id: userId,
+            thread_id: threadId,
+            event_type: "error.stream",
+            summary: String((err as Error)?.message ?? err).slice(0, 200),
+            ip,
+            user_agent: ua,
+          });
           return new Response("AI gateway error", { status: 500 });
         }
       },

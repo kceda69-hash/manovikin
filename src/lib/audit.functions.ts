@@ -1,0 +1,34 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+export type AuditEntry = {
+  id: string;
+  thread_id: string | null;
+  event_type: string;
+  summary: string | null;
+  ip: string | null;
+  user_agent: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
+
+export const listAuditLogs = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase } = context as unknown as { supabase: any };
+    const { data, error } = await supabase
+      .from("audit_logs")
+      .select("id,thread_id,event_type,summary,ip,user_agent,metadata,created_at")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) throw new Error(error.message);
+    return { logsJson: JSON.stringify((data ?? []) as AuditEntry[]) };
+  });
+
+export function parseAuditLogs(json: string): AuditEntry[] {
+  try {
+    return JSON.parse(json) as AuditEntry[];
+  } catch {
+    return [];
+  }
+}
