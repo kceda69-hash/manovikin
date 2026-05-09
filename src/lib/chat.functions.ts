@@ -48,6 +48,6 @@ export const getThreadMessages = createServerFn({ method: "POST" })
       .eq("thread_id", data.threadId)
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
-    const messages = (rows ?? []).map((r) => r.message as unknown as UIMessage);
-    return { messages };
+    const messages = (rows ?? []).map((r) => r.message);
+    return { messages: messages as unknown as UIMessage[] };
   });
