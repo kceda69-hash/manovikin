@@ -1,17 +1,10 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { convertToModelMessages, streamText, stepCountIs, tool, type UIMessage } from "ai";
 import { createClient } from "@supabase/supabase-js";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 import { redactMessage } from "@/lib/redact";
-
-// Allow-list of tool/action capabilities the agent may perform.
-// Any future tool calls must be checked against this set before execution.
-const ALLOWED_TOOLS = new Set<string>([
-  "text.respond",
-  "code.generate",
-  "markdown.render",
-]);
+import { sandbox } from "@/lib/agent-tools";
 
 function summarize(msg: { parts?: Array<{ type: string; text?: string }> }): string {
   if (!msg?.parts) return "";
@@ -133,7 +126,7 @@ export const Route = createFileRoute("/api/chat")({
             summary: summarize(safeUserMsg),
             ip,
             user_agent: ua,
-            metadata: { allowed_tools: Array.from(ALLOWED_TOOLS) },
+            metadata: { allowed_tools: sandbox.list().map((t) => t.name) },
           });
 
           // Auto-title if still default
@@ -151,11 +144,44 @@ export const Route = createFileRoute("/api/chat")({
         const gateway = createLovableAiGatewayProvider(apiKey);
         const model = gateway("google/gemini-3-flash-preview");
 
+        // Build AI SDK tools from the sandbox registry. Every tool execution
+        // is routed through the sandbox (timeout, output cap, rate limit,
+        // input validation, allow-list) and audited.
+        const tools = Object.fromEntries(
+          sandbox.entries().map(([name, def]) => [
+            name,
+            tool({
+              description: def.description,
+              inputSchema: def.schema,
+              execute: async (input: unknown) => {
+                const result = await sandbox.run(name, input, userId);
+                await audit(supabase, {
+                  user_id: userId,
+                  thread_id: threadId,
+                  event_type: result.ok ? "tool.exec" : "tool.denied",
+                  summary: `${name} • ${result.ok ? "ok" : "fail"} • ${result.durationMs}ms${result.truncated ? " • truncated" : ""}`,
+                  ip,
+                  user_agent: ua,
+                  metadata: { tool: name, error: result.error, input },
+                });
+                return result;
+              },
+            }),
+          ]),
+        );
+
         try {
           const result = streamText({
             model,
-            system: SYSTEM_PROMPT,
+            system:
+              SYSTEM_PROMPT +
+              `\n\nYou may call sandboxed tools: ${sandbox
+                .list()
+                .map((t) => `${t.name} (${t.description})`)
+                .join("; ")}. Tools enforce timeouts, output caps, and host allow-lists. Never attempt unsupported tools.`,
             messages: await convertToModelMessages(messages),
+            tools,
+            stopWhen: stepCountIs(50),
           });
 
           return result.toUIMessageStreamResponse({
