@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight } from "lucide-react";
 import logo from "@/assets/nova-x-logo.png";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -22,12 +21,21 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/chat" });
-  }, [loading, user, navigate]);
+    let cancelled = false;
+    // Defer Supabase client off the critical landing-page bundle.
+    import("@/integrations/supabase/client").then(({ supabase }) => {
+      if (cancelled) return;
+      supabase.auth.getSession().then(({ data }) => {
+        if (!cancelled && data.session?.user) navigate({ to: "/chat" });
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   return (
     <main className="relative min-h-screen overflow-hidden">
