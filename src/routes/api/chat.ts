@@ -1,17 +1,10 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, type UIMessage } from "ai";
+import { convertToModelMessages, streamText, stepCountIs, tool, type UIMessage } from "ai";
 import { createClient } from "@supabase/supabase-js";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 import { redactMessage } from "@/lib/redact";
-
-// Allow-list of tool/action capabilities the agent may perform.
-// Any future tool calls must be checked against this set before execution.
-const ALLOWED_TOOLS = new Set<string>([
-  "text.respond",
-  "code.generate",
-  "markdown.render",
-]);
+import { sandbox } from "@/lib/agent-tools";
 
 function summarize(msg: { parts?: Array<{ type: string; text?: string }> }): string {
   if (!msg?.parts) return "";
