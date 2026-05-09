@@ -34,7 +34,7 @@ async function audit(
     metadata?: Record<string, unknown>;
   },
 ) {
-  const { error } = await supabase.from("audit_logs").insert({
+  const { error } = await (supabase.from("audit_logs" as never) as any).insert({
     user_id: entry.user_id,
     thread_id: entry.thread_id,
     event_type: entry.event_type,
