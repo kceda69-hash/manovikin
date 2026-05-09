@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight } from "lucide-react";
 import logo from "@/assets/nova-x-logo.png";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
   component: Landing,
