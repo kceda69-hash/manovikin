@@ -144,11 +144,49 @@ export const Route = createFileRoute("/api/chat")({
         const gateway = createLovableAiGatewayProvider(apiKey);
         const model = gateway("google/gemini-3-flash-preview");
 
+        // Build AI SDK tools from the sandbox registry. Every tool execution
+        // is routed through the sandbox (timeout, output cap, rate limit,
+        // input validation, allow-list) and audited.
+        const aiTools = Object.fromEntries(
+          (sandbox as unknown as { ["registry"]: Map<string, any> }).registry
+            ? Array.from(((sandbox as unknown) as { registry: Map<string, any> }).registry.entries())
+            : [],
+        ) as Record<string, any>;
+        const tools = Object.fromEntries(
+          Object.entries(aiTools).map(([name, def]) => [
+            name,
+            tool({
+              description: def.description,
+              inputSchema: def.schema,
+              execute: async (input: unknown) => {
+                const result = await sandbox.run(name, input, userId);
+                await audit(supabase, {
+                  user_id: userId,
+                  thread_id: threadId,
+                  event_type: result.ok ? "tool.exec" : "tool.denied",
+                  summary: `${name} • ${result.ok ? "ok" : "fail"} • ${result.durationMs}ms${result.truncated ? " • truncated" : ""}`,
+                  ip,
+                  user_agent: ua,
+                  metadata: { tool: name, error: result.error, input },
+                });
+                return result;
+              },
+            }),
+          ]),
+        );
+
         try {
           const result = streamText({
             model,
-            system: SYSTEM_PROMPT,
+            system:
+              SYSTEM_PROMPT +
+              `\n\nYou may call sandboxed tools: ${sandbox
+                .list()
+                .map((t) => `${t.name} (${t.description})`)
+                .join("; ")}. Tools enforce timeouts, output caps, and host allow-lists. Never attempt unsupported tools.`,
             messages: await convertToModelMessages(messages),
+            tools,
+            stopWhen: stepCountIs(50),
           });
 
           return result.toUIMessageStreamResponse({
