@@ -126,7 +126,7 @@ export const Route = createFileRoute("/api/chat")({
             summary: summarize(safeUserMsg),
             ip,
             user_agent: ua,
-            metadata: { allowed_tools: Array.from(ALLOWED_TOOLS) },
+            metadata: { allowed_tools: sandbox.list().map((t) => t.name) },
           });
 
           // Auto-title if still default
