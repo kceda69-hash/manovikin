@@ -7,7 +7,7 @@ import { listAuditLogs, parseAuditLogs, type AuditEntry } from "@/lib/audit.func
 
 export const Route = createFileRoute("/audit")({
   component: AuditPage,
-  head: () => ({ meta: [{ title: "NOVA-X — Audit log" }] }),
+  head: () => ({ meta: [{ title: "MANOVIK AI — Audit log" }] }),
 });
 
 function AuditPage() {

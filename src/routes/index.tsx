@@ -8,13 +8,13 @@ export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "NOVA-X — Your Autonomous AI Employee" },
+      { title: "MANOVIK AI — Your Autonomous AI Employee" },
       {
         name: "description",
         content:
-          "NOVA-X is a futuristic AI agent that codes in any language, builds websites, apps, APIs, and works for you 24/7.",
+          "MANOVIK AI is a futuristic AI agent that codes in any language, builds websites, apps, APIs, and works for you 24/7.",
       },
-      { property: "og:title", content: "NOVA-X — Your Autonomous AI Employee" },
+      { property: "og:title", content: "MANOVIK AI — Your Autonomous AI Employee" },
       { property: "og:description", content: "Futuristic AI agent that codes, builds, and ships." },
     ],
   }),
@@ -47,8 +47,8 @@ function Landing() {
 
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-3">
-          <img src={logo} alt="NOVA-X logo" width={36} height={36} className="h-9 w-9 animate-float" />
-          <span className="text-lg font-bold tracking-wider text-gradient">NOVA-X</span>
+          <img src={logo} alt="MANOVIK AI logo" width={36} height={36} className="h-9 w-9 animate-float" />
+          <span className="text-lg font-bold tracking-wider text-gradient">MANOVIK AI</span>
         </div>
         <Link to="/login">
           <Button variant="outline" className="border-primary/40 bg-card/40 backdrop-blur">
@@ -63,7 +63,7 @@ function Landing() {
           Autonomous AI agent · v1.0
         </div>
         <h1 className="text-balance text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-          Meet <span className="text-gradient">NOVA-X</span>
+          Meet <span className="text-gradient">MANOVIK AI</span>
           <br />
           your AI employee.
         </h1>
@@ -74,7 +74,7 @@ function Landing() {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <Link to="/login">
             <Button size="lg" className="bg-aurora text-primary-foreground glow hover:opacity-90">
-              Launch NOVA-X <ArrowRight className="ml-1 h-4 w-4" />
+              Launch MANOVIK AI <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </Link>
         </div>

@@ -21,7 +21,7 @@ import {
 
 export const Route = createFileRoute("/chat")({
   component: ChatPage,
-  head: () => ({ meta: [{ title: "NOVA-X — Console" }] }),
+  head: () => ({ meta: [{ title: "MANOVIK AI — Console" }] }),
 });
 
 type Thread = { id: string; title: string; updated_at: string };
@@ -133,8 +133,8 @@ function ChatPage() {
       {/* Sidebar */}
       <aside className="hidden w-72 shrink-0 flex-col border-r border-border/40 bg-sidebar p-3 md:flex">
         <Link to="/" className="mb-4 flex items-center gap-2 px-2 py-2">
-          <img src={logo} alt="NOVA-X" width={28} height={28} className="h-7 w-7" />
-          <span className="text-base font-bold tracking-wider text-gradient">NOVA-X</span>
+          <img src={logo} alt="MANOVIK AI" width={28} height={28} className="h-7 w-7" />
+          <span className="text-base font-bold tracking-wider text-gradient">MANOVIK AI</span>
         </Link>
         <Button onClick={handleNew} className="mb-3 w-full bg-aurora text-primary-foreground hover:opacity-90">
           <Plus className="h-4 w-4" /> New chat
@@ -256,7 +256,7 @@ function ChatPanel({
               <img src={logo} alt="" width={72} height={72} className="h-16 w-16 animate-float" />
               <h2 className="mt-4 text-2xl font-bold text-gradient">How can I help today?</h2>
               <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                Ask NOVA-X to write code, design a feature, debug a bug, draft an API, or anything else.
+                Ask MANOVIK AI to write code, design a feature, debug a bug, draft an API, or anything else.
               </p>
               <div className="mt-6 grid w-full max-w-xl grid-cols-1 gap-2 sm:grid-cols-2">
                 {[
@@ -285,7 +285,7 @@ function ChatPanel({
           {status === "submitted" && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="inline-block h-2 w-2 animate-pulse-glow rounded-full bg-primary" />
-              NOVA-X is thinking…
+              MANOVIK AI is thinking…
             </div>
           )}
         </div>
@@ -298,7 +298,7 @@ function ChatPanel({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
-            placeholder="Message NOVA-X…"
+            placeholder="Message MANOVIK AI…"
             rows={1}
             className="min-h-[44px] max-h-48 resize-none border-0 bg-transparent text-base focus-visible:ring-0"
             disabled={isBusy}
@@ -313,7 +313,7 @@ function ChatPanel({
           </Button>
         </div>
         <p className="mt-2 text-center text-[11px] text-muted-foreground">
-          NOVA-X may make mistakes. Verify important information.
+          MANOVIK AI may make mistakes. Verify important information.
         </p>
       </form>
     </main>

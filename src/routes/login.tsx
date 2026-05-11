@@ -11,7 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
-  head: () => ({ meta: [{ title: "Sign in — NOVA-X" }] }),
+  head: () => ({ meta: [{ title: "Sign in — MANOVIK AI" }] }),
 });
 
 function LoginPage() {
@@ -75,8 +75,8 @@ function LoginPage() {
 
       <div className="surface-card w-full max-w-md rounded-2xl p-8">
         <Link to="/" className="mb-6 flex items-center justify-center gap-2">
-          <img src={logo} alt="NOVA-X" width={40} height={40} className="h-10 w-10" />
-          <span className="text-xl font-bold tracking-wider text-gradient">NOVA-X</span>
+          <img src={logo} alt="MANOVIK AI" width={40} height={40} className="h-10 w-10" />
+          <span className="text-xl font-bold tracking-wider text-gradient">MANOVIK AI</span>
         </Link>
         <h1 className="text-center text-2xl font-bold">
           {mode === "signin" ? "Welcome back" : "Create your account"}

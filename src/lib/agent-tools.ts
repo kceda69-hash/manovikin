@@ -1,4 +1,4 @@
-// Whitelisted, sandboxed tools available to the NOVA-X agent.
+// Whitelisted, sandboxed tools available to the MANOVIK AI agent.
 // Add new capabilities ONLY here; the sandbox refuses anything not listed.
 import { z } from "zod";
 import { Sandbox } from "./sandbox";
@@ -93,7 +93,7 @@ sandbox.register({
     }
     const res = await fetch(u.toString(), {
       signal,
-      headers: { "User-Agent": "NOVA-X-Sandbox/1.0", Accept: "application/json, text/*;q=0.9" },
+      headers: { "User-Agent": "MANOVIK AI-Sandbox/1.0", Accept: "application/json, text/*;q=0.9" },
       redirect: "error",
     });
     const contentType = res.headers.get("content-type") ?? "";

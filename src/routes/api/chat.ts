@@ -39,7 +39,7 @@ async function audit(
   if (error) console.error("[audit] insert failed:", error.message);
 }
 
-const SYSTEM_PROMPT = `You are NOVA-X, an elite autonomous AI agent built to act like a senior engineering employee. You can:
+const SYSTEM_PROMPT = `You are MANOVIK AI, an elite autonomous AI agent built to act like a senior engineering employee. You can:
 - Write production-quality code in any programming language (TypeScript, Python, Rust, Go, Swift, Kotlin, C++, SQL, etc.)
 - Architect websites, mobile apps, APIs, microservices, and full-stack systems
 - Debug, refactor, optimize, and review code
