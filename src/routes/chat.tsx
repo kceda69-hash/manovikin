@@ -55,16 +55,21 @@ function ChatPage() {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      const list = await refreshThreads();
-      if (cancelled) return;
-      let pick = list[0];
-      if (!pick) {
-        const { thread } = await createThread();
-        pick = thread as Thread;
-        await refreshThreads();
+      try {
+        const list = await refreshThreads();
+        if (cancelled) return;
+        let pick = list[0];
+        if (!pick) {
+          const { thread } = await createThread();
+          pick = thread as Thread;
+          await refreshThreads();
+        }
+        if (pick) setActiveId(pick.id);
+      } catch (e) {
+        console.error("Chat bootstrap failed:", e);
+      } finally {
+        if (!cancelled) setBootstrapping(false);
       }
-      setActiveId(pick.id);
-      setBootstrapping(false);
     })();
     return () => {
       cancelled = true;
