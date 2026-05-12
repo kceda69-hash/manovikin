@@ -244,7 +244,7 @@ export const Route = createFileRoute("/api/chat")({
                 summary: summarize(safeAssistant),
                 ip,
                 user_agent: ua,
-                metadata: { model: "google/gemini-3-flash-preview" },
+                metadata: { model: modelName, sovereign },
               });
             },
           });
