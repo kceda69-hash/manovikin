@@ -1,0 +1,70 @@
+# MANOVIK AI — sovereign stack
+# Run on your own server with:  docker compose up -d
+#
+# This bundle includes:
+#   - manovik     : the MANOVIK AI web app (TanStack Start)
+#   - postgres    : your own Postgres for threads / messages / audit logs
+#   - ollama      : your own LLM server (OpenAI-compatible at /v1)
+#
+# Replace any service with your preferred provider by editing the env vars
+# in .env (see .env.example).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: manovik
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_DB: manovik
+    volumes:
+      - manovik_pg:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - manovik_ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    # Uncomment for GPU:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  manovik:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - ollama
+    environment:
+      # --- Sovereign AI provider (OpenAI-compatible) ---
+      MANOVIK_AI_BASE_URL: ${MANOVIK_AI_BASE_URL:-http://ollama:11434/v1}
+      MANOVIK_AI_API_KEY: ${MANOVIK_AI_API_KEY:-ollama}
+      MANOVIK_AI_MODEL: ${MANOVIK_AI_MODEL:-llama3.1}
+
+      # --- Self-hosted Supabase / Postgres backend ---
+      # Point these at your own Supabase instance (self-hosted via
+      # https://supabase.com/docs/guides/self-hosting) backed by the
+      # postgres service above.
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      VITE_SUPABASE_URL: ${SUPABASE_URL}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
+
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "3000:3000"
+
+volumes:
+  manovik_pg:
+  manovik_ollama:

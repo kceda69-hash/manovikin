@@ -56,8 +56,11 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY;
-        if (!apiKey) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+        const sovereign = !!process.env.MANOVIK_AI_BASE_URL;
+        const apiKey = process.env.LOVABLE_API_KEY ?? "";
+        if (!sovereign && !apiKey) {
+          return new Response("Missing LOVABLE_API_KEY (or set MANOVIK_AI_BASE_URL for sovereign mode)", { status: 500 });
+        }
 
         const authHeader = request.headers.get("authorization");
         if (!authHeader?.startsWith("Bearer ")) {
@@ -162,7 +165,8 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const gateway = createLovableAiGatewayProvider(apiKey);
-        const model = gateway("google/gemini-3-flash-preview");
+        const modelName = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3-flash-preview";
+        const model = gateway(modelName);
 
         // Build AI SDK tools from the sandbox registry. Every tool execution
         // is routed through the sandbox (timeout, output cap, rate limit,
@@ -240,7 +244,7 @@ export const Route = createFileRoute("/api/chat")({
                 summary: summarize(safeAssistant),
                 ip,
                 user_agent: ua,
-                metadata: { model: "google/gemini-3-flash-preview" },
+                metadata: { model: modelName, sovereign },
               });
             },
           });
