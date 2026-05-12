@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "own audit insert" ON public.audit_logs;

@@ -2,9 +2,13 @@ import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, stepCountIs, tool, type UIMessage } from "ai";
 import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 import { redactMessage } from "@/lib/redact";
 import { sandbox } from "@/lib/agent-tools";
+
+const MAX_MESSAGES = 200;
+const MAX_BODY_BYTES = 256 * 1024; // 256 KB
 
 function summarize(msg: { parts?: Array<{ type: string; text?: string }> }): string {
   if (!msg?.parts) return "";
@@ -73,10 +77,26 @@ export const Route = createFileRoute("/api/chat")({
         }
         const userId = claimsData.claims.sub as string;
 
-        const body = (await request.json()) as { messages: UIMessage[]; threadId: string };
+        const contentLength = Number(request.headers.get("content-length") ?? 0);
+        if (contentLength && contentLength > MAX_BODY_BYTES) {
+          return new Response("Payload too large", { status: 413 });
+        }
+        const rawBody = await request.text();
+        if (rawBody.length > MAX_BODY_BYTES) {
+          return new Response("Payload too large", { status: 413 });
+        }
+        let body: { messages: UIMessage[]; threadId: string };
+        try {
+          body = JSON.parse(rawBody) as { messages: UIMessage[]; threadId: string };
+        } catch {
+          return new Response("Bad request", { status: 400 });
+        }
         const { messages, threadId } = body;
         if (!Array.isArray(messages) || !threadId) {
           return new Response("Bad request", { status: 400 });
+        }
+        if (messages.length > MAX_MESSAGES) {
+          return new Response(`Too many messages (max ${MAX_MESSAGES})`, { status: 400 });
         }
 
         // Verify thread ownership
@@ -100,7 +120,7 @@ export const Route = createFileRoute("/api/chat")({
         if (lastUserMsg) {
           const { msg: safeUserMsg, hits } = redactMessage(lastUserMsg);
           if (hits.length) {
-            await audit(supabase, {
+            await audit(supabaseAdmin, {
               user_id: userId,
               thread_id: threadId,
               event_type: "secret.redacted",
@@ -119,7 +139,7 @@ export const Route = createFileRoute("/api/chat")({
           });
           if (insertErr) console.error("[chat] save user msg:", insertErr);
 
-          await audit(supabase, {
+          await audit(supabaseAdmin, {
             user_id: userId,
             thread_id: threadId,
             event_type: "message.user",
@@ -155,7 +175,7 @@ export const Route = createFileRoute("/api/chat")({
               inputSchema: def.schema,
               execute: async (input: unknown) => {
                 const result = await sandbox.run(name, input, userId);
-                await audit(supabase, {
+                await audit(supabaseAdmin, {
                   user_id: userId,
                   thread_id: threadId,
                   event_type: result.ok ? "tool.exec" : "tool.denied",
@@ -191,7 +211,7 @@ export const Route = createFileRoute("/api/chat")({
               if (!lastAssistant) return;
               const { msg: safeAssistant, hits } = redactMessage(lastAssistant);
               if (hits.length) {
-                await audit(supabase, {
+                await audit(supabaseAdmin, {
                   user_id: userId,
                   thread_id: threadId,
                   event_type: "secret.redacted",
@@ -213,7 +233,7 @@ export const Route = createFileRoute("/api/chat")({
                 .update({ updated_at: new Date().toISOString() })
                 .eq("id", threadId);
 
-              await audit(supabase, {
+              await audit(supabaseAdmin, {
                 user_id: userId,
                 thread_id: threadId,
                 event_type: "message.assistant",
@@ -226,7 +246,7 @@ export const Route = createFileRoute("/api/chat")({
           });
         } catch (err) {
           console.error("[chat] stream error:", err);
-          await audit(supabase, {
+          await audit(supabaseAdmin, {
             user_id: userId,
             thread_id: threadId,
             event_type: "error.stream",
