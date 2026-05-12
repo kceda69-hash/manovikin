@@ -2,9 +2,13 @@ import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, stepCountIs, tool, type UIMessage } from "ai";
 import { createClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 import { redactMessage } from "@/lib/redact";
 import { sandbox } from "@/lib/agent-tools";
+
+const MAX_MESSAGES = 200;
+const MAX_BODY_BYTES = 256 * 1024; // 256 KB
 
 function summarize(msg: { parts?: Array<{ type: string; text?: string }> }): string {
   if (!msg?.parts) return "";
