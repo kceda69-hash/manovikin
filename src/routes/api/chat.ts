@@ -165,7 +165,8 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const gateway = createLovableAiGatewayProvider(apiKey);
-        const model = gateway("google/gemini-3-flash-preview");
+        const modelName = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3-flash-preview";
+        const model = gateway(modelName);
 
         // Build AI SDK tools from the sandbox registry. Every tool execution
         // is routed through the sandbox (timeout, output cap, rate limit,
