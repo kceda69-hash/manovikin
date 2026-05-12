@@ -77,10 +77,26 @@ export const Route = createFileRoute("/api/chat")({
         }
         const userId = claimsData.claims.sub as string;
 
-        const body = (await request.json()) as { messages: UIMessage[]; threadId: string };
+        const contentLength = Number(request.headers.get("content-length") ?? 0);
+        if (contentLength && contentLength > MAX_BODY_BYTES) {
+          return new Response("Payload too large", { status: 413 });
+        }
+        const rawBody = await request.text();
+        if (rawBody.length > MAX_BODY_BYTES) {
+          return new Response("Payload too large", { status: 413 });
+        }
+        let body: { messages: UIMessage[]; threadId: string };
+        try {
+          body = JSON.parse(rawBody) as { messages: UIMessage[]; threadId: string };
+        } catch {
+          return new Response("Bad request", { status: 400 });
+        }
         const { messages, threadId } = body;
         if (!Array.isArray(messages) || !threadId) {
           return new Response("Bad request", { status: 400 });
+        }
+        if (messages.length > MAX_MESSAGES) {
+          return new Response(`Too many messages (max ${MAX_MESSAGES})`, { status: 400 });
         }
 
         // Verify thread ownership
