@@ -120,7 +120,7 @@ export const Route = createFileRoute("/api/chat")({
         if (lastUserMsg) {
           const { msg: safeUserMsg, hits } = redactMessage(lastUserMsg);
           if (hits.length) {
-            await audit(supabase, {
+            await audit(supabaseAdmin, {
               user_id: userId,
               thread_id: threadId,
               event_type: "secret.redacted",
@@ -139,7 +139,7 @@ export const Route = createFileRoute("/api/chat")({
           });
           if (insertErr) console.error("[chat] save user msg:", insertErr);
 
-          await audit(supabase, {
+          await audit(supabaseAdmin, {
             user_id: userId,
             thread_id: threadId,
             event_type: "message.user",
@@ -175,7 +175,7 @@ export const Route = createFileRoute("/api/chat")({
               inputSchema: def.schema,
               execute: async (input: unknown) => {
                 const result = await sandbox.run(name, input, userId);
-                await audit(supabase, {
+                await audit(supabaseAdmin, {
                   user_id: userId,
                   thread_id: threadId,
                   event_type: result.ok ? "tool.exec" : "tool.denied",
@@ -211,7 +211,7 @@ export const Route = createFileRoute("/api/chat")({
               if (!lastAssistant) return;
               const { msg: safeAssistant, hits } = redactMessage(lastAssistant);
               if (hits.length) {
-                await audit(supabase, {
+                await audit(supabaseAdmin, {
                   user_id: userId,
                   thread_id: threadId,
                   event_type: "secret.redacted",
@@ -233,7 +233,7 @@ export const Route = createFileRoute("/api/chat")({
                 .update({ updated_at: new Date().toISOString() })
                 .eq("id", threadId);
 
-              await audit(supabase, {
+              await audit(supabaseAdmin, {
                 user_id: userId,
                 thread_id: threadId,
                 event_type: "message.assistant",
@@ -246,7 +246,7 @@ export const Route = createFileRoute("/api/chat")({
           });
         } catch (err) {
           console.error("[chat] stream error:", err);
-          await audit(supabase, {
+          await audit(supabaseAdmin, {
             user_id: userId,
             thread_id: threadId,
             event_type: "error.stream",
