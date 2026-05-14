@@ -260,6 +260,7 @@ function ChatPanel({
 
   return (
     <main className="flex flex-1 flex-col">
+      <h1 className="sr-only">MANOVIK AI Chat Console</h1>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-8">
         <div className="mx-auto max-w-3xl space-y-6">
           {messages.length === 0 && (
