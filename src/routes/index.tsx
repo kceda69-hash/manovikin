@@ -16,7 +16,9 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:title", content: "MANOVIK AI — Your Autonomous AI Employee" },
       { property: "og:description", content: "Futuristic AI agent that codes, builds, and ships." },
+      { property: "og:url", content: "https://manovikin.lovable.app/" },
     ],
+    links: [{ rel: "canonical", href: "https://manovikin.lovable.app/" }],
   }),
 });
 
