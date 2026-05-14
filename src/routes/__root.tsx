@@ -95,6 +95,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              name: "MANOVIK AI",
+              url: "https://manovikin.lovable.app",
+              description: "Autonomous AI agent that codes, builds, and ships software 24/7.",
+            },
+            {
+              "@type": "WebSite",
+              name: "MANOVIK AI",
+              url: "https://manovikin.lovable.app",
+            },
+          ],
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
