@@ -1,0 +1,10 @@
+# MANOVIK AI
+
+> MANOVIK AI is an autonomous AI agent that codes in any language, builds websites, apps, and APIs, and works for you 24/7.
+
+MANOVIK AI is a futuristic AI employee: a streaming, polyglot coding agent with reasoning, private threads, and rich markdown output. It can be self-hosted on your own infrastructure (see the self-hosting guide).
+
+## Pages
+
+- [Home](/): Product overview, features, and call to action.
+- [Sign in](/login): Sign in or create a MANOVIK AI account.

@@ -22,7 +22,17 @@ import {
 
 export const Route = createFileRoute("/chat")({
   component: ChatPage,
-  head: () => ({ meta: [{ title: "MANOVIK AI — Console" }] }),
+  head: () => ({
+    meta: [
+      { title: "MANOVIK AI Chat Console" },
+      { name: "description", content: "Chat console for MANOVIK AI — stream code, plans, and answers from your autonomous AI agent in real time." },
+      { name: "robots", content: "noindex" },
+      { property: "og:title", content: "MANOVIK AI Chat Console" },
+      { property: "og:description", content: "Stream code, plans, and answers from your autonomous AI agent." },
+      { property: "og:url", content: "https://manovikin.lovable.app/chat" },
+    ],
+    links: [{ rel: "canonical", href: "https://manovikin.lovable.app/chat" }],
+  }),
 });
 
 type Thread = { id: string; title: string; updated_at: string };
@@ -250,6 +260,7 @@ function ChatPanel({
 
   return (
     <main className="flex flex-1 flex-col">
+      <h1 className="sr-only">MANOVIK AI Chat Console</h1>
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-8">
         <div className="mx-auto max-w-3xl space-y-6">
           {messages.length === 0 && (
@@ -300,6 +311,7 @@ function ChatPanel({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
             placeholder="Message MANOVIK AI…"
+            aria-label="Message MANOVIK AI"
             rows={1}
             className="min-h-[44px] max-h-48 resize-none border-0 bg-transparent text-base focus-visible:ring-0"
             disabled={isBusy}
@@ -307,6 +319,7 @@ function ChatPanel({
           <Button
             type="submit"
             size="icon"
+            aria-label="Send message"
             disabled={isBusy || !input.trim()}
             className="h-11 w-11 shrink-0 bg-aurora text-primary-foreground glow hover:opacity-90"
           >

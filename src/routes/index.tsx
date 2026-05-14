@@ -16,7 +16,9 @@ export const Route = createFileRoute("/")({
       },
       { property: "og:title", content: "MANOVIK AI — Your Autonomous AI Employee" },
       { property: "og:description", content: "Futuristic AI agent that codes, builds, and ships." },
+      { property: "og:url", content: "https://manovikin.lovable.app/" },
     ],
+    links: [{ rel: "canonical", href: "https://manovikin.lovable.app/" }],
   }),
 });
 
@@ -90,7 +92,7 @@ function Landing() {
           ].map((f) => (
             <div key={f.title} className="surface-card rounded-xl p-5 text-left">
               <f.icon className="h-5 w-5 text-primary" />
-              <h3 className="mt-3 font-semibold">{f.title}</h3>
+              <h2 className="mt-3 font-semibold">{f.title}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{f.desc}</p>
             </div>
           ))}

@@ -7,7 +7,17 @@ import { listAuditLogs, parseAuditLogs, type AuditEntry } from "@/lib/audit.func
 
 export const Route = createFileRoute("/audit")({
   component: AuditPage,
-  head: () => ({ meta: [{ title: "MANOVIK AI — Audit log" }] }),
+  head: () => ({
+    meta: [
+      { title: "MANOVIK AI — Audit log" },
+      { name: "description", content: "Review the security audit log for your MANOVIK AI account — sign-ins, key actions, and access events." },
+      { name: "robots", content: "noindex" },
+      { property: "og:title", content: "MANOVIK AI — Audit log" },
+      { property: "og:description", content: "Security audit log for your MANOVIK AI account." },
+      { property: "og:url", content: "https://manovikin.lovable.app/audit" },
+    ],
+    links: [{ rel: "canonical", href: "https://manovikin.lovable.app/audit" }],
+  }),
 });
 
 function AuditPage() {

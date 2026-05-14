@@ -11,7 +11,16 @@ import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
-  head: () => ({ meta: [{ title: "Sign in — MANOVIK AI" }] }),
+  head: () => ({
+    meta: [
+      { title: "Sign in to MANOVIK AI" },
+      { name: "description", content: "Sign in to MANOVIK AI to launch your autonomous AI agent and start building." },
+      { property: "og:title", content: "Sign in to MANOVIK AI" },
+      { property: "og:description", content: "Access your MANOVIK AI workspace and command your autonomous AI agent." },
+      { property: "og:url", content: "https://manovikin.lovable.app/login" },
+    ],
+    links: [{ rel: "canonical", href: "https://manovikin.lovable.app/login" }],
+  }),
 });
 
 function LoginPage() {
@@ -79,7 +88,7 @@ function LoginPage() {
           <span className="text-xl font-bold tracking-wider text-gradient">MANOVIK AI</span>
         </Link>
         <h1 className="text-center text-2xl font-bold">
-          {mode === "signin" ? "Welcome back" : "Create your account"}
+          {mode === "signin" ? "Sign in to MANOVIK AI" : "Create your MANOVIK AI account"}
         </h1>
         <p className="mt-1 text-center text-sm text-muted-foreground">
           {mode === "signin" ? "Sign in to continue" : "Start commanding your AI agent"}
