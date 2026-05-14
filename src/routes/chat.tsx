@@ -311,6 +311,7 @@ function ChatPanel({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
             placeholder="Message MANOVIK AI…"
+            aria-label="Message MANOVIK AI"
             rows={1}
             className="min-h-[44px] max-h-48 resize-none border-0 bg-transparent text-base focus-visible:ring-0"
             disabled={isBusy}
@@ -318,6 +319,7 @@ function ChatPanel({
           <Button
             type="submit"
             size="icon"
+            aria-label="Send message"
             disabled={isBusy || !input.trim()}
             className="h-11 w-11 shrink-0 bg-aurora text-primary-foreground glow hover:opacity-90"
           >
