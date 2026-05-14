@@ -88,7 +88,7 @@ function LoginPage() {
           <span className="text-xl font-bold tracking-wider text-gradient">MANOVIK AI</span>
         </Link>
         <h1 className="text-center text-2xl font-bold">
-          {mode === "signin" ? "Welcome back" : "Create your account"}
+          {mode === "signin" ? "Sign in to MANOVIK AI" : "Create your MANOVIK AI account"}
         </h1>
         <p className="mt-1 text-center text-sm text-muted-foreground">
           {mode === "signin" ? "Sign in to continue" : "Start commanding your AI agent"}
