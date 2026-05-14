@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /chat
+Disallow: /audit
+Disallow: /api/
+
+Sitemap: https://manovikin.lovable.app/sitemap.xml
