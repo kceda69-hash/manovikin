@@ -18,7 +18,10 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Futuristic AI agent that codes, builds, and ships." },
       { property: "og:url", content: "https://manovikin.lovable.app/" },
     ],
-    links: [{ rel: "canonical", href: "https://manovikin.lovable.app/" }],
+    links: [
+      { rel: "canonical", href: "https://manovikin.lovable.app/" },
+      { rel: "preload", as: "image", href: logo, fetchpriority: "high" },
+    ],
   }),
 });
 
