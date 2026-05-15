@@ -87,12 +87,11 @@ function Landing() {
   return (
     <main ref={heroRef} className="hero-surface relative min-h-screen overflow-hidden">
       {/* Animated mesh + grid backdrop */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
+      <div className="pointer-events-none absolute inset-0 -z-10 [contain:paint]">
         <div className="absolute inset-0 bg-grid opacity-[0.18]" />
         <div className="absolute inset-0 mesh-aurora" />
         <div className="absolute -top-40 left-1/2 h-[640px] w-[640px] -translate-x-1/2 rounded-full bg-aurora opacity-25 blur-3xl animate-blob" />
         <div className="absolute bottom-[-120px] right-[-80px] h-[420px] w-[420px] rounded-full bg-primary/25 blur-3xl animate-blob-slow" />
-        <div className="absolute top-1/3 left-[-100px] h-[360px] w-[360px] rounded-full bg-accent/20 blur-3xl animate-blob-slower" />
         <div className="cursor-glow" />
       </div>
 
