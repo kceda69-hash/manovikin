@@ -104,6 +104,8 @@ function Landing() {
               alt="MANOVIK AI logo"
               width={36}
               height={36}
+              fetchPriority="high"
+              decoding="async"
               className="h-9 w-9 animate-float"
             />
           </span>
