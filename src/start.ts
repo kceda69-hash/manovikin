@@ -2,7 +2,12 @@ import { createStart, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
 
-const errorMiddleware = createMiddleware().server(async ({ next }) => {
+const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
+  // Bypass /lovable/* routes (webhooks, cron, API previews) — they self-authenticate
+  const url = new URL(request.url);
+  if (url.pathname.startsWith("/lovable/") || url.pathname === "/email/unsubscribe") {
+    return next();
+  }
   try {
     return await next();
   } catch (error) {

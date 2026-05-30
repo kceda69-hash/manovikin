@@ -39,14 +39,25 @@ export const Route = createFileRoute("/api/public/razorpay-webhook")({
           evt.event === "payment.captured" || entity.status === "captured" ? "paid" :
           evt.event === "payment.failed" ? "failed" : "pending";
 
-        await supabaseAdmin
+        const { data: updated } = await supabaseAdmin
           .from("purchases")
           .update({
             status,
             razorpay_payment_id: entity.id ?? null,
             metadata: { webhook_event: evt.event ?? null },
           })
-          .eq("razorpay_order_id", entity.order_id);
+          .eq("razorpay_order_id", entity.order_id)
+          .select("id, status")
+          .maybeSingle();
+
+        if (updated?.id && updated.status === "paid") {
+          try {
+            const { sendReceiptEmailForPurchase } = await import("@/lib/email/send-receipt.server");
+            await sendReceiptEmailForPurchase(updated.id);
+          } catch (e) {
+            console.error("webhook receipt email failed", e);
+          }
+        }
 
         return new Response("ok");
       },

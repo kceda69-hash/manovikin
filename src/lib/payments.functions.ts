@@ -129,16 +129,48 @@ export const verifyRazorpayPayment = createServerFn({ method: "POST" })
       return { ok: false as const, error: "Signature mismatch" };
     }
 
-    await supabaseAdmin
+    const { data: updated } = await supabaseAdmin
       .from("purchases")
       .update({
         status: "paid",
         razorpay_payment_id: data.razorpay_payment_id,
       })
       .eq("razorpay_order_id", data.razorpay_order_id)
-      .eq("user_id", context.userId);
+      .eq("user_id", context.userId)
+      .select("id")
+      .maybeSingle();
+
+    if (updated?.id) {
+      try {
+        const { sendReceiptEmailForPurchase } = await import("@/lib/email/send-receipt.server");
+        await sendReceiptEmailForPurchase(updated.id);
+      } catch (e) {
+        console.error("receipt email failed", e);
+      }
+    }
 
     return { ok: true as const };
+  });
+
+export const cancelRenewal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { autoRenew: boolean }) =>
+    z.object({ autoRenew: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: row } = await supabaseAdmin
+      .from("purchases")
+      .select("id, metadata")
+      .eq("user_id", context.userId)
+      .eq("plan", "pro")
+      .eq("status", "paid")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!row) return { ok: false as const, error: "No active Pro subscription" };
+    const meta = { ...(row.metadata as Record<string, unknown> | null ?? {}), auto_renew: data.autoRenew };
+    await supabaseAdmin.from("purchases").update({ metadata: meta }).eq("id", row.id);
+    return { ok: true as const, autoRenew: data.autoRenew };
   });
 
 export const listMyPurchases = createServerFn({ method: "GET" })
@@ -146,7 +178,7 @@ export const listMyPurchases = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await supabaseAdmin
       .from("purchases")
-      .select("id, plan, amount, currency, status, razorpay_payment_id, razorpay_order_id, receipt_no, email, created_at")
+      .select("id, plan, amount, currency, status, razorpay_payment_id, razorpay_order_id, receipt_no, email, created_at, metadata")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
       .limit(100);

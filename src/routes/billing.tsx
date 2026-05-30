@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { listMyPurchases } from "@/lib/payments.functions";
+import { listMyPurchases, cancelRenewal } from "@/lib/payments.functions";
 import { startCheckout } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,6 +19,7 @@ type Purchase = {
   receipt_no: string | null;
   email: string | null;
   created_at: string;
+  metadata?: Record<string, unknown> | null;
 };
 
 export const Route = createFileRoute("/billing")({
@@ -74,10 +75,25 @@ function BillingPage() {
 
   const buy = async (plan: "pro" | "sovereign") => {
     await startCheckout(plan, {
-      onSuccess: () => { toast.success("Payment successful"); load(); },
+      onSuccess: () => { toast.success("Payment successful — receipt emailed"); load(); },
       onError: (m) => toast.error(m),
       prefill: { email: user?.email ?? undefined },
     });
+  };
+
+  const autoRenew = (activePro?.metadata as Record<string, unknown> | null)?.auto_renew !== false;
+  const nextChargeDate = activePro
+    ? new Date(new Date(activePro.created_at).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()
+    : null;
+
+  const toggleRenewal = async (next: boolean) => {
+    try {
+      await cancelRenewal({ data: { autoRenew: next } });
+      toast.success(next ? "Auto-renewal resumed" : "Auto-renewal cancelled — access continues until period end");
+      load();
+    } catch {
+      toast.error("Could not update renewal");
+    }
   };
 
   return (
@@ -102,11 +118,20 @@ function BillingPage() {
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 {currentPlan === "sovereign" && "Lifetime self-host. No renewals."}
-                {currentPlan === "pro" && "Monthly subscription. Renews via Razorpay."}
+                {currentPlan === "pro" && (autoRenew
+                  ? `Monthly subscription. Next charge ~${nextChargeDate}.`
+                  : `Auto-renewal cancelled. Access continues until ${nextChargeDate}.`)}
                 {currentPlan === "free" && "Upgrade to unlock Pro features."}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              {currentPlan === "pro" && (
+                autoRenew ? (
+                  <Button variant="outline" onClick={() => toggleRenewal(false)}>Cancel auto-renewal</Button>
+                ) : (
+                  <Button variant="outline" onClick={() => toggleRenewal(true)}>Resume auto-renewal</Button>
+                )
+              )}
               {currentPlan !== "sovereign" && (
                 <>
                   {currentPlan !== "pro" && (
