@@ -79,9 +79,9 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/receipt/$id': typeof ReceiptIdRoute
   '/api/chat': typeof ApiChatRoute
   '/api/razorpay-webhook': typeof ApiRazorpayWebhookRoute
-  '/receipt/$id': typeof ReceiptIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -91,9 +91,9 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/receipt/$id': typeof ReceiptIdRoute
   '/api/chat': typeof ApiChatRoute
   '/api/razorpay-webhook': typeof ApiRazorpayWebhookRoute
-  '/receipt/$id': typeof ReceiptIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -104,9 +104,9 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/receipt/$id': typeof ReceiptIdRoute
   '/api/chat': typeof ApiChatRoute
   '/api/razorpay-webhook': typeof ApiRazorpayWebhookRoute
-  '/receipt/$id': typeof ReceiptIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -118,9 +118,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/setup'
     | '/sitemap.xml'
+    | '/receipt/$id'
     | '/api/chat'
     | '/api/razorpay-webhook'
-    | '/receipt/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -130,9 +130,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/setup'
     | '/sitemap.xml'
+    | '/receipt/$id'
     | '/api/chat'
     | '/api/razorpay-webhook'
-    | '/receipt/$id'
   id:
     | '__root__'
     | '/'
@@ -142,9 +142,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/setup'
     | '/sitemap.xml'
+    | '/receipt/$id'
     | '/api/chat'
     | '/api/razorpay-webhook'
-    | '/receipt/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -155,9 +155,9 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SetupRoute: typeof SetupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ReceiptIdRoute: typeof ReceiptIdRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiRazorpayWebhookRoute: typeof ApiRazorpayWebhookRoute
-  ReceiptIdRoute: typeof ReceiptIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -243,9 +243,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SetupRoute: SetupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ReceiptIdRoute: ReceiptIdRoute,
   ApiChatRoute: ApiChatRoute,
   ApiRazorpayWebhookRoute: ApiRazorpayWebhookRoute,
-  ReceiptIdRoute: ReceiptIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
