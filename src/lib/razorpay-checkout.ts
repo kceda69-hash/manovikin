@@ -16,10 +16,7 @@ function loadScript(): Promise<boolean> {
     s.src = "https://checkout.razorpay.com/v1/checkout.js";
     s.async = true;
     s.onload = () => resolve(true);
-    s.onerror = () => {
-      scriptPromise = null;
-      resolve(false);
-    };
+    s.onerror = () => { scriptPromise = null; resolve(false); };
     document.body.appendChild(s);
   });
   return scriptPromise;
@@ -37,15 +34,20 @@ export async function startCheckout(
   } = {},
 ) {
   const ok = await loadScript();
-  if (!ok) {
-    callbacks.onError?.("Could not load Razorpay. Check your internet.");
+  if (!ok) return callbacks.onError?.("Could not load Razorpay. Check your internet.");
+
+  let order: Awaited<ReturnType<typeof createRazorpayOrder>>;
+  try {
+    order = await createRazorpayOrder({ data: { plan } });
+  } catch (e) {
+    // 401 from requireSupabaseAuth → redirect to login
+    if (typeof window !== "undefined") {
+      window.location.href = `/login?next=${encodeURIComponent("/billing")}`;
+    }
     return;
   }
-  const order = await createRazorpayOrder({ data: { plan } });
-  if (!order.ok) {
-    callbacks.onError?.(order.error ?? "Payment unavailable");
-    return;
-  }
+  if (!order.ok) return callbacks.onError?.(order.error ?? "Payment unavailable");
+
   const rzp = new window.Razorpay!({
     key: order.keyId,
     amount: order.amount,
@@ -53,7 +55,7 @@ export async function startCheckout(
     name: "MANOVIK AI",
     description: order.name,
     order_id: order.orderId,
-    prefill: callbacks.prefill ?? {},
+    prefill: { ...(callbacks.prefill ?? {}), email: callbacks.prefill?.email ?? order.prefillEmail ?? undefined },
     theme: { color: "#06b6d4" },
     modal: { ondismiss: () => callbacks.onDismiss?.() },
     handler: async (resp: {
@@ -63,7 +65,7 @@ export async function startCheckout(
     }) => {
       const v = await verifyRazorpayPayment({ data: resp });
       if (v.ok) callbacks.onSuccess?.(resp.razorpay_payment_id);
-      else callbacks.onError?.("Payment verification failed");
+      else callbacks.onError?.(v.error ?? "Payment verification failed");
     },
   });
   rzp.open();
