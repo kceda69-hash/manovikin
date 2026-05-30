@@ -413,6 +413,102 @@ function Landing() {
           </div>
         </div>
 
+        {/* Pricing */}
+        <div className="mt-24">
+          <div className="text-center animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold">Simple pricing</h2>
+            <p className="mt-2 text-muted-foreground">Start free. Upgrade when you outgrow it.</p>
+          </div>
+          <div className="mt-10 grid gap-6 md:grid-cols-3 text-left">
+            {PRICING.map((p, i) => (
+              <div
+                key={p.name}
+                className={`surface-card tilt-card relative overflow-hidden rounded-2xl p-6 animate-fade-in ${
+                  p.highlight ? "ring-2 ring-primary/60 md:scale-105" : ""
+                }`}
+                style={{ animationDelay: `${i * 120}ms`, animationFillMode: "both" }}
+              >
+                <span className="card-border-glow" aria-hidden="true" />
+                {p.highlight && (
+                  <span className="absolute top-4 right-4 rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                    Popular
+                  </span>
+                )}
+                <div className="text-sm font-semibold text-primary">{p.name}</div>
+                <div className="mt-2 flex items-baseline gap-1">
+                  <span className="text-4xl font-bold text-gradient">{p.price}</span>
+                  <span className="text-sm text-muted-foreground">{p.period}</span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
+                <ul className="mt-5 space-y-2.5">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/login" className="block mt-6">
+                  <Button
+                    className={`w-full ${
+                      p.highlight
+                        ? "bg-aurora text-primary-foreground glow hover:opacity-95"
+                        : ""
+                    }`}
+                    variant={p.highlight ? "default" : "outline"}
+                  >
+                    {p.cta}
+                  </Button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="mt-24">
+          <div className="text-center animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold">Questions, answered</h2>
+            <p className="mt-2 text-muted-foreground">Everything you need to know about MANOVIK.</p>
+          </div>
+          <div className="mt-8 space-y-3 max-w-2xl mx-auto text-left">
+            {FAQ.map((item, i) => {
+              const open = faqOpen === i;
+              return (
+                <div
+                  key={item.q}
+                  className="surface-card relative overflow-hidden rounded-xl animate-fade-in"
+                  style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
+                >
+                  <button
+                    onClick={() => setFaqOpen(open ? null : i)}
+                    className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-card/40 transition-colors"
+                    aria-expanded={open}
+                  >
+                    <span className="font-medium">{item.q}</span>
+                    <ChevronDown
+                      className={`h-5 w-5 text-primary shrink-0 transition-transform duration-300 ${
+                        open ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  <div
+                    className={`grid transition-all duration-300 ease-out ${
+                      open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                        {item.a}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Final CTA */}
         <div className="mt-20 text-center animate-fade-in" style={{ animationDelay: "1700ms", animationFillMode: "both" }}>
           <h2 className="text-3xl md:text-5xl font-bold">Ready to hire your AI employee?</h2>
