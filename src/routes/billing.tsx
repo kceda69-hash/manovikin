@@ -124,7 +124,14 @@ function BillingPage() {
                 {currentPlan === "free" && "Upgrade to unlock Pro features."}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+              {currentPlan === "pro" && (
+                autoRenew ? (
+                  <Button variant="outline" onClick={() => toggleRenewal(false)}>Cancel auto-renewal</Button>
+                ) : (
+                  <Button variant="outline" onClick={() => toggleRenewal(true)}>Resume auto-renewal</Button>
+                )
+              )}
               {currentPlan !== "sovereign" && (
                 <>
                   {currentPlan !== "pro" && (
