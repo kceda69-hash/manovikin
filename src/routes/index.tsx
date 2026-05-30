@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight } from "lucide-react";
+import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight, Globe, Workflow, Terminal, Check, ChevronDown } from "lucide-react";
 import logo from "@/assets/nova-x-logo.webp";
 import { Button } from "@/components/ui/button";
 
@@ -27,10 +27,92 @@ export const Route = createFileRoute("/")({
 
 const ROTATING_WORDS = ["websites", "apps", "APIs", "agents", "anything"];
 
+const TOUR = [
+  {
+    icon: Globe,
+    label: "Apps",
+    title: "Build full-stack apps",
+    desc: "MANOVIK scaffolds the UI, wires the database, and ships auth — all from one prompt.",
+    lines: [
+      "› manovik build \"task tracker with auth\"",
+      "✓ Planning routes & schema…",
+      "✓ Generating React + Tailwind UI",
+      "✓ Wiring Supabase auth + RLS",
+      "✓ Deployed → https://yourapp.live",
+    ],
+  },
+  {
+    icon: Terminal,
+    label: "APIs",
+    title: "Spin up production APIs",
+    desc: "REST or RPC endpoints, typed validators, rate-limits and logs included.",
+    lines: [
+      "› manovik api \"POST /invoice with stripe\"",
+      "✓ Zod validator generated",
+      "✓ Stripe SDK integrated",
+      "✓ Tests passing (12/12)",
+      "✓ Live at /api/invoice",
+    ],
+  },
+  {
+    icon: Workflow,
+    label: "Automations",
+    title: "Automate everything",
+    desc: "Cron jobs, webhooks, AI workflows — MANOVIK glues your tools together.",
+    lines: [
+      "› manovik automate \"slack daily report\"",
+      "✓ Fetching analytics @ 9am IST",
+      "✓ Summarizing with GPT",
+      "✓ Posting to #growth",
+      "✓ Scheduled · cron(0 9 * * *)",
+    ],
+  },
+];
+
+const PRICING = [
+  {
+    name: "Free",
+    price: "₹0",
+    period: "forever",
+    desc: "Perfect to try out MANOVIK.",
+    features: ["50 messages / month", "All core models", "Private threads", "Community support"],
+    cta: "Start free",
+    highlight: false,
+  },
+  {
+    name: "Pro",
+    price: "₹499",
+    period: "/month",
+    desc: "For builders shipping daily.",
+    features: ["Unlimited messages", "Priority models (GPT-5, Gemini Pro)", "File uploads", "Email support"],
+    cta: "Go Pro",
+    highlight: true,
+  },
+  {
+    name: "Sovereign",
+    price: "Free",
+    period: "self-host",
+    desc: "Run MANOVIK on your own infra.",
+    features: ["Bring your own keys", "Ollama / OpenAI / Groq", "Zero vendor lock-in", "Setup wizard included"],
+    cta: "Self-host",
+    highlight: false,
+  },
+];
+
+const FAQ = [
+  { q: "What is MANOVIK AI?", a: "MANOVIK is an autonomous AI agent that codes, builds, and ships software for you. Think of it as a digital employee that turns ideas into working products." },
+  { q: "Which languages does it support?", a: "Any major language — JavaScript, TypeScript, Python, Go, Rust, Java, Swift, Kotlin, SQL and more. It picks the right stack for the job." },
+  { q: "Can I run MANOVIK on my own server?", a: "Yes. MANOVIK is sovereign-ready. Use the in-app /setup wizard to deploy with Docker, your own database, and any OpenAI-compatible model (Ollama, Groq, OpenAI)." },
+  { q: "Is my data private?", a: "Threads are encrypted at rest and never used to train third-party models. In sovereign mode, your data never leaves your infrastructure." },
+  { q: "Do I need to know how to code?", a: "No. Describe what you want in plain English and MANOVIK handles the rest — planning, coding, testing, and deployment." },
+];
+
 function Landing() {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
   const [wordIdx, setWordIdx] = useState(0);
+  const [tourIdx, setTourIdx] = useState(0);
+  const [faqOpen, setFaqOpen] = useState<number | null>(0);
 
   // Defer auth check — keeps landing TTI tiny.
   useEffect(() => {
@@ -54,6 +136,14 @@ function Landing() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
     const id = window.setInterval(() => setWordIdx((i) => (i + 1) % ROTATING_WORDS.length), 2200);
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Auto-cycle interactive feature tour
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    const id = window.setInterval(() => setTourIdx((i) => (i + 1) % 3), 4200);
     return () => window.clearInterval(id);
   }, []);
 
@@ -93,6 +183,14 @@ function Landing() {
         <div className="absolute -top-40 left-1/2 h-[640px] w-[640px] -translate-x-1/2 rounded-full bg-aurora opacity-25 blur-3xl animate-blob" />
         <div className="absolute bottom-[-120px] right-[-80px] h-[420px] w-[420px] rounded-full bg-primary/25 blur-3xl animate-blob-slow" />
         <div className="cursor-glow" />
+        {/* Orbiting particles */}
+        <div className="orbit-wrap" aria-hidden="true">
+          <div className="orbit orbit-1"><span /></div>
+          <div className="orbit orbit-2"><span /></div>
+          <div className="orbit orbit-3"><span /></div>
+        </div>
+        {/* Scanline shimmer */}
+        <div className="scanline" aria-hidden="true" />
       </div>
 
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
@@ -192,6 +290,73 @@ function Landing() {
           ))}
         </div>
 
+        {/* Interactive Feature Tour */}
+        <div className="mt-24 text-left">
+          <div className="text-center mb-8 animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold">See MANOVIK in action</h2>
+            <p className="mt-2 text-muted-foreground">One agent. Three superpowers. Click to explore.</p>
+          </div>
+          <div className="surface-card relative overflow-hidden rounded-2xl p-2 md:p-3">
+            <span className="card-border-glow" aria-hidden="true" />
+            {/* Tabs */}
+            <div className="flex gap-1 p-2 border-b border-border/40">
+              {TOUR.map((t, i) => (
+                <button
+                  key={t.label}
+                  onClick={() => setTourIdx(i)}
+                  className={`relative flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                    tourIdx === i
+                      ? "bg-aurora text-primary-foreground shadow-lg"
+                      : "text-muted-foreground hover:text-foreground hover:bg-card/60"
+                  }`}
+                >
+                  <t.icon className="h-4 w-4" />
+                  <span>{t.label}</span>
+                  {tourIdx === i && (
+                    <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary-foreground/60 rounded-full animate-tour-progress" />
+                  )}
+                </button>
+              ))}
+            </div>
+            {/* Panel */}
+            <div key={tourIdx} className="grid md:grid-cols-2 gap-6 p-5 md:p-8 animate-tour-fade">
+              <div>
+                <div className="inline-flex items-center gap-2 text-primary text-xs uppercase tracking-wider mb-3">
+                  {(() => { const Icon = TOUR[tourIdx].icon; return <Icon className="h-4 w-4" />; })()}
+                  {TOUR[tourIdx].label}
+                </div>
+                <h3 className="text-2xl md:text-3xl font-bold">{TOUR[tourIdx].title}</h3>
+                <p className="mt-3 text-muted-foreground">{TOUR[tourIdx].desc}</p>
+                <Link to="/login">
+                  <Button variant="outline" className="mt-5 border-primary/40 hover-scale">
+                    Try it now <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+              {/* Mock terminal */}
+              <div className="rounded-xl bg-[oklch(0.1_0.02_275)] border border-border/60 overflow-hidden shadow-2xl">
+                <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border/40 bg-card/40">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-green-500/70" />
+                  <span className="ml-2 text-[10px] text-muted-foreground font-mono">manovik · live</span>
+                </div>
+                <pre className="p-4 text-xs md:text-sm font-mono leading-relaxed text-foreground/90 overflow-hidden">
+                  {TOUR[tourIdx].lines.map((line, i) => (
+                    <div
+                      key={i}
+                      className="animate-tour-line"
+                      style={{ animationDelay: `${i * 280}ms`, animationFillMode: "both" }}
+                    >
+                      {line.startsWith("✓") ? <span className="text-primary">{line}</span> : line}
+                    </div>
+                  ))}
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* How it works */}
         <div className="mt-24 grid gap-6 md:grid-cols-3 text-left">
           {[
@@ -253,6 +418,102 @@ function Landing() {
                 {t}
               </span>
             ))}
+          </div>
+        </div>
+
+        {/* Pricing */}
+        <div className="mt-24">
+          <div className="text-center animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold">Simple pricing</h2>
+            <p className="mt-2 text-muted-foreground">Start free. Upgrade when you outgrow it.</p>
+          </div>
+          <div className="mt-10 grid gap-6 md:grid-cols-3 text-left">
+            {PRICING.map((p, i) => (
+              <div
+                key={p.name}
+                className={`surface-card tilt-card relative overflow-hidden rounded-2xl p-6 animate-fade-in ${
+                  p.highlight ? "ring-2 ring-primary/60 md:scale-105" : ""
+                }`}
+                style={{ animationDelay: `${i * 120}ms`, animationFillMode: "both" }}
+              >
+                <span className="card-border-glow" aria-hidden="true" />
+                {p.highlight && (
+                  <span className="absolute top-4 right-4 rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                    Popular
+                  </span>
+                )}
+                <div className="text-sm font-semibold text-primary">{p.name}</div>
+                <div className="mt-2 flex items-baseline gap-1">
+                  <span className="text-4xl font-bold text-gradient">{p.price}</span>
+                  <span className="text-sm text-muted-foreground">{p.period}</span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
+                <ul className="mt-5 space-y-2.5">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/login" className="block mt-6">
+                  <Button
+                    className={`w-full ${
+                      p.highlight
+                        ? "bg-aurora text-primary-foreground glow hover:opacity-95"
+                        : ""
+                    }`}
+                    variant={p.highlight ? "default" : "outline"}
+                  >
+                    {p.cta}
+                  </Button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="mt-24">
+          <div className="text-center animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold">Questions, answered</h2>
+            <p className="mt-2 text-muted-foreground">Everything you need to know about MANOVIK.</p>
+          </div>
+          <div className="mt-8 space-y-3 max-w-2xl mx-auto text-left">
+            {FAQ.map((item, i) => {
+              const open = faqOpen === i;
+              return (
+                <div
+                  key={item.q}
+                  className="surface-card relative overflow-hidden rounded-xl animate-fade-in"
+                  style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
+                >
+                  <button
+                    onClick={() => setFaqOpen(open ? null : i)}
+                    className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-card/40 transition-colors"
+                    aria-expanded={open}
+                  >
+                    <span className="font-medium">{item.q}</span>
+                    <ChevronDown
+                      className={`h-5 w-5 text-primary shrink-0 transition-transform duration-300 ${
+                        open ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  <div
+                    className={`grid transition-all duration-300 ease-out ${
+                      open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                        {item.a}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
