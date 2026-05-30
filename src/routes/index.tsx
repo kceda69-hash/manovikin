@@ -282,6 +282,73 @@ function Landing() {
           ))}
         </div>
 
+        {/* Interactive Feature Tour */}
+        <div className="mt-24 text-left">
+          <div className="text-center mb-8 animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold">See MANOVIK in action</h2>
+            <p className="mt-2 text-muted-foreground">One agent. Three superpowers. Click to explore.</p>
+          </div>
+          <div className="surface-card relative overflow-hidden rounded-2xl p-2 md:p-3">
+            <span className="card-border-glow" aria-hidden="true" />
+            {/* Tabs */}
+            <div className="flex gap-1 p-2 border-b border-border/40">
+              {TOUR.map((t, i) => (
+                <button
+                  key={t.label}
+                  onClick={() => setTourIdx(i)}
+                  className={`relative flex-1 inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                    tourIdx === i
+                      ? "bg-aurora text-primary-foreground shadow-lg"
+                      : "text-muted-foreground hover:text-foreground hover:bg-card/60"
+                  }`}
+                >
+                  <t.icon className="h-4 w-4" />
+                  <span>{t.label}</span>
+                  {tourIdx === i && (
+                    <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary-foreground/60 rounded-full animate-tour-progress" />
+                  )}
+                </button>
+              ))}
+            </div>
+            {/* Panel */}
+            <div key={tourIdx} className="grid md:grid-cols-2 gap-6 p-5 md:p-8 animate-tour-fade">
+              <div>
+                <div className="inline-flex items-center gap-2 text-primary text-xs uppercase tracking-wider mb-3">
+                  {(() => { const Icon = TOUR[tourIdx].icon; return <Icon className="h-4 w-4" />; })()}
+                  {TOUR[tourIdx].label}
+                </div>
+                <h3 className="text-2xl md:text-3xl font-bold">{TOUR[tourIdx].title}</h3>
+                <p className="mt-3 text-muted-foreground">{TOUR[tourIdx].desc}</p>
+                <Link to="/login">
+                  <Button variant="outline" className="mt-5 border-primary/40 hover-scale">
+                    Try it now <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+              {/* Mock terminal */}
+              <div className="rounded-xl bg-[oklch(0.1_0.02_275)] border border-border/60 overflow-hidden shadow-2xl">
+                <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border/40 bg-card/40">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-green-500/70" />
+                  <span className="ml-2 text-[10px] text-muted-foreground font-mono">manovik · live</span>
+                </div>
+                <pre className="p-4 text-xs md:text-sm font-mono leading-relaxed text-foreground/90 overflow-hidden">
+                  {TOUR[tourIdx].lines.map((line, i) => (
+                    <div
+                      key={i}
+                      className="animate-tour-line"
+                      style={{ animationDelay: `${i * 280}ms`, animationFillMode: "both" }}
+                    >
+                      {line.startsWith("✓") ? <span className="text-primary">{line}</span> : line}
+                    </div>
+                  ))}
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* How it works */}
         <div className="mt-24 grid gap-6 md:grid-cols-3 text-left">
           {[
