@@ -19,7 +19,7 @@ async function verifySig(secret: string, body: string, headerSig: string) {
   return r === 0;
 }
 
-export const Route = createFileRoute("/api/razorpay-webhook")({
+export const Route = createFileRoute("/api/public/razorpay-webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
