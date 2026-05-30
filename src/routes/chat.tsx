@@ -5,7 +5,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { PreBlock } from "@/components/CodeBlock";
-import { Plus, Send, Trash2, LogOut, Loader2, ShieldCheck } from "lucide-react";
+import { Plus, Send, Trash2, LogOut, Loader2, ShieldCheck, CreditCard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -180,6 +180,11 @@ function ChatPage() {
         </div>
         <div className="mt-3 border-t border-sidebar-border/60 pt-3">
           <div className="px-2 text-xs text-muted-foreground">{user.email}</div>
+          <Button asChild variant="ghost" size="sm" className="mt-1 w-full justify-start">
+            <Link to="/billing">
+              <CreditCard className="h-4 w-4" /> Billing
+            </Link>
+          </Button>
           <Button asChild variant="ghost" size="sm" className="mt-1 w-full justify-start">
             <Link to="/audit">
               <ShieldCheck className="h-4 w-4" /> Audit log
