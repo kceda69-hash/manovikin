@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { listMyPurchases } from "@/lib/payments.functions";
+import { listMyPurchases, cancelRenewal } from "@/lib/payments.functions";
 import { startCheckout } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
