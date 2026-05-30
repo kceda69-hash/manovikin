@@ -118,7 +118,9 @@ function BillingPage() {
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 {currentPlan === "sovereign" && "Lifetime self-host. No renewals."}
-                {currentPlan === "pro" && "Monthly subscription. Renews via Razorpay."}
+                {currentPlan === "pro" && (autoRenew
+                  ? `Monthly subscription. Next charge ~${nextChargeDate}.`
+                  : `Auto-renewal cancelled. Access continues until ${nextChargeDate}.`)}
                 {currentPlan === "free" && "Upgrade to unlock Pro features."}
               </p>
             </div>
