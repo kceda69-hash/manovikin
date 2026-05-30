@@ -165,6 +165,24 @@ function Landing() {
   const [wordIdx, setWordIdx] = useState(0);
   const [tourIdx, setTourIdx] = useState(0);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
+  const [buying, setBuying] = useState<CheckoutPlan | null>(null);
+
+  const handleBuy = (plan: CheckoutPlan) => {
+    if (buying) return;
+    setBuying(plan);
+    startCheckout(plan, {
+      onSuccess: (paymentId) => {
+        setBuying(null);
+        toast.success("Payment successful!", { description: `ID: ${paymentId}` });
+        navigate({ to: "/chat" });
+      },
+      onError: (msg) => {
+        setBuying(null);
+        toast.error(msg);
+      },
+      onDismiss: () => setBuying(null),
+    });
+  };
 
   // Defer auth check — keeps landing TTI tiny.
   useEffect(() => {
@@ -474,7 +492,7 @@ function Landing() {
         </div>
 
         {/* Pricing */}
-        <div className="mt-24">
+        <div id="pricing" className="mt-24 scroll-mt-20">
           <div className="text-center animate-fade-in">
             <h2 className="text-3xl md:text-4xl font-bold">Simple pricing</h2>
             <p className="mt-2 text-muted-foreground">Start free. Upgrade when you outgrow it.</p>
@@ -508,18 +526,25 @@ function Landing() {
                     </li>
                   ))}
                 </ul>
-                <Link to="/login" className="block mt-6">
+                {p.id === "free" ? (
+                  <Link to="/login" className="block mt-6">
+                    <Button
+                      className={`w-full ${p.highlight ? "bg-aurora text-primary-foreground glow hover:opacity-95" : ""}`}
+                      variant={p.highlight ? "default" : "outline"}
+                    >
+                      {p.cta}
+                    </Button>
+                  </Link>
+                ) : (
                   <Button
-                    className={`w-full ${
-                      p.highlight
-                        ? "bg-aurora text-primary-foreground glow hover:opacity-95"
-                        : ""
-                    }`}
+                    onClick={() => handleBuy(p.id as CheckoutPlan)}
+                    disabled={buying !== null}
+                    className={`w-full mt-6 ${p.highlight ? "bg-aurora text-primary-foreground glow hover:opacity-95" : ""}`}
                     variant={p.highlight ? "default" : "outline"}
                   >
-                    {p.cta}
+                    {buying === p.id ? "Opening checkout…" : p.cta}
                   </Button>
-                </Link>
+                )}
               </div>
             ))}
           </div>
