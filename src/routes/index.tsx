@@ -27,6 +27,86 @@ export const Route = createFileRoute("/")({
 
 const ROTATING_WORDS = ["websites", "apps", "APIs", "agents", "anything"];
 
+const TOUR = [
+  {
+    icon: Globe,
+    label: "Apps",
+    title: "Build full-stack apps",
+    desc: "MANOVIK scaffolds the UI, wires the database, and ships auth — all from one prompt.",
+    lines: [
+      "› manovik build \"task tracker with auth\"",
+      "✓ Planning routes & schema…",
+      "✓ Generating React + Tailwind UI",
+      "✓ Wiring Supabase auth + RLS",
+      "✓ Deployed → https://yourapp.live",
+    ],
+  },
+  {
+    icon: Terminal,
+    label: "APIs",
+    title: "Spin up production APIs",
+    desc: "REST or RPC endpoints, typed validators, rate-limits and logs included.",
+    lines: [
+      "› manovik api \"POST /invoice with stripe\"",
+      "✓ Zod validator generated",
+      "✓ Stripe SDK integrated",
+      "✓ Tests passing (12/12)",
+      "✓ Live at /api/invoice",
+    ],
+  },
+  {
+    icon: Workflow,
+    label: "Automations",
+    title: "Automate everything",
+    desc: "Cron jobs, webhooks, AI workflows — MANOVIK glues your tools together.",
+    lines: [
+      "› manovik automate \"slack daily report\"",
+      "✓ Fetching analytics @ 9am IST",
+      "✓ Summarizing with GPT",
+      "✓ Posting to #growth",
+      "✓ Scheduled · cron(0 9 * * *)",
+    ],
+  },
+];
+
+const PRICING = [
+  {
+    name: "Free",
+    price: "₹0",
+    period: "forever",
+    desc: "Perfect to try out MANOVIK.",
+    features: ["50 messages / month", "All core models", "Private threads", "Community support"],
+    cta: "Start free",
+    highlight: false,
+  },
+  {
+    name: "Pro",
+    price: "₹499",
+    period: "/month",
+    desc: "For builders shipping daily.",
+    features: ["Unlimited messages", "Priority models (GPT-5, Gemini Pro)", "File uploads", "Email support"],
+    cta: "Go Pro",
+    highlight: true,
+  },
+  {
+    name: "Sovereign",
+    price: "Free",
+    period: "self-host",
+    desc: "Run MANOVIK on your own infra.",
+    features: ["Bring your own keys", "Ollama / OpenAI / Groq", "Zero vendor lock-in", "Setup wizard included"],
+    cta: "Self-host",
+    highlight: false,
+  },
+];
+
+const FAQ = [
+  { q: "What is MANOVIK AI?", a: "MANOVIK is an autonomous AI agent that codes, builds, and ships software for you. Think of it as a digital employee that turns ideas into working products." },
+  { q: "Which languages does it support?", a: "Any major language — JavaScript, TypeScript, Python, Go, Rust, Java, Swift, Kotlin, SQL and more. It picks the right stack for the job." },
+  { q: "Can I run MANOVIK on my own server?", a: "Yes. MANOVIK is sovereign-ready. Use the in-app /setup wizard to deploy with Docker, your own database, and any OpenAI-compatible model (Ollama, Groq, OpenAI)." },
+  { q: "Is my data private?", a: "Threads are encrypted at rest and never used to train third-party models. In sovereign mode, your data never leaves your infrastructure." },
+  { q: "Do I need to know how to code?", a: "No. Describe what you want in plain English and MANOVIK handles the rest — planning, coding, testing, and deployment." },
+];
+
 function Landing() {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
