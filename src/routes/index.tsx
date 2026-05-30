@@ -31,6 +31,8 @@ function Landing() {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLDivElement>(null);
   const [wordIdx, setWordIdx] = useState(0);
+  const [tourIdx, setTourIdx] = useState(0);
+  const [faqOpen, setFaqOpen] = useState<number | null>(0);
 
   // Defer auth check — keeps landing TTI tiny.
   useEffect(() => {
