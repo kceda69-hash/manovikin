@@ -1,26 +1,64 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight, Globe, Workflow, Terminal, Check, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
+import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "MANOVIK AI — Your Autonomous AI Employee" },
+      { title: "MANOVIK AI — Your Autonomous AI Employee | Build Apps, APIs & Automations" },
       {
         name: "description",
         content:
-          "MANOVIK AI is a futuristic AI agent that codes in any language, builds websites, apps, APIs, and works for you 24/7.",
+          "MANOVIK AI is an autonomous coding agent that builds apps, APIs, and automations 24/7. Pro plan ₹499/mo. Lifetime self-host ₹1999. Made in India.",
       },
-      { property: "og:title", content: "MANOVIK AI — Your Autonomous AI Employee" },
-      { property: "og:description", content: "Futuristic AI agent that codes, builds, and ships." },
+      { name: "keywords", content: "AI coding agent, autonomous AI, MANOVIK, build apps with AI, AI APIs, self-hosted AI, Indian AI startup" },
+      { property: "og:title", content: "MANOVIK AI — Autonomous AI Employee" },
+      { property: "og:description", content: "Codes, builds, and ships software 24/7. Pro ₹499/mo · Sovereign lifetime ₹1999." },
       { property: "og:url", content: "https://manovikin.lovable.app/" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "canonical", href: "https://manovikin.lovable.app/" },
       { rel: "preload", as: "image", href: logo, fetchpriority: "high" },
+      { rel: "dns-prefetch", href: "https://checkout.razorpay.com" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Product",
+              name: "MANOVIK AI Pro",
+              description: "Unlimited messages and priority models for builders shipping daily.",
+              brand: { "@type": "Brand", name: "MANOVIK AI" },
+              offers: { "@type": "Offer", price: "499", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovikin.lovable.app/#pricing" },
+            },
+            {
+              "@type": "Product",
+              name: "MANOVIK AI Sovereign (Lifetime Self-Host)",
+              description: "Run MANOVIK on your own infrastructure forever. One-time payment.",
+              brand: { "@type": "Brand", name: "MANOVIK AI" },
+              offers: { "@type": "Offer", price: "1999", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovikin.lovable.app/#pricing" },
+            },
+            {
+              "@type": "FAQPage",
+              mainEntity: [
+                { "@type": "Question", name: "What is MANOVIK AI?", acceptedAnswer: { "@type": "Answer", text: "MANOVIK is an autonomous AI agent that codes, builds, and ships software for you." } },
+                { "@type": "Question", name: "Which languages does it support?", acceptedAnswer: { "@type": "Answer", text: "Any major language — JavaScript, TypeScript, Python, Go, Rust, Java, Swift, Kotlin, SQL and more." } },
+                { "@type": "Question", name: "Can I run MANOVIK on my own server?", acceptedAnswer: { "@type": "Answer", text: "Yes. The Sovereign lifetime plan (₹1999) includes the self-host setup wizard, Docker support, and BYOK." } },
+                { "@type": "Question", name: "Is my data private?", acceptedAnswer: { "@type": "Answer", text: "Threads are encrypted at rest and never used to train third-party models." } },
+              ],
+            },
+          ],
+        }),
+      },
     ],
   }),
 });
@@ -69,8 +107,20 @@ const TOUR = [
   },
 ];
 
-const PRICING = [
+type Pricing = {
+  id: "free" | "pro" | "sovereign";
+  name: string;
+  price: string;
+  period: string;
+  desc: string;
+  features: string[];
+  cta: string;
+  highlight: boolean;
+};
+
+const PRICING: Pricing[] = [
   {
+    id: "free",
     name: "Free",
     price: "₹0",
     period: "forever",
@@ -80,6 +130,7 @@ const PRICING = [
     highlight: false,
   },
   {
+    id: "pro",
     name: "Pro",
     price: "₹499",
     period: "/month",
@@ -89,12 +140,13 @@ const PRICING = [
     highlight: true,
   },
   {
+    id: "sovereign",
     name: "Sovereign",
-    price: "Free",
-    period: "self-host",
-    desc: "Run MANOVIK on your own infra.",
-    features: ["Bring your own keys", "Ollama / OpenAI / Groq", "Zero vendor lock-in", "Setup wizard included"],
-    cta: "Self-host",
+    price: "₹1999",
+    period: "lifetime",
+    desc: "One-time payment. Run MANOVIK on your own infra forever.",
+    features: ["Bring your own keys", "Ollama / OpenAI / Groq", "Zero vendor lock-in", "Setup wizard + Docker", "Lifetime updates"],
+    cta: "Buy lifetime",
     highlight: false,
   },
 ];
