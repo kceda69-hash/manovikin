@@ -219,9 +219,67 @@
   @property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
   @keyframes spin-a { to { --a: 360deg; } }
 
+  /* Tour panel animations */
+  @keyframes tour-fade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-tour-fade { animation: tour-fade 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes tour-line {
+    from { opacity: 0; transform: translateX(-6px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .animate-tour-line { animation: tour-line 0.35s ease-out both; }
+  @keyframes tour-progress {
+    from { transform: scaleX(0); transform-origin: left; }
+    to { transform: scaleX(1); transform-origin: left; }
+  }
+  .animate-tour-progress { animation: tour-progress 4.2s linear; }
+
+  /* Orbiting particles around hero */
+  .orbit-wrap {
+    position: absolute; left: 50%; top: 30%;
+    width: 720px; height: 720px; margin-left: -360px; margin-top: -360px;
+    pointer-events: none; opacity: 0.7;
+  }
+  .orbit {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1px solid oklch(0.78 0.18 200 / 0.08);
+    animation: orbit-spin 18s linear infinite;
+  }
+  .orbit > span {
+    position: absolute; top: -4px; left: 50%; margin-left: -4px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 12px var(--primary), 0 0 24px var(--accent);
+  }
+  .orbit-1 { transform: scale(0.55); animation-duration: 14s; }
+  .orbit-2 { transform: scale(0.78) rotate(60deg); animation-duration: 22s; animation-direction: reverse; }
+  .orbit-2 > span { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+  .orbit-3 { transform: scale(1) rotate(120deg); animation-duration: 32s; }
+  .orbit-3 > span { width: 5px; height: 5px; margin-left: -2.5px; top: -2.5px; }
+  @keyframes orbit-spin { to { transform: rotate(360deg) scale(var(--s, 1)); } }
+  .orbit-1 { --s: 0.55; }
+  .orbit-2 { --s: 0.78; }
+  .orbit-3 { --s: 1; }
+
+  /* Scanline shimmer across hero */
+  .scanline {
+    position: absolute; left: 0; right: 0; top: 0; height: 100%;
+    background: linear-gradient(180deg, transparent 0%, oklch(0.78 0.18 200 / 0.06) 50%, transparent 100%);
+    background-size: 100% 220%;
+    animation: scanline-slide 9s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+  @keyframes scanline-slide {
+    0%, 100% { background-position: 0% -120%; }
+    50% { background-position: 0% 120%; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-blob, .animate-blob-slow, .animate-blob-slower,
     .mesh-aurora, .text-shimmer, .btn-sheen, .bg-grid, .animate-float,
-    .animate-pulse-glow, .card-border-glow { animation: none !important; }
+    .animate-pulse-glow, .card-border-glow, .orbit, .scanline,
+    .animate-tour-progress, .animate-tour-line { animation: none !important; }
   }
 }
