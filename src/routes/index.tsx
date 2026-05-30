@@ -59,6 +59,14 @@ function Landing() {
     return () => window.clearInterval(id);
   }, []);
 
+  // Auto-cycle interactive feature tour
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    const id = window.setInterval(() => setTourIdx((i) => (i + 1) % 3), 4200);
+    return () => window.clearInterval(id);
+  }, []);
+
   // Pointer-driven aurora glow (rAF-throttled, GPU transforms only).
   useEffect(() => {
     const el = heroRef.current;
