@@ -191,10 +191,100 @@ function Landing() {
             </div>
           ))}
         </div>
+
+        {/* How it works */}
+        <div className="mt-24 grid gap-6 md:grid-cols-3 text-left">
+          {[
+            { step: "01", title: "Describe", desc: "Tell MANOVIK what to build — a site, an API, an agent, a script." },
+            { step: "02", title: "Reason & Plan", desc: "It breaks the goal into steps, picks tools, and writes the code." },
+            { step: "03", title: "Ship", desc: "Streaming output, instant preview, and production-ready files." },
+          ].map((s, i) => (
+            <div
+              key={s.step}
+              className="surface-card tilt-card relative overflow-hidden rounded-xl p-6 animate-fade-in"
+              style={{ animationDelay: `${800 + i * 120}ms`, animationFillMode: "both" }}
+            >
+              <span className="card-border-glow" aria-hidden="true" />
+              <div className="text-3xl font-bold text-gradient">{s.step}</div>
+              <h3 className="mt-3 font-semibold text-lg">{s.title}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Stats */}
+        <div className="mt-20 grid grid-cols-2 gap-6 md:grid-cols-4">
+          {[
+            { k: "20+", v: "Languages" },
+            { k: "24/7", v: "Always-on" },
+            { k: "∞", v: "Private threads" },
+            { k: "0ms", v: "Streams live" },
+          ].map((s, i) => (
+            <div
+              key={s.v}
+              className="surface-card rounded-xl p-5 text-center animate-fade-in hover-scale"
+              style={{ animationDelay: `${1100 + i * 100}ms`, animationFillMode: "both" }}
+            >
+              <div className="text-3xl font-bold text-gradient text-shimmer">{s.k}</div>
+              <div className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">{s.v}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* About MANOVIK */}
+        <div
+          className="surface-card mt-20 relative overflow-hidden rounded-2xl p-8 md:p-12 text-left animate-fade-in"
+          style={{ animationDelay: "1500ms", animationFillMode: "both" }}
+        >
+          <span className="card-border-glow" aria-hidden="true" />
+          <h2 className="text-3xl md:text-4xl font-bold text-gradient">Why MANOVIK?</h2>
+          <p className="mt-4 text-muted-foreground md:text-lg leading-relaxed">
+            MANOVIK AI is your autonomous digital employee. It doesn't just answer —
+            it <span className="text-primary">plans</span>,{" "}
+            <span className="text-primary">builds</span>, and{" "}
+            <span className="text-primary">delivers</span>. From a one-line idea to a
+            deployable product, MANOVIK reasons across files, calls tools, and ships
+            real software. Sovereign-ready — run it on your own infrastructure, with
+            your keys and your rules.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {["Autonomous", "Sovereign", "Polyglot", "Streaming", "Private", "Made in 🇮🇳"].map((t) => (
+              <span key={t} className="rounded-full border border-primary/30 bg-card/50 px-3 py-1 text-xs text-primary backdrop-blur">
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Final CTA */}
+        <div className="mt-20 text-center animate-fade-in" style={{ animationDelay: "1700ms", animationFillMode: "both" }}>
+          <h2 className="text-3xl md:text-5xl font-bold">Ready to hire your AI employee?</h2>
+          <p className="mt-4 text-muted-foreground">No setup. No limits. Just describe and ship.</p>
+          <Link to="/login">
+            <Button size="lg" className="mt-6 group relative overflow-hidden bg-aurora text-primary-foreground glow">
+              <span className="relative z-10 inline-flex items-center">
+                Start building free
+                <ArrowRight className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </span>
+              <span className="btn-sheen" aria-hidden="true" />
+            </Button>
+          </Link>
+        </div>
       </section>
 
-      <footer className="relative z-10 border-t border-border/40 py-6 text-center text-xs text-muted-foreground">
-        Powered by Lovable AI · Built for builders
+      <footer className="relative z-10 border-t border-border/40 py-8 text-center text-xs text-muted-foreground">
+        <div className="flex items-center justify-center gap-2 animate-fade-in">
+          <span>Powered by</span>
+          <span className="font-bold text-gradient text-shimmer">KC</span>
+          <span className="inline-flex h-4 w-6 overflow-hidden rounded-sm shadow-sm ring-1 ring-border/60" aria-label="Indian flag" title="Made in India">
+            <span className="flex-1 bg-[#FF9933]" />
+            <span className="flex-1 bg-white relative flex items-center justify-center">
+              <span className="h-1.5 w-1.5 rounded-full border border-[#000080]" />
+            </span>
+            <span className="flex-1 bg-[#138808]" />
+          </span>
+          <span>· Made in India with ❤️</span>
+        </div>
       </footer>
     </main>
   );
