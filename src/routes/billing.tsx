@@ -75,10 +75,25 @@ function BillingPage() {
 
   const buy = async (plan: "pro" | "sovereign") => {
     await startCheckout(plan, {
-      onSuccess: () => { toast.success("Payment successful"); load(); },
+      onSuccess: () => { toast.success("Payment successful — receipt emailed"); load(); },
       onError: (m) => toast.error(m),
       prefill: { email: user?.email ?? undefined },
     });
+  };
+
+  const autoRenew = (activePro?.metadata as Record<string, unknown> | null)?.auto_renew !== false;
+  const nextChargeDate = activePro
+    ? new Date(new Date(activePro.created_at).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()
+    : null;
+
+  const toggleRenewal = async (next: boolean) => {
+    try {
+      await cancelRenewal({ data: { autoRenew: next } });
+      toast.success(next ? "Auto-renewal resumed" : "Auto-renewal cancelled — access continues until period end");
+      load();
+    } catch {
+      toast.error("Could not update renewal");
+    }
   };
 
   return (
