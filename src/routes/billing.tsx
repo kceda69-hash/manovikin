@@ -19,6 +19,7 @@ type Purchase = {
   receipt_no: string | null;
   email: string | null;
   created_at: string;
+  metadata?: Record<string, unknown> | null;
 };
 
 export const Route = createFileRoute("/billing")({
