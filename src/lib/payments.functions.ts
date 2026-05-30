@@ -178,7 +178,7 @@ export const listMyPurchases = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await supabaseAdmin
       .from("purchases")
-      .select("id, plan, amount, currency, status, razorpay_payment_id, razorpay_order_id, receipt_no, email, created_at")
+      .select("id, plan, amount, currency, status, razorpay_payment_id, razorpay_order_id, receipt_no, email, created_at, metadata")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
       .limit(100);
