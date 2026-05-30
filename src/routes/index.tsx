@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight } from "lucide-react";
+import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight, Globe, Workflow, Terminal, Check, ChevronDown } from "lucide-react";
 import logo from "@/assets/nova-x-logo.webp";
 import { Button } from "@/components/ui/button";
 
