@@ -106,13 +106,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             {
               "@type": "Organization",
               name: "MANOVIK AI",
-              url: "https://manovikin.lovable.app",
+              url: "https://manovik.in",
               description: "Autonomous AI agent that codes, builds, and ships software 24/7.",
             },
             {
               "@type": "WebSite",
               name: "MANOVIK AI",
-              url: "https://manovikin.lovable.app",
+              url: "https://manovik.in",
             },
           ],
         }),
