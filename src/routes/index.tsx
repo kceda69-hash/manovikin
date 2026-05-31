@@ -38,14 +38,14 @@ export const Route = createFileRoute("/")({
               name: "MANOVIK AI Pro",
               description: "Unlimited messages and priority models for builders shipping daily.",
               brand: { "@type": "Brand", name: "MANOVIK AI" },
-              offers: { "@type": "Offer", price: "499", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovikin.lovable.app/#pricing" },
+              offers: { "@type": "Offer", price: "499", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
             },
             {
               "@type": "Product",
               name: "MANOVIK AI Sovereign (Lifetime Self-Host)",
               description: "Run MANOVIK on your own infrastructure forever. One-time payment.",
               brand: { "@type": "Brand", name: "MANOVIK AI" },
-              offers: { "@type": "Offer", price: "1999", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovikin.lovable.app/#pricing" },
+              offers: { "@type": "Offer", price: "1999", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
             },
             {
               "@type": "FAQPage",
