@@ -3,7 +3,6 @@ Allow: /
 Disallow: /chat
 Disallow: /audit
 Disallow: /billing
-Disallow: /setup
 Disallow: /unsubscribe
 Disallow: /receipt/
 Disallow: /api/
