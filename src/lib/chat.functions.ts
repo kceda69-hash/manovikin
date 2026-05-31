@@ -33,10 +33,11 @@ export const createThread = createServerFn({ method: "POST" })
     return { thread: data };
   });
 
+export const deleteThreadInput = z.object({ id: z.string().uuid() });
+export const getThreadMessagesInput = z.object({ threadId: z.string().uuid() });
+
 export const deleteThread = createServerFn({ method: "POST" })
-  .inputValidator((d: { id: string }) =>
-    z.object({ id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { id: string }) => deleteThreadInput.parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -46,9 +47,7 @@ export const deleteThread = createServerFn({ method: "POST" })
   });
 
 export const getThreadMessages = createServerFn({ method: "POST" })
-  .inputValidator((d: { threadId: string }) =>
-    z.object({ threadId: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { threadId: string }) => getThreadMessagesInput.parse(d))
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { supabase } = context;
