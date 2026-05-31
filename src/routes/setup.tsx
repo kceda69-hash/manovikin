@@ -15,7 +15,12 @@ export const Route = createFileRoute("/setup")({
     meta: [
       { title: "Setup Wizard — MANOVIK AI Sovereign Install" },
       { name: "description", content: "Step-by-step wizard to self-host MANOVIK AI with Docker, your own AI provider, and your own database." },
-      { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Self-host MANOVIK AI — Sovereign setup wizard" },
+      { property: "og:description", content: "Run MANOVIK on your own infrastructure with Docker, your AI provider, and your database. Step-by-step guide." },
+      { property: "og:url", content: "https://manovik.in/setup" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://manovik.in/setup" },
     ],
   }),
   component: SetupWizard,
