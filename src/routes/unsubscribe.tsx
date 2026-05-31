@@ -12,6 +12,9 @@ export const Route = createFileRoute("/unsubscribe")({
   head: () => ({
     meta: [
       { title: "Unsubscribe — MANOVIK AI" },
+      { name: "description", content: "Unsubscribe from MANOVIK AI transactional and marketing emails. One click and you're off the list." },
+      { property: "og:title", content: "Unsubscribe from MANOVIK AI emails" },
+      { property: "og:description", content: "One-click opt-out from MANOVIK AI emails." },
       { name: "robots", content: "noindex" },
     ],
   }),

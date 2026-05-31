@@ -10,6 +10,9 @@ export const Route = createFileRoute("/receipt/$id")({
   head: () => ({
     meta: [
       { title: "Receipt — MANOVIK AI" },
+      { name: "description", content: "View and download your MANOVIK AI payment receipt and tax invoice for this transaction." },
+      { property: "og:title", content: "Your MANOVIK AI receipt" },
+      { property: "og:description", content: "View and download your MANOVIK AI tax invoice." },
       { name: "robots", content: "noindex" },
     ],
   }),

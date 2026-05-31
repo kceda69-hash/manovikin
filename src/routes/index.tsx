@@ -10,20 +10,20 @@ export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
     meta: [
-      { title: "MANOVIK AI — Your Autonomous AI Employee | Build Apps, APIs & Automations" },
+      { title: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
       {
         name: "description",
         content:
           "MANOVIK AI is an autonomous coding agent that builds apps, APIs, and automations 24/7. Pro plan ₹499/mo. Lifetime self-host ₹1999. Made in India.",
       },
       { name: "keywords", content: "AI coding agent, autonomous AI, MANOVIK, build apps with AI, AI APIs, self-hosted AI, Indian AI startup" },
-      { property: "og:title", content: "MANOVIK AI — Autonomous AI Employee" },
+      { property: "og:title", content: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
       { property: "og:description", content: "Codes, builds, and ships software 24/7. Pro ₹499/mo · Sovereign lifetime ₹1999." },
-      { property: "og:url", content: "https://manovikin.lovable.app/" },
+      { property: "og:url", content: "https://manovik.in/" },
       { property: "og:type", content: "website" },
     ],
     links: [
-      { rel: "canonical", href: "https://manovikin.lovable.app/" },
+      { rel: "canonical", href: "https://manovik.in/" },
       { rel: "preload", as: "image", href: logo, fetchpriority: "high" },
       { rel: "dns-prefetch", href: "https://checkout.razorpay.com" },
     ],
@@ -38,14 +38,14 @@ export const Route = createFileRoute("/")({
               name: "MANOVIK AI Pro",
               description: "Unlimited messages and priority models for builders shipping daily.",
               brand: { "@type": "Brand", name: "MANOVIK AI" },
-              offers: { "@type": "Offer", price: "499", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovikin.lovable.app/#pricing" },
+              offers: { "@type": "Offer", price: "499", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
             },
             {
               "@type": "Product",
               name: "MANOVIK AI Sovereign (Lifetime Self-Host)",
               description: "Run MANOVIK on your own infrastructure forever. One-time payment.",
               brand: { "@type": "Brand", name: "MANOVIK AI" },
-              offers: { "@type": "Offer", price: "1999", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovikin.lovable.app/#pricing" },
+              offers: { "@type": "Offer", price: "1999", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
             },
             {
               "@type": "FAQPage",

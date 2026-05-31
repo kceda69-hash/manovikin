@@ -2,6 +2,9 @@ User-agent: *
 Allow: /
 Disallow: /chat
 Disallow: /audit
+Disallow: /billing
+Disallow: /unsubscribe
+Disallow: /receipt/
 Disallow: /api/
 
-Sitemap: https://manovikin.lovable.app/sitemap.xml
+Sitemap: https://manovik.in/sitemap.xml

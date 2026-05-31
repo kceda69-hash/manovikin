@@ -15,7 +15,12 @@ export const Route = createFileRoute("/setup")({
     meta: [
       { title: "Setup Wizard — MANOVIK AI Sovereign Install" },
       { name: "description", content: "Step-by-step wizard to self-host MANOVIK AI with Docker, your own AI provider, and your own database." },
-      { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Self-host MANOVIK AI — Sovereign setup wizard" },
+      { property: "og:description", content: "Run MANOVIK on your own infrastructure with Docker, your AI provider, and your database. Step-by-step guide." },
+      { property: "og:url", content: "https://manovik.in/setup" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://manovik.in/setup" },
     ],
   }),
   component: SetupWizard,
@@ -143,14 +148,17 @@ VITE_SUPABASE_PUBLISHABLE_KEY=${supabaseAnon || "eyJ...your-anon-key..."}
                 <button
                   key={s.id}
                   onClick={() => setStep(s.id)}
+                  aria-label={`Step ${s.id}: ${s.label}${active ? " (current)" : done ? " (completed)" : ""}`}
+                  aria-current={active ? "step" : undefined}
                   className={`flex flex-col items-center gap-1 p-2 rounded-md border text-xs transition-colors ${
                     active ? "border-primary bg-primary/10 text-primary" :
                     done ? "border-border bg-muted text-foreground" :
                     "border-border text-muted-foreground hover:bg-muted"
                   }`}
                 >
-                  {done ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                  {done ? <Check className="h-4 w-4" aria-hidden="true" /> : <Icon className="h-4 w-4" aria-hidden="true" />}
                   <span className="hidden sm:inline">{s.label}</span>
+                  <span className="sr-only sm:hidden">{s.label}</span>
                 </button>
               );
             })}
