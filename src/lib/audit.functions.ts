@@ -21,7 +21,10 @@ export const listAuditLogs = createServerFn({ method: "GET" })
       .select("id,thread_id,event_type,summary,ip,user_agent,metadata,created_at")
       .order("created_at", { ascending: false })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[listAuditLogs]", error);
+      throw new Error("Failed to load audit logs");
+    }
     return { logsJson: JSON.stringify((data ?? []) as AuditEntry[]) };
   });
 
