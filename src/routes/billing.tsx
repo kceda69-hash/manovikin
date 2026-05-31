@@ -28,6 +28,8 @@ export const Route = createFileRoute("/billing")({
     meta: [
       { title: "Billing — MANOVIK AI" },
       { name: "description", content: "View your MANOVIK plan, purchase history, and download receipts." },
+      { property: "og:title", content: "Billing & receipts — MANOVIK AI" },
+      { property: "og:description", content: "Manage your MANOVIK plan, renewals, and download past receipts." },
       { name: "robots", content: "noindex" },
     ],
   }),
