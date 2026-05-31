@@ -1,6 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { UIMessage } from "ai";
+
+function fail(tag: string, error: unknown): never {
+  console.error(`[${tag}]`, error);
+  throw new Error("Request failed");
+}
 
 export const listThreads = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -10,7 +16,7 @@ export const listThreads = createServerFn({ method: "GET" })
       .from("threads")
       .select("id,title,updated_at")
       .order("updated_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) fail("listThreads", error);
     return { threads: data ?? [] };
   });
 
@@ -23,22 +29,26 @@ export const createThread = createServerFn({ method: "POST" })
       .insert({ user_id: userId, title: "New conversation" })
       .select("id,title,updated_at")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) fail("createThread", error);
     return { thread: data };
   });
 
 export const deleteThread = createServerFn({ method: "POST" })
-  .inputValidator((d: { id: string }) => d)
+  .inputValidator((d: { id: string }) =>
+    z.object({ id: z.string().uuid() }).parse(d),
+  )
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { error } = await supabase.from("threads").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) fail("deleteThread", error);
     return { ok: true };
   });
 
 export const getThreadMessages = createServerFn({ method: "POST" })
-  .inputValidator((d: { threadId: string }) => d)
+  .inputValidator((d: { threadId: string }) =>
+    z.object({ threadId: z.string().uuid() }).parse(d),
+  )
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -47,7 +57,7 @@ export const getThreadMessages = createServerFn({ method: "POST" })
       .select("message,created_at")
       .eq("thread_id", data.threadId)
       .order("created_at", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) fail("getThreadMessages", error);
     return { messagesJson: JSON.stringify((rows ?? []).map((r) => r.message)) };
   });
 
