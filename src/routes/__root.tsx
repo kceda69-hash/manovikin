@@ -88,6 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "Autonomous coding agent that builds apps, APIs, and automations 24/7 — your futuristic AI employee." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b60b2fb0-e5b2-4664-957d-ccee1257580a/id-preview-b60afdf7--9e140ba8-6acc-42f5-8e24-1a6609f849b5.lovable.app-1778327527940.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b60b2fb0-e5b2-4664-957d-ccee1257580a/id-preview-b60afdf7--9e140ba8-6acc-42f5-8e24-1a6609f849b5.lovable.app-1778327527940.png" },
+      { name: "google-site-verification", content: "2FYBW62bNs978cpUu3IS_F1pqZPeFNyWsh0uZBRHb3w" },
     ],
     links: [
       { rel: "preconnect", href: "https://cdn.gpteng.co", crossOrigin: "anonymous" },
