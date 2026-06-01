@@ -17,7 +17,7 @@ function authHeaders() {
   };
 }
 
-async function gsc(path: string, init: RequestInit = {}) {
+async function gsc(path: string, init: RequestInit = {}): Promise<{ ok: boolean; status: number; body: any; raw: string }> {
   const res = await fetch(`${GATEWAY}${path}`, {
     ...init,
     headers: { ...authHeaders(), ...(init.headers as Record<string, string> | undefined) },
@@ -27,7 +27,7 @@ async function gsc(path: string, init: RequestInit = {}) {
   return { ok: res.ok, status: res.status, body, raw: text };
 }
 
-function safeJson(s: string): unknown {
+function safeJson(s: string): any {
   try { return JSON.parse(s); } catch { return s; }
 }
 

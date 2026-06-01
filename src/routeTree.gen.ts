@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SetupRouteImport } from './routes/setup'
+import { Route as SeoRouteImport } from './routes/seo'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BillingRouteImport } from './routes/billing'
@@ -25,6 +26,7 @@ import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/publi
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -39,6 +41,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SetupRoute = SetupRouteImport.update({
   id: '/setup',
   path: '/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeoRoute = SeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -110,6 +117,12 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksResubmitSitemapRoute =
+  ApiPublicHooksResubmitSitemapRouteImport.update({
+    id: '/api/public/hooks/resubmit-sitemap',
+    path: '/api/public/hooks/resubmit-sitemap',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/billing': typeof BillingRoute
   '/chat': typeof ChatRoute
   '/login': typeof LoginRoute
+  '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -125,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -135,6 +150,7 @@ export interface FileRoutesByTo {
   '/billing': typeof BillingRoute
   '/chat': typeof ChatRoute
   '/login': typeof LoginRoute
+  '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -143,6 +159,7 @@ export interface FileRoutesByTo {
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -154,6 +171,7 @@ export interface FileRoutesById {
   '/billing': typeof BillingRoute
   '/chat': typeof ChatRoute
   '/login': typeof LoginRoute
+  '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
@@ -162,6 +180,7 @@ export interface FileRoutesById {
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -174,6 +193,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/chat'
     | '/login'
+    | '/seo'
     | '/setup'
     | '/sitemap.xml'
     | '/unsubscribe'
@@ -182,6 +202,7 @@ export interface FileRouteTypes {
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/resubmit-sitemap'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -192,6 +213,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/chat'
     | '/login'
+    | '/seo'
     | '/setup'
     | '/sitemap.xml'
     | '/unsubscribe'
@@ -200,6 +222,7 @@ export interface FileRouteTypes {
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/resubmit-sitemap'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -210,6 +233,7 @@ export interface FileRouteTypes {
     | '/billing'
     | '/chat'
     | '/login'
+    | '/seo'
     | '/setup'
     | '/sitemap.xml'
     | '/unsubscribe'
@@ -218,6 +242,7 @@ export interface FileRouteTypes {
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/resubmit-sitemap'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -229,6 +254,7 @@ export interface RootRouteChildren {
   BillingRoute: typeof BillingRoute
   ChatRoute: typeof ChatRoute
   LoginRoute: typeof LoginRoute
+  SeoRoute: typeof SeoRoute
   SetupRoute: typeof SetupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
@@ -237,6 +263,7 @@ export interface RootRouteChildren {
   ReceiptIdRoute: typeof ReceiptIdRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksResubmitSitemapRoute: typeof ApiPublicHooksResubmitSitemapRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
@@ -263,6 +290,13 @@ declare module '@tanstack/react-router' {
       path: '/setup'
       fullPath: '/setup'
       preLoaderRoute: typeof SetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seo': {
+      id: '/seo'
+      path: '/seo'
+      fullPath: '/seo'
+      preLoaderRoute: typeof SeoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -356,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/resubmit-sitemap': {
+      id: '/api/public/hooks/resubmit-sitemap'
+      path: '/api/public/hooks/resubmit-sitemap'
+      fullPath: '/api/public/hooks/resubmit-sitemap'
+      preLoaderRoute: typeof ApiPublicHooksResubmitSitemapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -365,6 +406,7 @@ const rootRouteChildren: RootRouteChildren = {
   BillingRoute: BillingRoute,
   ChatRoute: ChatRoute,
   LoginRoute: LoginRoute,
+  SeoRoute: SeoRoute,
   SetupRoute: SetupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UnsubscribeRoute: UnsubscribeRoute,
@@ -373,6 +415,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReceiptIdRoute: ReceiptIdRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksResubmitSitemapRoute: ApiPublicHooksResubmitSitemapRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
