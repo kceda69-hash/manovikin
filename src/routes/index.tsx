@@ -111,6 +111,10 @@ type Pricing = {
   id: "free" | "pro" | "sovereign";
   name: string;
   price: string;
+  /** Strikethrough original price, shown when there's a discount. */
+  originalPrice?: string;
+  /** Percent off (e.g. 10, 20). When set, an animated badge is rendered. */
+  discountPct?: number;
   period: string;
   desc: string;
   features: string[];
@@ -132,7 +136,9 @@ const PRICING: Pricing[] = [
   {
     id: "pro",
     name: "Pro",
-    price: "₹499",
+    price: "₹699",
+    originalPrice: "₹777",
+    discountPct: 10,
     period: "/month",
     desc: "For builders shipping daily.",
     features: ["Unlimited messages", "Priority models (GPT-5, Gemini Pro)", "File uploads", "Email support"],
@@ -142,7 +148,9 @@ const PRICING: Pricing[] = [
   {
     id: "sovereign",
     name: "Sovereign",
-    price: "₹1999",
+    price: "₹4999",
+    originalPrice: "₹6249",
+    discountPct: 20,
     period: "lifetime",
     desc: "One-time payment. Run MANOVIK on your own infra forever.",
     features: ["Bring your own keys", "Ollama / OpenAI / Groq", "Zero vendor lock-in", "Setup wizard + Docker", "Lifetime updates"],
