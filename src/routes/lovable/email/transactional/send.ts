@@ -90,6 +90,24 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
 
         // 1. Look up template from registry (early — needed to resolve recipient)
         const template = TEMPLATES[templateName]
+        // Validate templateData against the template's declared schema.
+        // This rejects unknown props and unsafe values (e.g. javascript: URLs)
+        // before they reach the React renderer.
+        const parsedData = template.dataSchema.safeParse(templateData)
+        if (!parsedData.success) {
+          return Response.json(
+            {
+              error: 'Invalid templateData',
+              issues: parsedData.error.issues.map((i) => ({
+                path: i.path.join('.'),
+                message: i.message,
+              })),
+            },
+            { status: 400 }
+          )
+        }
+        templateData = parsedData.data as Record<string, any>
+
 
         if (!template) {
           console.error('Template not found in registry', { templateName })
