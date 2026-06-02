@@ -106,11 +106,27 @@ export const Route = createFileRoute('/api/public/hooks/security-scan')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env.LOVABLE_API_KEY
         const got = request.headers
           .get('authorization')
           ?.replace(/^Bearer\s+/i, '')
-        if (!expected || !got || got !== expected) {
+
+        if (!got) {
+          return new Response('Forbidden', { status: 403 })
+        }
+
+        // Validate against the vault-stored shared secret used by pg_cron.
+        const { data: tokenRow, error: tokenErr } = await supabaseAdmin
+          .schema('vault' as never)
+          .from('decrypted_secrets' as never)
+          .select('decrypted_secret')
+          .eq('name', 'security_scan_token')
+          .maybeSingle()
+
+        const expected =
+          (tokenRow as { decrypted_secret?: string } | null)?.decrypted_secret ??
+          process.env.LOVABLE_API_KEY
+
+        if (tokenErr || !expected || got !== expected) {
           return new Response('Forbidden', { status: 403 })
         }
 
