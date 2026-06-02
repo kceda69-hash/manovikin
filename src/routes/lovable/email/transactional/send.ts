@@ -90,6 +90,17 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
 
         // 1. Look up template from registry (early — needed to resolve recipient)
         const template = TEMPLATES[templateName]
+
+        if (!template) {
+          console.error('Template not found in registry', { templateName })
+          return Response.json(
+            {
+              error: `Template '${templateName}' not found. Available: ${Object.keys(TEMPLATES).join(', ')}`,
+            },
+            { status: 404 }
+          )
+        }
+
         // Validate templateData against the template's declared schema.
         // This rejects unknown props and unsafe values (e.g. javascript: URLs)
         // before they reach the React renderer.
@@ -107,17 +118,6 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           )
         }
         templateData = parsedData.data as Record<string, any>
-
-
-        if (!template) {
-          console.error('Template not found in registry', { templateName })
-          return Response.json(
-            {
-              error: `Template '${templateName}' not found. Available: ${Object.keys(TEMPLATES).join(', ')}`,
-            },
-            { status: 404 }
-          )
-        }
 
         // Resolve effective recipient:
         // 1. Template-level `to` (fixed recipient, e.g. site owner) takes precedence.
