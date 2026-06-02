@@ -121,7 +121,7 @@ export const Route = createFileRoute('/api/public/hooks/security-scan')({
           run_id,
           check_name: c.check_name,
           status: c.status,
-          details: c.details,
+          details: c.details as unknown as Record<string, never>,
           auto_fix_applied: c.auto_fix_applied ?? false,
         }))
 
