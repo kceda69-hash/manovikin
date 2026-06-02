@@ -111,6 +111,7 @@ export const template = {
   subject: (d: Record<string, any>) =>
     `Your ${SITE_NAME} receipt — ${d?.amountFormatted ?? ""}`.trim(),
   displayName: "Payment receipt",
+  dataSchema,
   previewData: {
     name: "Jane",
     planLabel: "MANOVIK Pro (monthly)",
