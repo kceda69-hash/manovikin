@@ -5,7 +5,100 @@ import { Sandbox } from "./sandbox";
 
 export const sandbox = new Sandbox();
 
-// 1. Safe arithmetic evaluator (no eval, no identifiers, only numbers + operators)
+// 1. Safe arithmetic evaluator — AST-based recursive descent parser.
+// No eval / Function(); only numbers, +, -, *, /, %, **, and parentheses.
+function evalArithmetic(input: string): number {
+  if (input.length > 200) throw new Error("Expression too long");
+  if (!/^[\d\s+\-*/%().eE]+$/.test(input)) {
+    throw new Error("Expression contains disallowed characters");
+  }
+  let pos = 0;
+  const src = input;
+  const peek = () => src[pos];
+  const skipWs = () => {
+    while (pos < src.length && /\s/.test(src[pos])) pos++;
+  };
+  // grammar: expr = term (('+'|'-') term)*
+  //          term = power (('*'|'/'|'%') power)*
+  //          power = unary ('**' power)?   (right-assoc)
+  //          unary = ('+'|'-') unary | primary
+  //          primary = number | '(' expr ')'
+  function parseExpr(): number {
+    let left = parseTerm();
+    skipWs();
+    while (peek() === "+" || peek() === "-") {
+      const op = src[pos++];
+      const right = parseTerm();
+      left = op === "+" ? left + right : left - right;
+      skipWs();
+    }
+    return left;
+  }
+  function parseTerm(): number {
+    let left = parsePower();
+    skipWs();
+    while (peek() === "*" || peek() === "/" || peek() === "%") {
+      // ensure not '**'
+      if (peek() === "*" && src[pos + 1] === "*") break;
+      const op = src[pos++];
+      const right = parsePower();
+      if ((op === "/" || op === "%") && right === 0) throw new Error("Division by zero");
+      left = op === "*" ? left * right : op === "/" ? left / right : left % right;
+      skipWs();
+    }
+    return left;
+  }
+  function parsePower(): number {
+    const base = parseUnary();
+    skipWs();
+    if (peek() === "*" && src[pos + 1] === "*") {
+      pos += 2;
+      const exp = parsePower();
+      return base ** exp;
+    }
+    return base;
+  }
+  function parseUnary(): number {
+    skipWs();
+    if (peek() === "+") {
+      pos++;
+      return parseUnary();
+    }
+    if (peek() === "-") {
+      pos++;
+      return -parseUnary();
+    }
+    return parsePrimary();
+  }
+  function parsePrimary(): number {
+    skipWs();
+    if (peek() === "(") {
+      pos++;
+      const v = parseExpr();
+      skipWs();
+      if (peek() !== ")") throw new Error("Missing closing parenthesis");
+      pos++;
+      return v;
+    }
+    const start = pos;
+    while (pos < src.length && /[\d.eE+\-]/.test(src[pos])) {
+      // only consume +/- if part of exponent
+      if ((src[pos] === "+" || src[pos] === "-") && !/[eE]/.test(src[pos - 1])) break;
+      pos++;
+    }
+    const numStr = src.slice(start, pos);
+    if (!/^\d+(\.\d+)?([eE][+\-]?\d+)?$|^\.\d+([eE][+\-]?\d+)?$/.test(numStr)) {
+      throw new Error("Invalid number literal");
+    }
+    return Number(numStr);
+  }
+  const result = parseExpr();
+  skipWs();
+  if (pos !== src.length) throw new Error("Unexpected trailing input");
+  if (!Number.isFinite(result)) throw new Error("Expression did not evaluate to a finite number");
+  return result;
+}
+
 sandbox.register({
   name: "math.eval",
   description: "Evaluate a basic arithmetic expression (+ - * / % ** and parentheses).",
@@ -14,15 +107,7 @@ sandbox.register({
   maxOutputBytes: 1_000,
   rateLimitPerMin: 60,
   execute: async ({ expression }) => {
-    if (!/^[\d\s+\-*/%().,e]+$|^[\d\s+\-*/%().,e*]+$/.test(expression)) {
-      throw new Error("Expression contains disallowed characters");
-    }
-    // eslint-disable-next-line no-new-func
-    const value = Function(`"use strict"; return (${expression});`)();
-    if (typeof value !== "number" || !Number.isFinite(value)) {
-      throw new Error("Expression did not evaluate to a finite number");
-    }
-    return { value };
+    return { value: evalArithmetic(expression) };
   },
 });
 

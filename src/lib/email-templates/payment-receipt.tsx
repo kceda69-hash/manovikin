@@ -1,4 +1,5 @@
 import React from "react";
+import { z } from "zod";
 import {
   Body,
   Button,
@@ -12,6 +13,26 @@ import {
   Text,
 } from "@react-email/components";
 import type { TemplateEntry } from "./registry";
+
+// Only allow https:// URLs so callers cannot inject javascript:/data: links.
+const httpsUrl = z
+  .string()
+  .url()
+  .max(2048)
+  .refine((u) => /^https:\/\//i.test(u), { message: "Must be an https:// URL" });
+
+const dataSchema = z
+  .object({
+    name: z.string().max(200).optional(),
+    planLabel: z.string().max(200).optional(),
+    amountFormatted: z.string().max(64).optional(),
+    paymentId: z.string().max(128).optional(),
+    orderId: z.string().max(128).optional(),
+    receiptNo: z.string().max(128).optional(),
+    date: z.string().max(128).optional(),
+    receiptUrl: httpsUrl.optional(),
+  })
+  .strict();
 
 const SITE_NAME = "MANOVIK AI";
 const BRAND = "#7c5cff";
@@ -90,6 +111,7 @@ export const template = {
   subject: (d: Record<string, any>) =>
     `Your ${SITE_NAME} receipt — ${d?.amountFormatted ?? ""}`.trim(),
   displayName: "Payment receipt",
+  dataSchema,
   previewData: {
     name: "Jane",
     planLabel: "MANOVIK Pro (monthly)",

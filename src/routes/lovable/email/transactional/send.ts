@@ -101,6 +101,24 @@ export const Route = createFileRoute("/lovable/email/transactional/send")({
           )
         }
 
+        // Validate templateData against the template's declared schema.
+        // This rejects unknown props and unsafe values (e.g. javascript: URLs)
+        // before they reach the React renderer.
+        const parsedData = template.dataSchema.safeParse(templateData)
+        if (!parsedData.success) {
+          return Response.json(
+            {
+              error: 'Invalid templateData',
+              issues: parsedData.error.issues.map((i) => ({
+                path: i.path.join('.'),
+                message: i.message,
+              })),
+            },
+            { status: 400 }
+          )
+        }
+        templateData = parsedData.data as Record<string, any>
+
         // Resolve effective recipient:
         // 1. Template-level `to` (fixed recipient, e.g. site owner) takes precedence.
         // 2. Otherwise, force the recipient to the authenticated user's own email.
