@@ -249,6 +249,36 @@ export type Database = {
         }
         Relationships: []
       }
+      security_self_checks: {
+        Row: {
+          auto_fix_applied: boolean
+          check_name: string
+          details: Json
+          id: string
+          ran_at: string
+          run_id: string
+          status: string
+        }
+        Insert: {
+          auto_fix_applied?: boolean
+          check_name: string
+          details?: Json
+          id?: string
+          ran_at?: string
+          run_id: string
+          status: string
+        }
+        Update: {
+          auto_fix_applied?: boolean
+          check_name?: string
+          details?: Json
+          id?: string
+          ran_at?: string
+          run_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
