@@ -4,8 +4,8 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const PLANS = {
-  pro: { amount: 49900, currency: "INR", name: "MANOVIK Pro (monthly)" },
-  sovereign: { amount: 199900, currency: "INR", name: "MANOVIK Sovereign (lifetime)" },
+  pro: { amount: 69900, currency: "INR", name: "MANOVIK Pro (monthly)" },
+  sovereign: { amount: 499900, currency: "INR", name: "MANOVIK Sovereign (lifetime)" },
 } as const;
 
 type PlanId = keyof typeof PLANS;

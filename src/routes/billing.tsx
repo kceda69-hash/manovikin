@@ -137,10 +137,12 @@ function BillingPage() {
               {currentPlan !== "sovereign" && (
                 <>
                   {currentPlan !== "pro" && (
-                    <Button onClick={() => buy("pro")}>Upgrade to Pro — ₹499/mo</Button>
+                    <Button onClick={() => buy("pro")}>
+                      Upgrade to Pro — <span className="line-through opacity-60 mx-1">₹777</span> ₹699/mo
+                    </Button>
                   )}
                   <Button variant="outline" onClick={() => buy("sovereign")}>
-                    Buy Sovereign — ₹1,999
+                    Buy Sovereign — <span className="line-through opacity-60 mx-1">₹6,249</span> ₹4,999
                   </Button>
                 </>
               )}

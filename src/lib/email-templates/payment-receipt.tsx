@@ -115,7 +115,7 @@ export const template = {
   previewData: {
     name: "Jane",
     planLabel: "MANOVIK Pro (monthly)",
-    amountFormatted: "₹499",
+    amountFormatted: "₹699",
     paymentId: "pay_ABC123",
     orderId: "order_XYZ789",
     receiptNo: "mnv_pro_1730000000",

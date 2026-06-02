@@ -14,11 +14,11 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "MANOVIK AI is an autonomous coding agent that builds apps, APIs, and automations 24/7. Pro plan ₹499/mo. Lifetime self-host ₹1999. Made in India.",
+          "MANOVIK AI is an autonomous coding agent that builds apps, APIs, and automations 24/7. Pro plan ₹699/mo (10% off). Lifetime self-host ₹4999 (20% off). Made in India.",
       },
       { name: "keywords", content: "AI coding agent, autonomous AI, MANOVIK, build apps with AI, AI APIs, self-hosted AI, Indian AI startup" },
       { property: "og:title", content: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
-      { property: "og:description", content: "Codes, builds, and ships software 24/7. Pro ₹499/mo · Sovereign lifetime ₹1999." },
+      { property: "og:description", content: "Codes, builds, and ships software 24/7. Pro ₹699/mo · Sovereign lifetime ₹4999." },
       { property: "og:url", content: "https://manovik.in/" },
       { property: "og:type", content: "website" },
     ],
@@ -38,21 +38,21 @@ export const Route = createFileRoute("/")({
               name: "MANOVIK AI Pro",
               description: "Unlimited messages and priority models for builders shipping daily.",
               brand: { "@type": "Brand", name: "MANOVIK AI" },
-              offers: { "@type": "Offer", price: "499", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
+              offers: { "@type": "Offer", price: "699", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
             },
             {
               "@type": "Product",
               name: "MANOVIK AI Sovereign (Lifetime Self-Host)",
               description: "Run MANOVIK on your own infrastructure forever. One-time payment.",
               brand: { "@type": "Brand", name: "MANOVIK AI" },
-              offers: { "@type": "Offer", price: "1999", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
+              offers: { "@type": "Offer", price: "4999", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
             },
             {
               "@type": "FAQPage",
               mainEntity: [
                 { "@type": "Question", name: "What is MANOVIK AI?", acceptedAnswer: { "@type": "Answer", text: "MANOVIK is an autonomous AI agent that codes, builds, and ships software for you." } },
                 { "@type": "Question", name: "Which languages does it support?", acceptedAnswer: { "@type": "Answer", text: "Any major language — JavaScript, TypeScript, Python, Go, Rust, Java, Swift, Kotlin, SQL and more." } },
-                { "@type": "Question", name: "Can I run MANOVIK on my own server?", acceptedAnswer: { "@type": "Answer", text: "Yes. The Sovereign lifetime plan (₹1999) includes the self-host setup wizard, Docker support, and BYOK." } },
+                { "@type": "Question", name: "Can I run MANOVIK on my own server?", acceptedAnswer: { "@type": "Answer", text: "Yes. The Sovereign lifetime plan (₹4999, 20% off) includes the self-host setup wizard, Docker support, and BYOK." } },
                 { "@type": "Question", name: "Is my data private?", acceptedAnswer: { "@type": "Answer", text: "Threads are encrypted at rest and never used to train third-party models." } },
               ],
             },
@@ -111,6 +111,10 @@ type Pricing = {
   id: "free" | "pro" | "sovereign";
   name: string;
   price: string;
+  /** Strikethrough original price, shown when there's a discount. */
+  originalPrice?: string;
+  /** Percent off (e.g. 10, 20). When set, an animated badge is rendered. */
+  discountPct?: number;
   period: string;
   desc: string;
   features: string[];
@@ -132,7 +136,9 @@ const PRICING: Pricing[] = [
   {
     id: "pro",
     name: "Pro",
-    price: "₹499",
+    price: "₹699",
+    originalPrice: "₹777",
+    discountPct: 10,
     period: "/month",
     desc: "For builders shipping daily.",
     features: ["Unlimited messages", "Priority models (GPT-5, Gemini Pro)", "File uploads", "Email support"],
@@ -142,7 +148,9 @@ const PRICING: Pricing[] = [
   {
     id: "sovereign",
     name: "Sovereign",
-    price: "₹1999",
+    price: "₹4999",
+    originalPrice: "₹6249",
+    discountPct: 20,
     period: "lifetime",
     desc: "One-time payment. Run MANOVIK on your own infra forever.",
     features: ["Bring your own keys", "Ollama / OpenAI / Groq", "Zero vendor lock-in", "Setup wizard + Docker", "Lifetime updates"],
@@ -512,9 +520,25 @@ function Landing() {
                     Popular
                   </span>
                 )}
+                {p.discountPct && (
+                  <span
+                    className="absolute -top-2 -left-2 z-10 rounded-full bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-lg shadow-rose-500/40 ring-2 ring-background animate-bounce-soft"
+                    aria-label={`${p.discountPct}% discount`}
+                  >
+                    <span className="relative inline-flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                      Save {p.discountPct}%
+                    </span>
+                  </span>
+                )}
                 <div className="text-sm font-semibold text-primary">{p.name}</div>
-                <div className="mt-2 flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-gradient">{p.price}</span>
+                <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+                  {p.originalPrice && (
+                    <span className="text-lg font-medium text-muted-foreground line-through decoration-rose-500/70 decoration-2">
+                      {p.originalPrice}
+                    </span>
+                  )}
+                  <span className="text-4xl font-bold text-gradient animate-price-pop">{p.price}</span>
                   <span className="text-sm text-muted-foreground">{p.period}</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>

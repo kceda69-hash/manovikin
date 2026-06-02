@@ -249,6 +249,36 @@ export type Database = {
         }
         Relationships: []
       }
+      security_self_checks: {
+        Row: {
+          auto_fix_applied: boolean
+          check_name: string
+          details: Json
+          id: string
+          ran_at: string
+          run_id: string
+          status: string
+        }
+        Insert: {
+          auto_fix_applied?: boolean
+          check_name: string
+          details?: Json
+          id?: string
+          ran_at?: string
+          run_id: string
+          status: string
+        }
+        Update: {
+          auto_fix_applied?: boolean
+          check_name?: string
+          details?: Json
+          id?: string
+          ran_at?: string
+          run_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -310,6 +340,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_security_scan_token: { Args: never; Returns: string }
       move_to_dlq: {
         Args: {
           dlq_name: string
