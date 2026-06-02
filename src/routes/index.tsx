@@ -45,7 +45,7 @@ export const Route = createFileRoute("/")({
               name: "MANOVIK AI Sovereign (Lifetime Self-Host)",
               description: "Run MANOVIK on your own infrastructure forever. One-time payment.",
               brand: { "@type": "Brand", name: "MANOVIK AI" },
-              offers: { "@type": "Offer", price: "1999", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
+              offers: { "@type": "Offer", price: "4999", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
             },
             {
               "@type": "FAQPage",
