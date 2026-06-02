@@ -340,6 +340,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_security_scan_token: { Args: never; Returns: string }
       move_to_dlq: {
         Args: {
           dlq_name: string
