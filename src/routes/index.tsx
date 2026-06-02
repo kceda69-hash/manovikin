@@ -520,9 +520,25 @@ function Landing() {
                     Popular
                   </span>
                 )}
+                {p.discountPct && (
+                  <span
+                    className="absolute -top-2 -left-2 z-10 rounded-full bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-lg shadow-rose-500/40 ring-2 ring-background animate-bounce-soft"
+                    aria-label={`${p.discountPct}% discount`}
+                  >
+                    <span className="relative inline-flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                      Save {p.discountPct}%
+                    </span>
+                  </span>
+                )}
                 <div className="text-sm font-semibold text-primary">{p.name}</div>
-                <div className="mt-2 flex items-baseline gap-1">
-                  <span className="text-4xl font-bold text-gradient">{p.price}</span>
+                <div className="mt-2 flex items-baseline gap-2 flex-wrap">
+                  {p.originalPrice && (
+                    <span className="text-lg font-medium text-muted-foreground line-through decoration-rose-500/70 decoration-2">
+                      {p.originalPrice}
+                    </span>
+                  )}
+                  <span className="text-4xl font-bold text-gradient animate-price-pop">{p.price}</span>
                   <span className="text-sm text-muted-foreground">{p.period}</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
