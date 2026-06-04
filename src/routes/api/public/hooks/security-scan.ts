@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import { timingSafeEqual } from 'crypto'
 
 type Status = 'pass' | 'warn' | 'fail' | 'fixed'
 interface CheckResult {
@@ -7,6 +8,18 @@ interface CheckResult {
   status: Status
   details: Record<string, unknown>
   auto_fix_applied?: boolean
+}
+
+/** Constant-time string compare; returns false on length mismatch. */
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a)
+  const bb = Buffer.from(b)
+  if (ab.length !== bb.length) return false
+  try {
+    return timingSafeEqual(ab, bb)
+  } catch {
+    return false
+  }
 }
 
 /**
@@ -115,14 +128,15 @@ export const Route = createFileRoute('/api/public/hooks/security-scan')({
         }
 
         // Validate against the vault-stored shared secret used by pg_cron.
+        // No fallback — if the vault token cannot be read, reject.
         const { data: tokenData, error: tokenErr } = await supabaseAdmin.rpc(
           'get_security_scan_token' as never,
         )
-        const expected =
-          (typeof tokenData === 'string' ? tokenData : null) ??
-          process.env.LOVABLE_API_KEY
+        const expected = typeof tokenData === 'string' ? tokenData : null
 
-        if (tokenErr || !expected || got !== expected) {
+        if (tokenErr || !expected || !safeEqual(got, expected)) {
+          // Small delay to flatten brute-force / probing signal.
+          await new Promise((r) => setTimeout(r, 250))
           return new Response('Forbidden', { status: 403 })
         }
 

@@ -510,10 +510,24 @@ function Landing() {
               <div
                 key={p.name}
                 className={`surface-card tilt-card relative overflow-hidden rounded-2xl p-6 animate-fade-in ${
-                  p.highlight ? "ring-2 ring-primary/60 md:scale-105" : ""
+                  p.highlight ? "price-card-featured ring-2 ring-primary/60 md:scale-105" : ""
                 }`}
                 style={{ animationDelay: `${i * 120}ms`, animationFillMode: "both" }}
               >
+                {p.highlight && (
+                  <span className="sparkle-field" aria-hidden="true">
+                    {Array.from({ length: 10 }).map((_, k) => (
+                      <i
+                        key={k}
+                        style={{
+                          left: `${(k * 9 + 5) % 100}%`,
+                          animationDuration: `${5 + (k % 5)}s`,
+                          animationDelay: `${(k * 0.6) % 5}s`,
+                        }}
+                      />
+                    ))}
+                  </span>
+                )}
                 <span className="card-border-glow" aria-hidden="true" />
                 {p.highlight && (
                   <span className="absolute top-4 right-4 rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
@@ -538,7 +552,7 @@ function Landing() {
                       {p.originalPrice}
                     </span>
                   )}
-                  <span className="text-4xl font-bold text-gradient animate-price-pop">{p.price}</span>
+                  <span className="text-4xl font-bold price-liquid animate-price-pop">{p.price}</span>
                   <span className="text-sm text-muted-foreground">{p.period}</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
@@ -602,12 +616,13 @@ function Landing() {
                     />
                   </button>
                   <div
-                    className={`grid transition-all duration-300 ease-out ${
+                    className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
                       open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                     }`}
+                    style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
                   >
                     <div className="overflow-hidden">
-                      <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                      <p className={`px-5 pb-5 text-sm text-muted-foreground leading-relaxed ${open ? "animate-faq-down" : ""}`}>
                         {item.a}
                       </p>
                     </div>

@@ -77,12 +77,27 @@ function LoginPage() {
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center px-4">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+      {/* Animated background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-1/2 top-1/3 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-aurora opacity-20 blur-3xl" />
+        <div className="absolute inset-0 mesh-aurora opacity-60" />
+        <div className="absolute inset-0 bg-grid opacity-30" />
+        <div
+          className="login-orb"
+          style={{ width: 340, height: 340, left: "12%", top: "18%", background: "var(--gradient-aurora)" }}
+        />
+        <div
+          className="login-orb"
+          style={{ width: 280, height: 280, right: "10%", bottom: "12%", background: "radial-gradient(circle, oklch(0.65 0.25 305 / 0.8), transparent 70%)", animationDuration: "20s" }}
+        />
+        <div
+          className="login-orb"
+          style={{ width: 200, height: 200, left: "55%", top: "8%", background: "radial-gradient(circle, oklch(0.78 0.18 200 / 0.7), transparent 70%)", animationDuration: "24s" }}
+        />
       </div>
 
-      <div className="surface-card w-full max-w-md rounded-2xl p-8">
+      <div className="surface-card relative w-full max-w-md rounded-2xl p-8 animate-fade-in">
+        <span className="login-aura" aria-hidden="true" />
         <Link to="/" className="mb-6 flex items-center justify-center gap-2">
           <img src={logo} alt="MANOVIK AI" width={40} height={40} className="h-10 w-10" />
           <span className="text-xl font-bold tracking-wider text-gradient">MANOVIK AI</span>
@@ -112,11 +127,11 @@ function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5" />
+            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5 input-glow" />
           </div>
           <div>
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5" />
+            <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5 input-glow" />
           </div>
           <Button type="submit" disabled={busy} className="w-full bg-aurora text-primary-foreground glow hover:opacity-90">
             {busy ? "..." : mode === "signin" ? "Sign in" : "Create account"}
