@@ -616,12 +616,13 @@ function Landing() {
                     />
                   </button>
                   <div
-                    className={`grid transition-all duration-300 ease-out ${
+                    className={`grid transition-[grid-template-rows,opacity] duration-400 ease-out ${
                       open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                     }`}
+                    style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
                   >
                     <div className="overflow-hidden">
-                      <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
+                      <p className={`px-5 pb-5 text-sm text-muted-foreground leading-relaxed ${open ? "animate-faq-down" : ""}`}>
                         {item.a}
                       </p>
                     </div>
