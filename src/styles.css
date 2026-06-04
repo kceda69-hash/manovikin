@@ -380,6 +380,8 @@
     .animate-blob, .animate-blob-slow, .animate-blob-slower,
     .mesh-aurora, .text-shimmer, .btn-sheen, .bg-grid, .animate-float,
     .animate-pulse-glow, .card-border-glow, .orbit, .scanline,
-    .animate-tour-progress, .animate-tour-line { animation: none !important; }
+    .animate-tour-progress, .animate-tour-line,
+    .price-liquid, .price-card-featured::before, .sparkle-field i,
+    .login-orb, .login-aura, .animate-bounce-soft { animation: none !important; }
   }
 }
