@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { supabaseAdmin } from '@/integrations/supabase/client.server'
+import { timingSafeEqual } from 'crypto'
 
 type Status = 'pass' | 'warn' | 'fail' | 'fixed'
 interface CheckResult {
@@ -7,6 +8,18 @@ interface CheckResult {
   status: Status
   details: Record<string, unknown>
   auto_fix_applied?: boolean
+}
+
+/** Constant-time string compare; returns false on length mismatch. */
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a)
+  const bb = Buffer.from(b)
+  if (ab.length !== bb.length) return false
+  try {
+    return timingSafeEqual(ab, bb)
+  } catch {
+    return false
+  }
 }
 
 /**
