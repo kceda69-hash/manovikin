@@ -260,15 +260,6 @@ function Landing() {
         <div className="absolute inset-0 mesh-aurora" />
         <div className="absolute -top-40 left-1/2 h-[640px] w-[640px] -translate-x-1/2 rounded-full bg-aurora opacity-25 blur-3xl animate-blob" />
         <div className="absolute bottom-[-120px] right-[-80px] h-[420px] w-[420px] rounded-full bg-primary/25 blur-3xl animate-blob-slow" />
-        <div className="cursor-glow" />
-        {/* Orbiting particles */}
-        <div className="orbit-wrap" aria-hidden="true">
-          <div className="orbit orbit-1"><span /></div>
-          <div className="orbit orbit-2"><span /></div>
-          <div className="orbit orbit-3"><span /></div>
-        </div>
-        {/* Scanline shimmer */}
-        <div className="scanline" aria-hidden="true" />
       </div>
 
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
@@ -510,25 +501,10 @@ function Landing() {
               <div
                 key={p.name}
                 className={`surface-card tilt-card relative overflow-hidden rounded-2xl p-6 animate-fade-in ${
-                  p.highlight ? "price-card-featured ring-2 ring-primary/60 md:scale-105" : ""
+                  p.highlight ? "ring-2 ring-primary/60 md:scale-105" : ""
                 }`}
                 style={{ animationDelay: `${i * 120}ms`, animationFillMode: "both" }}
               >
-                {p.highlight && (
-                  <span className="sparkle-field" aria-hidden="true">
-                    {Array.from({ length: 10 }).map((_, k) => (
-                      <i
-                        key={k}
-                        style={{
-                          left: `${(k * 9 + 5) % 100}%`,
-                          animationDuration: `${5 + (k % 5)}s`,
-                          animationDelay: `${(k * 0.6) % 5}s`,
-                        }}
-                      />
-                    ))}
-                  </span>
-                )}
-                <span className="card-border-glow" aria-hidden="true" />
                 {p.highlight && (
                   <span className="absolute top-4 right-4 rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
                     Popular
