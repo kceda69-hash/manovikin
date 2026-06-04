@@ -616,7 +616,7 @@ function Landing() {
                     />
                   </button>
                   <div
-                    className={`grid transition-[grid-template-rows,opacity] duration-400 ease-out ${
+                    className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
                       open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                     }`}
                     style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
