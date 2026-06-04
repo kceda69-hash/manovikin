@@ -84,20 +84,22 @@ function LoginPage() {
         <div className="absolute inset-0 bg-grid opacity-30" />
         <div
           className="login-orb"
-          style={{ width: 340, height: 340, left: "12%", top: "18%", background: "var(--gradient-aurora)" }}
+          style={{ width: 320, height: 320, left: "10%", top: "20%", background: "var(--gradient-aurora)" }}
         />
         <div
           className="login-orb"
-          style={{ width: 280, height: 280, right: "10%", bottom: "12%", background: "radial-gradient(circle, oklch(0.65 0.25 305 / 0.8), transparent 70%)", animationDuration: "20s" }}
-        />
-        <div
-          className="login-orb"
-          style={{ width: 200, height: 200, left: "55%", top: "8%", background: "radial-gradient(circle, oklch(0.78 0.18 200 / 0.7), transparent 70%)", animationDuration: "24s" }}
+          style={{ width: 260, height: 260, right: "8%", bottom: "14%", background: "radial-gradient(circle, oklch(0.65 0.25 305 / 0.8), transparent 70%)", animationDuration: "22s" }}
         />
       </div>
 
+      <Link
+        to="/"
+        className="absolute top-6 left-6 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm transition-colors hover:text-foreground hover:border-primary/60"
+      >
+        <span aria-hidden="true">←</span> Back to home
+      </Link>
+
       <div className="surface-card relative w-full max-w-md rounded-2xl p-8 animate-fade-in">
-        <span className="login-aura" aria-hidden="true" />
         <Link to="/" className="mb-6 flex items-center justify-center gap-2">
           <img src={logo} alt="MANOVIK AI" width={40} height={40} className="h-10 w-10" />
           <span className="text-xl font-bold tracking-wider text-gradient">MANOVIK AI</span>
