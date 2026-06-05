@@ -136,7 +136,7 @@ function SeoPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Sitemaps</CardTitle>
+                <CardTitle className="text-base"><h2>Sitemaps</h2></CardTitle>
               </CardHeader>
               <CardContent>
                 {sitemaps.length === 0 ? (
@@ -160,13 +160,13 @@ function SeoPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <Card>
-                <CardHeader><CardTitle className="text-base">Top queries</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base"><h2>Top queries</h2></CardTitle></CardHeader>
                 <CardContent>
                   <Table rows={topQueries} />
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader><CardTitle className="text-base">Top pages</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base"><h2>Top pages</h2></CardTitle></CardHeader>
                 <CardContent>
                   <Table rows={topPages} />
                 </CardContent>

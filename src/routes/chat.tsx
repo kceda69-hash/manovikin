@@ -29,9 +29,9 @@ export const Route = createFileRoute("/chat")({
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "MANOVIK AI Chat Console" },
       { property: "og:description", content: "Stream code, plans, and answers from your autonomous AI agent." },
-      { property: "og:url", content: "https://manovikin.lovable.app/chat" },
+      { property: "og:url", content: "https://manovik.in/chat" },
     ],
-    links: [{ rel: "canonical", href: "https://manovikin.lovable.app/chat" }],
+    links: [{ rel: "canonical", href: "https://manovik.in/chat" }],
   }),
 });
 
