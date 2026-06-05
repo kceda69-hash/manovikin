@@ -77,7 +77,7 @@ function ReceiptPage() {
             <Printer className="h-4 w-4" /> Print / Save PDF
           </Button>
         </div>
-
+        <h1 className="sr-only">Tax Invoice {p.receipt_no ?? p.id.slice(0, 12)}</h1>
         <div className="mt-6 rounded-xl border border-border/60 bg-card p-8 print:border-0 print:p-0">
           <div className="flex items-start justify-between border-b border-border/40 pb-6">
             <div>
