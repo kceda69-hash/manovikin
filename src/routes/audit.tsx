@@ -14,9 +14,9 @@ export const Route = createFileRoute("/audit")({
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "MANOVIK AI — Audit log" },
       { property: "og:description", content: "Security audit log for your MANOVIK AI account." },
-      { property: "og:url", content: "https://manovikin.lovable.app/audit" },
+      { property: "og:url", content: "https://manovik.in/audit" },
     ],
-    links: [{ rel: "canonical", href: "https://manovikin.lovable.app/audit" }],
+    links: [{ rel: "canonical", href: "https://manovik.in/audit" }],
   }),
 });
 
