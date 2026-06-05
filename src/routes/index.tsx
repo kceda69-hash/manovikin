@@ -626,19 +626,37 @@ function Landing() {
       </section>
 
       <footer className="relative z-10 border-t border-border/40 py-8 text-center text-xs text-muted-foreground">
-        <div className="flex items-center justify-center gap-2 animate-fade-in">
-          <span>Powered by</span>
-          <span className="font-bold text-gradient text-shimmer">KC</span>
-          <span className="inline-flex h-4 w-6 overflow-hidden rounded-sm shadow-sm ring-1 ring-border/60" aria-label="Indian flag" title="Made in India">
-            <span className="flex-1 bg-[#FF9933]" />
-            <span className="flex-1 bg-white relative flex items-center justify-center">
-              <span className="h-1.5 w-1.5 rounded-full border border-[#000080]" />
+        <div className="flex flex-col items-center justify-center gap-3 animate-fade-in px-4">
+          <div className="flex items-center justify-center gap-2">
+            <span>Powered by</span>
+            <span className="font-bold text-gradient text-shimmer">KC</span>
+            <span className="inline-flex h-4 w-6 overflow-hidden rounded-sm shadow-sm ring-1 ring-border/60" aria-label="Indian flag" title="Made in India">
+              <span className="flex-1 bg-[#FF9933]" />
+              <span className="flex-1 bg-white relative flex items-center justify-center">
+                <span className="h-1.5 w-1.5 rounded-full border border-[#000080]" />
+              </span>
+              <span className="flex-1 bg-[#138808]" />
             </span>
-            <span className="flex-1 bg-[#138808]" />
-          </span>
-          <span>· Made in India with ❤️</span>
+            <span>· Made in India with ❤️</span>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2 text-[11px]">
+            <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-primary">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Official Verified Website
+            </span>
+            <span className="opacity-60">·</span>
+            <span>manovik.in</span>
+          </div>
+          <p className="max-w-2xl text-[11px] leading-relaxed opacity-80">
+            © {new Date().getFullYear()} MANOVIK AI. All Rights Reserved. "MANOVIK", "MANOVIK AI", the MANOVIK logo, and all related marks,
+            content, designs, code, and trade dress are the exclusive intellectual property of MANOVIK AI and are protected under Indian and
+            international copyright, trademark, and unfair-competition laws. Any unauthorized reproduction, redistribution, scraping,
+            cloning, reverse-engineering, or commercial use — in whole or in part — is strictly prohibited and will be prosecuted to the
+            fullest extent of the law.
+          </p>
         </div>
       </footer>
+
     </main>
   );
 }
