@@ -14,7 +14,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "MANOVIK AI is an autonomous coding agent that builds apps, APIs, and automations 24/7. Pro plan ₹699/mo (10% off). Lifetime self-host ₹4999 (20% off). Made in India.",
+          "MANOVIK AI: autonomous coding agent that builds apps, APIs & automations 24/7. Pro ₹699/mo (10% off). Lifetime self-host ₹4999 (20% off).",
       },
       { name: "keywords", content: "AI coding agent, autonomous AI, MANOVIK, build apps with AI, AI APIs, self-hosted AI, Indian AI startup" },
       { property: "og:title", content: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
