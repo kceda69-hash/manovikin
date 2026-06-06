@@ -500,11 +500,18 @@ function Landing() {
             {PRICING.map((p, i) => (
               <div
                 key={p.name}
-                className={`surface-card tilt-card relative overflow-hidden rounded-2xl p-6 animate-fade-in ${
+                onPointerMove={(e) => {
+                  const el = e.currentTarget;
+                  const r = el.getBoundingClientRect();
+                  el.style.setProperty("--px", `${((e.clientX - r.left) / r.width) * 100}%`);
+                  el.style.setProperty("--py", `${((e.clientY - r.top) / r.height) * 100}%`);
+                }}
+                className={`pricing-card surface-card tilt-card relative overflow-hidden rounded-2xl p-6 animate-fade-in ${
                   p.highlight ? "ring-2 ring-primary/60 md:scale-105" : ""
                 }`}
                 style={{ animationDelay: `${i * 120}ms`, animationFillMode: "both" }}
               >
+                <span className="pricing-spotlight" aria-hidden="true" />
                 {p.highlight && (
                   <span className="absolute top-4 right-4 rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
                     Popular
@@ -592,13 +599,12 @@ function Landing() {
                     />
                   </button>
                   <div
-                    className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
+                    className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out ${
                       open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                     }`}
-                    style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
                   >
                     <div className="overflow-hidden">
-                      <p className={`px-5 pb-5 text-sm text-muted-foreground leading-relaxed ${open ? "animate-faq-down" : ""}`}>
+                      <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">
                         {item.a}
                       </p>
                     </div>
@@ -625,35 +631,60 @@ function Landing() {
         </div>
       </section>
 
-      <footer className="relative z-10 border-t border-border/40 py-8 text-center text-xs text-muted-foreground">
-        <div className="flex flex-col items-center justify-center gap-3 animate-fade-in px-4">
-          <div className="flex items-center justify-center gap-2">
-            <span>Powered by</span>
-            <span className="font-bold text-gradient text-shimmer">KC</span>
-            <span className="inline-flex h-4 w-6 overflow-hidden rounded-sm shadow-sm ring-1 ring-border/60" aria-label="Indian flag" title="Made in India">
-              <span className="flex-1 bg-[#FF9933]" />
-              <span className="flex-1 bg-white relative flex items-center justify-center">
-                <span className="h-1.5 w-1.5 rounded-full border border-[#000080]" />
-              </span>
-              <span className="flex-1 bg-[#138808]" />
-            </span>
-            <span>· Made in India with ❤️</span>
+      <footer className="relative z-10 border-t border-border/40 py-10 text-xs text-muted-foreground">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="grid gap-8 md:grid-cols-4 text-left">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-base text-gradient">MANOVIK AI</span>
+                <span className="inline-flex h-4 w-6 overflow-hidden rounded-sm ring-1 ring-border/60" aria-label="Indian flag" title="Made in India">
+                  <span className="flex-1 bg-[#FF9933]" />
+                  <span className="flex-1 bg-white relative flex items-center justify-center">
+                    <span className="h-1.5 w-1.5 rounded-full border border-[#000080]" />
+                  </span>
+                  <span className="flex-1 bg-[#138808]" />
+                </span>
+              </div>
+              <p className="mt-3 max-w-sm leading-relaxed">
+                Autonomous AI employee that plans, builds, and ships software 24/7. Made in India.
+              </p>
+              <div className="mt-3 inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-primary">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Official Verified Website · manovik.in
+              </div>
+            </div>
+            <div>
+              <div className="font-semibold text-foreground mb-2">Product</div>
+              <ul className="space-y-1.5">
+                <li><Link to="/" hash="pricing" className="hover:text-primary">Pricing</Link></li>
+                <li><Link to="/chat" className="hover:text-primary">Chat</Link></li>
+                <li><Link to="/billing" className="hover:text-primary">Billing</Link></li>
+                <li><Link to="/login" className="hover:text-primary">Sign in</Link></li>
+              </ul>
+            </div>
+            <div>
+              <div className="font-semibold text-foreground mb-2">Legal & Support</div>
+              <ul className="space-y-1.5">
+                <li><Link to="/terms" className="hover:text-primary">Terms of Service</Link></li>
+                <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
+                <li><Link to="/refund" className="hover:text-primary">Refund & Cancellation</Link></li>
+                <li><Link to="/contact" className="hover:text-primary">Contact</Link></li>
+              </ul>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-2 text-[11px]">
-            <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-primary">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Official Verified Website
-            </span>
-            <span className="opacity-60">·</span>
-            <span>manovik.in</span>
+
+          <div className="mt-8 border-t border-border/40 pt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <p className="text-[11px] leading-relaxed opacity-80 max-w-3xl">
+              © {new Date().getFullYear()} MANOVIK AI. All Rights Reserved. "MANOVIK", "MANOVIK AI", the MANOVIK logo, and all related
+              marks, content, designs, and code are the exclusive intellectual property of MANOVIK AI and are protected under Indian and
+              international copyright, trademark, and unfair-competition laws. Unauthorized reproduction, redistribution, scraping,
+              cloning, reverse-engineering, or commercial use — in whole or in part — is strictly prohibited.
+            </p>
+            <div className="text-[11px] opacity-70 flex items-center gap-2">
+              <span>Payments secured by</span>
+              <span className="rounded bg-foreground/10 px-2 py-0.5 font-semibold">Razorpay</span>
+            </div>
           </div>
-          <p className="max-w-2xl text-[11px] leading-relaxed opacity-80">
-            © {new Date().getFullYear()} MANOVIK AI. All Rights Reserved. "MANOVIK", "MANOVIK AI", the MANOVIK logo, and all related marks,
-            content, designs, code, and trade dress are the exclusive intellectual property of MANOVIK AI and are protected under Indian and
-            international copyright, trademark, and unfair-competition laws. Any unauthorized reproduction, redistribution, scraping,
-            cloning, reverse-engineering, or commercial use — in whole or in part — is strictly prohibited and will be prosecuted to the
-            fullest extent of the law.
-          </p>
         </div>
       </footer>
 
