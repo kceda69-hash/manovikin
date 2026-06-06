@@ -187,6 +187,27 @@
   }
   .animate-faq-down { animation: faq-down 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+  /* God-tier pricing card — mouse-tracking spotlight + animated conic border */
+  .pricing-card { --px: 50%; --py: 50%; transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease; }
+  .pricing-card:hover { transform: translateY(-6px); box-shadow: 0 30px 60px -20px oklch(0.65 0.25 220 / 0.35); }
+  .pricing-spotlight {
+    position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+    background: radial-gradient(380px circle at var(--px) var(--py),
+      oklch(0.78 0.18 215 / 0.22), transparent 55%);
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  .pricing-card:hover .pricing-spotlight { opacity: 1; }
+  .pricing-card::before {
+    content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: conic-gradient(from var(--ang, 0deg) at var(--px) var(--py),
+      oklch(0.78 0.18 215 / 0.9), oklch(0.65 0.25 305 / 0.9), oklch(0.78 0.18 215 / 0));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity: 0; transition: opacity 0.35s ease; animation: spin-a 6s linear infinite;
+  }
+  .pricing-card:hover::before { opacity: 1; }
+  .pricing-card > * { position: relative; z-index: 1; }
+
   /* Login page magic — drifting orbs, conic aura, focus glow */
   .login-orb {
     position: absolute; border-radius: 9999px; filter: blur(40px); opacity: 0.55;
