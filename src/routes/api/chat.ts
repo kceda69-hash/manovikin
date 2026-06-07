@@ -172,8 +172,35 @@ export const Route = createFileRoute("/api/chat")({
           }
         }
 
+        // Detect language hint from latest user text (lightweight heuristic)
+        const lastText = lastUserMsg ? summarize(lastUserMsg as any) : "";
+        const langCode = detectLanguage(lastText);
+
+        // Load per-user language memory for fluency + terminology consistency
+        let langMemoryBlock = "";
+        try {
+          const { data: lm } = await supabase
+            .from("language_memory" as any)
+            .select("language_code,terminology,notes")
+            .eq("user_id", userId)
+            .eq("language_code", langCode)
+            .maybeSingle();
+          if (lm) {
+            langMemoryBlock = `\n\nLANGUAGE MEMORY (${(lm as any).language_code}):\nTerminology: ${JSON.stringify((lm as any).terminology).slice(0, 1500)}\nNotes: ${((lm as any).notes ?? "").slice(0, 500)}`;
+          }
+          // Upsert empty record on first detection so the brain can grow it later
+          if (!lm && langCode) {
+            await supabase.from("language_memory" as any).upsert(
+              { user_id: userId, language_code: langCode },
+              { onConflict: "user_id,language_code" } as any,
+            );
+          }
+        } catch (e) {
+          console.warn("[chat] language_memory load failed", e);
+        }
+
         const gateway = createLovableAiGatewayProvider(apiKey);
-        const modelName = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3-flash-preview";
+        const modelName = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3.5-flash";
         const model = gateway(modelName);
 
         // Build AI SDK tools from the sandbox registry. Every tool execution
