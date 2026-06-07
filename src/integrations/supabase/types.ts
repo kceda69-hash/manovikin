@@ -145,6 +145,60 @@ export type Database = {
         }
         Relationships: []
       }
+      language_memory: {
+        Row: {
+          created_at: string
+          id: string
+          language_code: string
+          notes: string | null
+          terminology: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language_code: string
+          notes?: string | null
+          terminology?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language_code?: string
+          notes?: string | null
+          terminology?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      manovik_brain_updates: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json
+          notes: string | null
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          version: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          version?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string
