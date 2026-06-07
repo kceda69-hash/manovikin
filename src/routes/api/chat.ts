@@ -43,6 +43,31 @@ async function audit(
   if (error) console.error("[audit] insert failed:", error.message);
 }
 
+// Lightweight script-based language detection (no deps). Returns BCP47-ish code.
+function detectLanguage(text: string): string {
+  if (!text) return "en";
+  if (/[\u4e00-\u9fff]/.test(text)) return "zh";
+  if (/[\u3040-\u309f\u30a0-\u30ff]/.test(text)) return "ja";
+  if (/[\uac00-\ud7af]/.test(text)) return "ko";
+  if (/[\u0600-\u06ff]/.test(text)) return "ar";
+  if (/[\u0590-\u05ff]/.test(text)) return "he";
+  if (/[\u0900-\u097f]/.test(text)) return "hi";
+  if (/[\u0980-\u09ff]/.test(text)) return "bn";
+  if (/[\u0a00-\u0a7f]/.test(text)) return "pa";
+  if (/[\u0a80-\u0aff]/.test(text)) return "gu";
+  if (/[\u0b80-\u0bff]/.test(text)) return "ta";
+  if (/[\u0c00-\u0c7f]/.test(text)) return "te";
+  if (/[\u0c80-\u0cff]/.test(text)) return "kn";
+  if (/[\u0d00-\u0d7f]/.test(text)) return "ml";
+  if (/[\u0e00-\u0e7f]/.test(text)) return "th";
+  if (/[\u0400-\u04ff]/.test(text)) return "ru";
+  if (/[ñáéíóúü¿¡]/i.test(text)) return "es";
+  if (/[àâçéèêëîïôûùüÿœæ]/i.test(text)) return "fr";
+  if (/[äöüß]/i.test(text)) return "de";
+  if (/[ãõáàâçéêíóôú]/i.test(text)) return "pt";
+  return "en";
+}
+
 const SYSTEM_PROMPT = `You are MANOVIK AI — a quantum-grade, hyper-intelligent autonomous agent. You operate at the frontier of capability:
 
 CORE ABILITIES
@@ -172,8 +197,35 @@ export const Route = createFileRoute("/api/chat")({
           }
         }
 
+        // Detect language hint from latest user text (lightweight heuristic)
+        const lastText = lastUserMsg ? summarize(lastUserMsg as any) : "";
+        const langCode = detectLanguage(lastText);
+
+        // Load per-user language memory for fluency + terminology consistency
+        let langMemoryBlock = "";
+        try {
+          const { data: lm } = await supabase
+            .from("language_memory" as any)
+            .select("language_code,terminology,notes")
+            .eq("user_id", userId)
+            .eq("language_code", langCode)
+            .maybeSingle();
+          if (lm) {
+            langMemoryBlock = `\n\nLANGUAGE MEMORY (${(lm as any).language_code}):\nTerminology: ${JSON.stringify((lm as any).terminology).slice(0, 1500)}\nNotes: ${((lm as any).notes ?? "").slice(0, 500)}`;
+          }
+          // Upsert empty record on first detection so the brain can grow it later
+          if (!lm && langCode) {
+            await supabase.from("language_memory" as any).upsert(
+              { user_id: userId, language_code: langCode },
+              { onConflict: "user_id,language_code" } as any,
+            );
+          }
+        } catch (e) {
+          console.warn("[chat] language_memory load failed", e);
+        }
+
         const gateway = createLovableAiGatewayProvider(apiKey);
-        const modelName = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3-flash-preview";
+        const modelName = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3.5-flash";
         const model = gateway(modelName);
 
         // Build AI SDK tools from the sandbox registry. Every tool execution
@@ -207,6 +259,8 @@ export const Route = createFileRoute("/api/chat")({
             model,
             system:
               SYSTEM_PROMPT +
+              langMemoryBlock +
+              `\n\nDetected user language: ${langCode}. Reply in that language unless the user switches.` +
               `\n\nYou may call sandboxed tools: ${sandbox
                 .list()
                 .map((t) => `${t.name} (${t.description})`)
