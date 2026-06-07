@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_balance: {
+        Row: {
+          created_at: string
+          credits: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_balance_ledger: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          metadata: Json
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          metadata?: Json
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          metadata?: Json
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           created_at: string
@@ -395,6 +443,14 @@ export type Database = {
         Returns: number
       }
       get_security_scan_token: { Args: never; Returns: string }
+      manovik_spend_credit: {
+        Args: { _amount: number; _reason: string; _user_id: string }
+        Returns: number
+      }
+      manovik_topup_credit: {
+        Args: { _amount: number; _reason: string; _user_id: string }
+        Returns: number
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
