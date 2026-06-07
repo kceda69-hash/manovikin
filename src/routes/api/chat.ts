@@ -259,6 +259,8 @@ export const Route = createFileRoute("/api/chat")({
             model,
             system:
               SYSTEM_PROMPT +
+              langMemoryBlock +
+              `\n\nDetected user language: ${langCode}. Reply in that language unless the user switches.` +
               `\n\nYou may call sandboxed tools: ${sandbox
                 .list()
                 .map((t) => `${t.name} (${t.description})`)
