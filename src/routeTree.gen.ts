@@ -32,6 +32,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/public/hooks/security-scan'
 import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
+import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -154,6 +155,12 @@ const ApiPublicHooksResubmitSitemapRoute =
     path: '/api/public/hooks/resubmit-sitemap',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksManovikSelfUpdateRoute =
+  ApiPublicHooksManovikSelfUpdateRouteImport.update({
+    id: '/api/public/hooks/manovik-self-update',
+    path: '/api/public/hooks/manovik-self-update',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -199,6 +207,7 @@ export interface FileRoutesByTo {
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -225,6 +234,7 @@ export interface FileRoutesById {
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/security-scan'
     | '/lovable/email/queue/process'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/security-scan'
     | '/lovable/email/queue/process'
@@ -302,6 +314,7 @@ export interface FileRouteTypes {
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/security-scan'
     | '/lovable/email/queue/process'
@@ -328,6 +341,7 @@ export interface RootRouteChildren {
   ReceiptIdRoute: typeof ReceiptIdRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicHooksManovikSelfUpdateRoute: typeof ApiPublicHooksManovikSelfUpdateRoute
   ApiPublicHooksResubmitSitemapRoute: typeof ApiPublicHooksResubmitSitemapRoute
   ApiPublicHooksSecurityScanRoute: typeof ApiPublicHooksSecurityScanRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -498,6 +512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksResubmitSitemapRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/manovik-self-update': {
+      id: '/api/public/hooks/manovik-self-update'
+      path: '/api/public/hooks/manovik-self-update'
+      fullPath: '/api/public/hooks/manovik-self-update'
+      preLoaderRoute: typeof ApiPublicHooksManovikSelfUpdateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -520,6 +541,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReceiptIdRoute: ReceiptIdRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicHooksManovikSelfUpdateRoute: ApiPublicHooksManovikSelfUpdateRoute,
   ApiPublicHooksResubmitSitemapRoute: ApiPublicHooksResubmitSitemapRoute,
   ApiPublicHooksSecurityScanRoute: ApiPublicHooksSecurityScanRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
@@ -529,3 +551,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
