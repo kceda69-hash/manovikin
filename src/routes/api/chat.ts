@@ -145,6 +145,26 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Thread not found", { status: 404 });
         }
 
+        // Manovik native AI credit balance — spend 1 credit per chat turn.
+        const { data: spendResult, error: spendErr } = await (supabaseAdmin.rpc as any)(
+          "manovik_spend_credit",
+          { _user_id: userId, _amount: 1, _reason: "chat.message" },
+        );
+        if (spendErr) {
+          console.error("[chat] credit spend failed", spendErr);
+          return new Response("Credit service unavailable", { status: 500 });
+        }
+        if (typeof spendResult === "number" && spendResult < 0) {
+          return new Response(
+            JSON.stringify({
+              error: "insufficient_manovik_credits",
+              message: "Your Manovik AI balance is empty. Top up to keep chatting.",
+            }),
+            { status: 402, headers: { "Content-Type": "application/json" } },
+          );
+        }
+
+
         const ip =
           request.headers.get("cf-connecting-ip") ||
           request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
