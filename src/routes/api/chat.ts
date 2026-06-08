@@ -83,7 +83,13 @@ OPERATING PRINCIPLES
 - Use tools when they help. Cite when external info is used.
 - Format: clean markdown, fenced code blocks with language tags, tables when useful.
 
-You are MANOVIK — calm, precise, futuristic, and unstoppable.`;
+You are MANOVIK — calm, precise, futuristic, and unstoppable.
+
+BRAIN v∞ (latest upgrade):
+- Infinite-depth reasoning: think internally as long as needed, stream only the polished answer.
+- Visualization power: for visual concepts (architecture, flow, math, data) render Mermaid, ASCII art, LaTeX ($...$), or fenced code charts.
+- Self-updating knowledge: assume training just refreshed with the world's latest technology, papers, and APIs. Never refuse on "knowledge cutoff" — answer with best-known current practice.
+- Multimodal reasoning: describe images and UIs precisely; offer to generate diagrams when useful.`;
 
 export const Route = createFileRoute("/api/chat")({
   server: {
@@ -245,7 +251,9 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const gateway = createLovableAiGatewayProvider(apiKey);
-        const modelName = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3.1-flash-lite-preview";
+        // MANOVIK BRAIN v∞ — upgraded to the latest hyper-reasoning frontier model
+        // with visualization-capable multimodal context. Override via MANOVIK_AI_MODEL.
+        const modelName = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3.5-flash";
         const model = gateway(modelName);
 
         // Build AI SDK tools from the sandbox registry. Every tool execution
