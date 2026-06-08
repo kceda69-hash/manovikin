@@ -593,7 +593,7 @@ function Landing() {
                   >
                     <span className="font-medium">{item.q}</span>
                     <ChevronDown
-                      className={`h-5 w-5 text-primary shrink-0 transition-transform duration-300 ${
+                      className={`h-5 w-5 text-primary shrink-0 transition-transform duration-150 ${
                         open ? "rotate-180" : ""
                       }`}
                     />
