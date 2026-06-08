@@ -604,7 +604,7 @@ function Landing() {
                   style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
                 >
                   <button
-                    onClick={() => setFaqOpen(open ? null : i)}
+                    onClick={() => toggleFaq(i)}
                     className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-card/40 transition-colors"
                     aria-expanded={open}
                   >
