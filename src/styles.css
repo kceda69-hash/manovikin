@@ -223,6 +223,12 @@
   @media (prefers-reduced-motion: reduce) {
     .pricing-card, .pricing-card::after { animation: none !important; }
   }
+  /* Mobile perf: drop the heavy blurred conic aura + float on small screens to avoid jank */
+  @media (max-width: 768px) {
+    .pricing-card { animation: none !important; }
+    .pricing-card::after { display: none !important; }
+    .pricing-card::before { animation: none !important; }
+  }
 
   /* Login page magic — drifting orbs, conic aura, focus glow */
   .login-orb {
