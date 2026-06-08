@@ -513,7 +513,7 @@ function Landing() {
               >
                 <span className="pricing-spotlight" aria-hidden="true" />
                 {p.highlight && (
-                  <span className="absolute top-4 right-4 rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                  <span className="absolute top-3 right-3 z-10 rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground shadow-md">
                     Popular
                   </span>
                 )}
@@ -528,7 +528,7 @@ function Landing() {
                     </span>
                   </span>
                 )}
-                <div className="text-sm font-semibold text-primary">{p.name}</div>
+                <div className={`text-sm font-semibold text-primary ${p.highlight ? "mt-4 pr-20" : ""} ${p.discountPct && !p.highlight ? "pl-16" : ""}`}>{p.name}</div>
                 <div className="mt-2 flex items-baseline gap-2 flex-wrap">
                   {p.originalPrice && (
                     <span className="text-lg font-medium text-muted-foreground line-through decoration-rose-500/70 decoration-2">
@@ -593,13 +593,13 @@ function Landing() {
                   >
                     <span className="font-medium">{item.q}</span>
                     <ChevronDown
-                      className={`h-5 w-5 text-primary shrink-0 transition-transform duration-300 ${
+                      className={`h-5 w-5 text-primary shrink-0 transition-transform duration-150 ${
                         open ? "rotate-180" : ""
                       }`}
                     />
                   </button>
                   <div
-                    className={`grid transition-[grid-template-rows,opacity] duration-200 ease-out ${
+                    className={`grid transition-[grid-template-rows,opacity] duration-150 ease-out ${
                       open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
                     }`}
                   >
