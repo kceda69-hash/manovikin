@@ -1,4 +1,6 @@
 import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/payments.functions";
+import { supabase } from "@/integrations/supabase/client";
+
 
 declare global {
   interface Window {
@@ -36,14 +38,21 @@ export async function startCheckout(
   const ok = await loadScript();
   if (!ok) return callbacks.onError?.("Could not load Razorpay. Check your internet.");
 
+  // Pre-check auth to avoid an unhandled 401 Response from the server fn
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session) {
+    if (typeof window !== "undefined") {
+      window.location.href = `/login?next=${encodeURIComponent("/billing")}`;
+    }
+    return;
+  }
+
   let order: Awaited<ReturnType<typeof createRazorpayOrder>>;
   try {
     order = await createRazorpayOrder({ data: { plan } });
   } catch (e) {
-    // 401 from requireSupabaseAuth → redirect to login
-    if (typeof window !== "undefined") {
-      window.location.href = `/login?next=${encodeURIComponent("/billing")}`;
-    }
+    const msg = e instanceof Error ? e.message : "Payment service unavailable";
+    callbacks.onError?.(msg);
     return;
   }
   if (!order.ok) return callbacks.onError?.(order.error ?? "Payment unavailable");
