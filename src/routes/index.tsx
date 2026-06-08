@@ -173,6 +173,13 @@ function Landing() {
   const [wordIdx, setWordIdx] = useState(0);
   const [tourIdx, setTourIdx] = useState(0);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
+  const faqLockRef = useRef(false);
+  const toggleFaq = (i: number) => {
+    if (faqLockRef.current) return;
+    faqLockRef.current = true;
+    setFaqOpen((cur) => (cur === i ? null : i));
+    setTimeout(() => { faqLockRef.current = false; }, 180);
+  };
   const [buying, setBuying] = useState<CheckoutPlan | null>(null);
 
   const handleBuy = (plan: CheckoutPlan) => {
@@ -528,7 +535,17 @@ function Landing() {
                     </span>
                   </span>
                 )}
-                <div className={`text-sm font-semibold text-primary ${p.highlight ? "mt-4 pr-20" : ""} ${p.discountPct && !p.highlight ? "pl-16" : ""}`}>{p.name}</div>
+                <div
+                  className={[
+                    "text-sm font-semibold text-primary",
+                    // Always push name below badges + clear horizontal space for them.
+                    p.highlight || p.discountPct ? "mt-5" : "",
+                    p.highlight ? "pr-20" : "",
+                    p.discountPct ? "pl-20" : "",
+                  ].filter(Boolean).join(" ")}
+                >
+                  {p.name}
+                </div>
                 <div className="mt-2 flex items-baseline gap-2 flex-wrap">
                   {p.originalPrice && (
                     <span className="text-lg font-medium text-muted-foreground line-through decoration-rose-500/70 decoration-2">
@@ -587,7 +604,7 @@ function Landing() {
                   style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
                 >
                   <button
-                    onClick={() => setFaqOpen(open ? null : i)}
+                    onClick={() => toggleFaq(i)}
                     className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-card/40 transition-colors"
                     aria-expanded={open}
                   >
