@@ -173,6 +173,13 @@ function Landing() {
   const [wordIdx, setWordIdx] = useState(0);
   const [tourIdx, setTourIdx] = useState(0);
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
+  const faqLockRef = useRef(false);
+  const toggleFaq = (i: number) => {
+    if (faqLockRef.current) return;
+    faqLockRef.current = true;
+    setFaqOpen((cur) => (cur === i ? null : i));
+    setTimeout(() => { faqLockRef.current = false; }, 180);
+  };
   const [buying, setBuying] = useState<CheckoutPlan | null>(null);
 
   const handleBuy = (plan: CheckoutPlan) => {
