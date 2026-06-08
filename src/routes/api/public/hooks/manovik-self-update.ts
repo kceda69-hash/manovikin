@@ -15,8 +15,8 @@ export const Route = createFileRoute("/api/public/hooks/manovik-self-update")({
           .from("manovik_brain_updates" as any)
           .insert({
             version,
-            notes: "Scheduled Manovik brain self-update — refreshed language memory, terminology, and reasoning heuristics.",
-            metadata: { source: "cron", runtime: "edge" },
+            notes: "MANOVIK Brain v∞ — refreshed with the world's latest models, language memory, visualization heuristics, and infinite-depth reasoning patterns.",
+            metadata: { source: "cron", runtime: "edge", brain: "v∞", capabilities: ["infinite-reasoning", "visualization", "multilingual", "self-update"] },
           });
         if (error) {
           return new Response(JSON.stringify({ ok: false, error: error.message }), {
