@@ -10,6 +10,7 @@ import {
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { initPerf } from "@/lib/perf";
+import { initClientErrorMonitor } from "@/lib/client-error-monitor";
 
 import appCss from "../styles.css?url";
 
