@@ -528,7 +528,17 @@ function Landing() {
                     </span>
                   </span>
                 )}
-                <div className={`text-sm font-semibold text-primary ${p.highlight ? "mt-4 pr-20" : ""} ${p.discountPct && !p.highlight ? "pl-16" : ""}`}>{p.name}</div>
+                <div
+                  className={[
+                    "text-sm font-semibold text-primary",
+                    // Always push name below badges + clear horizontal space for them.
+                    p.highlight || p.discountPct ? "mt-5" : "",
+                    p.highlight ? "pr-20" : "",
+                    p.discountPct ? "pl-20" : "",
+                  ].filter(Boolean).join(" ")}
+                >
+                  {p.name}
+                </div>
                 <div className="mt-2 flex items-baseline gap-2 flex-wrap">
                   {p.originalPrice && (
                     <span className="text-lg font-medium text-muted-foreground line-through decoration-rose-500/70 decoration-2">
