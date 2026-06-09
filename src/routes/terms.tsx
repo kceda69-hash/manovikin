@@ -8,6 +8,7 @@ export const Route = createFileRoute("/terms")({
       { title: "Terms of Service — MANOVIK AI" },
       { name: "description", content: "MANOVIK AI Terms of Service governing use of our website, products, subscriptions, and APIs." },
       { property: "og:title", content: "Terms of Service — MANOVIK AI" },
+      { property: "og:description", content: "MANOVIK AI Terms of Service governing use of our website, products, subscriptions, and APIs." },
       { property: "og:url", content: "https://manovik.in/terms" },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/terms" }],
