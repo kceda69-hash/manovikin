@@ -25,6 +25,7 @@ import { Route as AuditRouteImport } from './routes/audit'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReceiptIdRouteImport } from './routes/receipt.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-ai-coding-agents'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
@@ -115,6 +116,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogBestAiCodingAgentsRoute = BlogBestAiCodingAgentsRouteImport.update({
+  id: '/blog/best-ai-coding-agents',
+  path: '/blog/best-ai-coding-agents',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/api/chat': typeof ApiChatRoute
+  '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/api/chat': typeof ApiChatRoute
+  '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/api/chat': typeof ApiChatRoute
+  '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/unsubscribe'
     | '/api/chat'
+    | '/blog/best-ai-coding-agents'
     | '/email/unsubscribe'
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/unsubscribe'
     | '/api/chat'
+    | '/blog/best-ai-coding-agents'
     | '/email/unsubscribe'
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
@@ -322,6 +333,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/unsubscribe'
     | '/api/chat'
+    | '/blog/best-ai-coding-agents'
     | '/email/unsubscribe'
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
@@ -350,6 +362,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   ApiChatRoute: typeof ApiChatRoute
+  BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ReceiptIdRoute: typeof ReceiptIdRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
@@ -476,6 +489,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/best-ai-coding-agents': {
+      id: '/blog/best-ai-coding-agents'
+      path: '/blog/best-ai-coding-agents'
+      fullPath: '/blog/best-ai-coding-agents'
+      preLoaderRoute: typeof BlogBestAiCodingAgentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -558,6 +578,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   ApiChatRoute: ApiChatRoute,
+  BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ReceiptIdRoute: ReceiptIdRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,

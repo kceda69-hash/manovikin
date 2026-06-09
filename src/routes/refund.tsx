@@ -7,6 +7,8 @@ export const Route = createFileRoute("/refund")({
     meta: [
       { title: "Refund & Cancellation Policy — MANOVIK AI" },
       { name: "description", content: "MANOVIK AI refund, cancellation, and shipping policy for digital subscriptions and lifetime purchases." },
+      { property: "og:title", content: "Refund & Cancellation Policy — MANOVIK AI" },
+      { property: "og:description", content: "MANOVIK AI refund, cancellation, and shipping policy for digital subscriptions and lifetime purchases." },
       { property: "og:url", content: "https://manovik.in/refund" },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/refund" }],

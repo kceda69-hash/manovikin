@@ -7,6 +7,8 @@ export const Route = createFileRoute("/contact")({
     meta: [
       { title: "Contact — MANOVIK AI" },
       { name: "description", content: "Contact MANOVIK AI for support, sales, partnerships, and grievances." },
+      { property: "og:title", content: "Contact — MANOVIK AI" },
+      { property: "og:description", content: "Reach MANOVIK AI for support, sales, partnerships, and grievance redressal." },
       { property: "og:url", content: "https://manovik.in/contact" },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/contact" }],

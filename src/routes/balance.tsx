@@ -6,7 +6,14 @@ import { getManovikBalance } from "@/lib/manovik-balance.functions";
 export const Route = createFileRoute("/balance")({
   component: BalancePage,
   head: () => ({
-    meta: [{ title: "Manovik AI Balance" }],
+    meta: [
+      { title: "Manovik AI Balance" },
+      { name: "description", content: "View your MANOVIK AI native credit balance and recent activity ledger — independent of any external provider, 1 credit per chat message." },
+      { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Manovik AI Balance" },
+      { property: "og:description", content: "Your MANOVIK AI native credit balance and recent activity ledger." },
+      { property: "og:url", content: "https://manovik.in/balance" },
+    ],
   }),
 });
 

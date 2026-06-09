@@ -8,6 +8,7 @@ export const Route = createFileRoute("/privacy")({
       { title: "Privacy Policy — MANOVIK AI" },
       { name: "description", content: "How MANOVIK AI collects, uses, stores, and protects your personal data." },
       { property: "og:title", content: "Privacy Policy — MANOVIK AI" },
+      { property: "og:description", content: "How MANOVIK AI collects, uses, stores, and protects your personal data." },
       { property: "og:url", content: "https://manovik.in/privacy" },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/privacy" }],
