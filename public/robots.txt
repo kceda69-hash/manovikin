@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /chat
+Disallow: /balance
 Disallow: /audit
 Disallow: /billing
 Disallow: /unsubscribe
