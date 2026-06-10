@@ -21,6 +21,9 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Codes, builds, and ships software 24/7. Pro ₹699/mo · Sovereign lifetime ₹4999." },
       { property: "og:url", content: "https://manovik.in/" },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
+      { name: "twitter:description", content: "Codes, builds, and ships software 24/7. Pro ₹699/mo · Sovereign lifetime ₹4999." },
     ],
     links: [
       { rel: "canonical", href: "https://manovik.in/" },

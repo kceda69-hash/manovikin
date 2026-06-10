@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
       { property: "og:description", content: "MANOVIK AI is an autonomous coding agent that builds apps, APIs, and automations 24/7 — your futuristic AI employee." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@manovikai" },
       { name: "twitter:title", content: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
       { name: "twitter:description", content: "Autonomous coding agent that builds apps, APIs, and automations 24/7 — your futuristic AI employee." },

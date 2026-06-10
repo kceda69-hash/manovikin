@@ -13,6 +13,10 @@ export const Route = createFileRoute("/balance")({
       { property: "og:title", content: "Manovik AI Balance" },
       { property: "og:description", content: "Your MANOVIK AI native credit balance and recent activity ledger." },
       { property: "og:url", content: "https://manovik.in/balance" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Manovik AI Balance" },
+      { name: "twitter:description", content: "Your MANOVIK AI native credit balance and recent activity ledger." },
     ],
   }),
 });
