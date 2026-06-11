@@ -9,7 +9,7 @@ export const Route = createFileRoute("/blog/best-ai-coding-agents")({
       {
         name: "description",
         content:
-          "Comparing the best AI coding agents in 2026 — MANOVIK AI vs Devin vs Cline. Lifetime pricing, sovereign self-hosting, data privacy, and autonomous capabilities head-to-head.",
+          "Best AI coding agents 2026: MANOVIK AI vs Devin vs Cline compared on pricing, privacy, self-hosting, and autonomy.",
       },
       { property: "og:title", content: "Best AI Coding Agent 2026: MANOVIK AI vs Devin vs Cline" },
       {

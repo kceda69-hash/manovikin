@@ -169,7 +169,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=${supabaseAnon || "eyJ...your-anon-key..."}
           {step === 1 && (
             <>
               <CardHeader>
-                <CardTitle>1. Prerequisites</CardTitle>
+                <h2 className="font-semibold leading-none tracking-tight">1. Prerequisites</h2>
                 <CardDescription>Install these once on the machine that will run MANOVIK.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -189,7 +189,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=${supabaseAnon || "eyJ...your-anon-key..."}
           {step === 2 && (
             <>
               <CardHeader>
-                <CardTitle>2. Pick an AI provider</CardTitle>
+                <h2 className="font-semibold leading-none tracking-tight">2. Pick an AI provider</h2>
                 <CardDescription>Choose where MANOVIK's brain runs. All are free or have free tiers.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -238,7 +238,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=${supabaseAnon || "eyJ...your-anon-key..."}
           {step === 3 && (
             <>
               <CardHeader>
-                <CardTitle>3. Database (Supabase)</CardTitle>
+                <h2 className="font-semibold leading-none tracking-tight">3. Database (Supabase)</h2>
                 <CardDescription>Easiest path: create a free Supabase project, paste its keys here.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -272,7 +272,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=${supabaseAnon || "eyJ...your-anon-key..."}
           {step === 4 && (
             <>
               <CardHeader>
-                <CardTitle>4. Generate your .env file</CardTitle>
+                <h2 className="font-semibold leading-none tracking-tight">4. Generate your .env file</h2>
                 <CardDescription>Copy this into a file named <code>.env</code> at the project root.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -298,7 +298,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=${supabaseAnon || "eyJ...your-anon-key..."}
           {step === 5 && (
             <>
               <CardHeader>
-                <CardTitle>5. Launch MANOVIK</CardTitle>
+                <h2 className="font-semibold leading-none tracking-tight">5. Launch MANOVIK</h2>
                 <CardDescription>One command builds the image and starts every service.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -320,7 +320,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=${supabaseAnon || "eyJ...your-anon-key..."}
           {step === 6 && (
             <>
               <CardHeader>
-                <CardTitle>6. Verify sovereign mode</CardTitle>
+                <h2 className="font-semibold leading-none tracking-tight">6. Verify sovereign mode</h2>
                 <CardDescription>Confirm MANOVIK is talking to your provider, not Lovable.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
