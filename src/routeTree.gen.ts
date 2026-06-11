@@ -20,6 +20,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BillingRouteImport } from './routes/billing'
+import { Route as BestAiCodingAgentRouteImport } from './routes/best-ai-coding-agent'
 import { Route as BalanceRouteImport } from './routes/balance'
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as IndexRouteImport } from './routes/index'
@@ -89,6 +90,11 @@ const ChatRoute = ChatRouteImport.update({
 const BillingRoute = BillingRouteImport.update({
   id: '/billing',
   path: '/billing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BestAiCodingAgentRoute = BestAiCodingAgentRouteImport.update({
+  id: '/best-ai-coding-agent',
+  path: '/best-ai-coding-agent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BalanceRoute = BalanceRouteImport.update({
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/audit': typeof AuditRoute
   '/balance': typeof BalanceRoute
+  '/best-ai-coding-agent': typeof BestAiCodingAgentRoute
   '/billing': typeof BillingRoute
   '/chat': typeof ChatRoute
   '/contact': typeof ContactRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/audit': typeof AuditRoute
   '/balance': typeof BalanceRoute
+  '/best-ai-coding-agent': typeof BestAiCodingAgentRoute
   '/billing': typeof BillingRoute
   '/chat': typeof ChatRoute
   '/contact': typeof ContactRoute
@@ -235,6 +243,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/audit': typeof AuditRoute
   '/balance': typeof BalanceRoute
+  '/best-ai-coding-agent': typeof BestAiCodingAgentRoute
   '/billing': typeof BillingRoute
   '/chat': typeof ChatRoute
   '/contact': typeof ContactRoute
@@ -265,6 +274,7 @@ export interface FileRouteTypes {
     | '/'
     | '/audit'
     | '/balance'
+    | '/best-ai-coding-agent'
     | '/billing'
     | '/chat'
     | '/contact'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/'
     | '/audit'
     | '/balance'
+    | '/best-ai-coding-agent'
     | '/billing'
     | '/chat'
     | '/contact'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/'
     | '/audit'
     | '/balance'
+    | '/best-ai-coding-agent'
     | '/billing'
     | '/chat'
     | '/contact'
@@ -350,6 +362,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuditRoute: typeof AuditRoute
   BalanceRoute: typeof BalanceRoute
+  BestAiCodingAgentRoute: typeof BestAiCodingAgentRoute
   BillingRoute: typeof BillingRoute
   ChatRoute: typeof ChatRoute
   ContactRoute: typeof ContactRoute
@@ -452,6 +465,13 @@ declare module '@tanstack/react-router' {
       path: '/billing'
       fullPath: '/billing'
       preLoaderRoute: typeof BillingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/best-ai-coding-agent': {
+      id: '/best-ai-coding-agent'
+      path: '/best-ai-coding-agent'
+      fullPath: '/best-ai-coding-agent'
+      preLoaderRoute: typeof BestAiCodingAgentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/balance': {
@@ -566,6 +586,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuditRoute: AuditRoute,
   BalanceRoute: BalanceRoute,
+  BestAiCodingAgentRoute: BestAiCodingAgentRoute,
   BillingRoute: BillingRoute,
   ChatRoute: ChatRoute,
   ContactRoute: ContactRoute,
@@ -593,3 +614,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
