@@ -76,7 +76,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "MANOVIK AI" },
+      { title: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
       { name: "description", content: "MANOVIK AI is an autonomous AI agent that codes in any language, builds websites, apps, and APIs, and works for you 24/7." },
       { name: "author", content: "MANOVIK AI" },
       { property: "og:site_name", content: "MANOVIK AI" },
