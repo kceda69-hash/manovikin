@@ -133,13 +133,18 @@ export const Route = createFileRoute("/api/chat")({
         } catch {
           return new Response("Bad request", { status: 400 });
         }
-        const { messages, threadId } = body;
-        if (!Array.isArray(messages) || !threadId) {
+        const { messages: rawMessages, threadId } = body;
+        if (!Array.isArray(rawMessages) || !threadId) {
           return new Response("Bad request", { status: 400 });
         }
-        if (messages.length > MAX_MESSAGES) {
+        if (rawMessages.length > MAX_MESSAGES) {
           return new Response(`Too many messages (max ${MAX_MESSAGES})`, { status: 400 });
         }
+        // Strict role allow-list: reject any client-supplied system/tool/etc.
+        // messages to prevent prompt-injection via crafted message history.
+        const messages: UIMessage[] = rawMessages.filter(
+          (m): m is UIMessage => !!m && (m.role === "user" || m.role === "assistant"),
+        );
 
         // Verify thread ownership
         const { data: thread, error: tErr } = await supabase
