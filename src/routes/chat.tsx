@@ -31,7 +31,6 @@ export const Route = createFileRoute("/chat")({
       { property: "og:description", content: "Stream code, plans, and answers from your autonomous AI agent." },
       { property: "og:url", content: "https://manovik.in/chat" },
     ],
-    links: [{ rel: "canonical", href: "https://manovik.in/chat" }],
   }),
 });
 
