@@ -615,9 +615,11 @@ function Landing() {
                     onClick={() => toggleFaq(i)}
                     className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-card/40 transition-colors"
                     aria-expanded={open}
+                    aria-label={`${open ? "Collapse" : "Expand"} answer: ${item.q}`}
                   >
                     <span className="font-medium">{item.q}</span>
                     <ChevronDown
+                      aria-hidden="true"
                       className={`h-5 w-5 text-primary shrink-0 transition-transform duration-150 ${
                         open ? "rotate-180" : ""
                       }`}
