@@ -16,7 +16,6 @@ export const Route = createFileRoute("/audit")({
       { property: "og:description", content: "Security audit log for your MANOVIK AI account." },
       { property: "og:url", content: "https://manovik.in/audit" },
     ],
-    links: [{ rel: "canonical", href: "https://manovik.in/audit" }],
   }),
 });
 
