@@ -27,6 +27,7 @@ import { Route as AiCodingAssistantRouteImport } from './routes/ai-coding-assist
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReceiptIdRouteImport } from './routes/receipt.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as BlogWillAiReplaceSoftwareEngineersRouteImport } from './routes/blog.will-ai-replace-software-engineers'
 import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-ai-coding-agents'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -128,6 +129,12 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogWillAiReplaceSoftwareEngineersRoute =
+  BlogWillAiReplaceSoftwareEngineersRouteImport.update({
+    id: '/blog/will-ai-replace-software-engineers',
+    path: '/blog/will-ai-replace-software-engineers',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BlogBestAiCodingAgentsRoute = BlogBestAiCodingAgentsRouteImport.update({
   id: '/blog/best-ai-coding-agents',
   path: '/blog/best-ai-coding-agents',
@@ -205,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
@@ -235,6 +243,7 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
@@ -266,6 +275,7 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
@@ -298,6 +308,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
+    | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
+    | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
@@ -358,6 +370,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
+    | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
     | '/api/public/razorpay-webhook'
@@ -389,6 +402,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   ApiChatRoute: typeof ApiChatRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
+  BlogWillAiReplaceSoftwareEngineersRoute: typeof BlogWillAiReplaceSoftwareEngineersRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ReceiptIdRoute: typeof ReceiptIdRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
@@ -529,6 +543,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/will-ai-replace-software-engineers': {
+      id: '/blog/will-ai-replace-software-engineers'
+      path: '/blog/will-ai-replace-software-engineers'
+      fullPath: '/blog/will-ai-replace-software-engineers'
+      preLoaderRoute: typeof BlogWillAiReplaceSoftwareEngineersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/best-ai-coding-agents': {
       id: '/blog/best-ai-coding-agents'
       path: '/blog/best-ai-coding-agents'
@@ -621,6 +642,8 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   ApiChatRoute: ApiChatRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
+  BlogWillAiReplaceSoftwareEngineersRoute:
+    BlogWillAiReplaceSoftwareEngineersRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ReceiptIdRoute: ReceiptIdRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
@@ -635,3 +658,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
