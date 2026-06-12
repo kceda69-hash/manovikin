@@ -4,6 +4,7 @@ Disallow: /chat
 Disallow: /balance
 Disallow: /audit
 Disallow: /billing
+Disallow: /seo
 Disallow: /unsubscribe
 Disallow: /receipt/
 Disallow: /api/
