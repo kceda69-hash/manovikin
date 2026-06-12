@@ -310,14 +310,19 @@ function Landing() {
           className="text-balance text-5xl font-bold leading-tight tracking-tight md:text-7xl animate-fade-in"
           style={{ animationDelay: "60ms", animationFillMode: "both" }}
         >
-          Meet <span className="text-gradient text-shimmer">MANOVIK AI</span>
-          <br />
-          that builds{" "}
-          <span className="relative inline-block align-baseline">
-            <span key={wordIdx} className="inline-block text-gradient animate-word-swap">
-              {ROTATING_WORDS[wordIdx]}
+          <span className="sr-only">
+            MANOVIK AI — an autonomous AI coding agent that builds websites, apps, APIs, and automations.
+          </span>
+          <span aria-hidden="true">
+            Meet <span className="text-gradient text-shimmer">MANOVIK AI</span>
+            <br />
+            that builds{" "}
+            <span className="relative inline-block align-baseline">
+              <span key={wordIdx} className="inline-block text-gradient animate-word-swap">
+                {ROTATING_WORDS[wordIdx]}
+              </span>
+              <span className="caret" aria-hidden="true" />
             </span>
-            <span className="caret" aria-hidden="true" />
           </span>
         </h1>
 
@@ -610,9 +615,11 @@ function Landing() {
                     onClick={() => toggleFaq(i)}
                     className="w-full flex items-center justify-between gap-4 p-5 text-left hover:bg-card/40 transition-colors"
                     aria-expanded={open}
+                    aria-label={`${open ? "Collapse" : "Expand"} answer: ${item.q}`}
                   >
                     <span className="font-medium">{item.q}</span>
                     <ChevronDown
+                      aria-hidden="true"
                       className={`h-5 w-5 text-primary shrink-0 transition-transform duration-150 ${
                         open ? "rotate-180" : ""
                       }`}
