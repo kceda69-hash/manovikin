@@ -135,10 +135,12 @@ const inspectInput = z.object({ url: z.string().url() });
 export const inspectUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => inspectInput.parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    assertAdmin(context.userId);
     const r = await gsc(`/v1/urlInspection/index:inspect`, {
       method: "POST",
       body: JSON.stringify({ inspectionUrl: data.url, siteUrl: SITE_URL }),
     });
+
     return { ok: r.ok, status: r.status, body: r.body };
   });
