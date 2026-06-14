@@ -2,6 +2,15 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+function assertAdmin(userId: string) {
+  const raw = process.env.SEO_ADMIN_USER_IDS ?? process.env.ADMIN_USER_IDS ?? "";
+  const admins = raw.split(",").map((s) => s.trim()).filter(Boolean);
+  if (admins.length === 0 || !admins.includes(userId)) {
+    throw new Response("Forbidden", { status: 403 });
+  }
+}
+
+
 const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
 const SITE_URL = "https://manovik.in/";
 const SITEMAP_URL = "https://manovik.in/sitemap.xml";
