@@ -9,7 +9,7 @@ export const Route = createFileRoute("/blog/will-ai-replace-software-engineers")
       {
         name: "description",
         content:
-          "Will AI replace software engineers? A balanced look at autonomous AI agents like MANOVIK AI — what they automate, what they don't, and how engineers stay essential.",
+          "Will AI replace software engineers? A balanced 2026 take on what autonomous agents like MANOVIK AI automate — and where engineers stay essential.",
       },
       { property: "og:title", content: "Will AI Replace Software Engineers? An Honest 2026 Take" },
       {
