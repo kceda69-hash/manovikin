@@ -32,7 +32,7 @@ export const Route = createFileRoute("/ai-coding-assistant")({
   component: AiCodingAssistantPage,
   head: () => ({
     meta: [
-      { title: "AI Coding Assistant 2026 — Autonomous, Private, Lifetime | MANOVIK AI" },
+      { title: "AI Coding Assistant 2026 — Private & Lifetime | MANOVIK" },
       {
         name: "description",
         content:
