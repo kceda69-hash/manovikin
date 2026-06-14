@@ -2,6 +2,15 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+function assertAdmin(userId: string) {
+  const raw = process.env.SEO_ADMIN_USER_IDS ?? process.env.ADMIN_USER_IDS ?? "";
+  const admins = raw.split(",").map((s) => s.trim()).filter(Boolean);
+  if (admins.length === 0 || !admins.includes(userId)) {
+    throw new Response("Forbidden", { status: 403 });
+  }
+}
+
+
 const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
 const SITE_URL = "https://manovik.in/";
 const SITEMAP_URL = "https://manovik.in/sitemap.xml";
@@ -46,7 +55,8 @@ export async function submitSitemapInternal() {
 /** Verify ownership of manovik.in via META tag (must already be deployed). */
 export const verifySite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    assertAdmin(context.userId);
     const verify = await gsc(`/siteVerification/v1/webResource?verificationMethod=META`, {
       method: "POST",
       body: JSON.stringify({ site: { identifier: SITE_URL, type: "SITE" } }),
@@ -61,12 +71,17 @@ export const verifySite = createServerFn({ method: "POST" })
 /** Submit (or re-submit) the sitemap. */
 export const submitSitemap = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => submitSitemapInternal());
+  .handler(async ({ context }) => {
+    assertAdmin(context.userId);
+    return submitSitemapInternal();
+  });
 
 /** Fetch sitemap status + recent search-analytics summary. */
 export const getSeoHealth = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    assertAdmin(context.userId);
+
     const sites = await gsc(`/webmasters/v3/sites`);
     const sitemaps = await gsc(`/webmasters/v3/sites/${enc(SITE_URL)}/sitemaps`);
 
@@ -120,10 +135,12 @@ const inspectInput = z.object({ url: z.string().url() });
 export const inspectUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => inspectInput.parse(d))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    assertAdmin(context.userId);
     const r = await gsc(`/v1/urlInspection/index:inspect`, {
       method: "POST",
       body: JSON.stringify({ inspectionUrl: data.url, siteUrl: SITE_URL }),
     });
+
     return { ok: r.ok, status: r.status, body: r.body };
   });
