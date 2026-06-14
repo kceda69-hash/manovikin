@@ -32,7 +32,7 @@ export const Route = createFileRoute("/best-ai-coding-agent")({
   component: BestAiCodingAgentPage,
   head: () => ({
     meta: [
-      { title: "Best AI Coding Agent 2026 — Lifetime, Sovereign, Private | MANOVIK AI" },
+      { title: "Best AI Coding Agent 2026 — Lifetime & Private | MANOVIK" },
       {
         name: "description",
         content:
