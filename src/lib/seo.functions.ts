@@ -55,7 +55,8 @@ export async function submitSitemapInternal() {
 /** Verify ownership of manovik.in via META tag (must already be deployed). */
 export const verifySite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    assertAdmin(context.userId);
     const verify = await gsc(`/siteVerification/v1/webResource?verificationMethod=META`, {
       method: "POST",
       body: JSON.stringify({ site: { identifier: SITE_URL, type: "SITE" } }),
@@ -70,12 +71,17 @@ export const verifySite = createServerFn({ method: "POST" })
 /** Submit (or re-submit) the sitemap. */
 export const submitSitemap = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => submitSitemapInternal());
+  .handler(async ({ context }) => {
+    assertAdmin(context.userId);
+    return submitSitemapInternal();
+  });
 
 /** Fetch sitemap status + recent search-analytics summary. */
 export const getSeoHealth = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    assertAdmin(context.userId);
+
     const sites = await gsc(`/webmasters/v3/sites`);
     const sitemaps = await gsc(`/webmasters/v3/sites/${enc(SITE_URL)}/sitemaps`);
 
