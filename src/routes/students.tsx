@@ -112,6 +112,8 @@ const FAQ = [
 ];
 
 function StudentsPage() {
+  const [faqOpen, setFaqOpen] = useState<number | null>(null);
+  const toggleFaq = (i: number) => setFaqOpen((cur) => (cur === i ? null : i));
   return (
     <main className="hero-surface relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10 [contain:paint]">
