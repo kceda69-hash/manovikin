@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { GraduationCap, BookOpen, Users, ArrowRight, Mail } from "lucide-react";
+import { useState } from "react";
+import { GraduationCap, BookOpen, Users, ArrowRight, Mail, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/students")({
@@ -41,16 +42,28 @@ export const Route = createFileRoute("/students")({
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: "Students & Educators — MANOVIK AI",
-          description:
-            "MANOVIK AI for students and educators. Education pricing and classroom tooling coming soon.",
-          url: "https://manovik.in/students",
-          mainEntity: {
-            "@type": "Organization",
-            name: "MANOVIK AI",
-            url: "https://manovik.in",
-          },
+          "@graph": [
+            {
+              "@type": "WebPage",
+              name: "Students & Educators — MANOVIK AI",
+              description:
+                "MANOVIK AI for students and educators. Education pricing and classroom tooling coming soon.",
+              url: "https://manovik.in/students",
+              mainEntity: {
+                "@type": "Organization",
+                name: "MANOVIK AI",
+                url: "https://manovik.in",
+              },
+            },
+            {
+              "@type": "FAQPage",
+              mainEntity: FAQ.map((item) => ({
+                "@type": "Question",
+                name: item.q,
+                acceptedAnswer: { "@type": "Answer", text: item.a },
+              })),
+            },
+          ],
         }),
       },
     ],
@@ -75,7 +88,32 @@ const BENEFITS = [
   },
 ];
 
+const FAQ = [
+  {
+    q: "What is the MANOVIK AI student and educator program?",
+    a: "It is an education initiative that gives students, teachers, and institutions discounted access to MANOVIK AI, plus classroom tools designed for learning and teaching software development.",
+  },
+  {
+    q: "Who is eligible for the education discount?",
+    a: "Verified students enrolled at accredited schools, colleges, or universities, as well as teachers, professors, and institutional IT administrators, are eligible.",
+  },
+  {
+    q: "Can MANOVIK AI be used in coding classes and bootcamps?",
+    a: "Yes. MANOVIK can scaffold assignments, explain code, debug student projects, and deploy real apps so learners focus on concepts instead of boilerplate.",
+  },
+  {
+    q: "Is student data kept private?",
+    a: "Absolutely. MANOVIK threads are encrypted at rest, never used to train third-party models, and can run fully self-hosted for universities that require data sovereignty.",
+  },
+  {
+    q: "When will education pricing and classroom features be available?",
+    a: "We are actively building the program. Join the early-access list by emailing edu@manovik.in to get updates and help shape the roadmap.",
+  },
+];
+
 function StudentsPage() {
+  const [faqOpen, setFaqOpen] = useState<number | null>(null);
+  const toggleFaq = (i: number) => setFaqOpen((cur) => (cur === i ? null : i));
   return (
     <main className="hero-surface relative min-h-screen overflow-hidden">
       <div className="pointer-events-none absolute inset-0 -z-10 [contain:paint]">
@@ -176,6 +214,51 @@ function StudentsPage() {
                 </Button>
               </Link>
             </div>
+          </div>
+        </div>
+        <div className="mt-20 text-left animate-fade-in">
+          <div className="surface-card relative overflow-hidden rounded-2xl p-8 md:p-10">
+            <span className="card-border-glow" aria-hidden="true" />
+            <h2 className="text-2xl font-bold md:text-3xl">Frequently asked questions</h2>
+            <p className="mt-4 text-muted-foreground">
+              Quick answers about MANOVIK AI for students, educators, and institutions.
+            </p>
+            <dl className="mt-8 space-y-3">
+              {FAQ.map((item, i) => {
+                const open = faqOpen === i;
+                return (
+                  <div
+                    key={item.q}
+                    className={`overflow-hidden rounded-xl border transition-colors ${
+                      open ? "border-primary/40 bg-card/60" : "border-border/40 bg-card/40 hover:bg-card/60"
+                    }`}
+                  >
+                    <dt>
+                      <button
+                        type="button"
+                        onClick={() => toggleFaq(i)}
+                        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-medium"
+                        aria-expanded={open}
+                      >
+                        {item.q}
+                        <ChevronDown
+                          className={`h-4 w-4 shrink-0 text-primary transition-transform duration-200 ${
+                            open ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                    </dt>
+                    <dd
+                      className={`px-5 text-sm text-muted-foreground transition-all duration-200 ${
+                        open ? "pb-5 pt-0 opacity-100" : "h-0 overflow-hidden opacity-0"
+                      }`}
+                    >
+                      {item.a}
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
           </div>
         </div>
       </section>
