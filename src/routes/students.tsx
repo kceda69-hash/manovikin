@@ -42,16 +42,28 @@ export const Route = createFileRoute("/students")({
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: "Students & Educators — MANOVIK AI",
-          description:
-            "MANOVIK AI for students and educators. Education pricing and classroom tooling coming soon.",
-          url: "https://manovik.in/students",
-          mainEntity: {
-            "@type": "Organization",
-            name: "MANOVIK AI",
-            url: "https://manovik.in",
-          },
+          "@graph": [
+            {
+              "@type": "WebPage",
+              name: "Students & Educators — MANOVIK AI",
+              description:
+                "MANOVIK AI for students and educators. Education pricing and classroom tooling coming soon.",
+              url: "https://manovik.in/students",
+              mainEntity: {
+                "@type": "Organization",
+                name: "MANOVIK AI",
+                url: "https://manovik.in",
+              },
+            },
+            {
+              "@type": "FAQPage",
+              mainEntity: FAQ.map((item) => ({
+                "@type": "Question",
+                name: item.q,
+                acceptedAnswer: { "@type": "Answer", text: item.a },
+              })),
+            },
+          ],
         }),
       },
     ],
