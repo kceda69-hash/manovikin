@@ -216,6 +216,51 @@ function StudentsPage() {
             </div>
           </div>
         </div>
+        <div className="mt-20 text-left animate-fade-in">
+          <div className="surface-card relative overflow-hidden rounded-2xl p-8 md:p-10">
+            <span className="card-border-glow" aria-hidden="true" />
+            <h2 className="text-2xl font-bold md:text-3xl">Frequently asked questions</h2>
+            <p className="mt-4 text-muted-foreground">
+              Quick answers about MANOVIK AI for students, educators, and institutions.
+            </p>
+            <dl className="mt-8 space-y-3">
+              {FAQ.map((item, i) => {
+                const open = faqOpen === i;
+                return (
+                  <div
+                    key={item.q}
+                    className={`overflow-hidden rounded-xl border transition-colors ${
+                      open ? "border-primary/40 bg-card/60" : "border-border/40 bg-card/40 hover:bg-card/60"
+                    }`}
+                  >
+                    <dt>
+                      <button
+                        type="button"
+                        onClick={() => toggleFaq(i)}
+                        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-medium"
+                        aria-expanded={open}
+                      >
+                        {item.q}
+                        <ChevronDown
+                          className={`h-4 w-4 shrink-0 text-primary transition-transform duration-200 ${
+                            open ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+                    </dt>
+                    <dd
+                      className={`px-5 text-sm text-muted-foreground transition-all duration-200 ${
+                        open ? "pb-5 pt-0 opacity-100" : "h-0 overflow-hidden opacity-0"
+                      }`}
+                    >
+                      {item.a}
+                    </dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </div>
+        </div>
       </section>
     </main>
   );
