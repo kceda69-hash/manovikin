@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as StudentsRouteImport } from './routes/students'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SeoRouteImport } from './routes/seo'
@@ -47,6 +48,11 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentsRoute = StudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -208,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/api/chat': typeof ApiChatRoute
@@ -239,6 +246,7 @@ export interface FileRoutesByTo {
   '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/api/chat': typeof ApiChatRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/api/chat': typeof ApiChatRoute
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/seo'
     | '/setup'
     | '/sitemap.xml'
+    | '/students'
     | '/terms'
     | '/unsubscribe'
     | '/api/chat'
@@ -335,6 +345,7 @@ export interface FileRouteTypes {
     | '/seo'
     | '/setup'
     | '/sitemap.xml'
+    | '/students'
     | '/terms'
     | '/unsubscribe'
     | '/api/chat'
@@ -366,6 +377,7 @@ export interface FileRouteTypes {
     | '/seo'
     | '/setup'
     | '/sitemap.xml'
+    | '/students'
     | '/terms'
     | '/unsubscribe'
     | '/api/chat'
@@ -398,6 +410,7 @@ export interface RootRouteChildren {
   SeoRoute: typeof SeoRoute
   SetupRoute: typeof SetupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StudentsRoute: typeof StudentsRoute
   TermsRoute: typeof TermsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -429,6 +442,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/students': {
+      id: '/students'
+      path: '/students'
+      fullPath: '/students'
+      preLoaderRoute: typeof StudentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -638,6 +658,7 @@ const rootRouteChildren: RootRouteChildren = {
   SeoRoute: SeoRoute,
   SetupRoute: SetupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StudentsRoute: StudentsRoute,
   TermsRoute: TermsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   ApiChatRoute: ApiChatRoute,
