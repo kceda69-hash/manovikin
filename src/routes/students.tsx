@@ -76,6 +76,29 @@ const BENEFITS = [
   },
 ];
 
+const FAQ = [
+  {
+    q: "What is the MANOVIK AI student and educator program?",
+    a: "It is an education initiative that gives students, teachers, and institutions discounted access to MANOVIK AI, plus classroom tools designed for learning and teaching software development.",
+  },
+  {
+    q: "Who is eligible for the education discount?",
+    a: "Verified students enrolled at accredited schools, colleges, or universities, as well as teachers, professors, and institutional IT administrators, are eligible.",
+  },
+  {
+    q: "Can MANOVIK AI be used in coding classes and bootcamps?",
+    a: "Yes. MANOVIK can scaffold assignments, explain code, debug student projects, and deploy real apps so learners focus on concepts instead of boilerplate.",
+  },
+  {
+    q: "Is student data kept private?",
+    a: "Absolutely. MANOVIK threads are encrypted at rest, never used to train third-party models, and can run fully self-hosted for universities that require data sovereignty.",
+  },
+  {
+    q: "When will education pricing and classroom features be available?",
+    a: "We are actively building the program. Join the early-access list by emailing edu@manovik.in to get updates and help shape the roadmap.",
+  },
+];
+
 function StudentsPage() {
   return (
     <main className="hero-surface relative min-h-screen overflow-hidden">
