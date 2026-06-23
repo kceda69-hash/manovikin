@@ -37,8 +37,8 @@ export const Route = createFileRoute("/blog/will-ai-replace-software-engineers")
           headline: "Will AI Replace Software Engineers? An Honest 2026 Take",
           description:
             "A balanced look at whether AI will replace software engineers, how autonomous AI agents like MANOVIK AI change the job, and what skills stay valuable.",
-          author: { "@type": "Organization", name: "MANOVIK AI" },
-          publisher: { "@type": "Organization", name: "MANOVIK AI" },
+          author: { "@type": "Organization", name: "MANOVIK AI", url: "https://manovik.in" },
+          publisher: { "@type": "Organization", name: "MANOVIK AI", url: "https://manovik.in", logo: { "@type": "ImageObject", url: "https://manovik.in/favicon.ico" } },
           mainEntityOfPage: "https://manovik.in/blog/will-ai-replace-software-engineers",
         }),
       },

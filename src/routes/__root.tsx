@@ -4,10 +4,11 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { initPerf } from "@/lib/perf";
 import { initClientErrorMonitor } from "@/lib/client-error-monitor";
@@ -99,14 +100,41 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@graph": [
             {
               "@type": "Organization",
+              "@id": "https://manovik.in/#organization",
               name: "MANOVIK AI",
               url: "https://manovik.in",
-              description: "Autonomous AI agent that codes, builds, and ships software 24/7.",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://manovik.in/favicon.ico",
+              },
+              description:
+                "Autonomous AI agent that codes, builds, and ships software 24/7.",
+              sameAs: [
+                "https://twitter.com/manovikai",
+                "https://manovikin.lovable.app",
+              ],
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer support",
+                url: "https://manovik.in/contact",
+                availableLanguage: ["English", "Hindi"],
+              },
             },
             {
               "@type": "WebSite",
+              "@id": "https://manovik.in/#website",
               name: "MANOVIK AI",
               url: "https://manovik.in",
+              publisher: { "@id": "https://manovik.in/#organization" },
+              inLanguage: "en",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: "https://manovik.in/?q={search_term_string}",
+                },
+                "query-input": "required name=search_term_string",
+              },
             },
           ],
         }),
@@ -133,12 +161,73 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+const BREADCRUMB_LABELS: Record<string, string> = {
+  setup: "Setup",
+  login: "Login",
+  contact: "Contact",
+  privacy: "Privacy",
+  terms: "Terms",
+  refund: "Refund",
+  blog: "Blog",
+  "best-ai-coding-agent": "Best AI coding agent",
+  "ai-coding-assistant": "AI coding assistant",
+  "best-ai-coding-agents": "Best AI coding agents",
+  "will-ai-replace-software-engineers": "Will AI replace software engineers?",
+  students: "Students & Educators",
+  billing: "Billing",
+  chat: "Chat",
+  balance: "Balance",
+  audit: "Audit log",
+  seo: "SEO health",
+  receipt: "Receipt",
+  unsubscribe: "Unsubscribe",
+};
+
+function humanize(segment: string) {
+  return (
+    BREADCRUMB_LABELS[segment] ??
+    segment.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  );
+}
+
+function BreadcrumbJsonLd() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const json = useMemo(() => {
+    const clean = pathname.split("?")[0].split("#")[0];
+    const parts = clean.split("/").filter(Boolean);
+    if (parts.length === 0) return null;
+    const items = [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://manovik.in/" },
+      ...parts.map((seg, i) => ({
+        "@type": "ListItem",
+        position: i + 2,
+        name: humanize(decodeURIComponent(seg)),
+        item: `https://manovik.in/${parts.slice(0, i + 1).join("/")}`,
+      })),
+    ];
+    return JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: items,
+    });
+  }, [pathname]);
+
+  if (!json) return null;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: json }}
+    />
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => { initPerf(); initClientErrorMonitor(); }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
+      <BreadcrumbJsonLd />
       <Outlet />
       <Toaster richColors position="top-right" />
     </QueryClientProvider>
