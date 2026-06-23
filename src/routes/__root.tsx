@@ -161,12 +161,73 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+const BREADCRUMB_LABELS: Record<string, string> = {
+  setup: "Setup",
+  login: "Login",
+  contact: "Contact",
+  privacy: "Privacy",
+  terms: "Terms",
+  refund: "Refund",
+  blog: "Blog",
+  "best-ai-coding-agent": "Best AI coding agent",
+  "ai-coding-assistant": "AI coding assistant",
+  "best-ai-coding-agents": "Best AI coding agents",
+  "will-ai-replace-software-engineers": "Will AI replace software engineers?",
+  students: "Students & Educators",
+  billing: "Billing",
+  chat: "Chat",
+  balance: "Balance",
+  audit: "Audit log",
+  seo: "SEO health",
+  receipt: "Receipt",
+  unsubscribe: "Unsubscribe",
+};
+
+function humanize(segment: string) {
+  return (
+    BREADCRUMB_LABELS[segment] ??
+    segment.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  );
+}
+
+function BreadcrumbJsonLd() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const json = useMemo(() => {
+    const clean = pathname.split("?")[0].split("#")[0];
+    const parts = clean.split("/").filter(Boolean);
+    if (parts.length === 0) return null;
+    const items = [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://manovik.in/" },
+      ...parts.map((seg, i) => ({
+        "@type": "ListItem",
+        position: i + 2,
+        name: humanize(decodeURIComponent(seg)),
+        item: `https://manovik.in/${parts.slice(0, i + 1).join("/")}`,
+      })),
+    ];
+    return JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: items,
+    });
+  }, [pathname]);
+
+  if (!json) return null;
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: json }}
+    />
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => { initPerf(); initClientErrorMonitor(); }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
+      <BreadcrumbJsonLd />
       <Outlet />
       <Toaster richColors position="top-right" />
     </QueryClientProvider>
