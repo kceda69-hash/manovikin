@@ -100,14 +100,41 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@graph": [
             {
               "@type": "Organization",
+              "@id": "https://manovik.in/#organization",
               name: "MANOVIK AI",
               url: "https://manovik.in",
-              description: "Autonomous AI agent that codes, builds, and ships software 24/7.",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://manovik.in/favicon.ico",
+              },
+              description:
+                "Autonomous AI agent that codes, builds, and ships software 24/7.",
+              sameAs: [
+                "https://twitter.com/manovikai",
+                "https://manovikin.lovable.app",
+              ],
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer support",
+                url: "https://manovik.in/contact",
+                availableLanguage: ["English", "Hindi"],
+              },
             },
             {
               "@type": "WebSite",
+              "@id": "https://manovik.in/#website",
               name: "MANOVIK AI",
               url: "https://manovik.in",
+              publisher: { "@id": "https://manovik.in/#organization" },
+              inLanguage: "en",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate: "https://manovik.in/?q={search_term_string}",
+                },
+                "query-input": "required name=search_term_string",
+              },
             },
           ],
         }),
