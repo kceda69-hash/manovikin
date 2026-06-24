@@ -1,0 +1,22 @@
+name: SEO audit
+
+# Runs the static SEO audit on every push and PR. Fails the build if a route
+# is missing from the sitemap, contradicts robots.txt, or has a stale
+# canonical / og:url — catching deploy-time SEO regressions early.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun run seo:audit
