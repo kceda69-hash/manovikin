@@ -5,13 +5,26 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { PreBlock } from "@/components/CodeBlock";
-import { Plus, Send, Trash2, LogOut, Loader2, ShieldCheck, CreditCard } from "lucide-react";
+import {
+  Plus,
+  Send,
+  Trash2,
+  LogOut,
+  Loader2,
+  ShieldCheck,
+  CreditCard,
+  Menu,
+  MessageSquarePlus,
+  Sparkles,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
+
 import {
   listThreads,
   createThread,
