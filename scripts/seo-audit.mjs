@@ -2,16 +2,10 @@
 // Static SEO audit. Runs in CI to flag sitemap / robots / noindex / canonical
 // drift before a deploy. No network calls — reads source files only.
 //
-// Checks:
-//  1. robots.txt exists and is parseable
-//  2. Every route in the sitemap has a `canonical` link pointing at itself
-//     (absolute https://manovik.in/<path>)
-//  3. Every route in the sitemap has matching og:url (when og tags are present)
-//  4. No route in the sitemap is marked `noindex`
-//  5. No route in the sitemap is Disallow'd in robots.txt
-//  6. Every public, static route file is either in the sitemap, marked
-//     noindex, or Disallow'd in robots.txt (no silently-unlisted pages)
-//  7. Sitemap BASE_URL matches the canonical domain
+// When running under GitHub Actions (GITHUB_ACTIONS=true), each failing
+// finding is emitted as a workflow command (`::error file=...,line=...::`
+// or `::warning ...`), so they appear as inline annotations on pull
+// requests at the exact file + line that needs to change.
 
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -22,52 +16,78 @@ const ROUTES_DIR = join(ROOT, "src", "routes");
 const SITEMAP_FILE = join(ROUTES_DIR, "sitemap[.]xml.ts");
 const ROBOTS_FILE = join(ROOT, "public", "robots.txt");
 const CANONICAL_HOST = "https://manovik.in";
+const IS_GHA = process.env.GITHUB_ACTIONS === "true";
 
-const errors = [];
-const warnings = [];
-const err = (m) => errors.push(m);
-const warn = (m) => warnings.push(m);
+/** @type {{level:'error'|'warning', file:string, line:number, title:string, message:string}[]} */
+const findings = [];
+const rel = (p) => relative(ROOT, p).split("\\").join("/");
+const add = (level, file, line, title, message) =>
+  findings.push({ level, file: rel(file), line: Math.max(1, line | 0), title, message });
+const err = (file, line, title, message) => add("error", file, line, title, message);
+const warn = (file, line, title, message) => add("warning", file, line, title, message);
 
 function read(path) {
   try { return readFileSync(path, "utf8"); }
   catch { return null; }
 }
 
+/** Find the 1-based line number of the first regex match, or 1 if not found. */
+function lineOf(src, re) {
+  if (!src) return 1;
+  const m = re.exec(src);
+  if (!m) return 1;
+  return src.slice(0, m.index).split(/\r?\n/).length;
+}
+
 // ---------- sitemap ----------
 const sitemapSrc = read(SITEMAP_FILE);
-if (!sitemapSrc) err(`Missing sitemap route at ${relative(ROOT, SITEMAP_FILE)}`);
+if (!sitemapSrc) {
+  err(SITEMAP_FILE, 1, "Sitemap missing", `Missing sitemap route at ${rel(SITEMAP_FILE)}`);
+}
 
 const baseUrlMatch = sitemapSrc?.match(/BASE_URL\s*=\s*["'`]([^"'`]+)["'`]/);
 const baseUrl = baseUrlMatch?.[1];
 if (sitemapSrc && baseUrl !== CANONICAL_HOST) {
-  err(`Sitemap BASE_URL is "${baseUrl}", expected "${CANONICAL_HOST}"`);
+  const ln = lineOf(sitemapSrc, /BASE_URL\s*=/);
+  err(SITEMAP_FILE, ln, "Sitemap BASE_URL mismatch",
+    `BASE_URL is "${baseUrl}", expected "${CANONICAL_HOST}"`);
 }
 
-const sitemapPaths = new Set();
+/** path -> line in sitemap source */
+const sitemapPaths = new Map();
 if (sitemapSrc) {
   const re = /\bpath:\s*["'`]([^"'`]+)["'`]/g;
   let m;
-  while ((m = re.exec(sitemapSrc))) sitemapPaths.add(m[1]);
-  if (sitemapPaths.size === 0) err("Sitemap contains no entries");
+  while ((m = re.exec(sitemapSrc))) {
+    const ln = sitemapSrc.slice(0, m.index).split(/\r?\n/).length;
+    if (!sitemapPaths.has(m[1])) sitemapPaths.set(m[1], ln);
+  }
+  if (sitemapPaths.size === 0) {
+    err(SITEMAP_FILE, 1, "Sitemap empty", "Sitemap contains no entries");
+  }
 }
 
 // ---------- robots ----------
 const robotsSrc = read(ROBOTS_FILE);
-if (!robotsSrc) err(`Missing ${relative(ROOT, ROBOTS_FILE)}`);
-const disallowed = new Set();
+if (!robotsSrc) {
+  err(ROBOTS_FILE, 1, "robots.txt missing", `Missing ${rel(ROBOTS_FILE)}`);
+}
+/** path -> line in robots.txt */
+const disallowed = new Map();
 if (robotsSrc) {
-  for (const line of robotsSrc.split(/\r?\n/)) {
-    const t = line.trim();
-    const d = t.match(/^Disallow:\s*(\S+)/i);
-    if (d) disallowed.add(d[1]);
-  }
+  const lines = robotsSrc.split(/\r?\n/);
+  lines.forEach((line, i) => {
+    const d = line.trim().match(/^Disallow:\s*(\S+)/i);
+    if (d && !disallowed.has(d[1])) disallowed.set(d[1], i + 1);
+  });
   if (!/Sitemap:\s*https?:\/\//i.test(robotsSrc)) {
-    warn("robots.txt has no Sitemap: directive");
+    warn(ROBOTS_FILE, lines.length, "robots.txt missing Sitemap directive",
+      "robots.txt has no Sitemap: directive — crawlers fall back to /sitemap.xml");
   }
 }
 
 function isDisallowed(path) {
-  for (const d of disallowed) {
+  for (const d of disallowed.keys()) {
     if (d === "/") return false;
     if (path === d || path.startsWith(d + "/") || path.startsWith(d)) return true;
   }
@@ -86,19 +106,15 @@ function listRouteFiles(dir) {
   return out;
 }
 
-function routePathFromFile(rel) {
-  // strip extension and the leading "routes/"
-  let p = rel.replace(/\.[jt]sx?$/, "");
+function routePathFromFile(relPath) {
+  let p = relPath.replace(/\.[jt]sx?$/, "");
   if (p.startsWith("routes/")) p = p.slice("routes/".length);
-  // ignore special files
   if (p === "__root") return null;
   if (p === "index") return "/";
   if (p.endsWith("/index")) return "/" + p.slice(0, -"/index".length);
   if (p.startsWith("api/") || p.startsWith("lovable/") || p.startsWith("email/")) return null;
   if (p.includes("[.]xml")) return null;
-  // dynamic / param routes — skip from static-coverage check
   if (/\$|\*/.test(p)) return null;
-  // dot-separated -> slashes (TanStack flat routes)
   p = p.split(".").join("/");
   return "/" + p;
 }
@@ -106,14 +122,28 @@ function routePathFromFile(rel) {
 const files = listRouteFiles(ROUTES_DIR);
 const inspected = [];
 for (const f of files) {
-  const rel = relative(join(ROOT, "src"), f);
-  const path = routePathFromFile(rel);
+  const relFromSrc = relative(join(ROOT, "src"), f).split("\\").join("/");
+  const path = routePathFromFile(relFromSrc);
   if (!path) continue;
   const src = readFileSync(f, "utf8");
-  const noindex = /name:\s*["'`]robots["'`]\s*,\s*content:\s*["'`][^"'`]*noindex/i.test(src);
-  const canonicalMatch = src.match(/rel:\s*["'`]canonical["'`]\s*,\s*href:\s*["'`]([^"'`]+)["'`]/);
-  const ogUrlMatch = src.match(/property:\s*["'`]og:url["'`]\s*,\s*content:\s*["'`]([^"'`]+)["'`]/);
-  inspected.push({ file: rel, path, src, noindex, canonical: canonicalMatch?.[1], ogUrl: ogUrlMatch?.[1] });
+  const noindexRe = /name:\s*["'`]robots["'`]\s*,\s*content:\s*["'`][^"'`]*noindex/i;
+  const canonicalRe = /rel:\s*["'`]canonical["'`]\s*,\s*href:\s*["'`]([^"'`]+)["'`]/;
+  const ogUrlRe = /property:\s*["'`]og:url["'`]\s*,\s*content:\s*["'`]([^"'`]+)["'`]/;
+  const noindex = noindexRe.test(src);
+  const canonicalMatch = src.match(canonicalRe);
+  const ogUrlMatch = src.match(ogUrlRe);
+  inspected.push({
+    file: f,
+    path,
+    src,
+    noindex,
+    noindexLine: noindex ? lineOf(src, noindexRe) : 0,
+    canonical: canonicalMatch?.[1],
+    canonicalLine: canonicalMatch ? lineOf(src, canonicalRe) : 0,
+    ogUrl: ogUrlMatch?.[1],
+    ogUrlLine: ogUrlMatch ? lineOf(src, ogUrlRe) : 0,
+    headLine: lineOf(src, /head:\s*\(/),
+  });
 }
 
 // ---------- cross-checks ----------
@@ -122,45 +152,106 @@ for (const r of inspected) {
   const blocked = isDisallowed(r.path);
 
   if (inSitemap && r.noindex) {
-    err(`${r.path}: in sitemap but has noindex meta (${r.file})`);
+    err(r.file, r.noindexLine, "Conflict: sitemap + noindex",
+      `${r.path} is listed in the sitemap but has a robots noindex meta. Remove one.`);
   }
   if (inSitemap && blocked) {
-    err(`${r.path}: in sitemap but blocked by robots.txt (${r.file})`);
+    const robotsLine = [...disallowed.entries()].find(([d]) =>
+      r.path === d || r.path.startsWith(d + "/") || r.path.startsWith(d),
+    )?.[1] ?? 1;
+    err(ROBOTS_FILE, robotsLine, "Conflict: sitemap + robots Disallow",
+      `${r.path} is listed in the sitemap but Disallow'd in robots.txt.`);
   }
   if (inSitemap && r.canonical) {
     const expected = `${CANONICAL_HOST}${r.path}`;
     if (r.canonical !== expected) {
-      err(`${r.path}: canonical "${r.canonical}" should be "${expected}" (${r.file})`);
+      err(r.file, r.canonicalLine, "Canonical mismatch",
+        `canonical "${r.canonical}" should be "${expected}".`);
     }
   }
   if (inSitemap && !r.canonical) {
-    warn(`${r.path}: in sitemap but missing canonical link (${r.file})`);
+    warn(r.file, r.headLine, "Missing canonical",
+      `${r.path} is in the sitemap but has no <link rel="canonical">.`);
   }
   if (inSitemap && r.ogUrl) {
     const expected = `${CANONICAL_HOST}${r.path}`;
     if (r.ogUrl !== expected) {
-      err(`${r.path}: og:url "${r.ogUrl}" should be "${expected}" (${r.file})`);
+      err(r.file, r.ogUrlLine, "og:url mismatch",
+        `og:url "${r.ogUrl}" should be "${expected}".`);
     }
   }
   if (!inSitemap && !r.noindex && !blocked) {
-    err(`${r.path}: public route is not in sitemap, not noindex'd, and not Disallow'd (${r.file})`);
+    err(r.file, r.headLine, "Route not indexed and not hidden",
+      `${r.path} is a public route but is not in the sitemap, not noindex'd, and not Disallow'd. Add it to the sitemap or hide it explicitly.`);
   }
 }
 
 // ---------- sitemap entries with no matching file ----------
 const knownPaths = new Set(inspected.map((r) => r.path));
-for (const p of sitemapPaths) {
-  // dynamic content (e.g. blog posts not auto-detected via static file map) may still be valid
-  if (!knownPaths.has(p)) warn(`Sitemap entry "${p}" has no matching static route file`);
+for (const [p, ln] of sitemapPaths) {
+  if (!knownPaths.has(p)) {
+    warn(SITEMAP_FILE, ln, "Sitemap entry has no matching route",
+      `Sitemap entry "${p}" has no matching static route file (OK for dynamic content).`);
+  }
 }
 
 // ---------- report ----------
+function gha(f) {
+  // https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions
+  // Escape message for the workflow command line.
+  const esc = (s) =>
+    String(s).replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+  const cmd = f.level; // 'error' or 'warning'
+  console.log(
+    `::${cmd} file=${f.file},line=${f.line},title=${esc(f.title)}::${esc(f.message)}`,
+  );
+}
+
+const errors = findings.filter((f) => f.level === "error");
+const warnings = findings.filter((f) => f.level === "warning");
+
+if (IS_GHA) {
+  for (const f of findings) gha(f);
+  // Job summary so the PR check page has a readable rollup too.
+  const summary = process.env.GITHUB_STEP_SUMMARY;
+  if (summary) {
+    const rows = (list) =>
+      list.length
+        ? list
+            .map((f) => `| ${f.level} | \`${f.file}:${f.line}\` | ${f.title} | ${f.message.replace(/\|/g, "\\|")} |`)
+            .join("\n")
+        : "| _none_ | | | |";
+    const md = [
+      `# SEO audit`,
+      ``,
+      `- routes checked: **${inspected.length}**`,
+      `- sitemap entries: **${sitemapPaths.size}**`,
+      `- robots Disallow rules: **${disallowed.size}**`,
+      `- errors: **${errors.length}**, warnings: **${warnings.length}**`,
+      ``,
+      `| level | location | title | message |`,
+      `| --- | --- | --- | --- |`,
+      rows([...errors, ...warnings]),
+      ``,
+    ].join("\n");
+    try {
+      const { appendFileSync } = await import("node:fs");
+      appendFileSync(summary, md);
+    } catch { /* non-fatal */ }
+  }
+}
+
 const fmt = (label, list) =>
-  list.length ? `\n${label} (${list.length}):\n` + list.map((l) => `  - ${l}`).join("\n") : "";
+  list.length
+    ? `\n${label} (${list.length}):\n` +
+      list.map((f) => `  - ${f.file}:${f.line}  ${f.title} — ${f.message}`).join("\n")
+    : "";
 
 if (warnings.length) console.warn("SEO audit warnings:" + fmt("WARN", warnings));
 if (errors.length) {
   console.error("\nSEO audit failed:" + fmt("ERROR", errors));
   process.exit(1);
 }
-console.log(`SEO audit passed: ${inspected.length} routes checked, ${sitemapPaths.size} sitemap entries, ${disallowed.size} robots Disallow rules.`);
+console.log(
+  `SEO audit passed: ${inspected.length} routes checked, ${sitemapPaths.size} sitemap entries, ${disallowed.size} robots Disallow rules.`,
+);
