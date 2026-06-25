@@ -209,7 +209,7 @@ function BreadcrumbJsonLd() {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: items,
-    });
+    }).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
   }, [pathname]);
 
   if (!json) return null;
