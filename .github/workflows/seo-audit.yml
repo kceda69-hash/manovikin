@@ -14,9 +14,17 @@ on:
 jobs:
   audit:
     runs-on: ubuntu-latest
+    # `checks: write` lets workflow-command annotations attach to PR files
+    # so each failing finding shows as an inline warning/error in the diff.
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun run seo:audit
+      - name: Run SEO audit
+        run: bun run seo:audit
+
