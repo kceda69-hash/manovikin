@@ -57,6 +57,9 @@ function ChatPage() {
   const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
   const [threadKey, setThreadKey] = useState(0);
   const [bootstrapping, setBootstrapping] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -103,6 +106,7 @@ function ChatPage() {
   useEffect(() => {
     if (!activeId) return;
     let cancelled = false;
+    setHistoryLoading(true);
     (async () => {
       try {
         const { messagesJson } = await getThreadMessages({ data: { threadId: activeId } });
@@ -111,12 +115,15 @@ function ChatPage() {
         setThreadKey((k) => k + 1);
       } catch {
         if (!cancelled) setInitialMessages([]);
+      } finally {
+        if (!cancelled) setHistoryLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
   }, [activeId]);
+
 
   const handleNew = async () => {
     const { thread } = await createThread();
@@ -144,14 +151,11 @@ function ChatPage() {
   };
 
   if (loading || !user || bootstrapping || !activeId) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
+    return <FullPageChatSkeleton />;
   }
 
-  const [mobileOpen, setMobileOpen] = useState(false);
+
+
 
   const handleSelect = (id: string) => {
     setActiveId(id);
@@ -215,7 +219,7 @@ function ChatPage() {
           </Button>
         </header>
 
-        <ChatPanel key={threadKey} threadId={activeId} initialMessages={initialMessages} />
+        <ChatPanel key={threadKey} threadId={activeId} initialMessages={initialMessages} historyLoading={historyLoading} />
       </div>
     </div>
   );
@@ -304,9 +308,11 @@ function SidebarBody({
 function ChatPanel({
   threadId,
   initialMessages,
+  historyLoading,
 }: {
   threadId: string;
   initialMessages: UIMessage[];
+  historyLoading: boolean;
 }) {
   const transport = useMemo(
     () =>
@@ -336,14 +342,25 @@ function ChatPanel({
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const lastUserSendRef = useRef(0);
 
   useEffect(() => {
     textareaRef.current?.focus();
   }, [threadId, status]);
 
+  // Smooth scroll-to-bottom: instant jump right after the user sends (so their
+  // message snaps into view on mobile), smooth while the assistant streams.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const justSent = Date.now() - lastUserSendRef.current < 400;
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: justSent ? "auto" : "smooth",
+    });
   }, [messages, status]);
+
 
   // Auto-grow textarea
   useEffect(() => {
@@ -360,8 +377,14 @@ function ChatPanel({
     const trimmed = input.trim();
     if (!trimmed || isBusy) return;
     setInput("");
+    lastUserSendRef.current = Date.now();
     await sendMessage({ text: trimmed });
+    // Belt-and-braces: force scroll-into-view for mobile keyboards.
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ block: "end" });
+    });
   };
+
 
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -380,9 +403,14 @@ function ChatPanel({
   return (
     <main className="flex min-h-0 flex-1 flex-col">
       <h1 className="sr-only">MANOVIK AI Chat Console</h1>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-8">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto overscroll-contain scroll-smooth px-3 py-4 sm:px-6 sm:py-8 [-webkit-overflow-scrolling:touch]"
+      >
         <div className="mx-auto max-w-3xl space-y-5 sm:space-y-6">
-          {messages.length === 0 && (
+          {historyLoading && messages.length === 0 ? (
+            <ChatHistorySkeleton />
+          ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center pt-10 text-center sm:pt-20">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-aurora opacity-30 blur-2xl" />
@@ -417,7 +445,7 @@ function ChatPanel({
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
 
           {messages.map((m) => (
             <MessageBubble key={m.id} message={m} />
@@ -429,7 +457,9 @@ function ChatPanel({
               <span>MANOVIK AI is thinking…</span>
             </div>
           )}
+          <div ref={bottomRef} aria-hidden className="h-px w-full" />
         </div>
+
       </div>
 
       <form
@@ -491,3 +521,53 @@ function MessageBubble({ message }: { message: UIMessage }) {
     </div>
   );
 }
+
+function ChatHistorySkeleton() {
+  return (
+    <div className="space-y-5 sm:space-y-6" aria-busy="true" aria-label="Loading conversation">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="space-y-3">
+          {/* user-side bubble */}
+          <div className="flex justify-end">
+            <div className="h-10 w-2/3 max-w-[80%] animate-pulse rounded-2xl rounded-tr-sm bg-muted/60 sm:w-1/2" />
+          </div>
+          {/* assistant lines */}
+          <div className="flex gap-2 sm:gap-3">
+            <div className="mt-1 h-7 w-7 shrink-0 animate-pulse rounded-full bg-muted/60" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="h-3 w-11/12 animate-pulse rounded bg-muted/60" />
+              <div className="h-3 w-9/12 animate-pulse rounded bg-muted/50" />
+              <div className="h-3 w-7/12 animate-pulse rounded bg-muted/40" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FullPageChatSkeleton() {
+  return (
+    <div className="flex h-[100dvh] overflow-hidden bg-background">
+      <aside className="hidden w-72 shrink-0 flex-col gap-2 border-r border-border/40 bg-sidebar p-3 md:flex">
+        <div className="mb-3 h-10 w-full animate-pulse rounded-lg bg-muted/60" />
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="h-9 w-full animate-pulse rounded-lg bg-muted/40" />
+        ))}
+      </aside>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center gap-2 border-b border-border/40 bg-background/80 px-3 py-2 backdrop-blur md:hidden">
+          <div className="h-8 w-8 animate-pulse rounded-md bg-muted/60" />
+          <div className="h-5 flex-1 animate-pulse rounded bg-muted/40" />
+        </header>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="flex flex-col items-center gap-3 text-muted-foreground">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <span className="text-xs">Loading your conversations…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
