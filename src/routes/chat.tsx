@@ -521,3 +521,53 @@ function MessageBubble({ message }: { message: UIMessage }) {
     </div>
   );
 }
+
+function ChatHistorySkeleton() {
+  return (
+    <div className="space-y-5 sm:space-y-6" aria-busy="true" aria-label="Loading conversation">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="space-y-3">
+          {/* user-side bubble */}
+          <div className="flex justify-end">
+            <div className="h-10 w-2/3 max-w-[80%] animate-pulse rounded-2xl rounded-tr-sm bg-muted/60 sm:w-1/2" />
+          </div>
+          {/* assistant lines */}
+          <div className="flex gap-2 sm:gap-3">
+            <div className="mt-1 h-7 w-7 shrink-0 animate-pulse rounded-full bg-muted/60" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="h-3 w-11/12 animate-pulse rounded bg-muted/60" />
+              <div className="h-3 w-9/12 animate-pulse rounded bg-muted/50" />
+              <div className="h-3 w-7/12 animate-pulse rounded bg-muted/40" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FullPageChatSkeleton() {
+  return (
+    <div className="flex h-[100dvh] overflow-hidden bg-background">
+      <aside className="hidden w-72 shrink-0 flex-col gap-2 border-r border-border/40 bg-sidebar p-3 md:flex">
+        <div className="mb-3 h-10 w-full animate-pulse rounded-lg bg-muted/60" />
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="h-9 w-full animate-pulse rounded-lg bg-muted/40" />
+        ))}
+      </aside>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center gap-2 border-b border-border/40 bg-background/80 px-3 py-2 backdrop-blur md:hidden">
+          <div className="h-8 w-8 animate-pulse rounded-md bg-muted/60" />
+          <div className="h-5 flex-1 animate-pulse rounded bg-muted/40" />
+        </header>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="flex flex-col items-center gap-3 text-muted-foreground">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <span className="text-xs">Loading your conversations…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
