@@ -377,8 +377,14 @@ function ChatPanel({
     const trimmed = input.trim();
     if (!trimmed || isBusy) return;
     setInput("");
+    lastUserSendRef.current = Date.now();
     await sendMessage({ text: trimmed });
+    // Belt-and-braces: force scroll-into-view for mobile keyboards.
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ block: "end" });
+    });
   };
+
 
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
