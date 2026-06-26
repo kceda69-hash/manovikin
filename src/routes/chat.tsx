@@ -403,9 +403,14 @@ function ChatPanel({
   return (
     <main className="flex min-h-0 flex-1 flex-col">
       <h1 className="sr-only">MANOVIK AI Chat Console</h1>
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-8">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto overscroll-contain scroll-smooth px-3 py-4 sm:px-6 sm:py-8 [-webkit-overflow-scrolling:touch]"
+      >
         <div className="mx-auto max-w-3xl space-y-5 sm:space-y-6">
-          {messages.length === 0 && (
+          {historyLoading && messages.length === 0 ? (
+            <ChatHistorySkeleton />
+          ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center pt-10 text-center sm:pt-20">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-aurora opacity-30 blur-2xl" />
@@ -440,7 +445,7 @@ function ChatPanel({
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
 
           {messages.map((m) => (
             <MessageBubble key={m.id} message={m} />
@@ -452,7 +457,9 @@ function ChatPanel({
               <span>MANOVIK AI is thinking…</span>
             </div>
           )}
+          <div ref={bottomRef} aria-hidden className="h-px w-full" />
         </div>
+
       </div>
 
       <form
