@@ -106,6 +106,7 @@ function ChatPage() {
   useEffect(() => {
     if (!activeId) return;
     let cancelled = false;
+    setHistoryLoading(true);
     (async () => {
       try {
         const { messagesJson } = await getThreadMessages({ data: { threadId: activeId } });
@@ -114,12 +115,15 @@ function ChatPage() {
         setThreadKey((k) => k + 1);
       } catch {
         if (!cancelled) setInitialMessages([]);
+      } finally {
+        if (!cancelled) setHistoryLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
   }, [activeId]);
+
 
   const handleNew = async () => {
     const { thread } = await createThread();
