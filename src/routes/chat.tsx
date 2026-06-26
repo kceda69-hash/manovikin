@@ -57,6 +57,9 @@ function ChatPage() {
   const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
   const [threadKey, setThreadKey] = useState(0);
   const [bootstrapping, setBootstrapping] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
