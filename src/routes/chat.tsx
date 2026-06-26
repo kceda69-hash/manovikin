@@ -154,7 +154,7 @@ function ChatPage() {
     );
   }
 
-  const [mobileOpen, setMobileOpen] = useState(false);
+
 
   const handleSelect = (id: string) => {
     setActiveId(id);
