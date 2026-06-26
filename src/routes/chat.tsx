@@ -308,9 +308,11 @@ function SidebarBody({
 function ChatPanel({
   threadId,
   initialMessages,
+  historyLoading,
 }: {
   threadId: string;
   initialMessages: UIMessage[];
+  historyLoading: boolean;
 }) {
   const transport = useMemo(
     () =>
@@ -340,14 +342,25 @@ function ChatPanel({
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const lastUserSendRef = useRef(0);
 
   useEffect(() => {
     textareaRef.current?.focus();
   }, [threadId, status]);
 
+  // Smooth scroll-to-bottom: instant jump right after the user sends (so their
+  // message snaps into view on mobile), smooth while the assistant streams.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const justSent = Date.now() - lastUserSendRef.current < 400;
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: justSent ? "auto" : "smooth",
+    });
   }, [messages, status]);
+
 
   // Auto-grow textarea
   useEffect(() => {
