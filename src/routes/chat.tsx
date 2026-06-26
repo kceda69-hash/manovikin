@@ -219,7 +219,7 @@ function ChatPage() {
           </Button>
         </header>
 
-        <ChatPanel key={threadKey} threadId={activeId} initialMessages={initialMessages} />
+        <ChatPanel key={threadKey} threadId={activeId} initialMessages={initialMessages} historyLoading={historyLoading} />
       </div>
     </div>
   );
