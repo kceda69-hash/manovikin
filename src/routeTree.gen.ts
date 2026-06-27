@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VsCursorRouteImport } from './routes/vs-cursor'
+import { Route as VsClineRouteImport } from './routes/vs-cline'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StudentsRouteImport } from './routes/students'
@@ -45,6 +46,11 @@ import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/ap
 const VsCursorRoute = VsCursorRouteImport.update({
   id: '/vs-cursor',
   path: '/vs-cursor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VsClineRoute = VsClineRouteImport.update({
+  id: '/vs-cline',
+  path: '/vs-cline',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -230,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vs-cline': typeof VsClineRoute
   '/vs-cursor': typeof VsCursorRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
@@ -264,6 +271,7 @@ export interface FileRoutesByTo {
   '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vs-cline': typeof VsClineRoute
   '/vs-cursor': typeof VsCursorRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vs-cline': typeof VsClineRoute
   '/vs-cursor': typeof VsCursorRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
@@ -335,6 +344,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/terms'
     | '/unsubscribe'
+    | '/vs-cline'
     | '/vs-cursor'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
@@ -369,6 +379,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/terms'
     | '/unsubscribe'
+    | '/vs-cline'
     | '/vs-cursor'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
@@ -403,6 +414,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/terms'
     | '/unsubscribe'
+    | '/vs-cline'
     | '/vs-cursor'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
@@ -438,6 +450,7 @@ export interface RootRouteChildren {
   StudentsRoute: typeof StudentsRoute
   TermsRoute: typeof TermsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  VsClineRoute: typeof VsClineRoute
   VsCursorRoute: typeof VsCursorRoute
   ApiChatRoute: typeof ApiChatRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
@@ -462,6 +475,13 @@ declare module '@tanstack/react-router' {
       path: '/vs-cursor'
       fullPath: '/vs-cursor'
       preLoaderRoute: typeof VsCursorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vs-cline': {
+      id: '/vs-cline'
+      path: '/vs-cline'
+      fullPath: '/vs-cline'
+      preLoaderRoute: typeof VsClineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/unsubscribe': {
@@ -702,6 +722,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudentsRoute: StudentsRoute,
   TermsRoute: TermsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  VsClineRoute: VsClineRoute,
   VsCursorRoute: VsCursorRoute,
   ApiChatRoute: ApiChatRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
