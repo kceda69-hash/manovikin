@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VsCursorRouteImport } from './routes/vs-cursor'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StudentsRouteImport } from './routes/students'
@@ -40,6 +41,11 @@ import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/pub
 import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
 import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
 
+const VsCursorRoute = VsCursorRouteImport.update({
+  id: '/vs-cursor',
+  path: '/vs-cursor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vs-cursor': typeof VsCursorRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -249,6 +256,7 @@ export interface FileRoutesByTo {
   '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vs-cursor': typeof VsCursorRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vs-cursor': typeof VsCursorRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/terms'
     | '/unsubscribe'
+    | '/vs-cursor'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
     | '/blog/will-ai-replace-software-engineers'
@@ -348,6 +358,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/terms'
     | '/unsubscribe'
+    | '/vs-cursor'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
     | '/blog/will-ai-replace-software-engineers'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/terms'
     | '/unsubscribe'
+    | '/vs-cursor'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
     | '/blog/will-ai-replace-software-engineers'
@@ -413,6 +425,7 @@ export interface RootRouteChildren {
   StudentsRoute: typeof StudentsRoute
   TermsRoute: typeof TermsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  VsCursorRoute: typeof VsCursorRoute
   ApiChatRoute: typeof ApiChatRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
   BlogWillAiReplaceSoftwareEngineersRoute: typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -430,6 +443,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vs-cursor': {
+      id: '/vs-cursor'
+      path: '/vs-cursor'
+      fullPath: '/vs-cursor'
+      preLoaderRoute: typeof VsCursorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/unsubscribe': {
       id: '/unsubscribe'
       path: '/unsubscribe'
@@ -661,6 +681,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudentsRoute: StudentsRoute,
   TermsRoute: TermsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  VsCursorRoute: VsCursorRoute,
   ApiChatRoute: ApiChatRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
   BlogWillAiReplaceSoftwareEngineersRoute:
@@ -679,13 +700,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
