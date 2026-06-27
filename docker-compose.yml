@@ -15,12 +15,16 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: manovik
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      # No default: startup fails loudly if POSTGRES_PASSWORD is unset.
+      # Set a strong value in .env before `docker compose up`.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env (use a strong, unique value)}
       POSTGRES_DB: manovik
     volumes:
       - manovik_pg:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      # Bind to localhost only — DB is reachable from other containers via
+      # the Docker network, never exposed to the public internet.
+      - "127.0.0.1:5432:5432"
 
   ollama:
     image: ollama/ollama:latest
@@ -28,7 +32,8 @@ services:
     volumes:
       - manovik_ollama:/root/.ollama
     ports:
-      - "11434:11434"
+      # Ollama has no built-in auth — bind to localhost only.
+      - "127.0.0.1:11434:11434"
     # Uncomment for GPU:
     # deploy:
     #   resources:

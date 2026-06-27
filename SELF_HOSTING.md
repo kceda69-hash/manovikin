@@ -29,7 +29,9 @@ remote provider.
 git clone <this-repo> manovik
 cd manovik
 cp .env.example .env
-# Edit .env — set POSTGRES_PASSWORD and your Supabase keys
+# Edit .env — set a STRONG, UNIQUE POSTGRES_PASSWORD (compose refuses to
+# start if it's empty) and your Supabase keys. Postgres (5432) and Ollama
+# (11434) are bound to 127.0.0.1 only; do not republish them publicly.
 docker compose up -d --build
 
 # Pull a model into Ollama
