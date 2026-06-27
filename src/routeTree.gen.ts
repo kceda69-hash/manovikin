@@ -30,6 +30,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReceiptIdRouteImport } from './routes/receipt.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogWillAiReplaceSoftwareEngineersRouteImport } from './routes/blog.will-ai-replace-software-engineers'
+import { Route as BlogSelfHostingAiWithOllamaRouteImport } from './routes/blog.self-hosting-ai-with-ollama'
 import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-ai-coding-agents'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -147,6 +148,12 @@ const BlogWillAiReplaceSoftwareEngineersRoute =
     path: '/blog/will-ai-replace-software-engineers',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BlogSelfHostingAiWithOllamaRoute =
+  BlogSelfHostingAiWithOllamaRouteImport.update({
+    id: '/blog/self-hosting-ai-with-ollama',
+    path: '/blog/self-hosting-ai-with-ollama',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BlogBestAiCodingAgentsRoute = BlogBestAiCodingAgentsRouteImport.update({
   id: '/blog/best-ai-coding-agents',
   path: '/blog/best-ai-coding-agents',
@@ -226,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/vs-cursor': typeof VsCursorRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
@@ -259,6 +267,7 @@ export interface FileRoutesByTo {
   '/vs-cursor': typeof VsCursorRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
@@ -293,6 +302,7 @@ export interface FileRoutesById {
   '/vs-cursor': typeof VsCursorRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
@@ -328,6 +338,7 @@ export interface FileRouteTypes {
     | '/vs-cursor'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
+    | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/vs-cursor'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
+    | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
@@ -394,6 +406,7 @@ export interface FileRouteTypes {
     | '/vs-cursor'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
+    | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
@@ -428,6 +441,7 @@ export interface RootRouteChildren {
   VsCursorRoute: typeof VsCursorRoute
   ApiChatRoute: typeof ApiChatRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
+  BlogSelfHostingAiWithOllamaRoute: typeof BlogSelfHostingAiWithOllamaRoute
   BlogWillAiReplaceSoftwareEngineersRoute: typeof BlogWillAiReplaceSoftwareEngineersRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ReceiptIdRoute: typeof ReceiptIdRoute
@@ -590,6 +604,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogWillAiReplaceSoftwareEngineersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/self-hosting-ai-with-ollama': {
+      id: '/blog/self-hosting-ai-with-ollama'
+      path: '/blog/self-hosting-ai-with-ollama'
+      fullPath: '/blog/self-hosting-ai-with-ollama'
+      preLoaderRoute: typeof BlogSelfHostingAiWithOllamaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/best-ai-coding-agents': {
       id: '/blog/best-ai-coding-agents'
       path: '/blog/best-ai-coding-agents'
@@ -684,6 +705,7 @@ const rootRouteChildren: RootRouteChildren = {
   VsCursorRoute: VsCursorRoute,
   ApiChatRoute: ApiChatRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
+  BlogSelfHostingAiWithOllamaRoute: BlogSelfHostingAiWithOllamaRoute,
   BlogWillAiReplaceSoftwareEngineersRoute:
     BlogWillAiReplaceSoftwareEngineersRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
