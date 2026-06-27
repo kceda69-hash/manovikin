@@ -4,11 +4,11 @@ export const Route = createFileRoute("/vs-cursor")({
   component: VsCursorPage,
   head: () => ({
     meta: [
-      { title: "MANOVIK AI vs Cursor AI — Sovereign, Private, Lifetime Pricing" },
+      { title: "MANOVIK AI vs Cursor AI — Sovereign Alternative" },
       {
         name: "description",
         content:
-          "Cursor AI alternative comparison: MANOVIK AI offers sovereign deployment, local model support, and lifetime pricing vs Cursor's cloud-only subscription. Privacy-first AI coding assistant.",
+          "Cursor AI alternative: MANOVIK offers sovereign deployment, local model support, and lifetime pricing. Privacy-first AI coding assistant.",
       },
       { name: "keywords", content: "Cursor AI alternative, Cursor AI privacy, local AI coding, sovereign AI, MANOVIK vs Cursor" },
       { property: "og:title", content: "MANOVIK AI vs Cursor AI — The Sovereign Alternative" },
