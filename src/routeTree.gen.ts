@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VsGithubCopilotRouteImport } from './routes/vs-github-copilot'
 import { Route as VsCursorRouteImport } from './routes/vs-cursor'
 import { Route as VsClineRouteImport } from './routes/vs-cline'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
@@ -43,6 +44,11 @@ import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/pub
 import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
 import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
 
+const VsGithubCopilotRoute = VsGithubCopilotRouteImport.update({
+  id: '/vs-github-copilot',
+  path: '/vs-github-copilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VsCursorRoute = VsCursorRouteImport.update({
   id: '/vs-cursor',
   path: '/vs-cursor',
@@ -238,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/vs-cline': typeof VsClineRoute
   '/vs-cursor': typeof VsCursorRoute
+  '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
@@ -273,6 +280,7 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/vs-cline': typeof VsClineRoute
   '/vs-cursor': typeof VsCursorRoute
+  '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
@@ -309,6 +317,7 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/vs-cline': typeof VsClineRoute
   '/vs-cursor': typeof VsCursorRoute
+  '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
@@ -346,6 +355,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/vs-cline'
     | '/vs-cursor'
+    | '/vs-github-copilot'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
     | '/blog/self-hosting-ai-with-ollama'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/vs-cline'
     | '/vs-cursor'
+    | '/vs-github-copilot'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
     | '/blog/self-hosting-ai-with-ollama'
@@ -416,6 +427,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/vs-cline'
     | '/vs-cursor'
+    | '/vs-github-copilot'
     | '/api/chat'
     | '/blog/best-ai-coding-agents'
     | '/blog/self-hosting-ai-with-ollama'
@@ -452,6 +464,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   VsClineRoute: typeof VsClineRoute
   VsCursorRoute: typeof VsCursorRoute
+  VsGithubCopilotRoute: typeof VsGithubCopilotRoute
   ApiChatRoute: typeof ApiChatRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
   BlogSelfHostingAiWithOllamaRoute: typeof BlogSelfHostingAiWithOllamaRoute
@@ -470,6 +483,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vs-github-copilot': {
+      id: '/vs-github-copilot'
+      path: '/vs-github-copilot'
+      fullPath: '/vs-github-copilot'
+      preLoaderRoute: typeof VsGithubCopilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vs-cursor': {
       id: '/vs-cursor'
       path: '/vs-cursor'
@@ -724,6 +744,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   VsClineRoute: VsClineRoute,
   VsCursorRoute: VsCursorRoute,
+  VsGithubCopilotRoute: VsGithubCopilotRoute,
   ApiChatRoute: ApiChatRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
   BlogSelfHostingAiWithOllamaRoute: BlogSelfHostingAiWithOllamaRoute,
@@ -743,13 +764,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
