@@ -63,7 +63,7 @@ describe("tool registry", () => {
   it("math.eval computes simple expressions", async () => {
     const r = await sandbox.run("math.eval", { expression: "2 + 3 * 4" }, "test-user");
     expect(r.ok).toBe(true);
-    expect(r.output).toBe(14);
+    expect((r.output as { value: number }).value).toBe(14);
   });
   it("math.eval rejects disallowed chars", async () => {
     const r = await sandbox.run("math.eval", { expression: "process.exit(1)" }, "test-user");
@@ -72,8 +72,9 @@ describe("tool registry", () => {
   it("time.now returns ISO string", async () => {
     const r = await sandbox.run("time.now", {}, "test-user");
     expect(r.ok).toBe(true);
-    expect(typeof r.output).toBe("string");
-    expect(() => new Date(r.output as string).toISOString()).not.toThrow();
+    const out = r.output as { iso: string; epoch: number };
+    expect(typeof out.iso).toBe("string");
+    expect(() => new Date(out.iso).toISOString()).not.toThrow();
   });
   it("unknown tool denied", async () => {
     const r = await sandbox.run("rm.rf", {}, "test-user");
