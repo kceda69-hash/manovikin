@@ -6,6 +6,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 import { redactMessage } from "@/lib/redact";
 import { sandbox } from "@/lib/agent-tools";
+import { log } from "@/lib/logger";
 
 const MAX_MESSAGES = 200;
 const MAX_BODY_BYTES = 256 * 1024; // 256 KB
@@ -352,7 +353,7 @@ export const Route = createFileRoute("/api/chat")({
             .join("; ")}. Tools enforce timeouts, output caps, and host allow-lists. Never attempt unsupported tools.`;
         const modelMessages = await convertToModelMessages(messages);
 
-        let result: ReturnType<typeof streamText> | null = null;
+        let result: ReturnType<typeof streamText> | null = null as any;
         let chosenModel = modelCandidates[0];
         let lastErr: unknown;
         for (const candidate of modelCandidates) {
