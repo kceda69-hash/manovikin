@@ -342,22 +342,58 @@ export const Route = createFileRoute("/api/chat")({
           ]),
         );
 
-        try {
-          const result = streamText({
-            model,
-            system:
-              SYSTEM_PROMPT +
-              langMemoryBlock +
-              `\n\nDetected user language: ${langCode}. Reply in that language unless the user switches.` +
-              `\n\nYou may call sandboxed tools: ${sandbox
-                .list()
-                .map((t) => `${t.name} (${t.description})`)
-                .join("; ")}. Tools enforce timeouts, output caps, and host allow-lists. Never attempt unsupported tools.`,
-            messages: await convertToModelMessages(messages),
-            tools,
-            stopWhen: stepCountIs(50),
-          });
+        const systemPrompt =
+          SYSTEM_PROMPT +
+          langMemoryBlock +
+          `\n\nDetected user language: ${langCode}. Reply in that language unless the user switches.` +
+          `\n\nYou may call sandboxed tools: ${sandbox
+            .list()
+            .map((t) => `${t.name} (${t.description})`)
+            .join("; ")}. Tools enforce timeouts, output caps, and host allow-lists. Never attempt unsupported tools.`;
+        const modelMessages = await convertToModelMessages(messages);
 
+        let result: ReturnType<typeof streamText> | null = null;
+        let chosenModel = modelCandidates[0];
+        let lastErr: unknown;
+        for (const candidate of modelCandidates) {
+          try {
+            result = streamText({
+              model: gateway(candidate),
+              system: systemPrompt,
+              messages: modelMessages,
+              tools,
+              stopWhen: stepCountIs(50),
+            });
+            chosenModel = candidate;
+            if (candidate !== primaryModel) {
+              log.warn("chat.model.fallback", { from: primaryModel, to: candidate, userId, threadId });
+            }
+            break;
+          } catch (err) {
+            lastErr = err;
+            log.error("chat.model.init_failed", {
+              model: candidate,
+              error: String((err as Error)?.message ?? err),
+            });
+            if (!isRetryableGatewayError(err)) break;
+          }
+        }
+        if (!result) {
+          log.error("chat.stream.fatal", { error: String((lastErr as Error)?.message ?? lastErr) });
+          await audit(supabaseAdmin, {
+            user_id: userId,
+            thread_id: threadId,
+            event_type: "error.stream",
+            summary: String((lastErr as Error)?.message ?? lastErr).slice(0, 200),
+            ip,
+            user_agent: ua,
+          });
+          return new Response("AI gateway error", { status: 500 });
+        }
+
+        log.info("chat.stream.start", { userId, threadId, model: chosenModel, lang: langCode });
+
+        try {
           return result.toUIMessageStreamResponse({
             originalMessages: messages,
             onFinish: async ({ messages: finalMessages }) => {
@@ -381,7 +417,7 @@ export const Route = createFileRoute("/api/chat")({
                 role: "assistant",
                 message: safeAssistant as unknown as Record<string, unknown>,
               });
-              if (error) console.error("[chat] save assistant msg:", error);
+              if (error) log.error("chat.save.assistant_failed", { error: error.message });
               await supabase
                 .from("threads")
                 .update({ updated_at: new Date().toISOString() })
@@ -394,12 +430,13 @@ export const Route = createFileRoute("/api/chat")({
                 summary: summarize(safeAssistant),
                 ip,
                 user_agent: ua,
-                metadata: { model: modelName, sovereign },
+                metadata: { model: chosenModel, sovereign },
               });
+              log.info("chat.stream.finish", { userId, threadId, model: chosenModel });
             },
           });
         } catch (err) {
-          console.error("[chat] stream error:", err);
+          log.error("chat.stream.error", { error: String((err as Error)?.message ?? err) });
           await audit(supabaseAdmin, {
             user_id: userId,
             thread_id: threadId,
