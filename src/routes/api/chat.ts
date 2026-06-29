@@ -287,8 +287,9 @@ export const Route = createFileRoute("/api/chat")({
 
         const gateway = createLovableAiGatewayProvider(apiKey);
         // MANOVIK BRAIN v∞ — upgraded to the latest hyper-reasoning frontier model
-        // with visualization-capable multimodal context. Override via MANOVIK_AI_MODEL.
-        const modelName = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3.5-flash";
+        // (GPT-5.5: state-of-the-art reasoning, coding, instruction-following) with
+        // visualization-capable multimodal context. Override via MANOVIK_AI_MODEL.
+        const modelName = process.env.MANOVIK_AI_MODEL ?? "openai/gpt-5.5";
         const model = gateway(modelName);
 
         // Build AI SDK tools from the sandbox registry. Every tool execution
