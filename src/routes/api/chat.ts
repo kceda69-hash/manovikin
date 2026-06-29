@@ -397,7 +397,7 @@ export const Route = createFileRoute("/api/chat")({
         try {
           return result.toUIMessageStreamResponse({
             originalMessages: messages,
-            onFinish: async ({ messages: finalMessages }) => {
+            onFinish: async ({ messages: finalMessages }: { messages: UIMessage[] }) => {
               const lastAssistant = [...finalMessages].reverse().find((m) => m.role === "assistant");
               if (!lastAssistant) return;
               const { msg: safeAssistant, hits } = redactMessage(lastAssistant);
