@@ -280,7 +280,7 @@ function Landing() {
             <span className="absolute inset-0 -z-10 rounded-full bg-aurora opacity-60 blur-md animate-pulse-glow" />
             <img
               src={logo}
-              alt="MANOVIK AI logo"
+              alt="MANOVIK AI — Autonomous AI employee"
               width={36}
               height={36}
               fetchPriority="high"
@@ -444,7 +444,8 @@ function Landing() {
         </div>
 
         {/* How it works */}
-        <div className="mt-24 grid gap-6 md:grid-cols-3 text-left">
+        <h2 className="mt-24 text-3xl md:text-4xl font-bold text-center">How it works</h2>
+        <div className="mt-8 grid gap-6 md:grid-cols-3 text-left">
           {[
             { step: "01", title: "Describe", desc: "Tell MANOVIK what to build — a site, an API, an agent, a script." },
             { step: "02", title: "Reason & Plan", desc: "It breaks the goal into steps, picks tools, and writes the code." },
