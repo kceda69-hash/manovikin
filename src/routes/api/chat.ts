@@ -354,7 +354,7 @@ export const Route = createFileRoute("/api/chat")({
           `\n\nDetected user language: ${langCode}. Reply in that language unless the user switches.` +
           `\n\nYou may call sandboxed tools: ${sandbox
             .list()
-            .map((t) => `${t.name} (${t.description})`)
+            .map((t) => `${toolNameToSandbox(t.name)} (${t.description})`)
             .join("; ")}. Tools enforce timeouts, output caps, and host allow-lists. Never attempt unsupported tools.`;
         const modelMessages = await convertToModelMessages(messages);
 
