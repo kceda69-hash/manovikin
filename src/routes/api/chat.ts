@@ -320,9 +320,13 @@ export const Route = createFileRoute("/api/chat")({
         // Build AI SDK tools from the sandbox registry. Every tool execution
         // is routed through the sandbox (timeout, output cap, rate limit,
         // input validation, allow-list) and audited.
+        // OpenAI requires tool names to match /^[a-zA-Z0-9_-]+$/ — dots are
+        // rejected. Expose sandbox tools with underscored names to the model
+        // while keeping the sandbox registry keyed by their original names.
+        const toolNameToSandbox = (n: string) => n.replace(/\./g, "_");
         const tools = Object.fromEntries(
           sandbox.entries().map(([name, def]) => [
-            name,
+            toolNameToSandbox(name),
             tool({
               description: def.description,
               inputSchema: def.schema,
@@ -342,6 +346,7 @@ export const Route = createFileRoute("/api/chat")({
             }),
           ]),
         );
+
 
         const systemPrompt =
           SYSTEM_PROMPT +
