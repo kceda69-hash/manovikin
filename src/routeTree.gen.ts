@@ -34,6 +34,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as BlogWillAiReplaceSoftwareEngineersRouteImport } from './routes/blog.will-ai-replace-software-engineers'
 import { Route as BlogSelfHostingAiWithOllamaRouteImport } from './routes/blog.self-hosting-ai-with-ollama'
 import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-ai-coding-agents'
+import { Route as BlogAiPricingComparisonRouteImport } from './routes/blog.ai-pricing-comparison'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
@@ -171,6 +172,11 @@ const BlogBestAiCodingAgentsRoute = BlogBestAiCodingAgentsRouteImport.update({
   path: '/blog/best-ai-coding-agents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogAiPricingComparisonRoute = BlogAiPricingComparisonRouteImport.update({
+  id: '/blog/ai-pricing-comparison',
+  path: '/blog/ai-pricing-comparison',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -246,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/vs-cursor': typeof VsCursorRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/api/chat': typeof ApiChatRoute
+  '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -282,6 +289,7 @@ export interface FileRoutesByTo {
   '/vs-cursor': typeof VsCursorRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/api/chat': typeof ApiChatRoute
+  '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -319,6 +327,7 @@ export interface FileRoutesById {
   '/vs-cursor': typeof VsCursorRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/api/chat': typeof ApiChatRoute
+  '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/vs-cursor'
     | '/vs-github-copilot'
     | '/api/chat'
+    | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
     | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/vs-cursor'
     | '/vs-github-copilot'
     | '/api/chat'
+    | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
     | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
@@ -429,6 +440,7 @@ export interface FileRouteTypes {
     | '/vs-cursor'
     | '/vs-github-copilot'
     | '/api/chat'
+    | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
     | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
@@ -466,6 +478,7 @@ export interface RootRouteChildren {
   VsCursorRoute: typeof VsCursorRoute
   VsGithubCopilotRoute: typeof VsGithubCopilotRoute
   ApiChatRoute: typeof ApiChatRoute
+  BlogAiPricingComparisonRoute: typeof BlogAiPricingComparisonRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
   BlogSelfHostingAiWithOllamaRoute: typeof BlogSelfHostingAiWithOllamaRoute
   BlogWillAiReplaceSoftwareEngineersRoute: typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -658,6 +671,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogBestAiCodingAgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/ai-pricing-comparison': {
+      id: '/blog/ai-pricing-comparison'
+      path: '/blog/ai-pricing-comparison'
+      fullPath: '/blog/ai-pricing-comparison'
+      preLoaderRoute: typeof BlogAiPricingComparisonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -746,6 +766,7 @@ const rootRouteChildren: RootRouteChildren = {
   VsCursorRoute: VsCursorRoute,
   VsGithubCopilotRoute: VsGithubCopilotRoute,
   ApiChatRoute: ApiChatRoute,
+  BlogAiPricingComparisonRoute: BlogAiPricingComparisonRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
   BlogSelfHostingAiWithOllamaRoute: BlogSelfHostingAiWithOllamaRoute,
   BlogWillAiReplaceSoftwareEngineersRoute:
