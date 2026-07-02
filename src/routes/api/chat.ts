@@ -461,6 +461,17 @@ export const Route = createFileRoute("/api/chat")({
         try {
           return result.toUIMessageStreamResponse({
             originalMessages: messages,
+            onError: (err: unknown) => {
+              const details = describeError(err);
+              log.error("chat.stream.onError", { userId, threadId, model: chosenModel, ...details });
+              // Surface a compact, non-sensitive hint to the client so the UI
+              // can render the actual field/tool that failed instead of a
+              // generic "invalid string".
+              const first = Array.isArray((details as any).issues) ? (details as any).issues[0] : null;
+              if (first) return `Invalid tool argument: ${first.path || "(root)"} — ${first.message}`;
+              if ((details as any).toolName) return `Tool "${(details as any).toolName}" failed: ${(details as any).message}`;
+              return String((details as any).message ?? "Stream error");
+            },
             onFinish: async ({ messages: finalMessages }: { messages: UIMessage[] }) => {
               const lastAssistant = [...finalMessages].reverse().find((m) => m.role === "assistant");
               if (!lastAssistant) return;
@@ -501,7 +512,7 @@ export const Route = createFileRoute("/api/chat")({
             },
           });
         } catch (err) {
-          log.error("chat.stream.error", { error: String((err as Error)?.message ?? err) });
+          log.error("chat.stream.error", { userId, threadId, model: chosenModel, ...describeError(err) });
           await audit(supabaseAdmin, {
             user_id: userId,
             thread_id: threadId,
@@ -509,6 +520,7 @@ export const Route = createFileRoute("/api/chat")({
             summary: String((err as Error)?.message ?? err).slice(0, 200),
             ip,
             user_agent: ua,
+            metadata: describeError(err),
           });
           return new Response("AI gateway error", { status: 500 });
         }
