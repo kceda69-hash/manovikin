@@ -4,7 +4,7 @@ export const Route = createFileRoute("/blog/ai-pricing-comparison")({
   component: AIPricingComparisonPost,
   head: () => ({
     meta: [
-      { title: "Lifetime vs Subscription AI Coding Tools — Total Cost Compared | MANOVIK" },
+      { title: "Lifetime vs Subscription AI Coding — TCO | MANOVIK" },
       {
         name: "description",
         content:
