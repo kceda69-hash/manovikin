@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VsWindsurfRouteImport } from './routes/vs-windsurf'
 import { Route as VsGithubCopilotRouteImport } from './routes/vs-github-copilot'
 import { Route as VsCursorRouteImport } from './routes/vs-cursor'
 import { Route as VsClineRouteImport } from './routes/vs-cline'
@@ -45,6 +46,11 @@ import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/pub
 import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
 import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
 
+const VsWindsurfRoute = VsWindsurfRouteImport.update({
+  id: '/vs-windsurf',
+  path: '/vs-windsurf',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VsGithubCopilotRoute = VsGithubCopilotRouteImport.update({
   id: '/vs-github-copilot',
   path: '/vs-github-copilot',
@@ -251,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/vs-cline': typeof VsClineRoute
   '/vs-cursor': typeof VsCursorRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
+  '/vs-windsurf': typeof VsWindsurfRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/vs-cline': typeof VsClineRoute
   '/vs-cursor': typeof VsCursorRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
+  '/vs-windsurf': typeof VsWindsurfRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
@@ -326,6 +334,7 @@ export interface FileRoutesById {
   '/vs-cline': typeof VsClineRoute
   '/vs-cursor': typeof VsCursorRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
+  '/vs-windsurf': typeof VsWindsurfRoute
   '/api/chat': typeof ApiChatRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
@@ -365,6 +374,7 @@ export interface FileRouteTypes {
     | '/vs-cline'
     | '/vs-cursor'
     | '/vs-github-copilot'
+    | '/vs-windsurf'
     | '/api/chat'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/vs-cline'
     | '/vs-cursor'
     | '/vs-github-copilot'
+    | '/vs-windsurf'
     | '/api/chat'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
@@ -439,6 +450,7 @@ export interface FileRouteTypes {
     | '/vs-cline'
     | '/vs-cursor'
     | '/vs-github-copilot'
+    | '/vs-windsurf'
     | '/api/chat'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
@@ -477,6 +489,7 @@ export interface RootRouteChildren {
   VsClineRoute: typeof VsClineRoute
   VsCursorRoute: typeof VsCursorRoute
   VsGithubCopilotRoute: typeof VsGithubCopilotRoute
+  VsWindsurfRoute: typeof VsWindsurfRoute
   ApiChatRoute: typeof ApiChatRoute
   BlogAiPricingComparisonRoute: typeof BlogAiPricingComparisonRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
@@ -496,6 +509,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vs-windsurf': {
+      id: '/vs-windsurf'
+      path: '/vs-windsurf'
+      fullPath: '/vs-windsurf'
+      preLoaderRoute: typeof VsWindsurfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vs-github-copilot': {
       id: '/vs-github-copilot'
       path: '/vs-github-copilot'
@@ -765,6 +785,7 @@ const rootRouteChildren: RootRouteChildren = {
   VsClineRoute: VsClineRoute,
   VsCursorRoute: VsCursorRoute,
   VsGithubCopilotRoute: VsGithubCopilotRoute,
+  VsWindsurfRoute: VsWindsurfRoute,
   ApiChatRoute: ApiChatRoute,
   BlogAiPricingComparisonRoute: BlogAiPricingComparisonRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
