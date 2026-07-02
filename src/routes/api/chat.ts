@@ -116,6 +116,45 @@ function isRetryableGatewayError(err: unknown): boolean {
   );
 }
 
+// Extract a structured, secret-free diagnostic from an unknown error.
+// Surfaces AI SDK error names, Zod issue paths, HTTP status, upstream body
+// snippets, and tool metadata so we can pinpoint *which* tool/payload field
+// tripped a validation error (e.g. "invalid string" from a Zod schema or
+// provider). Never returns raw prompts or full payloads.
+function describeError(err: unknown): Record<string, unknown> {
+  if (!err || typeof err !== "object") return { error: String(err) };
+  const e = err as any;
+  const out: Record<string, unknown> = {
+    name: e.name ?? typeof e,
+    message: String(e.message ?? "").slice(0, 500),
+  };
+  // AI SDK style
+  if (e.toolName) out.toolName = e.toolName;
+  if (e.toolCallId) out.toolCallId = e.toolCallId;
+  if (e.toolArgs !== undefined) {
+    try {
+      const keys = e.toolArgs && typeof e.toolArgs === "object" ? Object.keys(e.toolArgs).slice(0, 20) : undefined;
+      out.toolArgKeys = keys;
+    } catch {}
+  }
+  if (e.url) out.url = String(e.url).slice(0, 200);
+  if (e.statusCode ?? e.status) out.status = e.statusCode ?? e.status;
+  if (typeof e.responseBody === "string") out.responseBody = e.responseBody.slice(0, 500);
+  // Zod issue tree — this is what surfaces "invalid string" per field
+  const issues = e.issues ?? e.cause?.issues ?? e.error?.issues;
+  if (Array.isArray(issues)) {
+    out.issues = issues.slice(0, 10).map((i: any) => ({
+      path: Array.isArray(i.path) ? i.path.join(".") : String(i.path ?? ""),
+      code: i.code,
+      message: String(i.message ?? "").slice(0, 200),
+      expected: i.expected,
+      received: i.received,
+    }));
+  }
+  if (e.cause && e.cause !== err) out.cause = describeError(e.cause);
+  return out;
+}
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
@@ -331,17 +370,39 @@ export const Route = createFileRoute("/api/chat")({
               description: def.description,
               inputSchema: def.schema,
               execute: async (input: unknown) => {
-                const result = await sandbox.run(name, input, userId);
-                await audit(supabaseAdmin, {
-                  user_id: userId,
-                  thread_id: threadId,
-                  event_type: result.ok ? "tool.exec" : "tool.denied",
-                  summary: `${name} • ${result.ok ? "ok" : "fail"} • ${result.durationMs}ms${result.truncated ? " • truncated" : ""}`,
-                  ip,
-                  user_agent: ua,
-                  metadata: { tool: name, error: result.error, input },
-                });
-                return result;
+                const exposedName = toolNameToSandbox(name);
+                const inputKeys =
+                  input && typeof input === "object" ? Object.keys(input as object).slice(0, 20) : [];
+                try {
+                  const result = await sandbox.run(name, input, userId);
+                  if (!result.ok) {
+                    log.warn("chat.tool.failed", {
+                      tool: name,
+                      exposedName,
+                      inputKeys,
+                      error: String(result.error ?? "").slice(0, 300),
+                      durationMs: result.durationMs,
+                    });
+                  }
+                  await audit(supabaseAdmin, {
+                    user_id: userId,
+                    thread_id: threadId,
+                    event_type: result.ok ? "tool.exec" : "tool.denied",
+                    summary: `${name} • ${result.ok ? "ok" : "fail"} • ${result.durationMs}ms${result.truncated ? " • truncated" : ""}`,
+                    ip,
+                    user_agent: ua,
+                    metadata: { tool: name, error: result.error, input },
+                  });
+                  return result;
+                } catch (err) {
+                  log.error("chat.tool.exception", {
+                    tool: name,
+                    exposedName,
+                    inputKeys,
+                    ...describeError(err),
+                  });
+                  throw err;
+                }
               },
             }),
           ]),
@@ -377,15 +438,12 @@ export const Route = createFileRoute("/api/chat")({
             break;
           } catch (err) {
             lastErr = err;
-            log.error("chat.model.init_failed", {
-              model: candidate,
-              error: String((err as Error)?.message ?? err),
-            });
+            log.error("chat.model.init_failed", { model: candidate, ...describeError(err) });
             if (!isRetryableGatewayError(err)) break;
           }
         }
         if (!result) {
-          log.error("chat.stream.fatal", { error: String((lastErr as Error)?.message ?? lastErr) });
+          log.error("chat.stream.fatal", { userId, threadId, ...describeError(lastErr) });
           await audit(supabaseAdmin, {
             user_id: userId,
             thread_id: threadId,
@@ -393,6 +451,7 @@ export const Route = createFileRoute("/api/chat")({
             summary: String((lastErr as Error)?.message ?? lastErr).slice(0, 200),
             ip,
             user_agent: ua,
+            metadata: describeError(lastErr),
           });
           return new Response("AI gateway error", { status: 500 });
         }
@@ -402,6 +461,17 @@ export const Route = createFileRoute("/api/chat")({
         try {
           return result.toUIMessageStreamResponse({
             originalMessages: messages,
+            onError: (err: unknown) => {
+              const details = describeError(err);
+              log.error("chat.stream.onError", { userId, threadId, model: chosenModel, ...details });
+              // Surface a compact, non-sensitive hint to the client so the UI
+              // can render the actual field/tool that failed instead of a
+              // generic "invalid string".
+              const first = Array.isArray((details as any).issues) ? (details as any).issues[0] : null;
+              if (first) return `Invalid tool argument: ${first.path || "(root)"} — ${first.message}`;
+              if ((details as any).toolName) return `Tool "${(details as any).toolName}" failed: ${(details as any).message}`;
+              return String((details as any).message ?? "Stream error");
+            },
             onFinish: async ({ messages: finalMessages }: { messages: UIMessage[] }) => {
               const lastAssistant = [...finalMessages].reverse().find((m) => m.role === "assistant");
               if (!lastAssistant) return;
@@ -442,7 +512,7 @@ export const Route = createFileRoute("/api/chat")({
             },
           });
         } catch (err) {
-          log.error("chat.stream.error", { error: String((err as Error)?.message ?? err) });
+          log.error("chat.stream.error", { userId, threadId, model: chosenModel, ...describeError(err) });
           await audit(supabaseAdmin, {
             user_id: userId,
             thread_id: threadId,
@@ -450,6 +520,7 @@ export const Route = createFileRoute("/api/chat")({
             summary: String((err as Error)?.message ?? err).slice(0, 200),
             ip,
             user_agent: ua,
+            metadata: describeError(err),
           });
           return new Response("AI gateway error", { status: 500 });
         }
