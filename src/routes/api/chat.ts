@@ -116,6 +116,45 @@ function isRetryableGatewayError(err: unknown): boolean {
   );
 }
 
+// Extract a structured, secret-free diagnostic from an unknown error.
+// Surfaces AI SDK error names, Zod issue paths, HTTP status, upstream body
+// snippets, and tool metadata so we can pinpoint *which* tool/payload field
+// tripped a validation error (e.g. "invalid string" from a Zod schema or
+// provider). Never returns raw prompts or full payloads.
+function describeError(err: unknown): Record<string, unknown> {
+  if (!err || typeof err !== "object") return { error: String(err) };
+  const e = err as any;
+  const out: Record<string, unknown> = {
+    name: e.name ?? typeof e,
+    message: String(e.message ?? "").slice(0, 500),
+  };
+  // AI SDK style
+  if (e.toolName) out.toolName = e.toolName;
+  if (e.toolCallId) out.toolCallId = e.toolCallId;
+  if (e.toolArgs !== undefined) {
+    try {
+      const keys = e.toolArgs && typeof e.toolArgs === "object" ? Object.keys(e.toolArgs).slice(0, 20) : undefined;
+      out.toolArgKeys = keys;
+    } catch {}
+  }
+  if (e.url) out.url = String(e.url).slice(0, 200);
+  if (e.statusCode ?? e.status) out.status = e.statusCode ?? e.status;
+  if (typeof e.responseBody === "string") out.responseBody = e.responseBody.slice(0, 500);
+  // Zod issue tree — this is what surfaces "invalid string" per field
+  const issues = e.issues ?? e.cause?.issues ?? e.error?.issues;
+  if (Array.isArray(issues)) {
+    out.issues = issues.slice(0, 10).map((i: any) => ({
+      path: Array.isArray(i.path) ? i.path.join(".") : String(i.path ?? ""),
+      code: i.code,
+      message: String(i.message ?? "").slice(0, 200),
+      expected: i.expected,
+      received: i.received,
+    }));
+  }
+  if (e.cause && e.cause !== err) out.cause = describeError(e.cause);
+  return out;
+}
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
