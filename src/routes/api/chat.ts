@@ -370,17 +370,39 @@ export const Route = createFileRoute("/api/chat")({
               description: def.description,
               inputSchema: def.schema,
               execute: async (input: unknown) => {
-                const result = await sandbox.run(name, input, userId);
-                await audit(supabaseAdmin, {
-                  user_id: userId,
-                  thread_id: threadId,
-                  event_type: result.ok ? "tool.exec" : "tool.denied",
-                  summary: `${name} • ${result.ok ? "ok" : "fail"} • ${result.durationMs}ms${result.truncated ? " • truncated" : ""}`,
-                  ip,
-                  user_agent: ua,
-                  metadata: { tool: name, error: result.error, input },
-                });
-                return result;
+                const exposedName = toolNameToSandbox(name);
+                const inputKeys =
+                  input && typeof input === "object" ? Object.keys(input as object).slice(0, 20) : [];
+                try {
+                  const result = await sandbox.run(name, input, userId);
+                  if (!result.ok) {
+                    log.warn("chat.tool.failed", {
+                      tool: name,
+                      exposedName,
+                      inputKeys,
+                      error: String(result.error ?? "").slice(0, 300),
+                      durationMs: result.durationMs,
+                    });
+                  }
+                  await audit(supabaseAdmin, {
+                    user_id: userId,
+                    thread_id: threadId,
+                    event_type: result.ok ? "tool.exec" : "tool.denied",
+                    summary: `${name} • ${result.ok ? "ok" : "fail"} • ${result.durationMs}ms${result.truncated ? " • truncated" : ""}`,
+                    ip,
+                    user_agent: ua,
+                    metadata: { tool: name, error: result.error, input },
+                  });
+                  return result;
+                } catch (err) {
+                  log.error("chat.tool.exception", {
+                    tool: name,
+                    exposedName,
+                    inputKeys,
+                    ...describeError(err),
+                  });
+                  throw err;
+                }
               },
             }),
           ]),
