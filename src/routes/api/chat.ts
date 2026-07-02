@@ -438,15 +438,12 @@ export const Route = createFileRoute("/api/chat")({
             break;
           } catch (err) {
             lastErr = err;
-            log.error("chat.model.init_failed", {
-              model: candidate,
-              error: String((err as Error)?.message ?? err),
-            });
+            log.error("chat.model.init_failed", { model: candidate, ...describeError(err) });
             if (!isRetryableGatewayError(err)) break;
           }
         }
         if (!result) {
-          log.error("chat.stream.fatal", { error: String((lastErr as Error)?.message ?? lastErr) });
+          log.error("chat.stream.fatal", { userId, threadId, ...describeError(lastErr) });
           await audit(supabaseAdmin, {
             user_id: userId,
             thread_id: threadId,
@@ -454,6 +451,7 @@ export const Route = createFileRoute("/api/chat")({
             summary: String((lastErr as Error)?.message ?? lastErr).slice(0, 200),
             ip,
             user_agent: ua,
+            metadata: describeError(lastErr),
           });
           return new Response("AI gateway error", { status: 500 });
         }
