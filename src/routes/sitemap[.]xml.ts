@@ -25,6 +25,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/blog/will-ai-replace-software-engineers", changefreq: "monthly", priority: "0.6" },
           { path: "/blog/self-hosting-ai-with-ollama", changefreq: "monthly", priority: "0.7" },
           { path: "/blog/ai-pricing-comparison", changefreq: "monthly", priority: "0.7" },
+          { path: "/blog/mcp-guide", changefreq: "monthly", priority: "0.7" },
           { path: "/best-ai-coding-agent", changefreq: "weekly", priority: "0.9" },
           { path: "/ai-coding-assistant", changefreq: "weekly", priority: "0.9" },
           { path: "/students", changefreq: "monthly", priority: "0.6" },
