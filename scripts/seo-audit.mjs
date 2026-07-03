@@ -195,6 +195,66 @@ for (const [p, ln] of sitemapPaths) {
   }
 }
 
+// ---------- snapshot diff (indexability drift) ----------
+// Diffs the current robots.txt + rendered sitemap.xml against committed
+// snapshots under .seo-snapshots/. Any diff is a WARNING with a compact
+// per-line diff attached, so PR reviewers see intentional indexability
+// changes explicitly. Regenerate with `bun run seo:snapshot`.
+import { existsSync } from "node:fs";
+import {
+  SNAPSHOT_DIR, parseSitemapEntries, renderSitemap, simpleDiff,
+} from "./seo-lib.mjs";
+
+const snapshotRobots = read(join(SNAPSHOT_DIR, "robots.txt"));
+const snapshotSitemap = read(join(SNAPSHOT_DIR, "sitemap.xml"));
+const liveSitemap = sitemapSrc ? renderSitemap(parseSitemapEntries(sitemapSrc)) : "";
+
+if (!existsSync(SNAPSHOT_DIR)) {
+  warn(SITEMAP_FILE, 1, "SEO snapshot missing",
+    `No .seo-snapshots/ committed. Run 'bun run seo:snapshot' and commit the result to detect future indexability drift.`);
+} else {
+  if (snapshotRobots !== null && robotsSrc !== null && snapshotRobots !== robotsSrc) {
+    warn(ROBOTS_FILE, 1, "robots.txt drift vs snapshot",
+      `robots.txt differs from .seo-snapshots/robots.txt. Confirm this is intentional, then run 'bun run seo:snapshot' to update. Diff:\n${simpleDiff(snapshotRobots, robotsSrc)}`);
+  }
+  if (snapshotSitemap !== null && liveSitemap && snapshotSitemap !== liveSitemap) {
+    warn(SITEMAP_FILE, 1, "sitemap.xml drift vs snapshot",
+      `Rendered sitemap.xml differs from .seo-snapshots/sitemap.xml. Confirm this is intentional, then run 'bun run seo:snapshot' to update. Diff:\n${simpleDiff(snapshotSitemap, liveSitemap)}`);
+  }
+}
+
+// ---------- indexability validation ----------
+// Explicit "does the sitemap match what's actually indexable" pass:
+//   - every sitemap URL must resolve to a public route file (or be flagged)
+//   - no sitemap URL may ship a robots noindex meta
+//   - no sitemap URL may be Disallow'd in robots.txt
+//   - every route that ships noindex SHOULD also be Disallow'd (defense in depth)
+const pathToRoute = new Map(inspected.map((r) => [r.path, r]));
+for (const [p] of sitemapPaths) {
+  const r = pathToRoute.get(p);
+  if (!r) continue; // already warned above
+  if (r.noindex) {
+    err(r.file, r.noindexLine, "Sitemap URL is noindex",
+      `${p} is advertised in the sitemap but ships <meta name="robots" content="noindex">. Remove one.`);
+  }
+  if (isDisallowed(p, disallowed)) {
+    err(ROBOTS_FILE, 1, "Sitemap URL is Disallow'd",
+      `${p} is advertised in the sitemap but Disallow'd in robots.txt. Remove one.`);
+  }
+}
+for (const r of inspected) {
+  if (r.noindex && !isDisallowed(r.path, disallowed)) {
+    warn(ROBOTS_FILE, 1, "noindex route not in robots.txt",
+      `${r.path} ships noindex but is not Disallow'd in robots.txt. Add a Disallow so crawlers skip it before rendering.`);
+  }
+}
+
+// Re-declare a local isDisallowed shim if the module version wasn't imported.
+function _unused_reference_to_lib_symbols() {
+  void SNAPSHOT_DIR; void parseSitemapEntries; void renderSitemap; void simpleDiff;
+}
+
+
 // ---------- report ----------
 function gha(f) {
   // https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions
