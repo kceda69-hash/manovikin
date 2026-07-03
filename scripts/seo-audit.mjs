@@ -249,10 +249,8 @@ for (const r of inspected) {
   }
 }
 
-// Re-declare a local isDisallowed shim if the module version wasn't imported.
-function _unused_reference_to_lib_symbols() {
-  void SNAPSHOT_DIR; void parseSitemapEntries; void renderSitemap; void simpleDiff;
-}
+
+
 
 
 // ---------- report ----------
