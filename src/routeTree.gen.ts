@@ -34,6 +34,7 @@ import { Route as ReceiptIdRouteImport } from './routes/receipt.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogWillAiReplaceSoftwareEngineersRouteImport } from './routes/blog.will-ai-replace-software-engineers'
 import { Route as BlogSelfHostingAiWithOllamaRouteImport } from './routes/blog.self-hosting-ai-with-ollama'
+import { Route as BlogMcpGuideRouteImport } from './routes/blog.mcp-guide'
 import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-ai-coding-agents'
 import { Route as BlogAiPricingComparisonRouteImport } from './routes/blog.ai-pricing-comparison'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
@@ -173,6 +174,11 @@ const BlogSelfHostingAiWithOllamaRoute =
     path: '/blog/self-hosting-ai-with-ollama',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BlogMcpGuideRoute = BlogMcpGuideRouteImport.update({
+  id: '/blog/mcp-guide',
+  path: '/blog/mcp-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogBestAiCodingAgentsRoute = BlogBestAiCodingAgentsRouteImport.update({
   id: '/blog/best-ai-coding-agents',
   path: '/blog/best-ai-coding-agents',
@@ -261,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/mcp-guide': typeof BlogMcpGuideRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -299,6 +306,7 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/mcp-guide': typeof BlogMcpGuideRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/mcp-guide': typeof BlogMcpGuideRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
@@ -378,6 +387,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
+    | '/blog/mcp-guide'
     | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
@@ -416,6 +426,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
+    | '/blog/mcp-guide'
     | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
+    | '/blog/mcp-guide'
     | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
@@ -493,6 +505,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   BlogAiPricingComparisonRoute: typeof BlogAiPricingComparisonRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
+  BlogMcpGuideRoute: typeof BlogMcpGuideRoute
   BlogSelfHostingAiWithOllamaRoute: typeof BlogSelfHostingAiWithOllamaRoute
   BlogWillAiReplaceSoftwareEngineersRoute: typeof BlogWillAiReplaceSoftwareEngineersRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -684,6 +697,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSelfHostingAiWithOllamaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/mcp-guide': {
+      id: '/blog/mcp-guide'
+      path: '/blog/mcp-guide'
+      fullPath: '/blog/mcp-guide'
+      preLoaderRoute: typeof BlogMcpGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/best-ai-coding-agents': {
       id: '/blog/best-ai-coding-agents'
       path: '/blog/best-ai-coding-agents'
@@ -789,6 +809,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   BlogAiPricingComparisonRoute: BlogAiPricingComparisonRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
+  BlogMcpGuideRoute: BlogMcpGuideRoute,
   BlogSelfHostingAiWithOllamaRoute: BlogSelfHostingAiWithOllamaRoute,
   BlogWillAiReplaceSoftwareEngineersRoute:
     BlogWillAiReplaceSoftwareEngineersRoute,
