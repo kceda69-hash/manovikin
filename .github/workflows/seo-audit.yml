@@ -27,4 +27,16 @@ jobs:
           bun-version: latest
       - name: Run SEO audit
         run: bun run seo:audit
+      - name: Verify SEO snapshot is up to date
+        # Regenerate .seo-snapshots/ and fail if the committed snapshot
+        # doesn't match — forces intentional review of robots.txt +
+        # sitemap.xml changes rather than silent drift.
+        run: |
+          bun run seo:snapshot
+          if ! git diff --quiet -- .seo-snapshots; then
+            echo "::error title=SEO snapshot out of date::.seo-snapshots/ is stale. Run 'bun run seo:snapshot' locally and commit the result."
+            git --no-pager diff -- .seo-snapshots
+            exit 1
+          fi
+
 

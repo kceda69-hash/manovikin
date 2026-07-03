@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "seo:audit": "node scripts/seo-audit.mjs"
+    "seo:audit": "node scripts/seo-audit.mjs",
+    "seo:snapshot": "node scripts/seo-snapshot.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.47",
