@@ -690,6 +690,7 @@ function Landing() {
                 <li><Link to="/chat" className="hover:text-primary">Chat</Link></li>
                 <li><Link to="/billing" className="hover:text-primary">Billing</Link></li>
                 <li><Link to="/login" className="hover:text-primary">Sign in</Link></li>
+                <li><Link to="/connect" className="hover:text-primary">Connect AI assistants</Link></li>
               </ul>
             </div>
             <div>
