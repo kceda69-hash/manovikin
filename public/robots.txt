@@ -10,4 +10,4 @@ Disallow: /receipt/
 Disallow: /api/
 
 Sitemap: https://manovik.in/sitemap.xml
-# drift test
+

@@ -109,6 +109,10 @@ export function routePathFromFile(relPath) {
   if (p === "index") return "/";
   if (p.endsWith("/index")) return "/" + p.slice(0, -"/index".length);
   if (p.startsWith("api/") || p.startsWith("lovable/") || p.startsWith("email/")) return null;
+  // Escape-dot directories like [.mcp]/ and [.well-known]/ are server routes,
+  // not indexable pages. Same for the `mcp` JSON endpoint.
+  if (p.startsWith("[.")) return null;
+  if (p === "mcp") return null;
   if (p.includes("[.]xml")) return null;
   if (/\$|\*/.test(p)) return null;
   p = p.split(".").join("/");

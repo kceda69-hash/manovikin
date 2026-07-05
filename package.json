@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "seo:audit": "node scripts/seo-audit.mjs",
-    "seo:snapshot": "node scripts/seo-snapshot.mjs"
+    "seo:snapshot": "node scripts/seo-snapshot.mjs",
+    "seo:autofix": "node scripts/seo-autofix.mjs",
+    "seo:autofix:check": "node scripts/seo-autofix.mjs --check"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.47",
