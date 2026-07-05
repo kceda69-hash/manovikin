@@ -33,6 +33,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/vs-cline", changefreq: "monthly", priority: "0.8" },
           { path: "/vs-github-copilot", changefreq: "monthly", priority: "0.9" },
           { path: "/vs-windsurf", changefreq: "monthly", priority: "0.8" },
+          { path: "/vs-replit-agent", changefreq: "monthly", priority: "0.8" },
+          { path: "/connect", changefreq: "monthly", priority: "0.7" },
         ];
 
         const urls = entries.map((e) =>
