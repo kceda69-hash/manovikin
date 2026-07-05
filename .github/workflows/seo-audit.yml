@@ -27,6 +27,11 @@ jobs:
           bun-version: latest
       - name: Run SEO audit
         run: bun run seo:audit
+      - name: Verify SEO autofix has nothing to do
+        # If autofix in --check mode would rewrite canonicals, prune the
+        # sitemap, or add Disallow rules, fail the build. Contributors run
+        # `bun run seo:autofix` locally and commit the deterministic result.
+        run: bun run seo:autofix:check
       - name: Verify SEO snapshot is up to date
         # Regenerate .seo-snapshots/ and fail if the committed snapshot
         # doesn't match — forces intentional review of robots.txt +
