@@ -113,6 +113,8 @@ function routePathFromFile(relPath) {
   if (p === "index") return "/";
   if (p.endsWith("/index")) return "/" + p.slice(0, -"/index".length);
   if (p.startsWith("api/") || p.startsWith("lovable/") || p.startsWith("email/")) return null;
+  if (p.startsWith("[.")) return null; // [.mcp]/, [.well-known]/ — server routes, not pages
+  if (p === "mcp") return null;         // JSON MCP endpoint
   if (p.includes("[.]xml")) return null;
   if (/\$|\*/.test(p)) return null;
   p = p.split(".").join("/");
