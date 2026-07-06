@@ -431,12 +431,23 @@ export const Route = createFileRoute("/api/chat")({
         let lastErr: unknown;
         for (const candidate of modelCandidates) {
           try {
+            // Priority tier is a Fast-mode ✓ OpenAI capability. Only enable it
+            // for the primary router pick AND only when the chosen model is
+            // OpenAI — Gemini fallbacks silently ignore it and would be billed
+            // at the standard rate anyway. Faster TTFT for hard/code prompts.
+            const usePriority =
+              candidate === route.model &&
+              route.priority &&
+              candidate.startsWith("openai/");
             result = streamText({
               model: gateway(candidate),
               system: systemPrompt,
               messages: modelMessages,
               tools,
               stopWhen: stepCountIs(50),
+              ...(usePriority
+                ? { providerOptions: { lovable: { service_tier: "priority" } } }
+                : {}),
             });
             chosenModel = candidate;
             if (candidate !== primaryModel) {
