@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { EVAL_CASES, gradeCase, runLiveEvals, type EvalCase } from "@/lib/manovik-eval";
 import { sandbox } from "@/lib/agent-tools";
+import { routeModel } from "@/lib/model-router";
 
 describe("EVAL_CASES catalog", () => {
   it("has unique ids", () => {
