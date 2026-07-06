@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { EVAL_CASES, gradeCase, runLiveEvals, type EvalCase } from "@/lib/manovik-eval";
 import { sandbox } from "@/lib/agent-tools";
+import { routeModel } from "@/lib/model-router";
 
 describe("EVAL_CASES catalog", () => {
   it("has unique ids", () => {
@@ -27,6 +28,17 @@ describe("EVAL_CASES catalog", () => {
       expect(c.expectTool).toBeDefined();
       expect(registered.has(c.expectTool!)).toBe(true);
     }
+  });
+  it("router lands every case with expectTier in the right tier", () => {
+    const misses: string[] = [];
+    for (const c of EVAL_CASES) {
+      if (!c.expectTier) continue;
+      const r = routeModel(c.prompt);
+      if (r.tier !== c.expectTier) misses.push(`${c.id}: expected ${c.expectTier}, got ${r.tier} (${r.reason})`);
+    }
+    // Allow up to 10% router miss — heuristics aren't perfect, but flag hard regressions.
+    const total = EVAL_CASES.filter((c) => c.expectTier).length;
+    expect(misses.length / total, `router misses:\n${misses.join("\n")}`).toBeLessThan(0.1);
   });
 });
 
