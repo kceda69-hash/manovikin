@@ -474,7 +474,15 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("AI gateway error", { status: 500 });
         }
 
-        log.info("chat.stream.start", { userId, threadId, model: chosenModel, lang: langCode });
+        log.info("chat.stream.start", {
+          userId,
+          threadId,
+          model: chosenModel,
+          lang: langCode,
+          tier: route.tier,
+          priority: route.priority && chosenModel.startsWith("openai/"),
+          routeReason: route.reason,
+        });
 
         try {
           return result.toUIMessageStreamResponse({
