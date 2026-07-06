@@ -350,11 +350,18 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const gateway = createLovableAiGatewayProvider(apiKey);
-        // BRAIN v∞ — primary model + ordered fallback. Override head via MANOVIK_AI_MODEL.
-        const primaryModel = process.env.MANOVIK_AI_MODEL ?? MODEL_FALLBACK_CHAIN[0];
-        const modelCandidates = Array.from(
-          new Set<string>([primaryModel, ...MODEL_FALLBACK_CHAIN]),
+        // BRAIN v∞ — task-aware routing. Cheapest capable model per prompt +
+        // OpenAI priority tier where supported for low TTFT. Env override wins.
+        const forcedModel = process.env.MANOVIK_AI_MODEL;
+        const lastUserText = lastUserMsg ? summarize(lastUserMsg as any) : "";
+        const hasAttachments = !!(lastUserMsg as any)?.parts?.some(
+          (p: any) => p?.type && p.type !== "text",
         );
+        const route = routeModel(lastUserText, { forceModel: forcedModel, hasAttachments });
+        const modelCandidates = forcedModel
+          ? Array.from(new Set([forcedModel, ...MODEL_FALLBACK_CHAIN]))
+          : fallbackChainFor(route);
+        const primaryModel = modelCandidates[0];
 
         // Build AI SDK tools from the sandbox registry. Every tool execution
         // is routed through the sandbox (timeout, output cap, rate limit,
