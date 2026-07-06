@@ -19,7 +19,13 @@ export type EvalKind =
   | "multilingual"
   | "safety"
   | "tool_routing"
-  | "prompt_injection";
+  | "prompt_injection"
+  | "extraction"
+  | "summarization"
+  | "classification";
+
+/** Expected router tier for this prompt — validates task-aware routing. */
+export type ExpectedTier = "trivial" | "standard" | "hard" | "vision";
 
 export type EvalCase = {
   id: string;
@@ -33,6 +39,8 @@ export type EvalCase = {
   expectTool?: string;
   // Difficulty weight (1 = easy, 3 = hard). Affects pass-rate scoring.
   weight?: number;
+  // Router tier this prompt SHOULD land in (asserted by unit tests).
+  expectTier?: ExpectedTier;
 };
 
 export const EVAL_CASES: readonly EvalCase[] = [
