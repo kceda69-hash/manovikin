@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VsWindsurfRouteImport } from './routes/vs-windsurf'
 import { Route as VsReplitAgentRouteImport } from './routes/vs-replit-agent'
 import { Route as VsGithubCopilotRouteImport } from './routes/vs-github-copilot'
+import { Route as VsDevinRouteImport } from './routes/vs-devin'
 import { Route as VsCursorRouteImport } from './routes/vs-cursor'
 import { Route as VsClineVsWindsurfRouteImport } from './routes/vs-cline-vs-windsurf'
 import { Route as VsClineRouteImport } from './routes/vs-cline'
@@ -69,6 +70,11 @@ const VsReplitAgentRoute = VsReplitAgentRouteImport.update({
 const VsGithubCopilotRoute = VsGithubCopilotRouteImport.update({
   id: '/vs-github-copilot',
   path: '/vs-github-copilot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VsDevinRoute = VsDevinRouteImport.update({
+  id: '/vs-devin',
+  path: '/vs-devin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VsCursorRoute = VsCursorRouteImport.update({
@@ -322,6 +328,7 @@ export interface FileRoutesByFullPath {
   '/vs-cline': typeof VsClineRoute
   '/vs-cline-vs-windsurf': typeof VsClineVsWindsurfRoute
   '/vs-cursor': typeof VsCursorRoute
+  '/vs-devin': typeof VsDevinRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/vs-replit-agent': typeof VsReplitAgentRoute
   '/vs-windsurf': typeof VsWindsurfRoute
@@ -370,6 +377,7 @@ export interface FileRoutesByTo {
   '/vs-cline': typeof VsClineRoute
   '/vs-cline-vs-windsurf': typeof VsClineVsWindsurfRoute
   '/vs-cursor': typeof VsCursorRoute
+  '/vs-devin': typeof VsDevinRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/vs-replit-agent': typeof VsReplitAgentRoute
   '/vs-windsurf': typeof VsWindsurfRoute
@@ -419,6 +427,7 @@ export interface FileRoutesById {
   '/vs-cline': typeof VsClineRoute
   '/vs-cline-vs-windsurf': typeof VsClineVsWindsurfRoute
   '/vs-cursor': typeof VsCursorRoute
+  '/vs-devin': typeof VsDevinRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/vs-replit-agent': typeof VsReplitAgentRoute
   '/vs-windsurf': typeof VsWindsurfRoute
@@ -469,6 +478,7 @@ export interface FileRouteTypes {
     | '/vs-cline'
     | '/vs-cline-vs-windsurf'
     | '/vs-cursor'
+    | '/vs-devin'
     | '/vs-github-copilot'
     | '/vs-replit-agent'
     | '/vs-windsurf'
@@ -517,6 +527,7 @@ export interface FileRouteTypes {
     | '/vs-cline'
     | '/vs-cline-vs-windsurf'
     | '/vs-cursor'
+    | '/vs-devin'
     | '/vs-github-copilot'
     | '/vs-replit-agent'
     | '/vs-windsurf'
@@ -565,6 +576,7 @@ export interface FileRouteTypes {
     | '/vs-cline'
     | '/vs-cline-vs-windsurf'
     | '/vs-cursor'
+    | '/vs-devin'
     | '/vs-github-copilot'
     | '/vs-replit-agent'
     | '/vs-windsurf'
@@ -614,6 +626,7 @@ export interface RootRouteChildren {
   VsClineRoute: typeof VsClineRoute
   VsClineVsWindsurfRoute: typeof VsClineVsWindsurfRoute
   VsCursorRoute: typeof VsCursorRoute
+  VsDevinRoute: typeof VsDevinRoute
   VsGithubCopilotRoute: typeof VsGithubCopilotRoute
   VsReplitAgentRoute: typeof VsReplitAgentRoute
   VsWindsurfRoute: typeof VsWindsurfRoute
@@ -661,6 +674,13 @@ declare module '@tanstack/react-router' {
       path: '/vs-github-copilot'
       fullPath: '/vs-github-copilot'
       preLoaderRoute: typeof VsGithubCopilotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vs-devin': {
+      id: '/vs-devin'
+      path: '/vs-devin'
+      fullPath: '/vs-devin'
+      preLoaderRoute: typeof VsDevinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vs-cursor': {
@@ -990,6 +1010,7 @@ const rootRouteChildren: RootRouteChildren = {
   VsClineRoute: VsClineRoute,
   VsClineVsWindsurfRoute: VsClineVsWindsurfRoute,
   VsCursorRoute: VsCursorRoute,
+  VsDevinRoute: VsDevinRoute,
   VsGithubCopilotRoute: VsGithubCopilotRoute,
   VsReplitAgentRoute: VsReplitAgentRoute,
   VsWindsurfRoute: VsWindsurfRoute,
