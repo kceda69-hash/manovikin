@@ -10,6 +10,10 @@ import { MagicLinkEmail } from '@/lib/email-templates/magic-link'
 import { RecoveryEmail } from '@/lib/email-templates/recovery'
 import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
+import {
+  AUTH_TEMPLATE_SCHEMAS,
+  type AuthTemplateName,
+} from '@/lib/email-templates/schemas'
 
 const EMAIL_SUBJECTS: Record<string, string> = {
   signup: 'Confirm your email',
@@ -143,12 +147,29 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           newEmail: payload.data.new_email,
         }
 
+        // Validate props against the auth-template schema so a compromised
+        // upstream payload cannot inject unsafe values into the rendered email.
+        const schema = AUTH_TEMPLATE_SCHEMAS[emailType as AuthTemplateName]
+        if (schema) {
+          const parsed = schema.safeParse(templateProps)
+          if (!parsed.success) {
+            console.error('Rejected auth email: template variables failed schema', {
+              emailType,
+              run_id,
+              issues: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.code}`),
+            })
+            return Response.json(
+              { error: 'Invalid template variables' },
+              { status: 400 },
+            )
+          }
+        }
+
         // Render React Email to HTML and plain text
         const element = React.createElement(EmailTemplate, templateProps)
         const html = await render(element)
         const text = await render(element, { plainText: true })
 
-        // Enqueue email for async processing by the dispatcher (process-email-queue).
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
         const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -162,13 +183,77 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
 
         const supabase = createClient(supabaseUrl, supabaseServiceKey)
         const messageId = crypto.randomUUID()
+        const subject = EMAIL_SUBJECTS[emailType] || 'Notification'
+        const fromAddr = `${SITE_NAME} <noreply@${FROM_DOMAIN}>`
 
-        // Log pending BEFORE enqueue so we have a record even if enqueue crashes
+        // Log pending BEFORE the send so we always have a record.
         await supabase.from('email_send_log').insert({
           message_id: messageId,
           template_name: emailType,
           recipient_email: payload.data.email,
           status: 'pending',
+        })
+
+        // Preferred path: Resend (when RESEND_API_KEY is configured).
+        // Fallback: enqueue into the Lovable Emails pgmq queue.
+        const resendKey = process.env.RESEND_API_KEY
+        const lovableKey = process.env.LOVABLE_API_KEY
+
+        async function sendViaResend(): Promise<{ ok: true } | { ok: false; error: string }> {
+          if (!resendKey || !lovableKey) return { ok: false, error: 'resend_not_configured' }
+          try {
+            const res = await fetch(
+              'https://connector-gateway.lovable.dev/resend/emails',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${lovableKey}`,
+                  'X-Connection-Api-Key': resendKey,
+                },
+                body: JSON.stringify({
+                  from: fromAddr,
+                  to: [payload.data.email],
+                  subject,
+                  html,
+                  text,
+                  headers: { 'X-Entity-Ref-ID': messageId },
+                }),
+              },
+            )
+            if (!res.ok) {
+              const body = await res.text()
+              return { ok: false, error: `resend_${res.status}: ${body.slice(0, 200)}` }
+            }
+            return { ok: true }
+          } catch (err) {
+            return {
+              ok: false,
+              error: err instanceof Error ? err.message : 'resend_unknown',
+            }
+          }
+        }
+
+        const resendResult = await sendViaResend()
+
+        if (resendResult.ok) {
+          await supabase.from('email_send_log').insert({
+            message_id: messageId,
+            template_name: emailType,
+            recipient_email: payload.data.email,
+            status: 'sent',
+          })
+          console.log('Auth email sent via Resend', {
+            emailType,
+            email_redacted: redactEmail(payload.data.email),
+            run_id,
+          })
+          return Response.json({ success: true, provider: 'resend' })
+        }
+
+        console.warn('Resend send failed, falling back to Lovable queue', {
+          error: resendResult.error,
+          run_id,
         })
 
         const { error: enqueueError } = await supabase.rpc('enqueue_email', {
@@ -177,9 +262,9 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
             run_id,
             message_id: messageId,
             to: payload.data.email,
-            from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+            from: fromAddr,
             sender_domain: SENDER_DOMAIN,
-            subject: EMAIL_SUBJECTS[emailType] || 'Notification',
+            subject,
             html,
             text,
             purpose: 'transactional',
@@ -195,21 +280,21 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
             template_name: emailType,
             recipient_email: payload.data.email,
             status: 'failed',
-            error_message: 'Failed to enqueue email',
+            error_message: `resend_failed=${resendResult.error}; enqueue_failed=${enqueueError.message}`,
           })
           return Response.json(
-            { error: 'Failed to enqueue email' },
+            { error: 'Failed to send email' },
             { status: 500 }
           )
         }
 
-        console.log('Auth email enqueued', {
+        console.log('Auth email enqueued (Lovable fallback)', {
           emailType,
           email_redacted: redactEmail(payload.data.email),
           run_id,
         })
 
-        return Response.json({ success: true, queued: true })
+        return Response.json({ success: true, provider: 'lovable_queue' })
       },
     },
   },
