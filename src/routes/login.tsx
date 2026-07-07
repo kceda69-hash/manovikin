@@ -86,6 +86,42 @@ function LoginPage() {
     }
   };
 
+  const handleMagicLink = async () => {
+    if (!email) {
+      toast.error("Enter your email first.");
+      return;
+    }
+    setMagicBusy(true);
+    try {
+      const res = await fetch("/api/auth/magic-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          redirectTo: `${window.location.origin}/auth/callback`,
+        }),
+      });
+      if (res.status === 429) {
+        const body = await res.json().catch(() => ({}));
+        const secs: number = body.retryAfterSec ?? 60;
+        setMagicCooldown(secs);
+        toast.error(`Too many attempts. Try again in ${secs}s.`);
+        return;
+      }
+      if (!res.ok) {
+        toast.error("Could not send magic link. Please try again.");
+        return;
+      }
+      setMagicSent(true);
+      setMagicCooldown(60);
+      toast.success("Check your inbox for the login link.");
+    } catch {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setMagicBusy(false);
+    }
+  };
+
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
       {/* Animated background */}
@@ -149,6 +185,29 @@ function LoginPage() {
             {busy ? "..." : mode === "signin" ? "Sign in" : "Create account"}
           </Button>
         </form>
+
+        <div className="mt-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full border-border/60 bg-card/40"
+            onClick={handleMagicLink}
+            disabled={magicBusy || magicCooldown > 0}
+          >
+            {magicBusy
+              ? "Sending…"
+              : magicCooldown > 0
+                ? `Resend in ${magicCooldown}s`
+                : magicSent
+                  ? "Email another login link"
+                  : "Email me a magic link"}
+          </Button>
+          {magicSent && magicCooldown === 0 && (
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Didn't get it? Check spam, or resend above.
+            </p>
+          )}
+        </div>
 
         <button
           type="button"
