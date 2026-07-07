@@ -42,6 +42,7 @@ import { Route as BlogSelfHostingAiWithOllamaRouteImport } from './routes/blog.s
 import { Route as BlogMcpGuideRouteImport } from './routes/blog.mcp-guide'
 import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-ai-coding-agents'
 import { Route as BlogAiPricingComparisonRouteImport } from './routes/blog.ai-pricing-comparison'
+import { Route as BlogAiCodingAgentBenchmarkRouteImport } from './routes/blog.ai-coding-agent-benchmark'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -226,6 +227,12 @@ const BlogAiPricingComparisonRoute = BlogAiPricingComparisonRouteImport.update({
   path: '/blog/ai-pricing-comparison',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogAiCodingAgentBenchmarkRoute =
+  BlogAiCodingAgentBenchmarkRouteImport.update({
+    id: '/blog/ai-coding-agent-benchmark',
+    path: '/blog/ai-coding-agent-benchmark',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth/callback',
   path: '/auth/callback',
@@ -348,6 +355,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
@@ -399,6 +407,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
@@ -451,6 +460,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
@@ -504,6 +514,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
     | '/auth/callback'
+    | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
     | '/blog/mcp-guide'
@@ -555,6 +566,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
     | '/auth/callback'
+    | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
     | '/blog/mcp-guide'
@@ -606,6 +618,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
     | '/auth/callback'
+    | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
     | '/blog/mcp-guide'
@@ -658,6 +671,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  BlogAiCodingAgentBenchmarkRoute: typeof BlogAiCodingAgentBenchmarkRoute
   BlogAiPricingComparisonRoute: typeof BlogAiPricingComparisonRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
   BlogMcpGuideRoute: typeof BlogMcpGuideRoute
@@ -912,6 +926,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogAiPricingComparisonRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/ai-coding-agent-benchmark': {
+      id: '/blog/ai-coding-agent-benchmark'
+      path: '/blog/ai-coding-agent-benchmark'
+      fullPath: '/blog/ai-coding-agent-benchmark'
+      preLoaderRoute: typeof BlogAiCodingAgentBenchmarkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/callback': {
       id: '/auth/callback'
       path: '/auth/callback'
@@ -1059,6 +1080,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  BlogAiCodingAgentBenchmarkRoute: BlogAiCodingAgentBenchmarkRoute,
   BlogAiPricingComparisonRoute: BlogAiPricingComparisonRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
   BlogMcpGuideRoute: BlogMcpGuideRoute,
