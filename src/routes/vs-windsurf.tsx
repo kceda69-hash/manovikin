@@ -8,7 +8,7 @@ export const Route = createFileRoute("/vs-windsurf")({
       {
         name: "description",
         content:
-          "Windsurf AI coding agent alternative: MANOVIK offers sovereign self-hosting, local model support, and lifetime pricing vs Windsurf Pro's monthly subscription.",
+          "Windsurf alternative: MANOVIK offers sovereign self-hosting, local model support, and lifetime pricing vs Windsurf Pro's monthly plan.",
       },
       { name: "keywords", content: "windsurf ai coding agent, Windsurf alternative, Codeium Windsurf, sovereign AI IDE, self-hosted AI coding" },
       { property: "og:title", content: "MANOVIK AI vs Windsurf — Sovereign Alternative" },
