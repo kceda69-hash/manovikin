@@ -63,6 +63,7 @@ describe("auth template variable schemas", () => {
     const bad = EmailChangeSchema.safeParse({
       siteName: SITE,
       confirmationUrl: CONFIRM_URL,
+      email: "b@c.com",
       oldEmail: "not-an-email",
       newEmail: "b@c.com",
     });
@@ -132,6 +133,7 @@ describe("auth templates render with validated variables", () => {
     const props = {
       siteName: SITE,
       confirmationUrl: CONFIRM_URL,
+      email: "new@example.com",
       oldEmail: "old@example.com",
       newEmail: "new@example.com",
     };

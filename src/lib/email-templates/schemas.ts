@@ -54,6 +54,7 @@ export const InviteSchema = z.object({
 export const EmailChangeSchema = z.object({
   siteName,
   confirmationUrl: httpsUrl,
+  email,
   oldEmail: email,
   newEmail: email,
 });
