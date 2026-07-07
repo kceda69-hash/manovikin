@@ -70,19 +70,20 @@ function LoginPage() {
     }
   };
 
-  const handleGoogle = async () => {
+  const handleOAuth = async (provider: OAuthProvider) => {
     setBusy(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/chat`,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
       });
-      if (result.error) {
-        toast.error(result.error.message ?? "Google sign-in failed");
-        return;
+      if (error) {
+        toast.error(error.message ?? `${provider} sign-in failed`);
+        setBusy(false);
       }
-      if (result.redirected) return;
-      navigate({ to: "/chat" });
-    } finally {
+      // On success the browser redirects to the provider; no further action here.
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Sign-in failed");
       setBusy(false);
     }
   };
