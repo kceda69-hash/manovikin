@@ -35,6 +35,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/vs-windsurf", changefreq: "monthly", priority: "0.8" },
           { path: "/vs-replit-agent", changefreq: "monthly", priority: "0.8" },
           { path: "/vs-cline-vs-windsurf", changefreq: "monthly", priority: "0.8" },
+          { path: "/vs-devin", changefreq: "monthly", priority: "0.9" },
+          { path: "/seo", changefreq: "monthly", priority: "0.5" },
           { path: "/connect", changefreq: "monthly", priority: "0.7" },
           { path: "/chat", changefreq: "weekly", priority: "0.5" },
           { path: "/mcp", changefreq: "monthly", priority: "0.5" },
