@@ -1,69 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
-const BASE_URL = "https://manovik.in";
+import { buildSitemapEntriesFromRouteFiles, buildSitemapXml } from "@/lib/sitemap";
 
-interface SitemapEntry {
-  path: string;
-  changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
-  priority?: string;
-}
+const routeModules = import.meta.glob("./**/*.{ts,tsx}");
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const entries: SitemapEntry[] = [
-          { path: "/", changefreq: "weekly", priority: "1.0" },
-          { path: "/setup", changefreq: "monthly", priority: "0.7" },
-          { path: "/login", changefreq: "monthly", priority: "0.5" },
-          { path: "/contact", changefreq: "monthly", priority: "0.6" },
-          { path: "/privacy", changefreq: "yearly", priority: "0.3" },
-          { path: "/terms", changefreq: "yearly", priority: "0.3" },
-          { path: "/refund", changefreq: "yearly", priority: "0.3" },
-          { path: "/blog/best-ai-coding-agents", changefreq: "monthly", priority: "0.6" },
-          { path: "/blog/will-ai-replace-software-engineers", changefreq: "monthly", priority: "0.6" },
-          { path: "/blog/self-hosting-ai-with-ollama", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/ai-pricing-comparison", changefreq: "monthly", priority: "0.7" },
-          { path: "/blog/mcp-guide", changefreq: "monthly", priority: "0.7" },
-          { path: "/best-ai-coding-agent", changefreq: "weekly", priority: "0.9" },
-          { path: "/ai-coding-assistant", changefreq: "weekly", priority: "0.9" },
-          { path: "/students", changefreq: "monthly", priority: "0.6" },
-          { path: "/vs-cursor", changefreq: "monthly", priority: "0.8" },
-          { path: "/vs-cline", changefreq: "monthly", priority: "0.8" },
-          { path: "/vs-github-copilot", changefreq: "monthly", priority: "0.9" },
-          { path: "/vs-windsurf", changefreq: "monthly", priority: "0.8" },
-          { path: "/vs-replit-agent", changefreq: "monthly", priority: "0.8" },
-          { path: "/vs-cline-vs-windsurf", changefreq: "monthly", priority: "0.8" },
-          { path: "/vs-devin", changefreq: "monthly", priority: "0.9" },
-          { path: "/seo", changefreq: "monthly", priority: "0.5" },
-          { path: "/connect", changefreq: "monthly", priority: "0.7" },
-          { path: "/chat", changefreq: "weekly", priority: "0.5" },
-          { path: "/mcp", changefreq: "monthly", priority: "0.5" },
-          { path: "/audit", changefreq: "monthly", priority: "0.3" },
-          { path: "/balance", changefreq: "monthly", priority: "0.3" },
-          { path: "/billing", changefreq: "monthly", priority: "0.3" },
-          { path: "/unsubscribe", changefreq: "yearly", priority: "0.1" },
-        ];
-
-        const urls = entries.map((e) =>
-          [
-            `  <url>`,
-            `    <loc>${BASE_URL}${e.path}</loc>`,
-            e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
-            e.priority ? `    <priority>${e.priority}</priority>` : null,
-            `  </url>`,
-          ]
-            .filter(Boolean)
-            .join("\n"),
-        );
-
-        const xml = [
-          `<?xml version="1.0" encoding="UTF-8"?>`,
-          `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
-          ...urls,
-          `</urlset>`,
-        ].join("\n");
+        const entries = buildSitemapEntriesFromRouteFiles(Object.keys(routeModules));
+        const xml = buildSitemapXml(entries);
 
         return new Response(xml, {
           headers: {
