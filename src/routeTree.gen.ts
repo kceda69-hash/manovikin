@@ -42,11 +42,13 @@ import { Route as BlogSelfHostingAiWithOllamaRouteImport } from './routes/blog.s
 import { Route as BlogMcpGuideRouteImport } from './routes/blog.mcp-guide'
 import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-ai-coding-agents'
 import { Route as BlogAiPricingComparisonRouteImport } from './routes/blog.ai-pricing-comparison'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
+import { Route as ApiAuthMagicLinkRouteImport } from './routes/api/auth/magic-link'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
@@ -224,6 +226,11 @@ const BlogAiPricingComparisonRoute = BlogAiPricingComparisonRouteImport.update({
   path: '/blog/ai-pricing-comparison',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -252,6 +259,11 @@ const ApiPublicRazorpayWebhookRoute =
     path: '/api/public/razorpay-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAuthMagicLinkRoute = ApiAuthMagicLinkRouteImport.update({
+  id: '/api/auth/magic-link',
+  path: '/api/auth/magic-link',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -335,6 +347,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
@@ -343,6 +356,7 @@ export interface FileRoutesByFullPath {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -384,6 +398,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
@@ -392,6 +407,7 @@ export interface FileRoutesByTo {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -434,6 +450,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
@@ -442,6 +459,7 @@ export interface FileRoutesById {
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -485,6 +503,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
+    | '/auth/callback'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
     | '/blog/mcp-guide'
@@ -493,6 +512,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/receipt/$id'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/auth/magic-link'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/manovik-self-update'
@@ -534,6 +554,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
+    | '/auth/callback'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
     | '/blog/mcp-guide'
@@ -542,6 +563,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/receipt/$id'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/auth/magic-link'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/manovik-self-update'
@@ -583,6 +605,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
+    | '/auth/callback'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
     | '/blog/mcp-guide'
@@ -591,6 +614,7 @@ export interface FileRouteTypes {
     | '/email/unsubscribe'
     | '/receipt/$id'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/auth/magic-link'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/manovik-self-update'
@@ -633,6 +657,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   BlogAiPricingComparisonRoute: typeof BlogAiPricingComparisonRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
   BlogMcpGuideRoute: typeof BlogMcpGuideRoute
@@ -641,6 +666,7 @@ export interface RootRouteChildren {
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ReceiptIdRoute: typeof ReceiptIdRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiAuthMagicLinkRoute: typeof ApiAuthMagicLinkRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksManovikSelfUpdateRoute: typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -886,6 +912,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogAiPricingComparisonRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -919,6 +952,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/razorpay-webhook'
       fullPath: '/api/public/razorpay-webhook'
       preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/magic-link': {
+      id: '/api/auth/magic-link'
+      path: '/api/auth/magic-link'
+      fullPath: '/api/auth/magic-link'
+      preLoaderRoute: typeof ApiAuthMagicLinkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
@@ -1018,6 +1058,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   BlogAiPricingComparisonRoute: BlogAiPricingComparisonRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
   BlogMcpGuideRoute: BlogMcpGuideRoute,
@@ -1027,6 +1068,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ReceiptIdRoute: ReceiptIdRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiAuthMagicLinkRoute: ApiAuthMagicLinkRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksManovikSelfUpdateRoute: ApiPublicHooksManovikSelfUpdateRoute,
