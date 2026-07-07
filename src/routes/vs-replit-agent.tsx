@@ -8,7 +8,7 @@ export const Route = createFileRoute("/vs-replit-agent")({
       {
         name: "description",
         content:
-          "Replit Agent alternative: MANOVIK offers sovereign self-hosting, local model support, and a lifetime license vs Replit's cloud-only subscription for building full-stack apps.",
+          "Replit Agent alternative: MANOVIK offers sovereign self-hosting, local models, and lifetime pricing vs Replit's cloud subscription.",
       },
       {
         name: "keywords",
