@@ -151,25 +151,24 @@ describe("auth templates render with validated variables", () => {
     expect(html).toContain("123456");
   });
 
-  it("does not inject javascript: URLs even if a downstream template were misused", async () => {
-    // Attempt to bypass the schema: render directly with a bad URL and
-    // confirm the raw string is present verbatim (React escapes attrs), so
-    // downstream scanners will flag it. This documents that the *only*
-    // safety net is the schema layer above the webhook.
-    const html = await render(
-      React.createElement(MagicLinkEmail, {
-        siteName: SITE,
-        confirmationUrl: "javascript:alert(1)",
-      }),
-    );
-    // The dangerous scheme is passed through when the schema is skipped.
-    expect(html).toContain("javascript:alert(1)");
-    // Which is exactly why the webhook must call MagicLinkSchema.parse() first.
+  it("neutralises javascript: URLs at both the schema and React render layers", async () => {
+    // Layer 1: the schema must reject a javascript: URL.
     expect(() =>
       MagicLinkSchema.parse({
         siteName: SITE,
         confirmationUrl: "javascript:alert(1)",
       }),
     ).toThrow();
+
+    // Layer 2 (defense in depth): even if the schema were somehow skipped,
+    // React strips the dangerous scheme from the rendered <a href="...">.
+    const html = await render(
+      React.createElement(MagicLinkEmail, {
+        siteName: SITE,
+        confirmationUrl: "javascript:alert(1)",
+      }),
+    );
+    expect(html).not.toContain("javascript:alert(1)");
+    expect(html).toMatch(/React has blocked a javascript: URL/);
   });
 });
