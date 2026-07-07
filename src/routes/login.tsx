@@ -31,6 +31,15 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [magicBusy, setMagicBusy] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
+  const [magicCooldown, setMagicCooldown] = useState(0);
+
+  useEffect(() => {
+    if (magicCooldown <= 0) return;
+    const id = setInterval(() => setMagicCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(id);
+  }, [magicCooldown]);
 
   useEffect(() => {
     if (!loading && user) navigate({ to: "/chat" });
