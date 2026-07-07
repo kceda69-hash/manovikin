@@ -39,6 +39,11 @@ export function routeFilePathToPublicPath(filePath: string): string | null {
         return [];
       }
 
+      const escapedWholeSegment = segment.match(/^\[(\..+)]$/);
+      if (escapedWholeSegment) {
+        return [escapedWholeSegment[1]];
+      }
+
       return segment
         .replace(/\[\.\]/g, DOT_TOKEN)
         .split(".")
