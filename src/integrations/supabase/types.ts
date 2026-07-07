@@ -223,6 +223,27 @@ export type Database = {
         }
         Relationships: []
       }
+      magic_link_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+          ip: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+          ip: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+          ip?: string
+        }
+        Relationships: []
+      }
       manovik_brain_updates: {
         Row: {
           created_at: string
@@ -444,6 +465,10 @@ export type Database = {
         Returns: number
       }
       get_security_scan_token: { Args: never; Returns: string }
+      magic_link_check_and_record: {
+        Args: { _email: string; _ip: string }
+        Returns: Json
+      }
       manovik_spend_credit: {
         Args: { _amount: number; _reason: string; _user_id: string }
         Returns: number
