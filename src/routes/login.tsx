@@ -1,14 +1,13 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { useAuth } from "@/hooks/useAuth";
-
-type OAuthProvider = "google" | "github";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -70,18 +69,20 @@ function LoginPage() {
     }
   };
 
-  const handleOAuth = async (provider: OAuthProvider) => {
+  const handleGoogleSignIn = async () => {
     setBusy(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: `${window.location.origin}/auth/callback`,
       });
-      if (error) {
-        toast.error(error.message ?? `${provider} sign-in failed`);
+      if (result.error) {
+        toast.error(result.error.message ?? "Google sign-in failed");
         setBusy(false);
+        return;
       }
-      // On success the browser redirects to the provider; no further action here.
+      if (result.redirected) return;
+      // Session was set by the lovable wrapper; navigate to app.
+      navigate({ to: "/chat" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sign-in failed");
       setBusy(false);
@@ -164,23 +165,14 @@ function LoginPage() {
             type="button"
             variant="outline"
             className="w-full border-border/60 bg-card/40"
-            onClick={() => handleOAuth("google")}
+            onClick={handleGoogleSignIn}
             disabled={busy}
           >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.55c2.08-1.92 3.29-4.74 3.29-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.55-2.76c-.98.66-2.24 1.06-3.73 1.06-2.87 0-5.3-1.94-6.17-4.55H2.18v2.85A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.83 14.09a6.61 6.61 0 0 1 0-4.18V7.07H2.18a11 11 0 0 0 0 9.86l3.65-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.65 2.84C6.7 7.32 9.13 5.38 12 5.38z"/></svg>
             Continue with Google
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full border-border/60 bg-card/40"
-            onClick={() => handleOAuth("github")}
-            disabled={busy}
-          >
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2c-3.34.73-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.77-1.34-1.77-1.1-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.31-5.47-1.34-5.47-5.95 0-1.31.47-2.39 1.24-3.23-.13-.31-.54-1.54.11-3.21 0 0 1-.32 3.3 1.23a11.4 11.4 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.65 1.67.24 2.9.12 3.21.77.84 1.23 1.92 1.23 3.23 0 4.62-2.8 5.63-5.48 5.93.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 12 .5z"/></svg>
-            Continue with GitHub
-          </Button>
         </div>
+
 
         <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
           <div className="h-px flex-1 bg-border/60" /> or <div className="h-px flex-1 bg-border/60" />
