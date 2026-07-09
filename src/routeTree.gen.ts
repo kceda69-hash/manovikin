@@ -40,6 +40,7 @@ import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe
 import { Route as BlogWillAiReplaceSoftwareEngineersRouteImport } from './routes/blog.will-ai-replace-software-engineers'
 import { Route as BlogSelfHostingAiWithOllamaRouteImport } from './routes/blog.self-hosting-ai-with-ollama'
 import { Route as BlogMcpGuideRouteImport } from './routes/blog.mcp-guide'
+import { Route as BlogClaudeCodeVsCursorRouteImport } from './routes/blog.claude-code-vs-cursor'
 import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-ai-coding-agents'
 import { Route as BlogAiPricingComparisonRouteImport } from './routes/blog.ai-pricing-comparison'
 import { Route as BlogAiCodingAgentBenchmarkRouteImport } from './routes/blog.ai-coding-agent-benchmark'
@@ -217,6 +218,11 @@ const BlogMcpGuideRoute = BlogMcpGuideRouteImport.update({
   path: '/blog/mcp-guide',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogClaudeCodeVsCursorRoute = BlogClaudeCodeVsCursorRouteImport.update({
+  id: '/blog/claude-code-vs-cursor',
+  path: '/blog/claude-code-vs-cursor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogBestAiCodingAgentsRoute = BlogBestAiCodingAgentsRouteImport.update({
   id: '/blog/best-ai-coding-agents',
   path: '/blog/best-ai-coding-agents',
@@ -358,6 +364,7 @@ export interface FileRoutesByFullPath {
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/claude-code-vs-cursor': typeof BlogClaudeCodeVsCursorRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -410,6 +417,7 @@ export interface FileRoutesByTo {
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/claude-code-vs-cursor': typeof BlogClaudeCodeVsCursorRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -463,6 +471,7 @@ export interface FileRoutesById {
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
   '/blog/best-ai-coding-agents': typeof BlogBestAiCodingAgentsRoute
+  '/blog/claude-code-vs-cursor': typeof BlogClaudeCodeVsCursorRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -517,6 +526,7 @@ export interface FileRouteTypes {
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
+    | '/blog/claude-code-vs-cursor'
     | '/blog/mcp-guide'
     | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
@@ -569,6 +579,7 @@ export interface FileRouteTypes {
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
+    | '/blog/claude-code-vs-cursor'
     | '/blog/mcp-guide'
     | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
@@ -621,6 +632,7 @@ export interface FileRouteTypes {
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
     | '/blog/best-ai-coding-agents'
+    | '/blog/claude-code-vs-cursor'
     | '/blog/mcp-guide'
     | '/blog/self-hosting-ai-with-ollama'
     | '/blog/will-ai-replace-software-engineers'
@@ -674,6 +686,7 @@ export interface RootRouteChildren {
   BlogAiCodingAgentBenchmarkRoute: typeof BlogAiCodingAgentBenchmarkRoute
   BlogAiPricingComparisonRoute: typeof BlogAiPricingComparisonRoute
   BlogBestAiCodingAgentsRoute: typeof BlogBestAiCodingAgentsRoute
+  BlogClaudeCodeVsCursorRoute: typeof BlogClaudeCodeVsCursorRoute
   BlogMcpGuideRoute: typeof BlogMcpGuideRoute
   BlogSelfHostingAiWithOllamaRoute: typeof BlogSelfHostingAiWithOllamaRoute
   BlogWillAiReplaceSoftwareEngineersRoute: typeof BlogWillAiReplaceSoftwareEngineersRoute
@@ -912,6 +925,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogMcpGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/claude-code-vs-cursor': {
+      id: '/blog/claude-code-vs-cursor'
+      path: '/blog/claude-code-vs-cursor'
+      fullPath: '/blog/claude-code-vs-cursor'
+      preLoaderRoute: typeof BlogClaudeCodeVsCursorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/best-ai-coding-agents': {
       id: '/blog/best-ai-coding-agents'
       path: '/blog/best-ai-coding-agents'
@@ -1083,6 +1103,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogAiCodingAgentBenchmarkRoute: BlogAiCodingAgentBenchmarkRoute,
   BlogAiPricingComparisonRoute: BlogAiPricingComparisonRoute,
   BlogBestAiCodingAgentsRoute: BlogBestAiCodingAgentsRoute,
+  BlogClaudeCodeVsCursorRoute: BlogClaudeCodeVsCursorRoute,
   BlogMcpGuideRoute: BlogMcpGuideRoute,
   BlogSelfHostingAiWithOllamaRoute: BlogSelfHostingAiWithOllamaRoute,
   BlogWillAiReplaceSoftwareEngineersRoute:
