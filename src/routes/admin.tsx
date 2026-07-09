@@ -28,7 +28,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Shield, ShieldCheck, RefreshCw, Search, KeyRound, Ban, Coins, Trash2, UserPlus } from "lucide-react";
+import { ArrowLeft, Shield, ShieldCheck, RefreshCw, Search, Ban, Coins, Trash2, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
