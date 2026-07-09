@@ -61,8 +61,8 @@ function AdminPage() {
   };
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate({ to: "/login", search: { next: "/admin" } as never });
+    if (!authLoading && !user && typeof window !== "undefined") {
+      window.location.href = `/login?next=${encodeURIComponent("/admin")}`;
     }
   }, [authLoading, user, navigate]);
 
