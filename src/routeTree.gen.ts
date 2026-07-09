@@ -34,6 +34,7 @@ import { Route as BestAiCodingAgentRouteImport } from './routes/best-ai-coding-a
 import { Route as BalanceRouteImport } from './routes/balance'
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as AiCodingAssistantRouteImport } from './routes/ai-coding-assistant'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReceiptIdRouteImport } from './routes/receipt.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
@@ -186,6 +187,11 @@ const AiCodingAssistantRoute = AiCodingAssistantRouteImport.update({
   path: '/ai-coding-assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -332,6 +338,7 @@ const ApiPublicHooksManovikSelfUpdateRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/audit': typeof AuditRoute
   '/balance': typeof BalanceRoute
@@ -385,6 +392,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/audit': typeof AuditRoute
   '/balance': typeof BalanceRoute
@@ -439,6 +447,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/audit': typeof AuditRoute
   '/balance': typeof BalanceRoute
@@ -494,6 +503,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/ai-coding-assistant'
     | '/audit'
     | '/balance'
@@ -547,6 +557,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/ai-coding-assistant'
     | '/audit'
     | '/balance'
@@ -600,6 +611,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/ai-coding-assistant'
     | '/audit'
     | '/balance'
@@ -654,6 +666,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AiCodingAssistantRoute: typeof AiCodingAssistantRoute
   AuditRoute: typeof AuditRoute
   BalanceRoute: typeof BalanceRoute
@@ -883,6 +896,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AiCodingAssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -1070,6 +1090,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AiCodingAssistantRoute: AiCodingAssistantRoute,
   AuditRoute: AuditRoute,
   BalanceRoute: BalanceRoute,
