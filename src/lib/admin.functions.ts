@@ -27,7 +27,7 @@ async function audit(userId: string, event: string, summary: string, metadata: R
       user_id: userId,
       event_type: `admin.${event}`,
       summary,
-      metadata,
+      metadata: metadata as never,
     });
   } catch (e) {
     console.error("audit log failed", e);
