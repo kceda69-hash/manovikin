@@ -1,14 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-function assertAdmin(userId: string) {
-  const raw = process.env.SEO_ADMIN_USER_IDS ?? process.env.ADMIN_USER_IDS ?? "";
-  const admins = raw.split(",").map((s) => s.trim()).filter(Boolean);
-  if (admins.length === 0 || !admins.includes(userId)) {
-    throw new Response("Forbidden", { status: 403 });
-  }
-}
+import { assertAdmin } from "@/lib/admin-guard";
 
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
@@ -56,7 +49,7 @@ export async function submitSitemapInternal() {
 export const verifySite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    assertAdmin(context.userId);
+    await assertAdmin(context);
     const verify = await gsc(`/siteVerification/v1/webResource?verificationMethod=META`, {
       method: "POST",
       body: JSON.stringify({ site: { identifier: SITE_URL, type: "SITE" } }),
@@ -72,7 +65,7 @@ export const verifySite = createServerFn({ method: "POST" })
 export const submitSitemap = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    assertAdmin(context.userId);
+    await assertAdmin(context);
     return submitSitemapInternal();
   });
 
@@ -80,7 +73,7 @@ export const submitSitemap = createServerFn({ method: "POST" })
 export const getSeoHealth = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    assertAdmin(context.userId);
+    await assertAdmin(context);
 
     const sites = await gsc(`/webmasters/v3/sites`);
     const sitemaps = await gsc(`/webmasters/v3/sites/${enc(SITE_URL)}/sitemaps`);
@@ -136,7 +129,7 @@ export const inspectUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => inspectInput.parse(d))
   .handler(async ({ data, context }) => {
-    assertAdmin(context.userId);
+    await assertAdmin(context);
     const r = await gsc(`/v1/urlInspection/index:inspect`, {
       method: "POST",
       body: JSON.stringify({ inspectionUrl: data.url, siteUrl: SITE_URL }),
