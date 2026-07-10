@@ -1,24 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-// Helpers -------------------------------------------------------------
-
-async function assertAdmin(context: any, requireAal2 = true) {
-  const { supabase, userId, claims } = context;
-  // Require AAL2 (verified 2FA in current session) for all admin actions
-  if (requireAal2 && claims?.aal !== "aal2") {
-    throw new Response("Forbidden: 2FA required", { status: 403 });
-  }
-  const { data: isAdmin, error } = await supabase.rpc("has_role", {
-    _user_id: userId,
-    _role: "admin",
-  });
-  if (error || !isAdmin) {
-    throw new Response("Forbidden: admin only", { status: 403 });
-  }
-  return { supabase, userId, claims };
-}
+import { assertAdmin } from "@/lib/admin-guard";
 
 async function audit(userId: string, event: string, summary: string, metadata: Record<string, unknown> = {}) {
   try {
