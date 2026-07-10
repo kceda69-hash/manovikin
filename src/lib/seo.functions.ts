@@ -49,7 +49,7 @@ export async function submitSitemapInternal() {
 export const verifySite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    assertAdmin(context.userId);
+    await assertAdmin(context);
     const verify = await gsc(`/siteVerification/v1/webResource?verificationMethod=META`, {
       method: "POST",
       body: JSON.stringify({ site: { identifier: SITE_URL, type: "SITE" } }),
@@ -65,7 +65,7 @@ export const verifySite = createServerFn({ method: "POST" })
 export const submitSitemap = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    assertAdmin(context.userId);
+    await assertAdmin(context);
     return submitSitemapInternal();
   });
 
@@ -73,7 +73,7 @@ export const submitSitemap = createServerFn({ method: "POST" })
 export const getSeoHealth = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    assertAdmin(context.userId);
+    await assertAdmin(context);
 
     const sites = await gsc(`/webmasters/v3/sites`);
     const sitemaps = await gsc(`/webmasters/v3/sites/${enc(SITE_URL)}/sitemaps`);
@@ -129,7 +129,7 @@ export const inspectUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => inspectInput.parse(d))
   .handler(async ({ data, context }) => {
-    assertAdmin(context.userId);
+    await assertAdmin(context);
     const r = await gsc(`/v1/urlInspection/index:inspect`, {
       method: "POST",
       body: JSON.stringify({ inspectionUrl: data.url, siteUrl: SITE_URL }),
