@@ -311,20 +311,16 @@ function Landing() {
         <h1
           className="text-balance text-5xl font-bold leading-tight tracking-tight md:text-7xl animate-fade-in"
           style={{ animationDelay: "60ms", animationFillMode: "both" }}
+          aria-label="MANOVIK AI — an autonomous AI coding agent that builds websites, apps, APIs, and automations."
         >
-          <span className="sr-only">
-            MANOVIK AI — an autonomous AI coding agent that builds websites, apps, APIs, and automations.
-          </span>
-          <span aria-hidden="true">
-            Meet <span className="text-gradient text-shimmer">MANOVIK AI</span>
-            <br />
-            that builds{" "}
-            <span className="relative inline-block align-baseline">
-              <span key={wordIdx} className="inline-block text-gradient animate-word-swap">
-                {ROTATING_WORDS[wordIdx]}
-              </span>
-              <span className="caret" aria-hidden="true" />
+          Meet <span className="text-gradient text-shimmer">MANOVIK AI</span>
+          <br />
+          that builds{" "}
+          <span className="relative inline-block align-baseline">
+            <span key={wordIdx} className="inline-block text-gradient animate-word-swap">
+              {ROTATING_WORDS[wordIdx]}
             </span>
+            <span className="caret" aria-hidden="true" />
           </span>
         </h1>
 

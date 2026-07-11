@@ -151,12 +151,7 @@ function ChatPage() {
   };
 
   if (loading || !user || bootstrapping || !activeId) {
-    return (
-      <>
-        <h1 className="sr-only">MANOVIK AI Chat Console</h1>
-        <FullPageChatSkeleton />
-      </>
-    );
+    return <FullPageChatSkeleton />;
   }
 
 
