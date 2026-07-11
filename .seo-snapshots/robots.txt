@@ -8,6 +8,9 @@ Disallow: /seo
 Disallow: /unsubscribe
 Disallow: /receipt/
 Disallow: /api/
+Disallow: /auth/
+Disallow: /email/
+Disallow: /.mcp/
+Disallow: /.well-known/
 
 Sitemap: https://manovik.in/sitemap.xml
-
