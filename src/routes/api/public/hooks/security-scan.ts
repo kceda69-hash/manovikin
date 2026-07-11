@@ -163,6 +163,19 @@ export const Route = createFileRoute('/api/public/hooks/security-scan')({
           )
         }
 
+        // Diff against the previous run so post-deploy callers (GitHub
+        // Actions) can gate on "regressions introduced by this deploy"
+        // rather than the full failing set, which may include long-standing
+        // warnings.
+        const { data: newFindingsData, error: diffErr } = await supabaseAdmin.rpc(
+          'security_scan_new_findings' as never,
+          { _run_id: run_id } as never,
+        )
+        if (diffErr) {
+          console.warn('security-scan: diff query failed', diffErr)
+        }
+        const new_findings = Array.isArray(newFindingsData) ? newFindingsData : []
+
         const summary = {
           run_id,
           total: checks.length,
@@ -170,8 +183,9 @@ export const Route = createFileRoute('/api/public/hooks/security-scan')({
           warn: checks.filter((c) => c.status === 'warn').length,
           fail: checks.filter((c) => c.status === 'fail').length,
           fixed: checks.filter((c) => c.status === 'fixed').length,
+          new_findings_count: new_findings.length,
         }
-        return Response.json({ ok: true, summary, checks })
+        return Response.json({ ok: true, summary, checks, new_findings })
       },
     },
   },
