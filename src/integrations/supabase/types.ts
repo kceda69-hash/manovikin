@@ -522,6 +522,14 @@ export type Database = {
           read_ct: number
         }[]
       }
+      security_scan_new_findings: {
+        Args: { _run_id: string }
+        Returns: {
+          check_name: string
+          details: Json
+          status: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

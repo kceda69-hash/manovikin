@@ -1,0 +1,102 @@
+name: Post-deploy security re-scan
+
+# Calls the in-app runtime security self-scan
+# (/api/public/hooks/security-scan) after a push to main lands on the
+# published site, then fails the check if the scan reports any NEW findings
+# vs the previous run. The endpoint is idempotent and also runs every 15
+# minutes via pg_cron — this workflow just accelerates feedback right after
+# a deploy.
+#
+# Requires two repo secrets (Settings → Secrets and variables → Actions):
+#   SECURITY_SCAN_TOKEN  — same value as the vault `security_scan_token`
+#                          (pg_cron and the endpoint both read it).
+#   SECURITY_SCAN_URL    — full https URL of the scan endpoint, e.g.
+#                          https://project--<id>.lovable.app/api/public/hooks/security-scan
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: post-deploy-security-scan
+  cancel-in-progress: false
+
+jobs:
+  rescan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Wait for deploy to propagate
+        # Published deploys typically take ~60s. Sleep before scanning so
+        # the first call hits the new build, not the previous one.
+        run: sleep 90
+
+      - name: Trigger security self-scan
+        env:
+          SECURITY_SCAN_URL: ${{ secrets.SECURITY_SCAN_URL }}
+          SECURITY_SCAN_TOKEN: ${{ secrets.SECURITY_SCAN_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SECURITY_SCAN_URL:-}" ] || [ -z "${SECURITY_SCAN_TOKEN:-}" ]; then
+            echo "::error::SECURITY_SCAN_URL and SECURITY_SCAN_TOKEN must be set as repo secrets."
+            exit 1
+          fi
+          http_code="000"
+          for attempt in 1 2 3; do
+            http_code=$(curl -sS -o response.json -w "%{http_code}" \
+              -X POST "$SECURITY_SCAN_URL" \
+              -H "Authorization: Bearer $SECURITY_SCAN_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data '{}') || http_code="000"
+            echo "attempt=$attempt http_code=$http_code"
+            [ "$http_code" = "200" ] && break
+            sleep 15
+          done
+          if [ "$http_code" != "200" ]; then
+            echo "::error::Security scan endpoint returned HTTP $http_code"
+            cat response.json || true
+            exit 1
+          fi
+
+      - name: Upload scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-report
+          path: response.json
+          if-no-files-found: ignore
+
+      - name: Report new findings
+        run: |
+          set -euo pipefail
+          if [ ! -f response.json ]; then
+            echo "::error::No scan response captured."
+            exit 1
+          fi
+          new_count=$(jq '.summary.new_findings_count // 0' response.json)
+          total_fail=$(jq '.summary.fail // 0' response.json)
+          total_warn=$(jq '.summary.warn // 0' response.json)
+          run_id=$(jq -r '.summary.run_id // "unknown"' response.json)
+          {
+            echo "# Post-deploy security scan"
+            echo ""
+            echo "- run_id: \`$run_id\`"
+            echo "- fail: **$total_fail**, warn: **$total_warn**, new since previous run: **$new_count**"
+            echo ""
+            if [ "$new_count" -gt 0 ]; then
+              echo "## New findings"
+              echo ""
+              echo '```json'
+              jq '.new_findings' response.json
+              echo '```'
+            else
+              echo "No new findings vs previous run."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$new_count" -gt 0 ]; then
+            jq -r '.new_findings[] | "::error title=New security finding::\(.check_name) [\(.status)] \(.details|tostring)"' response.json
+            exit 1
+          fi
