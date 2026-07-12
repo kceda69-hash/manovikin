@@ -17,9 +17,28 @@ export interface SitemapEntry {
 
 const DOT_TOKEN = "__SITEMAP_LITERAL_DOT__";
 
-const EXCLUDED_PATHS = new Set(["/sitemap.xml"]);
+// Kept out of the sitemap. Every entry here must also be Disallow'd in
+// public/robots.txt (enforced by src/lib/__tests__/sitemap-robots.test.ts).
+const EXCLUDED_PATHS = new Set([
+  "/sitemap.xml",
+  "/admin",
+  "/chat",
+  "/balance",
+  "/audit",
+  "/billing",
+  "/seo",
+  "/unsubscribe",
+]);
 
-const EXCLUDED_PREFIXES = ["/api", "/auth", "/email", "/lovable"];
+const EXCLUDED_PREFIXES = [
+  "/api",
+  "/auth",
+  "/email",
+  "/lovable",
+  "/receipt",
+  "/.mcp",
+  "/.well-known",
+];
 
 export function routeFilePathToPublicPath(filePath: string): string | null {
   const normalized = filePath
