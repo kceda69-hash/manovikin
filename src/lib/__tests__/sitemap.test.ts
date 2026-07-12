@@ -31,13 +31,16 @@ describe("sitemap route discovery", () => {
 
     expect(paths).toEqual(
       expect.arrayContaining([
-        "/seo",
-        "/unsubscribe",
         "/vs-devin",
-        "/.mcp/list-tools",
-        "/.well-known/oauth-protected-resource",
+        "/blog/mcp-guide",
       ]),
     );
+    // Internal / Disallow'd pages must stay out — enforced by
+    // sitemap-robots.test.ts as well.
+    expect(paths).not.toContain("/seo");
+    expect(paths).not.toContain("/unsubscribe");
+    expect(paths).not.toContain("/.mcp/list-tools");
+    expect(paths).not.toContain("/.well-known/oauth-protected-resource");
   });
 
   it("keeps internal endpoints, callback routes, and dynamic placeholders out", () => {
