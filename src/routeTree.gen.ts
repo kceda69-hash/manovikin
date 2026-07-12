@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VsWindsurfRouteImport } from './routes/vs-windsurf'
+import { Route as VsRooCodeRouteImport } from './routes/vs-roo-code'
 import { Route as VsReplitAgentRouteImport } from './routes/vs-replit-agent'
 import { Route as VsGithubCopilotRouteImport } from './routes/vs-github-copilot'
 import { Route as VsDevinRouteImport } from './routes/vs-devin'
@@ -65,6 +66,11 @@ import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/ap
 const VsWindsurfRoute = VsWindsurfRouteImport.update({
   id: '/vs-windsurf',
   path: '/vs-windsurf',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VsRooCodeRoute = VsRooCodeRouteImport.update({
+  id: '/vs-roo-code',
+  path: '/vs-roo-code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VsReplitAgentRoute = VsReplitAgentRouteImport.update({
@@ -363,6 +369,7 @@ export interface FileRoutesByFullPath {
   '/vs-devin': typeof VsDevinRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/vs-replit-agent': typeof VsReplitAgentRoute
+  '/vs-roo-code': typeof VsRooCodeRoute
   '/vs-windsurf': typeof VsWindsurfRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -417,6 +424,7 @@ export interface FileRoutesByTo {
   '/vs-devin': typeof VsDevinRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/vs-replit-agent': typeof VsReplitAgentRoute
+  '/vs-roo-code': typeof VsRooCodeRoute
   '/vs-windsurf': typeof VsWindsurfRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -472,6 +480,7 @@ export interface FileRoutesById {
   '/vs-devin': typeof VsDevinRoute
   '/vs-github-copilot': typeof VsGithubCopilotRoute
   '/vs-replit-agent': typeof VsReplitAgentRoute
+  '/vs-roo-code': typeof VsRooCodeRoute
   '/vs-windsurf': typeof VsWindsurfRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -528,6 +537,7 @@ export interface FileRouteTypes {
     | '/vs-devin'
     | '/vs-github-copilot'
     | '/vs-replit-agent'
+    | '/vs-roo-code'
     | '/vs-windsurf'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -582,6 +592,7 @@ export interface FileRouteTypes {
     | '/vs-devin'
     | '/vs-github-copilot'
     | '/vs-replit-agent'
+    | '/vs-roo-code'
     | '/vs-windsurf'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -636,6 +647,7 @@ export interface FileRouteTypes {
     | '/vs-devin'
     | '/vs-github-copilot'
     | '/vs-replit-agent'
+    | '/vs-roo-code'
     | '/vs-windsurf'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -691,6 +703,7 @@ export interface RootRouteChildren {
   VsDevinRoute: typeof VsDevinRoute
   VsGithubCopilotRoute: typeof VsGithubCopilotRoute
   VsReplitAgentRoute: typeof VsReplitAgentRoute
+  VsRooCodeRoute: typeof VsRooCodeRoute
   VsWindsurfRoute: typeof VsWindsurfRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -726,6 +739,13 @@ declare module '@tanstack/react-router' {
       path: '/vs-windsurf'
       fullPath: '/vs-windsurf'
       preLoaderRoute: typeof VsWindsurfRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vs-roo-code': {
+      id: '/vs-roo-code'
+      path: '/vs-roo-code'
+      fullPath: '/vs-roo-code'
+      preLoaderRoute: typeof VsRooCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vs-replit-agent': {
@@ -1115,6 +1135,7 @@ const rootRouteChildren: RootRouteChildren = {
   VsDevinRoute: VsDevinRoute,
   VsGithubCopilotRoute: VsGithubCopilotRoute,
   VsReplitAgentRoute: VsReplitAgentRoute,
+  VsRooCodeRoute: VsRooCodeRoute,
   VsWindsurfRoute: VsWindsurfRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
