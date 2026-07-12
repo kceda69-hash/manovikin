@@ -27,6 +27,12 @@ jobs:
           bun-version: latest
       - name: Run SEO audit
         run: bun run seo:audit
+      - name: Sitemap ↔ robots.txt consistency check
+        # Bidirectional check: every sitemap URL is crawlable per robots.txt,
+        # every Disallow rule fails to match every sitemap URL. Uses the real
+        # builder in src/lib/sitemap.ts against src/routes/, so drift in
+        # either file fails the build.
+        run: bunx vitest run src/lib/__tests__/sitemap-robots.test.ts
       - name: Verify SEO autofix has nothing to do
         # If autofix in --check mode would rewrite canonicals, prune the
         # sitemap, or add Disallow rules, fail the build. Contributors run
