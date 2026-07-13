@@ -842,22 +842,101 @@ function PromptComposer() {
   const [prompt, setPrompt] = useState("");
   const [target, setTarget] = useState<(typeof TARGETS)[number]["id"]>("web");
   const [model, setModel] = useState<(typeof MODELS)[number]>("Claude Fable 5");
+  const [output, setOutput] = useState("");
+  const [status, setStatus] = useState<"idle" | "streaming" | "done" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const outputRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
 
-  const submit = () => {
+  useEffect(() => {
+    if (outputRef.current) {
+      outputRef.current.scrollTop = outputRef.current.scrollHeight;
+    }
+  }, [output]);
+
+  useEffect(() => () => abortRef.current?.abort(), []);
+
+  const stop = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setStatus((s) => (s === "streaming" ? "done" : s));
+  };
+
+  const submit = async () => {
     const text = prompt.trim();
     if (!text) {
       toast.error("Describe what you want to build first");
       return;
     }
-    // Hand off to auth/chat; free to wire to a real intake later.
+    if (status === "streaming") return;
+
+    // Remember the request so the /login → chat handoff can resume it later.
     try {
-      sessionStorage.setItem("manovik:pending-prompt", JSON.stringify({ prompt: text, target, model }));
+      sessionStorage.setItem(
+        "manovik:pending-prompt",
+        JSON.stringify({ prompt: text, target, model }),
+      );
     } catch {
       // ignore storage failures
     }
-    navigate({ to: "/login" });
+
+    setOutput("");
+    setErrorMsg(null);
+    setStatus("streaming");
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const res = await fetch("/api/public/demo-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: text, target, model }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok || !res.body) {
+        const detail = (await res.text().catch(() => "")).slice(0, 240);
+        const message =
+          res.status === 429
+            ? "You're going fast — wait a minute and retry."
+            : res.status === 402
+              ? "Demo credits are recharging. Sign in to use your own balance."
+              : detail || `Request failed (${res.status})`;
+        setErrorMsg(message);
+        setStatus("error");
+        toast.error(message);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let acc = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        acc += decoder.decode(value, { stream: true });
+        setOutput(acc);
+      }
+      acc += decoder.decode();
+      setOutput(acc);
+      setStatus("done");
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") {
+        setStatus("done");
+        return;
+      }
+      const message = (err as Error)?.message ?? "Network error";
+      setErrorMsg(message);
+      setStatus("error");
+      toast.error(message);
+    } finally {
+      abortRef.current = null;
+    }
   };
+
+  const isStreaming = status === "streaming";
 
   return (
     <div className="mt-24">
@@ -869,7 +948,7 @@ function PromptComposer() {
           Describe your app. <span className="text-gradient">MANOVIK ships it.</span>
         </h2>
         <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-          Type an idea, pick a target and a model. We handle planning, code, tests and deployment.
+          Type an idea, pick a target and a model. We stream a live build plan — sign in to run it.
         </p>
       </div>
 
@@ -882,9 +961,10 @@ function PromptComposer() {
           onKeyDown={(e) => {
             if ((e.metaKey || e.ctrlKey) && e.key === "Enter") submit();
           }}
+          disabled={isStreaming}
           placeholder="e.g. Build a fitness tracking app with streaks, social feed, and Play Store release."
           rows={4}
-          className="w-full resize-none rounded-xl bg-background/40 border border-border/60 p-4 text-sm md:text-base outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/70"
+          className="w-full resize-none rounded-xl bg-background/40 border border-border/60 p-4 text-sm md:text-base outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/70 disabled:opacity-70"
         />
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -930,9 +1010,15 @@ function PromptComposer() {
 
           <div className="ml-auto flex items-center gap-2">
             <span className="hidden md:inline text-[11px] text-muted-foreground">⌘/Ctrl + Enter</span>
-            <Button onClick={submit} className="bg-aurora text-primary-foreground glow hover:opacity-95">
-              <Send className="mr-1 h-4 w-4" /> Build it
-            </Button>
+            {isStreaming ? (
+              <Button onClick={stop} variant="outline" className="border-primary/40 text-primary">
+                Stop
+              </Button>
+            ) : (
+              <Button onClick={submit} className="bg-aurora text-primary-foreground glow hover:opacity-95">
+                <Send className="mr-1 h-4 w-4" /> Build it
+              </Button>
+            )}
           </div>
         </div>
 
@@ -942,13 +1028,50 @@ function PromptComposer() {
               key={p.label}
               type="button"
               onClick={() => setPrompt(p.prompt)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-3 py-1 text-xs text-muted-foreground hover:text-primary hover:border-primary/40 transition"
+              disabled={isStreaming}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-3 py-1 text-xs text-muted-foreground hover:text-primary hover:border-primary/40 transition disabled:opacity-50"
             >
               <p.icon className="h-3.5 w-3.5" />
               {p.label}
             </button>
           ))}
         </div>
+
+        {(output || isStreaming || errorMsg) && (
+          <div className="mt-5 border-t border-border/60 pt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                <Bot className="h-3.5 w-3.5 text-primary" />
+                MANOVIK preview · {model} · {target}
+              </div>
+              {status === "done" && (
+                <button
+                  type="button"
+                  onClick={() => navigate({ to: "/login" })}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Sign in to run it →
+                </button>
+              )}
+            </div>
+            <div
+              ref={outputRef}
+              aria-live="polite"
+              className="max-h-80 overflow-y-auto rounded-xl bg-background/50 border border-border/60 p-4 text-sm whitespace-pre-wrap font-mono text-foreground/90"
+            >
+              {errorMsg ? (
+                <span className="text-destructive">{errorMsg}</span>
+              ) : output ? (
+                <>
+                  {output}
+                  {isStreaming && <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-primary align-middle" />}
+                </>
+              ) : (
+                <span className="text-muted-foreground">Thinking…</span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

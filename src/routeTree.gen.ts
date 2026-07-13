@@ -52,6 +52,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
+import { Route as ApiPublicDemoChatRouteImport } from './routes/api/public/demo-chat'
 import { Route as ApiAuthMagicLinkRouteImport } from './routes/api/auth/magic-link'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
@@ -284,6 +285,11 @@ const ApiPublicRazorpayWebhookRoute =
     path: '/api/public/razorpay-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDemoChatRoute = ApiPublicDemoChatRouteImport.update({
+  id: '/api/public/demo-chat',
+  path: '/api/public/demo-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthMagicLinkRoute = ApiAuthMagicLinkRouteImport.update({
   id: '/api/auth/magic-link',
   path: '/api/auth/magic-link',
@@ -386,6 +392,7 @@ export interface FileRoutesByFullPath {
   '/receipt/$id': typeof ReceiptIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
+  '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -441,6 +448,7 @@ export interface FileRoutesByTo {
   '/receipt/$id': typeof ReceiptIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
+  '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -497,6 +505,7 @@ export interface FileRoutesById {
   '/receipt/$id': typeof ReceiptIdRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
+  '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -554,6 +563,7 @@ export interface FileRouteTypes {
     | '/receipt/$id'
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
+    | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/manovik-self-update'
@@ -609,6 +619,7 @@ export interface FileRouteTypes {
     | '/receipt/$id'
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
+    | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/manovik-self-update'
@@ -664,6 +675,7 @@ export interface FileRouteTypes {
     | '/receipt/$id'
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
+    | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
     | '/api/public/hooks/manovik-self-update'
@@ -720,6 +732,7 @@ export interface RootRouteChildren {
   ReceiptIdRoute: typeof ReceiptIdRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAuthMagicLinkRoute: typeof ApiAuthMagicLinkRoute
+  ApiPublicDemoChatRoute: typeof ApiPublicDemoChatRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksManovikSelfUpdateRoute: typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -1035,6 +1048,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/demo-chat': {
+      id: '/api/public/demo-chat'
+      path: '/api/public/demo-chat'
+      fullPath: '/api/public/demo-chat'
+      preLoaderRoute: typeof ApiPublicDemoChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/magic-link': {
       id: '/api/auth/magic-link'
       path: '/api/auth/magic-link'
@@ -1154,6 +1174,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReceiptIdRoute: ReceiptIdRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAuthMagicLinkRoute: ApiAuthMagicLinkRoute,
+  ApiPublicDemoChatRoute: ApiPublicDemoChatRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksManovikSelfUpdateRoute: ApiPublicHooksManovikSelfUpdateRoute,
