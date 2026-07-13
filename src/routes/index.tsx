@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight, Globe, Workflow, Terminal, Check, ChevronDown } from "lucide-react";
+import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight, Globe, Workflow, Terminal, Check, ChevronDown, Smartphone, Apple, Rocket, Cpu, Paperclip, Send, Store, Bot, Layers, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
@@ -439,8 +439,112 @@ function Landing() {
           </div>
         </div>
 
+        {/* Prompt-to-Build composer */}
+        <PromptComposer />
+
+        {/* Ship to real stores */}
+        <div className="mt-24">
+          <div className="text-center animate-fade-in">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
+              <Rocket className="h-3.5 w-3.5" /> Ship live — not just preview
+            </div>
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold">From prompt to Play Store, App Store & the web</h2>
+            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
+              MANOVIK doesn't stop at a demo. It builds, signs, and pushes real mobile apps and live websites — end to end.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-6 md:grid-cols-3 text-left">
+            {[
+              { icon: Smartphone, title: "Google Play", desc: "Android builds, keystore signing, aab upload & staged rollout to the Play Console." , tag: "Android · Kotlin · RN" },
+              { icon: Apple, title: "App Store", desc: "iOS builds via cloud signing, TestFlight and App Store Connect submission wired in.", tag: "iOS · Swift · Expo" },
+              { icon: Globe, title: "Live Web", desc: "Custom domain, edge-deployed, HTTPS, sitemap and SEO ready on day one.", tag: "Edge · CDN · SSL" },
+            ].map((s, i) => (
+              <div
+                key={s.title}
+                className="surface-card tilt-card relative overflow-hidden rounded-2xl p-6 animate-fade-in"
+                style={{ animationDelay: `${i * 120}ms`, animationFillMode: "both" }}
+              >
+                <span className="card-border-glow" aria-hidden="true" />
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-aurora text-primary-foreground shadow-lg">
+                    <s.icon className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <h3 className="font-semibold">{s.title}</h3>
+                    <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{s.tag}</div>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Powered by top models — incl. Claude Fable 5 */}
+        <div className="mt-24">
+          <div className="text-center animate-fade-in">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
+              <Cpu className="h-3.5 w-3.5" /> Multi-model brain
+            </div>
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold">
+              Now with <span className="text-gradient text-shimmer">Claude Fable 5</span>
+            </h2>
+            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
+              Route complex refactors, long-context reasoning, and production ship-work to Anthropic's newest model — right inside MANOVIK.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-6 md:grid-cols-2 text-left">
+            <div className="surface-card relative overflow-hidden rounded-2xl p-6 md:p-8">
+              <span className="card-border-glow" aria-hidden="true" />
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-lg">
+                  <Wand2 className="h-5 w-5" />
+                </span>
+                <div>
+                  <h3 className="font-semibold text-lg">Claude Fable 5</h3>
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Recommended for shipping</div>
+                </div>
+                <span className="ml-auto rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">New</span>
+              </div>
+              <ul className="mt-5 space-y-2.5 text-sm">
+                {[
+                  "Multi-file refactors across a whole repo",
+                  "Long-context reasoning up to 1M tokens",
+                  "Tool-use loops for build → test → deploy",
+                  "Best-in-class native app scaffolding",
+                ].map((f) => (
+                  <li key={f} className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/login" className="inline-block mt-6">
+                <Button className="bg-aurora text-primary-foreground glow hover:opacity-95">
+                  Try Fable 5 in MANOVIK <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { icon: Bot, title: "GPT-5.5", desc: "Deep reasoning & polish" },
+                { icon: Sparkles, title: "Gemini 3 Pro", desc: "Massive multimodal context" },
+                { icon: Layers, title: "Llama 3 · Local", desc: "Sovereign / on-device" },
+                { icon: Cpu, title: "Auto-router", desc: "Picks the cheapest capable model" },
+              ].map((m) => (
+                <div key={m.title} className="surface-card rounded-xl p-4">
+                  <m.icon className="h-5 w-5 text-primary" />
+                  <div className="mt-2 font-semibold text-sm">{m.title}</div>
+                  <div className="text-xs text-muted-foreground">{m.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* How it works */}
         <h2 className="mt-24 text-3xl md:text-4xl font-bold text-center">How it works</h2>
+
         <div className="mt-8 grid gap-6 md:grid-cols-3 text-left">
           {[
             { step: "01", title: "Describe", desc: "Tell MANOVIK what to build — a site, an API, an agent, a script." },
@@ -718,3 +822,135 @@ function Landing() {
     </main>
   );
 }
+
+const PROMPT_PRESETS = [
+  { icon: Smartphone, label: "Multiplayer mobile game", prompt: "Build a multiplayer trivia game for iOS & Android with Google login and realtime rooms." },
+  { icon: Store, label: "Shopify-style storefront", prompt: "Build a product storefront with cart, Razorpay checkout, and an admin dashboard." },
+  { icon: Bot, label: "AI SaaS with billing", prompt: "Build an AI writing SaaS with Supabase auth, Stripe subscriptions, and streaming responses." },
+  { icon: Workflow, label: "Automation dashboard", prompt: "Build a Zapier-style automation dashboard with triggers, actions and scheduled runs." },
+];
+
+const TARGETS = [
+  { id: "web", label: "Web app", icon: Globe },
+  { id: "ios", label: "iPhone", icon: Apple },
+  { id: "android", label: "Android", icon: Smartphone },
+] as const;
+
+const MODELS = ["Claude Fable 5", "GPT-5.5", "Gemini 3 Pro", "Auto"] as const;
+
+function PromptComposer() {
+  const [prompt, setPrompt] = useState("");
+  const [target, setTarget] = useState<(typeof TARGETS)[number]["id"]>("web");
+  const [model, setModel] = useState<(typeof MODELS)[number]>("Claude Fable 5");
+  const navigate = useNavigate();
+
+  const submit = () => {
+    const text = prompt.trim();
+    if (!text) {
+      toast.error("Describe what you want to build first");
+      return;
+    }
+    // Hand off to auth/chat; free to wire to a real intake later.
+    try {
+      sessionStorage.setItem("manovik:pending-prompt", JSON.stringify({ prompt: text, target, model }));
+    } catch {
+      // ignore storage failures
+    }
+    navigate({ to: "/login" });
+  };
+
+  return (
+    <div className="mt-24">
+      <div className="text-center animate-fade-in">
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
+          <Sparkles className="h-3.5 w-3.5" /> Start with a prompt
+        </div>
+        <h2 className="mt-4 text-3xl md:text-4xl font-bold">
+          Describe your app. <span className="text-gradient">MANOVIK ships it.</span>
+        </h2>
+        <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
+          Type an idea, pick a target and a model. We handle planning, code, tests and deployment.
+        </p>
+      </div>
+
+      <div className="mt-8 surface-card relative overflow-hidden rounded-2xl p-4 md:p-5 max-w-3xl mx-auto text-left">
+        <span className="card-border-glow" aria-hidden="true" />
+
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={(e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") submit();
+          }}
+          placeholder="e.g. Build a fitness tracking app with streaks, social feed, and Play Store release."
+          rows={4}
+          className="w-full resize-none rounded-xl bg-background/40 border border-border/60 p-4 text-sm md:text-base outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/70"
+        />
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/40 p-1">
+            {TARGETS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTarget(t.id)}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
+                  target === t.id ? "bg-aurora text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <t.icon className="h-3.5 w-3.5" />
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative">
+            <select
+              value={model}
+              onChange={(e) => setModel(e.target.value as (typeof MODELS)[number])}
+              aria-label="Model"
+              className="appearance-none rounded-full border border-primary/40 bg-card/40 px-3 py-1.5 pr-8 text-xs font-medium text-primary backdrop-blur outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              {MODELS.map((m) => (
+                <option key={m} value={m} className="bg-background text-foreground">
+                  {m}
+                </option>
+              ))}
+            </select>
+            <ChevronDown aria-hidden="true" className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-primary" />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => toast.info("File uploads unlock after sign-in")}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <Paperclip className="h-3.5 w-3.5" /> Attach
+          </button>
+
+          <div className="ml-auto flex items-center gap-2">
+            <span className="hidden md:inline text-[11px] text-muted-foreground">⌘/Ctrl + Enter</span>
+            <Button onClick={submit} className="bg-aurora text-primary-foreground glow hover:opacity-95">
+              <Send className="mr-1 h-4 w-4" /> Build it
+            </Button>
+          </div>
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {PROMPT_PRESETS.map((p) => (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => setPrompt(p.prompt)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-3 py-1 text-xs text-muted-foreground hover:text-primary hover:border-primary/40 transition"
+            >
+              <p.icon className="h-3.5 w-3.5" />
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
