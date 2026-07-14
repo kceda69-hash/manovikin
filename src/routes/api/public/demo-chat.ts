@@ -130,7 +130,14 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           return new Response("Payload too large", { status: 413 });
         }
 
-        let body: { prompt?: unknown; target?: unknown; model?: unknown };
+        let body: {
+          prompt?: unknown;
+          target?: unknown;
+          targets?: unknown;
+          model?: unknown;
+          mode?: unknown;
+          connected?: unknown;
+        };
         try {
           body = JSON.parse(raw);
         } catch {
@@ -144,6 +151,12 @@ export const Route = createFileRoute("/api/public/demo-chat")({
             : "web";
         const modelLabel =
           typeof body.model === "string" && MODEL_MAP[body.model] ? body.model : "Auto";
+        const mode = body.mode === "ship" ? "ship" : "plan";
+        const connected = body.connected === true;
+        const rawTargets = Array.isArray(body.targets) ? body.targets : [];
+        const targets = rawTargets
+          .filter((t): t is string => typeof t === "string")
+          .filter((t) => ["web", "ios", "android"].includes(t));
 
         if (!prompt) {
           return new Response("Prompt required", { status: 400 });
@@ -154,16 +167,21 @@ export const Route = createFileRoute("/api/public/demo-chat")({
 
         try {
           const gateway = createLovableAiGatewayProvider(apiKey);
+          const system =
+            mode === "ship"
+              ? shipSystemPrompt(targets.length ? targets : [target], modelLabel, connected)
+              : systemPrompt(target, modelLabel, connected);
           const result = streamText({
             model: gateway(MODEL_MAP[modelLabel]),
-            system: systemPrompt(target, modelLabel),
+            system,
             prompt,
-            temperature: 0.5,
+            temperature: mode === "ship" ? 0.3 : 0.5,
           });
           return result.toTextStreamResponse({
             headers: {
               "Cache-Control": "no-store",
               "X-Manovik-Demo": "1",
+              "X-Manovik-Mode": mode,
             },
           });
         } catch (err) {
