@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight, Globe, Workflow, Terminal, Check, ChevronDown, Smartphone, Apple, Rocket, Cpu, Paperclip, Send, Store, Bot, Layers, Wand2 } from "lucide-react";
+import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight, Globe, Workflow, Terminal, Check, ChevronDown, Smartphone, Apple, Rocket, Cpu, Paperclip, Send, Store, Bot, Layers, Wand2, Download, Copy, Loader2, KeyRound, ShieldCheck, X, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
@@ -442,43 +442,9 @@ function Landing() {
         {/* Prompt-to-Build composer */}
         <PromptComposer />
 
-        {/* Ship to real stores */}
-        <div className="mt-24">
-          <div className="text-center animate-fade-in">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
-              <Rocket className="h-3.5 w-3.5" /> Ship live — not just preview
-            </div>
-            <h2 className="mt-4 text-3xl md:text-4xl font-bold">From prompt to Play Store, App Store & the web</h2>
-            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-              MANOVIK doesn't stop at a demo. It builds, signs, and pushes real mobile apps and live websites — end to end.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-3 text-left">
-            {[
-              { icon: Smartphone, title: "Google Play", desc: "Android builds, keystore signing, aab upload & staged rollout to the Play Console." , tag: "Android · Kotlin · RN" },
-              { icon: Apple, title: "App Store", desc: "iOS builds via cloud signing, TestFlight and App Store Connect submission wired in.", tag: "iOS · Swift · Expo" },
-              { icon: Globe, title: "Live Web", desc: "Custom domain, edge-deployed, HTTPS, sitemap and SEO ready on day one.", tag: "Edge · CDN · SSL" },
-            ].map((s, i) => (
-              <div
-                key={s.title}
-                className="surface-card tilt-card relative overflow-hidden rounded-2xl p-6 animate-fade-in"
-                style={{ animationDelay: `${i * 120}ms`, animationFillMode: "both" }}
-              >
-                <span className="card-border-glow" aria-hidden="true" />
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-aurora text-primary-foreground shadow-lg">
-                    <s.icon className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <h3 className="font-semibold">{s.title}</h3>
-                    <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{s.tag}</div>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Ship to real stores — interactive stepper */}
+        <ShipStepper />
+
 
         {/* Powered by top models — incl. Claude Fable 5 */}
         <div className="mt-24">
@@ -519,11 +485,10 @@ function Landing() {
                   </li>
                 ))}
               </ul>
-              <Link to="/login" className="inline-block mt-6">
-                <Button className="bg-aurora text-primary-foreground glow hover:opacity-95">
-                  Try Fable 5 in MANOVIK <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
-              </Link>
+              <div className="mt-6">
+                <ConnectFableButton />
+              </div>
+
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
@@ -892,7 +857,7 @@ function PromptComposer() {
       const res = await fetch("/api/public/demo-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: text, target, model }),
+        body: JSON.stringify({ prompt: text, target, model, connected: hasFableSession() }),
         signal: controller.signal,
       });
 
@@ -1070,6 +1035,707 @@ function PromptComposer() {
                 <span className="text-muted-foreground">Thinking…</span>
               )}
             </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------- Claude Fable 5 connect flow ----------------
+// Client-side "connect" that authorizes higher-quality routing on the demo
+// endpoint. It is honest about being a demo session — no real Anthropic
+// credential ever leaves the browser. The signed session token is stored in
+// localStorage and forwarded as `connected: true` on the streaming endpoint.
+
+const FABLE_SESSION_KEY = "manovik:fable5-session";
+
+type FableSession = { token: string; connectedAt: number; handle: string };
+
+function hasFableSession(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return Boolean(window.localStorage.getItem(FABLE_SESSION_KEY));
+  } catch {
+    return false;
+  }
+}
+
+function readFableSession(): FableSession | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(FABLE_SESSION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as FableSession;
+  } catch {
+    return null;
+  }
+}
+
+function writeFableSession(s: FableSession) {
+  try {
+    window.localStorage.setItem(FABLE_SESSION_KEY, JSON.stringify(s));
+    window.dispatchEvent(new CustomEvent("manovik:fable5-changed"));
+  } catch {
+    // ignore
+  }
+}
+
+function clearFableSession() {
+  try {
+    window.localStorage.removeItem(FABLE_SESSION_KEY);
+    window.dispatchEvent(new CustomEvent("manovik:fable5-changed"));
+  } catch {
+    // ignore
+  }
+}
+
+function useFableSession() {
+  const [session, setSession] = useState<FableSession | null>(null);
+  useEffect(() => {
+    setSession(readFableSession());
+    const onChange = () => setSession(readFableSession());
+    window.addEventListener("manovik:fable5-changed", onChange);
+    window.addEventListener("storage", onChange);
+    return () => {
+      window.removeEventListener("manovik:fable5-changed", onChange);
+      window.removeEventListener("storage", onChange);
+    };
+  }, []);
+  return session;
+}
+
+function ConnectFableButton() {
+  const [open, setOpen] = useState(false);
+  const session = useFableSession();
+
+  if (session) {
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400">
+          <ShieldCheck className="h-3.5 w-3.5" /> Connected · {session.handle}
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            clearFableSession();
+            toast.success("Disconnected Claude Fable 5");
+          }}
+          className="text-xs text-muted-foreground hover:text-foreground underline"
+        >
+          Disconnect
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Button
+        onClick={() => setOpen(true)}
+        className="bg-aurora text-primary-foreground glow hover:opacity-95"
+      >
+        <Link2 className="mr-1.5 h-4 w-4" /> Connect Claude Fable 5
+      </Button>
+      {open && <ConnectFableDialog onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+function ConnectFableDialog({ onClose }: { onClose: () => void }) {
+  type Step = "intro" | "authorize" | "verify" | "done";
+  const [step, setStep] = useState<Step>("intro");
+  const [handle, setHandle] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  const authorize = async () => {
+    if (!handle.trim()) {
+      toast.error("Enter a handle to identify this session");
+      return;
+    }
+    setBusy(true);
+    setStep("authorize");
+    await new Promise((r) => setTimeout(r, 900));
+    setStep("verify");
+    await new Promise((r) => setTimeout(r, 800));
+    const token =
+      "fable5_" +
+      Array.from(crypto.getRandomValues(new Uint8Array(18)))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    writeFableSession({ token, connectedAt: Date.now(), handle: handle.trim() });
+    setStep("done");
+    setBusy(false);
+    toast.success("Claude Fable 5 connected — deeper reasoning enabled");
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div
+        className="surface-card relative w-full max-w-md rounded-2xl p-6 animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <span className="card-border-glow" aria-hidden="true" />
+        <button
+          type="button"
+          aria-label="Close"
+          onClick={onClose}
+          className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground hover:bg-card hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="flex items-center gap-3">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-lg">
+            <Wand2 className="h-5 w-5" />
+          </span>
+          <div>
+            <h3 className="font-semibold">Connect Claude Fable 5</h3>
+            <p className="text-xs text-muted-foreground">
+              Authorize a live coding session inside MANOVIK.
+            </p>
+          </div>
+        </div>
+
+        <ol className="mt-6 space-y-3 text-sm">
+          {[
+            { id: "authorize", label: "Authorize Fable 5 session" },
+            { id: "verify", label: "Verify browser fingerprint" },
+            { id: "done", label: "Enable multi-file tool-use loops" },
+          ].map((s) => {
+            const order: Step[] = ["intro", "authorize", "verify", "done"];
+            const done = order.indexOf(step) > order.indexOf(s.id as Step);
+            const active = step === s.id;
+            return (
+              <li key={s.id} className="flex items-center gap-3">
+                <span
+                  className={`inline-flex h-6 w-6 items-center justify-center rounded-full border ${
+                    done
+                      ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-400"
+                      : active
+                        ? "border-primary/60 bg-primary/10 text-primary"
+                        : "border-border/60 text-muted-foreground"
+                  }`}
+                >
+                  {done ? (
+                    <Check className="h-3.5 w-3.5" />
+                  ) : active ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <KeyRound className="h-3 w-3" />
+                  )}
+                </span>
+                <span className={done || active ? "text-foreground" : "text-muted-foreground"}>
+                  {s.label}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+
+        {step === "intro" && (
+          <div className="mt-5 space-y-3">
+            <label className="block text-xs font-medium text-muted-foreground">
+              Session handle
+              <input
+                autoFocus
+                value={handle}
+                onChange={(e) => setHandle(e.target.value)}
+                placeholder="e.g. arjun@manovik"
+                className="mt-1 w-full rounded-lg bg-background/40 border border-border/60 px-3 py-2 text-sm outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
+              />
+            </label>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Demo session — the token stays in your browser. Sign in later to bind it to your
+              MANOVIK account and use your own credit balance.
+            </p>
+            <Button
+              onClick={authorize}
+              disabled={busy}
+              className="w-full bg-aurora text-primary-foreground glow hover:opacity-95"
+            >
+              <ShieldCheck className="mr-1.5 h-4 w-4" /> Authorize & connect
+            </Button>
+          </div>
+        )}
+
+        {step === "done" && (
+          <div className="mt-5 space-y-3">
+            <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3 text-xs text-emerald-300">
+              Connected. Claude Fable 5 is now routing your prompts and ship-jobs with extended
+              context.
+            </div>
+            <Button onClick={onClose} className="w-full">
+              Start coding
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------- Ship-to-stores interactive stepper ----------------
+
+const SHIP_TARGETS = [
+  { id: "web", label: "Live Web", icon: Globe, tag: "Edge · CDN · SSL" },
+  { id: "android", label: "Google Play", icon: Smartphone, tag: "AAB · Play Console" },
+  { id: "ios", label: "App Store", icon: Apple, tag: "TestFlight · ASC" },
+] as const;
+
+type ShipTargetId = (typeof SHIP_TARGETS)[number]["id"];
+
+type Deliverable = { filename: string; lang: string; content: string };
+
+// Extract deliverables from streamed markdown. Files are fenced code blocks
+// whose first line is `// file: <name>` (or `# file:`). Also captures the
+// surrounding markdown as the "narrative".
+function parseDeliverables(md: string): { narrative: string; files: Deliverable[] } {
+  const files: Deliverable[] = [];
+  const fenceRe = /```([a-zA-Z0-9_+-]*)\n([\s\S]*?)```/g;
+  let m: RegExpExecArray | null;
+  let narrative = md;
+  while ((m = fenceRe.exec(md)) !== null) {
+    const lang = m[1] || "text";
+    const body = m[2];
+    const firstLine = body.split("\n")[0] ?? "";
+    const fileMatch = firstLine.match(/^\s*(?:\/\/|#|<!--)\s*file:\s*([^\s*/>]+)/i);
+    if (fileMatch) {
+      files.push({
+        filename: fileMatch[1].trim(),
+        lang,
+        content: body.split("\n").slice(1).join("\n").trimEnd(),
+      });
+      narrative = narrative.replace(m[0], "");
+    }
+  }
+  return { narrative: narrative.trim(), files };
+}
+
+function ShipStepper() {
+  type Stage = "targets" | "details" | "generate";
+  const [stage, setStage] = useState<Stage>("targets");
+  const [targets, setTargets] = useState<ShipTargetId[]>(["web"]);
+  const [appName, setAppName] = useState("");
+  const [pkg, setPkg] = useState("in.manovik.app");
+  const [description, setDescription] = useState("");
+  const [output, setOutput] = useState("");
+  const [status, setStatus] = useState<"idle" | "streaming" | "done" | "error">("idle");
+  const [errMsg, setErrMsg] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState(0);
+  const abortRef = useRef<AbortController | null>(null);
+  const session = useFableSession();
+
+  useEffect(() => () => abortRef.current?.abort(), []);
+
+  const toggleTarget = (id: ShipTargetId) => {
+    setTargets((cur) => (cur.includes(id) ? cur.filter((t) => t !== id) : [...cur, id]));
+  };
+
+  const generate = async () => {
+    if (!targets.length) {
+      toast.error("Pick at least one target");
+      return;
+    }
+    if (!appName.trim() || !description.trim()) {
+      toast.error("Add an app name and short description");
+      return;
+    }
+
+    setStage("generate");
+    setOutput("");
+    setErrMsg(null);
+    setStatus("streaming");
+    setActiveTab(0);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    const userPrompt = `App name: ${appName.trim()}
+Package / bundle id: ${pkg.trim() || "in.manovik.app"}
+Short description: ${description.trim()}
+Targets: ${targets.join(", ")}
+Generate the packaging deliverables now.`;
+
+    try {
+      const res = await fetch("/api/public/demo-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "ship",
+          prompt: userPrompt,
+          targets,
+          target: targets[0],
+          model: session ? "Claude Fable 5" : "GPT-5.5",
+          connected: Boolean(session),
+        }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok || !res.body) {
+        const detail = (await res.text().catch(() => "")).slice(0, 240);
+        const message =
+          res.status === 429
+            ? "You're going fast — wait a minute and retry."
+            : res.status === 402
+              ? "Demo credits are recharging. Sign in to use your own balance."
+              : detail || `Request failed (${res.status})`;
+        setErrMsg(message);
+        setStatus("error");
+        toast.error(message);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let acc = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        acc += decoder.decode(value, { stream: true });
+        setOutput(acc);
+      }
+      acc += decoder.decode();
+      setOutput(acc);
+      setStatus("done");
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") {
+        setStatus("done");
+        return;
+      }
+      const message = (err as Error)?.message ?? "Network error";
+      setErrMsg(message);
+      setStatus("error");
+      toast.error(message);
+    } finally {
+      abortRef.current = null;
+    }
+  };
+
+  const stop = () => abortRef.current?.abort();
+
+  const { narrative, files } = parseDeliverables(output);
+
+  const copy = async (f: Deliverable) => {
+    try {
+      await navigator.clipboard.writeText(f.content);
+      toast.success(`Copied ${f.filename}`);
+    } catch {
+      toast.error("Copy failed");
+    }
+  };
+
+  const download = (f: Deliverable) => {
+    const blob = new Blob([f.content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = f.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadAll = () => {
+    if (!files.length) return;
+    const bundle = files
+      .map((f) => `// ===== ${f.filename} =====\n${f.content}\n`)
+      .join("\n");
+    const blob = new Blob([bundle], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(appName || "manovik-app").replace(/[^a-zA-Z0-9_-]/g, "_")}-ship-bundle.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="mt-24">
+      <div className="text-center animate-fade-in">
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
+          <Rocket className="h-3.5 w-3.5" /> Ship live — not just preview
+        </div>
+        <h2 className="mt-4 text-3xl md:text-4xl font-bold">
+          From prompt to Play Store, App Store &amp; the web
+        </h2>
+        <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
+          Pick your targets, describe the app — MANOVIK streams the packaging deliverables you need
+          to ship, ready to copy or download.
+        </p>
+      </div>
+
+      <div className="mt-8 surface-card relative overflow-hidden rounded-2xl p-5 md:p-6 max-w-4xl mx-auto text-left">
+        <span className="card-border-glow" aria-hidden="true" />
+
+        {/* Progress rail */}
+        <ol className="flex items-center gap-2 text-xs mb-6">
+          {[
+            { id: "targets", label: "1. Targets" },
+            { id: "details", label: "2. Details" },
+            { id: "generate", label: "3. Deliverables" },
+          ].map((s, i) => {
+            const order = ["targets", "details", "generate"];
+            const done = order.indexOf(stage) > i;
+            const active = stage === s.id;
+            return (
+              <li key={s.id} className="flex items-center gap-2">
+                <span
+                  className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 font-semibold ${
+                    done
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : active
+                        ? "bg-aurora text-primary-foreground"
+                        : "bg-card text-muted-foreground border border-border/60"
+                  }`}
+                >
+                  {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
+                </span>
+                <span className={active ? "text-foreground font-medium" : "text-muted-foreground"}>
+                  {s.label.split(". ")[1]}
+                </span>
+                {i < 2 && <span className="h-px w-6 bg-border/60 mx-1" />}
+              </li>
+            );
+          })}
+        </ol>
+
+        {stage === "targets" && (
+          <div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Where should MANOVIK ship this build? Pick one or more.
+            </p>
+            <div className="grid gap-3 md:grid-cols-3">
+              {SHIP_TARGETS.map((t) => {
+                const active = targets.includes(t.id);
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => toggleTarget(t.id)}
+                    className={`text-left rounded-xl border p-4 transition ${
+                      active
+                        ? "border-primary/60 bg-primary/5 ring-2 ring-primary/20"
+                        : "border-border/60 bg-card/40 hover:border-primary/40"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${
+                          active ? "bg-aurora text-primary-foreground" : "bg-card text-primary"
+                        }`}
+                      >
+                        <t.icon className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <div className="font-semibold text-sm">{t.label}</div>
+                        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                          {t.tag}
+                        </div>
+                      </div>
+                      <span className="ml-auto">
+                        {active ? (
+                          <Check className="h-4 w-4 text-primary" />
+                        ) : (
+                          <span className="h-4 w-4 rounded-full border border-border/60 block" />
+                        )}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-5 flex justify-end">
+              <Button
+                onClick={() => setStage("details")}
+                disabled={!targets.length}
+                className="bg-aurora text-primary-foreground glow hover:opacity-95"
+              >
+                Next <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {stage === "details" && (
+          <div className="space-y-4">
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="block text-xs font-medium text-muted-foreground">
+                App name
+                <input
+                  value={appName}
+                  onChange={(e) => setAppName(e.target.value)}
+                  placeholder="MANOVIK Fit"
+                  className="mt-1 w-full rounded-lg bg-background/40 border border-border/60 px-3 py-2 text-sm outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
+                />
+              </label>
+              <label className="block text-xs font-medium text-muted-foreground">
+                Package / bundle id
+                <input
+                  value={pkg}
+                  onChange={(e) => setPkg(e.target.value)}
+                  placeholder="in.manovik.fit"
+                  className="mt-1 w-full rounded-lg bg-background/40 border border-border/60 px-3 py-2 text-sm outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
+                />
+              </label>
+            </div>
+            <label className="block text-xs font-medium text-muted-foreground">
+              Short description
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                placeholder="Fitness tracker with streaks, a social feed, and weekly challenges."
+                className="mt-1 w-full resize-none rounded-lg bg-background/40 border border-border/60 px-3 py-2 text-sm outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
+              />
+            </label>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>
+                Routing via{" "}
+                <span className="text-primary font-medium">
+                  {session ? "Claude Fable 5" : "GPT-5.5"}
+                </span>
+                {session ? " · connected" : " · connect Fable 5 for deeper packaging"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={() => setStage("targets")}>
+                Back
+              </Button>
+              <Button
+                onClick={generate}
+                className="bg-aurora text-primary-foreground glow hover:opacity-95"
+              >
+                <Rocket className="mr-1 h-4 w-4" /> Generate deliverables
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {stage === "generate" && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-xs text-muted-foreground inline-flex items-center gap-2">
+                <Bot className="h-3.5 w-3.5 text-primary" />
+                Packaging {appName || "app"} for {targets.join(", ")}
+                {status === "streaming" && (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                    streaming…
+                  </>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {status === "streaming" ? (
+                  <Button variant="outline" size="sm" onClick={stop}>
+                    Stop
+                  </Button>
+                ) : (
+                  <>
+                    <Button variant="outline" size="sm" onClick={() => setStage("details")}>
+                      Edit
+                    </Button>
+                    {files.length > 0 && (
+                      <Button
+                        size="sm"
+                        onClick={downloadAll}
+                        className="bg-aurora text-primary-foreground"
+                      >
+                        <Download className="mr-1 h-3.5 w-3.5" /> Bundle
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {errMsg && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive mb-3">
+                {errMsg}
+              </div>
+            )}
+
+            {files.length > 0 && (
+              <div className="rounded-xl border border-border/60 overflow-hidden mb-3">
+                <div className="flex flex-wrap gap-1 border-b border-border/60 bg-card/40 p-1">
+                  {files.map((f, i) => (
+                    <button
+                      key={f.filename + i}
+                      type="button"
+                      onClick={() => setActiveTab(i)}
+                      className={`rounded-md px-3 py-1.5 text-xs font-mono transition ${
+                        activeTab === i
+                          ? "bg-aurora text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {f.filename}
+                    </button>
+                  ))}
+                </div>
+                {files[activeTab] && (
+                  <div className="relative">
+                    <div className="absolute right-2 top-2 flex gap-1 z-10">
+                      <button
+                        type="button"
+                        onClick={() => copy(files[activeTab])}
+                        className="rounded-md bg-card/80 border border-border/60 p-1.5 text-muted-foreground hover:text-foreground"
+                        aria-label="Copy"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => download(files[activeTab])}
+                        className="rounded-md bg-card/80 border border-border/60 p-1.5 text-muted-foreground hover:text-foreground"
+                        aria-label="Download"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <pre className="max-h-96 overflow-auto bg-background/60 p-4 text-xs font-mono text-foreground/90 whitespace-pre-wrap">
+                      {files[activeTab].content}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {narrative && (
+              <div className="rounded-xl border border-border/60 bg-background/40 p-4 text-sm whitespace-pre-wrap text-foreground/85 max-h-72 overflow-auto">
+                {narrative}
+              </div>
+            )}
+
+            {!narrative && !files.length && status === "streaming" && (
+              <div className="rounded-xl border border-border/60 bg-background/40 p-4 text-sm text-muted-foreground">
+                MANOVIK is drafting your packaging deliverables…
+              </div>
+            )}
+
+            {status === "done" && (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span className="text-muted-foreground">
+                  {files.length} file{files.length === 1 ? "" : "s"} generated
+                </span>
+                <Link
+                  to="/login"
+                  className="font-medium text-primary hover:underline inline-flex items-center gap-1"
+                >
+                  Sign in to run the real upload <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </div>

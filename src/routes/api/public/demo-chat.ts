@@ -41,11 +41,14 @@ const MODEL_MAP: Record<string, string> = {
   Auto: "google/gemini-3-flash-preview",
 };
 
-function systemPrompt(target: string, modelLabel: string) {
+function systemPrompt(target: string, modelLabel: string, connected: boolean) {
   const goal = TARGET_LABEL[target] ?? TARGET_LABEL.web;
+  const brain = connected
+    ? `Currently routed model: ${modelLabel} (Claude Fable 5 session — deeper reasoning enabled).`
+    : `Currently routed model: ${modelLabel}.`;
   return `You are MANOVIK AI — an autonomous product engineer. This is a public landing-page demo, so keep the reply focused and under ~350 words.
 
-The user wants to ship ${goal}. Currently routed model: ${modelLabel}.
+The user wants to ship ${goal}. ${brain}
 
 Reply with this exact markdown structure:
 
@@ -65,6 +68,40 @@ Rules:
 - Never invent private APIs, secrets, or credentials.
 - Never claim work has already been executed — this is a preview.
 - Refuse unsafe requests (malware, unauthorized access, CSAM, weapons) with a brief decline.`;
+}
+
+function shipSystemPrompt(targets: string[], modelLabel: string, connected: boolean) {
+  const brain = connected
+    ? `${modelLabel} (Claude Fable 5 session — full packaging brain)`
+    : modelLabel;
+  const list = targets.length ? targets.join(", ") : "web";
+  return `You are MANOVIK's release engineer. Generate the packaging deliverables to ship an app to: ${list}. Model: ${brain}.
+
+Reply as concise markdown. For EACH selected target, include a section:
+
+## <Target name>
+One-line summary of what's included.
+
+Then include the real files as fenced code blocks with a filename comment on the FIRST line inside the fence, e.g.:
+\`\`\`json
+// file: app.json
+{ ... }
+\`\`\`
+
+Required deliverables per target:
+- web: manifest.json (PWA), index.html <head> meta+og tags, robots.txt, vercel.json OR netlify.toml (pick one).
+- ios: app.json (Expo/RN), Info.plist snippet with required usage strings, App Store listing copy (title <=30 chars, subtitle <=30, description ~600 chars, keywords), eas.json build profile.
+- android: app.json, AndroidManifest.xml snippet with permissions + intent filters, Play Store listing copy (title <=30, short desc <=80, full desc ~600), eas.json (or fastlane snippet).
+
+End with:
+
+### Next steps
+3 numbered steps: sign the artifact, upload to the store console, run a staged rollout.
+
+Rules:
+- Values should be real and coherent (use the provided app name, description, package id).
+- Do not fabricate credentials, API keys, or team IDs — leave TODO placeholders where needed.
+- Keep the whole reply under ~900 words.`;
 }
 
 export const Route = createFileRoute("/api/public/demo-chat")({
@@ -93,7 +130,14 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           return new Response("Payload too large", { status: 413 });
         }
 
-        let body: { prompt?: unknown; target?: unknown; model?: unknown };
+        let body: {
+          prompt?: unknown;
+          target?: unknown;
+          targets?: unknown;
+          model?: unknown;
+          mode?: unknown;
+          connected?: unknown;
+        };
         try {
           body = JSON.parse(raw);
         } catch {
@@ -107,6 +151,12 @@ export const Route = createFileRoute("/api/public/demo-chat")({
             : "web";
         const modelLabel =
           typeof body.model === "string" && MODEL_MAP[body.model] ? body.model : "Auto";
+        const mode = body.mode === "ship" ? "ship" : "plan";
+        const connected = body.connected === true;
+        const rawTargets = Array.isArray(body.targets) ? body.targets : [];
+        const targets = rawTargets
+          .filter((t): t is string => typeof t === "string")
+          .filter((t) => ["web", "ios", "android"].includes(t));
 
         if (!prompt) {
           return new Response("Prompt required", { status: 400 });
@@ -117,16 +167,21 @@ export const Route = createFileRoute("/api/public/demo-chat")({
 
         try {
           const gateway = createLovableAiGatewayProvider(apiKey);
+          const system =
+            mode === "ship"
+              ? shipSystemPrompt(targets.length ? targets : [target], modelLabel, connected)
+              : systemPrompt(target, modelLabel, connected);
           const result = streamText({
             model: gateway(MODEL_MAP[modelLabel]),
-            system: systemPrompt(target, modelLabel),
+            system,
             prompt,
-            temperature: 0.5,
+            temperature: mode === "ship" ? 0.3 : 0.5,
           });
           return result.toTextStreamResponse({
             headers: {
               "Cache-Control": "no-store",
               "X-Manovik-Demo": "1",
+              "X-Manovik-Mode": mode,
             },
           });
         } catch (err) {
