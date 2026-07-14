@@ -857,7 +857,7 @@ function PromptComposer() {
       const res = await fetch("/api/public/demo-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: text, target, model }),
+        body: JSON.stringify({ prompt: text, target, model, connected: hasFableSession() }),
         signal: controller.signal,
       });
 
