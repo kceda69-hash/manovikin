@@ -485,11 +485,10 @@ function Landing() {
                   </li>
                 ))}
               </ul>
-              <Link to="/login" className="inline-block mt-6">
-                <Button className="bg-aurora text-primary-foreground glow hover:opacity-95">
-                  Try Fable 5 in MANOVIK <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
-              </Link>
+              <div className="mt-6">
+                <ConnectFableButton />
+              </div>
+
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
