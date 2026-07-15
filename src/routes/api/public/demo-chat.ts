@@ -171,6 +171,7 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           model?: unknown;
           mode?: unknown;
           connected?: unknown;
+          files?: unknown;
         };
         try {
           body = JSON.parse(raw);
@@ -185,12 +186,24 @@ export const Route = createFileRoute("/api/public/demo-chat")({
             : "web";
         const modelLabel =
           typeof body.model === "string" && MODEL_MAP[body.model] ? body.model : "Auto";
-        const mode = body.mode === "ship" ? "ship" : "plan";
+        const mode =
+          body.mode === "ship" ? "ship" : body.mode === "workspace" ? "workspace" : "plan";
         const connected = body.connected === true;
         const rawTargets = Array.isArray(body.targets) ? body.targets : [];
         const targets = rawTargets
           .filter((t): t is string => typeof t === "string")
           .filter((t) => ["web", "ios", "android"].includes(t));
+        const rawFiles = Array.isArray(body.files) ? body.files : [];
+        const files = rawFiles
+          .filter(
+            (f): f is { path: string; content: string } =>
+              !!f &&
+              typeof f === "object" &&
+              typeof (f as { path?: unknown }).path === "string" &&
+              typeof (f as { content?: unknown }).content === "string",
+          )
+          .slice(0, 12)
+          .map((f) => ({ path: f.path.slice(0, 200), content: f.content.slice(0, 6000) }));
 
         if (!prompt) {
           return new Response("Prompt required", { status: 400 });
@@ -204,12 +217,14 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           const system =
             mode === "ship"
               ? shipSystemPrompt(targets.length ? targets : [target], modelLabel, connected)
-              : systemPrompt(target, modelLabel, connected);
+              : mode === "workspace"
+                ? workspaceSystemPrompt(files, modelLabel, connected)
+                : systemPrompt(target, modelLabel, connected);
           const result = streamText({
             model: gateway(MODEL_MAP[modelLabel]),
             system,
             prompt,
-            temperature: mode === "ship" ? 0.3 : 0.5,
+            temperature: mode === "plan" ? 0.5 : 0.3,
           });
           return result.toTextStreamResponse({
             headers: {
