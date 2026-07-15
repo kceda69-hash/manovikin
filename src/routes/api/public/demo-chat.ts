@@ -12,7 +12,7 @@ import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 // If you need persistence, tools, or auth-bound features, use /api/chat instead.
 
 const MAX_PROMPT_CHARS = 2000;
-const MAX_BODY_BYTES = 16 * 1024;
+const MAX_BODY_BYTES = 96 * 1024;
 const RATE_LIMIT_PER_MIN = 8;
 
 const buckets = new Map<string, number[]>();
