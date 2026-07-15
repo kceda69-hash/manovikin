@@ -12,7 +12,7 @@ import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 // If you need persistence, tools, or auth-bound features, use /api/chat instead.
 
 const MAX_PROMPT_CHARS = 2000;
-const MAX_BODY_BYTES = 16 * 1024;
+const MAX_BODY_BYTES = 96 * 1024;
 const RATE_LIMIT_PER_MIN = 8;
 
 const buckets = new Map<string, number[]>();
@@ -35,10 +35,12 @@ const TARGET_LABEL: Record<string, string> = {
 // Whitelist of demo model ids. "Claude Fable 5" is a marketing alias mapped to
 // the strongest available OpenAI reasoning model in the gateway catalog.
 const MODEL_MAP: Record<string, string> = {
-  "Claude Fable 5": "openai/gpt-5.5",
-  "GPT-5.5": "openai/gpt-5.5",
+  // gpt-5.4 streams plain text on the chat path (reasoning-only gpt-5.5 can
+  // return empty text through streamText without the Responses API).
+  "Claude Fable 5": "openai/gpt-5.4",
+  "GPT-5.5": "openai/gpt-5.4",
   "Gemini 3 Pro": "google/gemini-3.1-pro-preview",
-  Auto: "google/gemini-3-flash-preview",
+  Auto: "google/gemini-3.5-flash",
 };
 
 function systemPrompt(target: string, modelLabel: string, connected: boolean) {
@@ -104,6 +106,40 @@ Rules:
 - Keep the whole reply under ~900 words.`;
 }
 
+function workspaceSystemPrompt(
+  files: { path: string; content: string }[],
+  modelLabel: string,
+  connected: boolean,
+) {
+  const brain = connected
+    ? `${modelLabel} (Claude Fable 5 session — multi-file tool loop enabled)`
+    : modelLabel;
+  const snapshot = files
+    .map((f) => `\`\`\`\n// file: ${f.path}\n${f.content}\n\`\`\``)
+    .join("\n\n");
+  return `You are MANOVIK's in-browser coding agent. Model: ${brain}.
+
+You are editing this small project. Current file snapshot:
+
+${snapshot}
+
+When the user asks for a change, reply with:
+
+### Plan
+2-4 short bullets describing the edits.
+
+### Edits
+For EACH file you change or create, emit ONE fenced code block whose FIRST line is exactly:
+// file: <relative path>
+Followed by the FULL new contents of that file (not a patch, not a diff).
+
+Rules:
+- Only include files you actually change or create. Skip untouched files.
+- Keep paths relative and stable (match existing paths for edits).
+- Never invent secrets. Never claim the change is deployed — MANOVIK will apply it.
+- Keep the whole reply under ~700 words.`;
+}
+
 export const Route = createFileRoute("/api/public/demo-chat")({
   server: {
     handlers: {
@@ -137,6 +173,7 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           model?: unknown;
           mode?: unknown;
           connected?: unknown;
+          files?: unknown;
         };
         try {
           body = JSON.parse(raw);
@@ -151,12 +188,24 @@ export const Route = createFileRoute("/api/public/demo-chat")({
             : "web";
         const modelLabel =
           typeof body.model === "string" && MODEL_MAP[body.model] ? body.model : "Auto";
-        const mode = body.mode === "ship" ? "ship" : "plan";
+        const mode =
+          body.mode === "ship" ? "ship" : body.mode === "workspace" ? "workspace" : "plan";
         const connected = body.connected === true;
         const rawTargets = Array.isArray(body.targets) ? body.targets : [];
         const targets = rawTargets
           .filter((t): t is string => typeof t === "string")
           .filter((t) => ["web", "ios", "android"].includes(t));
+        const rawFiles = Array.isArray(body.files) ? body.files : [];
+        const files = rawFiles
+          .filter(
+            (f): f is { path: string; content: string } =>
+              !!f &&
+              typeof f === "object" &&
+              typeof (f as { path?: unknown }).path === "string" &&
+              typeof (f as { content?: unknown }).content === "string",
+          )
+          .slice(0, 12)
+          .map((f) => ({ path: f.path.slice(0, 200), content: f.content.slice(0, 6000) }));
 
         if (!prompt) {
           return new Response("Prompt required", { status: 400 });
@@ -170,12 +219,14 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           const system =
             mode === "ship"
               ? shipSystemPrompt(targets.length ? targets : [target], modelLabel, connected)
-              : systemPrompt(target, modelLabel, connected);
+              : mode === "workspace"
+                ? workspaceSystemPrompt(files, modelLabel, connected)
+                : systemPrompt(target, modelLabel, connected);
           const result = streamText({
             model: gateway(MODEL_MAP[modelLabel]),
             system,
             prompt,
-            temperature: mode === "ship" ? 0.3 : 0.5,
+            temperature: mode === "plan" ? 0.5 : 0.3,
           });
           return result.toTextStreamResponse({
             headers: {

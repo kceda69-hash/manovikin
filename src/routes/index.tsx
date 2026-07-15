@@ -507,6 +507,9 @@ function Landing() {
           </div>
         </div>
 
+        {/* In-page coding workspace — streams edits from Claude Fable 5 */}
+        <CodingWorkspace />
+
         {/* How it works */}
         <h2 className="mt-24 text-3xl md:text-4xl font-bold text-center">How it works</h2>
 
@@ -1738,6 +1741,407 @@ Generate the packaging deliverables now.`;
             )}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// -------------- CodingWorkspace: in-page IDE w/ streaming edits ---------------
+
+type WorkspaceFile = { path: string; content: string };
+
+const SEED_FILES: WorkspaceFile[] = [
+  {
+    path: "src/App.tsx",
+    content: `import { useState } from "react";
+
+export default function App() {
+  const [count, setCount] = useState(0);
+  return (
+    <main className="p-8">
+      <h1 className="text-2xl font-bold">Hello from MANOVIK</h1>
+      <button onClick={() => setCount((c) => c + 1)}>
+        Clicked {count} times
+      </button>
+    </main>
+  );
+}
+`,
+  },
+  {
+    path: "src/api/hello.ts",
+    content: `export async function GET() {
+  return Response.json({ ok: true, msg: "hello" });
+}
+`,
+  },
+  {
+    path: "package.json",
+    content: `{
+  "name": "manovik-demo",
+  "private": true,
+  "scripts": { "dev": "vite", "build": "vite build" }
+}
+`,
+  },
+  {
+    path: "README.md",
+    content: `# MANOVIK demo workspace
+
+Ask Claude Fable 5 for edits and watch them stream in.
+`,
+  },
+];
+
+/** Parse fenced code blocks whose first inner line is "// file: <path>". */
+function parseEdits(text: string): WorkspaceFile[] {
+  const out: WorkspaceFile[] = [];
+  const re = /```[a-zA-Z0-9_+-]*\n\/\/\s*file:\s*([^\n]+)\n([\s\S]*?)(?:```|$)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text))) {
+    const path = m[1].trim();
+    if (!path) continue;
+    out.push({ path, content: m[2].replace(/\n$/, "") });
+  }
+  // De-dupe by path (last wins).
+  const map = new Map<string, WorkspaceFile>();
+  for (const f of out) map.set(f.path, f);
+  return Array.from(map.values());
+}
+
+/** Tiny LCS line diff → array of {type, line}. */
+function lineDiff(a: string, b: string): { type: "eq" | "add" | "del"; line: string }[] {
+  const A = a.split("\n");
+  const B = b.split("\n");
+  const n = A.length;
+  const m = B.length;
+  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = A[i] === B[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const out: { type: "eq" | "add" | "del"; line: string }[] = [];
+  let i = 0, j = 0;
+  while (i < n && j < m) {
+    if (A[i] === B[j]) { out.push({ type: "eq", line: A[i] }); i++; j++; }
+    else if (dp[i + 1][j] >= dp[i][j + 1]) { out.push({ type: "del", line: A[i++] }); }
+    else { out.push({ type: "add", line: B[j++] }); }
+  }
+  while (i < n) out.push({ type: "del", line: A[i++] });
+  while (j < m) out.push({ type: "add", line: B[j++] });
+  return out;
+}
+
+function CodingWorkspace() {
+  const session = useFableSession();
+  const [files, setFiles] = useState<WorkspaceFile[]>(SEED_FILES);
+  const [edits, setEdits] = useState<WorkspaceFile[]>([]);
+  const [activePath, setActivePath] = useState<string>(SEED_FILES[0].path);
+  const [view, setView] = useState<"code" | "diff">("code");
+  const [prompt, setPrompt] = useState("");
+  const [stream, setStream] = useState("");
+  const [status, setStatus] = useState<"idle" | "streaming" | "done" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const streamRef = useRef<HTMLPreElement | null>(null);
+
+  useEffect(() => () => abortRef.current?.abort(), []);
+  useEffect(() => {
+    if (streamRef.current) streamRef.current.scrollTop = streamRef.current.scrollHeight;
+  }, [stream]);
+
+  // Parse edits live while streaming.
+  useEffect(() => {
+    if (!stream) return;
+    const parsed = parseEdits(stream);
+    if (parsed.length) {
+      setEdits(parsed);
+      if (!parsed.find((f) => f.path === activePath)) setActivePath(parsed[0].path);
+      if (view === "code") setView("diff");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stream]);
+
+  const allPaths = Array.from(new Set([...files.map((f) => f.path), ...edits.map((e) => e.path)]));
+  const currentOriginal = files.find((f) => f.path === activePath);
+  const currentEdit = edits.find((f) => f.path === activePath);
+
+  const stop = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setStatus((s) => (s === "streaming" ? "done" : s));
+  };
+
+  const submit = async () => {
+    const text = prompt.trim();
+    if (!text) return toast.error("Describe the edit you want");
+    if (!session) return toast.error("Connect Claude Fable 5 above to enable coding edits");
+    if (status === "streaming") return;
+    setStream("");
+    setEdits([]);
+    setErrorMsg(null);
+    setStatus("streaming");
+    const controller = new AbortController();
+    abortRef.current = controller;
+    try {
+      const res = await fetch("/api/public/demo-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: text,
+          mode: "workspace",
+          model: "Claude Fable 5",
+          connected: true,
+          files,
+        }),
+        signal: controller.signal,
+      });
+      if (!res.ok || !res.body) {
+        const detail = (await res.text().catch(() => "")).slice(0, 240);
+        throw new Error(
+          res.status === 429
+            ? "Rate limited — wait a minute."
+            : res.status === 402
+              ? "Demo credits are recharging."
+              : detail || "Fable 5 could not respond.",
+        );
+      }
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let acc = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        acc += dec.decode(value, { stream: true });
+        setStream(acc);
+      }
+      setStatus("done");
+    } catch (e) {
+      if ((e as Error).name === "AbortError") return;
+      setErrorMsg((e as Error).message);
+      setStatus("error");
+    } finally {
+      abortRef.current = null;
+    }
+  };
+
+  const applyEdits = () => {
+    if (!edits.length) return;
+    const map = new Map(files.map((f) => [f.path, f] as const));
+    for (const e of edits) map.set(e.path, e);
+    setFiles(Array.from(map.values()));
+    setEdits([]);
+    setView("code");
+    toast.success(`Applied ${edits.length} file change${edits.length === 1 ? "" : "s"}`);
+  };
+  const rejectEdits = () => {
+    setEdits([]);
+    setStream("");
+    setStatus("idle");
+    setView("code");
+  };
+
+  const diff = view === "diff" && currentEdit
+    ? lineDiff(currentOriginal?.content ?? "", currentEdit.content)
+    : null;
+
+  return (
+    <div className="mt-24">
+      <div className="text-center animate-fade-in">
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
+          <Terminal className="h-3.5 w-3.5" /> Live coding workspace
+        </div>
+        <h2 className="mt-4 text-3xl md:text-4xl font-bold">Edit code with Fable 5, right here</h2>
+        <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
+          {session
+            ? "Ask for a change — Fable 5 streams multi-file edits into a proposed diff you can apply."
+            : "Connect Claude Fable 5 above to unlock streaming multi-file edits in this in-page IDE."}
+        </p>
+      </div>
+
+      <div className="mt-8 surface-card relative overflow-hidden rounded-2xl">
+        <span className="card-border-glow" aria-hidden="true" />
+        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] min-h-[520px]">
+          {/* File tree */}
+          <aside className="border-b md:border-b-0 md:border-r border-border/60 bg-background/40 p-3">
+            <div className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+              Files
+            </div>
+            <ul className="space-y-0.5 text-sm">
+              {allPaths.map((p) => {
+                const edited = !!edits.find((e) => e.path === p);
+                const created = edited && !files.find((f) => f.path === p);
+                const active = p === activePath;
+                return (
+                  <li key={p}>
+                    <button
+                      type="button"
+                      onClick={() => setActivePath(p)}
+                      className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left font-mono text-xs transition ${
+                        active
+                          ? "bg-primary/15 text-foreground"
+                          : "text-muted-foreground hover:bg-card/60 hover:text-foreground"
+                      }`}
+                    >
+                      <Code2 className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{p}</span>
+                      {created ? (
+                        <span className="ml-auto rounded bg-emerald-500/15 px-1 text-[9px] font-bold text-emerald-400">
+                          NEW
+                        </span>
+                      ) : edited ? (
+                        <span className="ml-auto rounded bg-amber-500/15 px-1 text-[9px] font-bold text-amber-400">
+                          EDIT
+                        </span>
+                      ) : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </aside>
+
+          {/* Editor pane */}
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between border-b border-border/60 bg-background/40 px-3 py-2">
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => setView("code")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                    view === "code" ? "bg-primary/15 text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Code
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("diff")}
+                  disabled={!currentEdit}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition disabled:opacity-40 ${
+                    view === "diff" ? "bg-primary/15 text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Diff{edits.length ? ` (${edits.length})` : ""}
+                </button>
+              </div>
+              {edits.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={rejectEdits}
+                    className="rounded-md border border-border/60 px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    type="button"
+                    onClick={applyEdits}
+                    className="rounded-md bg-aurora px-2.5 py-1 text-xs font-semibold text-primary-foreground glow"
+                  >
+                    Apply {edits.length} edit{edits.length === 1 ? "" : "s"}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="min-h-[300px] flex-1 overflow-auto bg-background/60 p-3 font-mono text-xs">
+              {view === "code" ? (
+                <pre className="whitespace-pre text-foreground/90">
+                  {(currentEdit ?? currentOriginal)?.content ?? "// select a file"}
+                </pre>
+              ) : diff ? (
+                <pre className="whitespace-pre">
+                  {diff.map((d, i) => (
+                    <div
+                      key={i}
+                      className={
+                        d.type === "add"
+                          ? "bg-emerald-500/10 text-emerald-300"
+                          : d.type === "del"
+                            ? "bg-rose-500/10 text-rose-300 line-through decoration-rose-400/40"
+                            : "text-foreground/70"
+                      }
+                    >
+                      <span className="mr-2 select-none text-muted-foreground">
+                        {d.type === "add" ? "+" : d.type === "del" ? "-" : " "}
+                      </span>
+                      {d.line || " "}
+                    </div>
+                  ))}
+                </pre>
+              ) : (
+                <div className="text-muted-foreground">No proposed edit for this file.</div>
+              )}
+            </div>
+
+            {/* Live model stream */}
+            {(status === "streaming" || stream) && (
+              <details className="border-t border-border/60 bg-background/40" open={status === "streaming"}>
+                <summary className="cursor-pointer px-3 py-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+                  Fable 5 stream {status === "streaming" && <Loader2 className="ml-1 inline h-3 w-3 animate-spin" />}
+                </summary>
+                <pre
+                  ref={streamRef}
+                  className="max-h-40 overflow-auto whitespace-pre-wrap px-3 pb-3 text-[11px] text-foreground/75"
+                >
+                  {stream || "…"}
+                </pre>
+              </details>
+            )}
+
+            {/* Prompt bar */}
+            <div className="border-t border-border/60 bg-background/60 p-3">
+              {errorMsg && (
+                <div className="mb-2 rounded-md border border-rose-500/40 bg-rose-500/10 px-2 py-1 text-xs text-rose-300">
+                  {errorMsg}
+                </div>
+              )}
+              <div className="flex items-end gap-2">
+                <textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault();
+                      submit();
+                    }
+                  }}
+                  rows={2}
+                  placeholder={
+                    session
+                      ? "e.g. Add a dark-mode toggle to App.tsx and a /api/health route"
+                      : "Connect Claude Fable 5 above to enable edits…"
+                  }
+                  disabled={!session || status === "streaming"}
+                  className="flex-1 resize-none rounded-lg border border-border/60 bg-background/40 p-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none disabled:opacity-60"
+                />
+                {status === "streaming" ? (
+                  <button
+                    type="button"
+                    onClick={stop}
+                    className="inline-flex items-center gap-1 rounded-lg border border-border/60 px-3 py-2 text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" /> Stop
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={submit}
+                    disabled={!session}
+                    className="inline-flex items-center gap-1 rounded-lg bg-aurora px-3 py-2 text-sm font-semibold text-primary-foreground glow disabled:opacity-50"
+                  >
+                    <Send className="h-4 w-4" /> Send
+                  </button>
+                )}
+              </div>
+              <div className="mt-1 text-[10px] text-muted-foreground">
+                ⌘/Ctrl + Enter to send · Edits are proposed as a diff — click Apply to write them into the workspace.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
