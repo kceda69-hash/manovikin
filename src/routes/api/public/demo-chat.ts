@@ -104,6 +104,40 @@ Rules:
 - Keep the whole reply under ~900 words.`;
 }
 
+function workspaceSystemPrompt(
+  files: { path: string; content: string }[],
+  modelLabel: string,
+  connected: boolean,
+) {
+  const brain = connected
+    ? `${modelLabel} (Claude Fable 5 session — multi-file tool loop enabled)`
+    : modelLabel;
+  const snapshot = files
+    .map((f) => `\`\`\`\n// file: ${f.path}\n${f.content}\n\`\`\``)
+    .join("\n\n");
+  return `You are MANOVIK's in-browser coding agent. Model: ${brain}.
+
+You are editing this small project. Current file snapshot:
+
+${snapshot}
+
+When the user asks for a change, reply with:
+
+### Plan
+2-4 short bullets describing the edits.
+
+### Edits
+For EACH file you change or create, emit ONE fenced code block whose FIRST line is exactly:
+// file: <relative path>
+Followed by the FULL new contents of that file (not a patch, not a diff).
+
+Rules:
+- Only include files you actually change or create. Skip untouched files.
+- Keep paths relative and stable (match existing paths for edits).
+- Never invent secrets. Never claim the change is deployed — MANOVIK will apply it.
+- Keep the whole reply under ~700 words.`;
+}
+
 export const Route = createFileRoute("/api/public/demo-chat")({
   server: {
     handlers: {
