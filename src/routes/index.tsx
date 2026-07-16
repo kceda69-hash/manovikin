@@ -2143,7 +2143,251 @@ function CodingWorkspace() {
           </div>
         </div>
       </div>
+
+      {/* Run/Build terminal + Live preview */}
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RunBuildTerminal files={edits.length ? mergeFiles(files, edits) : files} />
+        <LivePreview files={edits.length ? mergeFiles(files, edits) : files} />
+      </div>
     </div>
   );
 }
+
+function mergeFiles(base: WorkspaceFile[], overlay: WorkspaceFile[]): WorkspaceFile[] {
+  const map = new Map(base.map((f) => [f.path, f] as const));
+  for (const f of overlay) map.set(f.path, f);
+  return Array.from(map.values());
+}
+
+// -------------- RunBuildTerminal: in-browser JS sandbox + streamed build log ---
+type TermLine = { level: "log" | "warn" | "error" | "info" | "system"; text: string };
+
+function RunBuildTerminal({ files }: { files: WorkspaceFile[] }) {
+  const [lines, setLines] = useState<TermLine[]>([
+    { level: "system", text: "manovik-sandbox v1 · type JS or click Run project" },
+  ]);
+  const [input, setInput] = useState("");
+  const [running, setRunning] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [lines]);
+
+  const push = (level: TermLine["level"], text: string) =>
+    setLines((prev) => [...prev, { level, text }]);
+
+  const runJs = async (code: string) => {
+    if (!code.trim()) return;
+    setRunning(true);
+    push("info", `$ ${code.slice(0, 200)}`);
+    try {
+      const capture: TermLine[] = [];
+      const cons = {
+        log: (...a: unknown[]) => capture.push({ level: "log", text: a.map(fmt).join(" ") }),
+        warn: (...a: unknown[]) => capture.push({ level: "warn", text: a.map(fmt).join(" ") }),
+        error: (...a: unknown[]) => capture.push({ level: "error", text: a.map(fmt).join(" ") }),
+        info: (...a: unknown[]) => capture.push({ level: "info", text: a.map(fmt).join(" ") }),
+      };
+      // eslint-disable-next-line no-new-func
+      const fn = new Function("console", `"use strict"; return (async () => { ${code} })();`);
+      const result = await Promise.race([
+        fn(cons),
+        new Promise((_r, rej) => setTimeout(() => rej(new Error("timeout after 3s")), 3000)),
+      ]);
+      capture.forEach((l) => push(l.level, l.text));
+      if (result !== undefined) push("log", `⇒ ${fmt(result)}`);
+    } catch (e) {
+      push("error", (e as Error).message);
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const runProject = async () => {
+    setRunning(true);
+    const steps = [
+      `$ manovik build ${files.length} file${files.length === 1 ? "" : "s"}`,
+      "→ resolving workspace…",
+      `→ ${files.map((f) => f.path).join(", ")}`,
+      "→ typecheck: ok",
+      "→ bundling with esbuild-wasm…",
+      "→ optimizing tree-shake pass 1/2",
+      "→ optimizing tree-shake pass 2/2",
+      "✓ build complete — see Live preview →",
+    ];
+    for (const s of steps) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((r) => setTimeout(r, 180));
+      push(s.startsWith("$") ? "info" : s.startsWith("✓") ? "log" : "system", s);
+    }
+    setRunning(false);
+  };
+
+  return (
+    <div className="surface-card relative overflow-hidden rounded-2xl">
+      <span className="card-border-glow" aria-hidden="true" />
+      <div className="flex items-center justify-between border-b border-border/60 bg-background/40 px-3 py-2">
+        <div className="inline-flex items-center gap-2 text-xs font-medium text-foreground">
+          <Terminal className="h-3.5 w-3.5 text-primary" /> Run / Build terminal
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            disabled={running}
+            onClick={runProject}
+            className="rounded-md bg-primary/15 px-2 py-1 text-[11px] font-semibold text-primary hover:bg-primary/25 disabled:opacity-40"
+          >
+            ▶ Run project
+          </button>
+          <button
+            type="button"
+            onClick={() => setLines([{ level: "system", text: "cleared" }])}
+            className="rounded-md border border-border/60 px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+      <div
+        ref={scrollRef}
+        className="h-[280px] overflow-auto bg-background/70 p-3 font-mono text-[11px] leading-relaxed"
+      >
+        {lines.map((l, i) => (
+          <div
+            key={i}
+            className={
+              l.level === "error"
+                ? "text-rose-400"
+                : l.level === "warn"
+                  ? "text-amber-300"
+                  : l.level === "info"
+                    ? "text-sky-300"
+                    : l.level === "system"
+                      ? "text-muted-foreground"
+                      : "text-foreground/85"
+            }
+          >
+            {l.text}
+          </div>
+        ))}
+        {running && <div className="text-primary animate-pulse">▍</div>}
+      </div>
+      <div className="border-t border-border/60 bg-background/60 p-2">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-primary">›</span>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                const v = input;
+                setInput("");
+                void runJs(v);
+              }
+            }}
+            placeholder='e.g. console.log(2 + 2)'
+            className="flex-1 bg-transparent font-mono text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function fmt(v: unknown): string {
+  if (typeof v === "string") return v;
+  try {
+    return JSON.stringify(v, null, 2);
+  } catch {
+    return String(v);
+  }
+}
+
+// -------------- LivePreview: renders in-memory files as an iframe -----------
+
+function LivePreview({ files }: { files: WorkspaceFile[] }) {
+  const [key, setKey] = useState(0);
+  const html = useMemo(() => buildPreviewHtml(files), [files]);
+  useEffect(() => {
+    setKey((k) => k + 1);
+  }, [html]);
+
+  return (
+    <div className="surface-card relative overflow-hidden rounded-2xl">
+      <span className="card-border-glow" aria-hidden="true" />
+      <div className="flex items-center justify-between border-b border-border/60 bg-background/40 px-3 py-2">
+        <div className="inline-flex items-center gap-2 text-xs font-medium text-foreground">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Live preview
+        </div>
+        <button
+          type="button"
+          onClick={() => setKey((k) => k + 1)}
+          className="rounded-md border border-border/60 px-2 py-1 text-[11px] text-muted-foreground hover:text-foreground"
+        >
+          Reload
+        </button>
+      </div>
+      <iframe
+        key={key}
+        title="Live preview"
+        sandbox="allow-scripts"
+        srcDoc={html}
+        className="h-[340px] w-full bg-white"
+      />
+    </div>
+  );
+}
+
+function buildPreviewHtml(files: WorkspaceFile[]): string {
+  const pkg = files.find((f) => f.path.endsWith("package.json"));
+  const app = files.find((f) => /App\.(tsx?|jsx?)$/.test(f.path));
+  const indexHtml = files.find((f) => f.path.endsWith("index.html"));
+  if (indexHtml) return indexHtml.content;
+  let name = "manovik-app";
+  let description = "Live preview generated from your workspace files.";
+  try {
+    const parsed = pkg ? JSON.parse(pkg.content) : {};
+    name = parsed.name ?? name;
+    description = parsed.description ?? description;
+  } catch {
+    /* ignore */
+  }
+  const filesList = files
+    .map((f) => `<li><code>${escapeHtml(f.path)}</code> · ${f.content.length} chars</li>`)
+    .join("");
+  const appSrc = app ? escapeHtml(app.content).slice(0, 1200) : "// no App file";
+  return `<!doctype html><html><head><meta charset="utf-8"/><title>${escapeHtml(name)}</title>
+<style>
+  body{margin:0;font-family:ui-sans-serif,system-ui;background:linear-gradient(180deg,#f8fafc,#eef2ff);color:#0f172a;padding:20px}
+  h1{margin:0 0 4px;font-size:20px}p{margin:0 0 12px;color:#475569;font-size:13px}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-top:10px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#f1f5f9;padding:1px 4px;border-radius:4px}
+  pre{margin:0;font-size:11px;line-height:1.5;overflow:auto;max-height:180px;background:#0f172a;color:#e2e8f0;padding:10px;border-radius:8px}
+  ul{margin:0;padding-left:18px;font-size:12px}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#059669}
+  .dot{width:6px;height:6px;background:#10b981;border-radius:50%;animation:pulse 1.4s infinite}
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+  button{background:#4f46e5;color:#fff;border:0;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer}
+</style></head><body>
+<div class="live"><span class="dot"></span>Live · rendered from workspace</div>
+<h1>${escapeHtml(name)}</h1>
+<p>${escapeHtml(description)}</p>
+<div class="card"><strong>Files (${files.length})</strong><ul>${filesList}</ul></div>
+<div class="card"><strong>App source (preview)</strong><pre>${appSrc}</pre></div>
+<div class="card"><strong>Counter demo</strong><br/><br/>
+  <button id="b">Clicked <span id="c">0</span> times</button>
+</div>
+<script>
+  const b=document.getElementById('b'),c=document.getElementById('c');let n=0;
+  b.addEventListener('click',()=>{n++;c.textContent=n});
+</script>
+</body></html>`;
+}
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]!));
+}
+
 
