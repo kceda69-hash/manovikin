@@ -222,6 +222,16 @@ function LoginPage() {
         >
           {mode === "signin" ? "No account? Sign up" : "Already have an account? Sign in"}
         </button>
+
+        <div className="mt-6 border-t border-border/40 pt-3 text-center">
+          <Link
+            to="/login"
+            search={{ next: "/admin" } as never}
+            className="text-[11px] uppercase tracking-wider text-muted-foreground/70 hover:text-foreground"
+          >
+            Admin sign-in →
+          </Link>
+        </div>
       </div>
     </main>
   );
