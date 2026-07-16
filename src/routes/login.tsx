@@ -225,8 +225,7 @@ function LoginPage() {
 
         <div className="mt-6 border-t border-border/40 pt-3 text-center">
           <Link
-            to="/login"
-            search={{ next: "/admin" } as never}
+            to="/admin"
             className="text-[11px] uppercase tracking-wider text-muted-foreground/70 hover:text-foreground"
           >
             Admin sign-in →
