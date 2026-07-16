@@ -307,10 +307,12 @@ function AdminConsole({ who }: { who: Whoami }) {
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="purchases">Purchases</TabsTrigger>
             <TabsTrigger value="audit">Audit log</TabsTrigger>
+            <TabsTrigger value="manovik">MANOVIK</TabsTrigger>
           </TabsList>
           <TabsContent value="users" className="mt-4"><UsersTab currentAdminId={who.userId} /></TabsContent>
           <TabsContent value="purchases" className="mt-4"><PurchasesTab /></TabsContent>
           <TabsContent value="audit" className="mt-4"><AuditTab /></TabsContent>
+          <TabsContent value="manovik" className="mt-4"><ManovikTab /></TabsContent>
         </Tabs>
       </main>
     </div>
