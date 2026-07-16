@@ -750,3 +750,101 @@ function AuditTab() {
     </Card>
   );
 }
+
+// -------- MANOVIK tab (updates + self-build console) ----------------
+
+function ManovikTab() {
+  const [updates, setUpdates] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const loadUpdates = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("manovik_brain_updates" as any)
+      .select("id, version, notes, metadata, created_at")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) toast.error(error.message);
+    else setUpdates((data ?? []) as any[]);
+    setLoading(false);
+  };
+
+  const saveUpdate = async () => {
+    if (!notes.trim()) return toast.error("Add release notes first");
+    setSaving(true);
+    const version = `admin-${new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "")}`;
+    const { error } = await supabase
+      .from("manovik_brain_updates" as any)
+      .insert({ version, notes: notes.trim(), metadata: { source: "admin" } as any });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success(`Published ${version}`);
+    setNotes("");
+    loadUpdates();
+  };
+
+  useEffect(() => { loadUpdates(); }, []);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <Card className="p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Publish MANOVIK update</h3>
+          <Badge variant="secondary" className="text-[10px]">admin · unlimited</Badge>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Announces a new brain version. Admin chat calls skip credit metering server-side.
+        </p>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={5}
+          placeholder="What's new in this brain update…"
+          className="mt-3 w-full rounded-md border border-border/60 bg-background p-2 text-sm focus:border-primary/60 focus:outline-none"
+        />
+        <Button className="mt-3" onClick={saveUpdate} disabled={saving}>
+          {saving ? "Publishing…" : "Publish update"}
+        </Button>
+      </Card>
+
+      <Card className="p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Self-build console</h3>
+          <Button size="sm" variant="ghost" onClick={loadUpdates}>
+            <RefreshCw className="mr-1 h-3 w-3" /> Refresh
+          </Button>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Ask MANOVIK to draft features into the workspace. Generated code lands in the
+          landing-page workspace; admin reviews the diff and applies. No repo writes.
+        </p>
+        <Button className="mt-3" variant="outline" asChild>
+          <Link to="/">Open workspace →</Link>
+        </Button>
+      </Card>
+
+      <Card className="p-4 lg:col-span-2">
+        <h3 className="text-sm font-semibold">Brain update history</h3>
+        <div className="mt-3 overflow-hidden rounded-md border border-border/40">
+          {loading ? (
+            <div className="px-3 py-6 text-center text-sm text-muted-foreground">Loading…</div>
+          ) : updates.length === 0 ? (
+            <div className="px-3 py-6 text-center text-sm text-muted-foreground">No brain updates yet.</div>
+          ) : (
+            updates.map((u) => (
+              <div key={u.id} className="border-t border-border/40 px-3 py-2 text-xs first:border-0">
+                <div className="flex justify-between">
+                  <span className="font-mono font-medium">{u.version}</span>
+                  <span className="text-muted-foreground">{new Date(u.created_at).toLocaleString()}</span>
+                </div>
+                {u.notes && <p className="mt-1 text-muted-foreground">{u.notes}</p>}
+              </div>
+            ))
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+}
