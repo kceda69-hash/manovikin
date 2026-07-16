@@ -220,24 +220,33 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Thread not found", { status: 404 });
         }
 
-        // Manovik native AI credit balance — spend 1 credit per chat turn.
-        const { data: spendResult, error: spendErr } = await (supabaseAdmin.rpc as any)(
-          "manovik_spend_credit",
-          { _user_id: userId, _amount: 1, _reason: "chat.message" },
-        );
-        if (spendErr) {
-          console.error("[chat] credit spend failed", spendErr);
-          return new Response("Credit service unavailable", { status: 500 });
-        }
-        if (typeof spendResult === "number" && spendResult < 0) {
-          return new Response(
-            JSON.stringify({
-              error: "insufficient_manovik_credits",
-              message: "Your Manovik AI balance is empty. Top up to keep chatting.",
-            }),
-            { status: 402, headers: { "Content-Type": "application/json" } },
+        // Admin users bypass credit metering entirely (workspace gateway usage still applies).
+        const { data: isAdminData } = await (supabaseAdmin.rpc as any)("has_role", {
+          _user_id: userId,
+          _role: "admin",
+        });
+        const isAdmin = !!isAdminData;
+        if (!isAdmin) {
+          // Manovik native AI credit balance — spend 1 credit per chat turn.
+          const { data: spendResult, error: spendErr } = await (supabaseAdmin.rpc as any)(
+            "manovik_spend_credit",
+            { _user_id: userId, _amount: 1, _reason: "chat.message" },
           );
+          if (spendErr) {
+            console.error("[chat] credit spend failed", spendErr);
+            return new Response("Credit service unavailable", { status: 500 });
+          }
+          if (typeof spendResult === "number" && spendResult < 0) {
+            return new Response(
+              JSON.stringify({
+                error: "insufficient_manovik_credits",
+                message: "Your Manovik AI balance is empty. Top up to keep chatting.",
+              }),
+              { status: 402, headers: { "Content-Type": "application/json" } },
+            );
+          }
         }
+
 
 
         const ip =
