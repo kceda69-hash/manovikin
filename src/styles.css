@@ -419,12 +419,55 @@
     50% { background-position: 0% 120%; }
   }
 
+  .premium-composer {
+    position: relative;
+    isolation: isolate;
+    border-color: oklch(0.78 0.18 200 / 0.28);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .premium-composer::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(110deg,
+      transparent 0%,
+      oklch(0.78 0.18 200 / 0.28) 35%,
+      oklch(0.65 0.25 305 / 0.25) 55%,
+      transparent 75%);
+    background-size: 240% 100%;
+    opacity: 0.55;
+    animation: composer-flow 7s linear infinite;
+  }
+  .premium-composer:focus-within {
+    transform: translateY(-1px);
+    border-color: oklch(0.78 0.18 200 / 0.55);
+    box-shadow: 0 0 0 1px oklch(0.78 0.18 200 / 0.22), 0 24px 70px -34px oklch(0.65 0.25 305 / 0.65);
+  }
+  @keyframes composer-flow { to { background-position: -240% 0; } }
+
+  .premium-send { position: relative; overflow: hidden; }
+  .premium-send::after {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border-radius: inherit;
+    border: 1px solid oklch(1 0 0 / 0.28);
+    animation: send-ring 1.8s ease-in-out infinite;
+  }
+  @keyframes send-ring {
+    0%, 100% { opacity: 0.35; transform: scale(0.92); }
+    50% { opacity: 0.85; transform: scale(1); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-blob, .animate-blob-slow, .animate-blob-slower,
     .mesh-aurora, .text-shimmer, .btn-sheen, .bg-grid, .animate-float,
     .animate-pulse-glow, .card-border-glow, .orbit, .scanline,
     .animate-tour-progress, .animate-tour-line,
     .price-liquid, .price-card-featured::before, .sparkle-field i,
-    .login-orb, .login-aura, .animate-bounce-soft { animation: none !important; }
+    .login-orb, .login-aura, .animate-bounce-soft,
+    .premium-composer::before, .premium-send::after { animation: none !important; }
   }
 }
