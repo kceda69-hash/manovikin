@@ -647,7 +647,7 @@ function ChatPanel({
         className="border-t border-border/40 bg-background/60 px-3 py-3 backdrop-blur sm:px-4 sm:py-4"
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
-        <div className="surface-card mx-auto flex max-w-3xl items-end gap-2 rounded-2xl p-2 shadow-lg">
+        <div className="premium-composer surface-card mx-auto flex max-w-3xl items-end gap-2 rounded-2xl p-2 shadow-lg">
           <Textarea
             ref={textareaRef}
             value={input}
@@ -664,7 +664,7 @@ function ChatPanel({
             size="icon"
             aria-label="Send message"
             disabled={isBusy || !input.trim()}
-            className="h-11 w-11 shrink-0 bg-aurora text-primary-foreground glow hover:opacity-90"
+            className="premium-send h-11 w-11 shrink-0 bg-aurora text-primary-foreground glow hover:opacity-90"
           >
             {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
