@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
@@ -497,10 +497,32 @@ function ChatPanel({
   });
 
   const [input, setInput] = useState("");
+  const queryClient = useQueryClient();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastUserSendRef = useRef(0);
+  const pendingPromptLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (pendingPromptLoadedRef.current || messages.length > 0 || status === "submitted" || status === "streaming") return;
+    pendingPromptLoadedRef.current = true;
+    try {
+      const raw = sessionStorage.getItem("manovik:pending-prompt");
+      if (!raw) return;
+      sessionStorage.removeItem("manovik:pending-prompt");
+      const saved = JSON.parse(raw) as { prompt?: string; target?: string; model?: string };
+      const prompt = saved.prompt?.trim();
+      if (!prompt) return;
+      const context = [saved.target && `Target: ${saved.target}`, saved.model && `Model: ${saved.model}`]
+        .filter(Boolean)
+        .join(" · ");
+      void sendMessage({ text: context ? `${prompt}\n\n${context}` : prompt });
+      lastUserSendRef.current = Date.now();
+    } catch {
+      // Ignore corrupted handoff state.
+    }
+  }, [messages.length, sendMessage, status]);
 
   useEffect(() => {
     textareaRef.current?.focus();
@@ -536,6 +558,7 @@ function ChatPanel({
     setInput("");
     lastUserSendRef.current = Date.now();
     await sendMessage({ text: trimmed });
+    void queryClient.invalidateQueries({ queryKey: ["manovik-dashboard"] });
     // Belt-and-braces: force scroll-into-view for mobile keyboards.
     requestAnimationFrame(() => {
       bottomRef.current?.scrollIntoView({ block: "end" });
