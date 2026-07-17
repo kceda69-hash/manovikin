@@ -68,6 +68,7 @@ function ChatPage() {
   const [bootstrapping, setBootstrapping] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
 
 
   useEffect(() => {
@@ -222,11 +223,27 @@ function ChatPage() {
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Open dashboard"
+              onClick={() => setDashboardOpen(true)}
+            >
+              <LayoutDashboard className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               aria-label="New chat"
               onClick={handleNew}
             >
               <MessageSquarePlus className="h-5 w-5" />
             </Button>
+            <Sheet open={dashboardOpen} onOpenChange={setDashboardOpen}>
+              <SheetContent side="right" className="w-[88vw] max-w-sm p-0 bg-background">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Workspace dashboard</SheetTitle>
+                </SheetHeader>
+                <DashboardPanel mobile />
+              </SheetContent>
+            </Sheet>
           </header>
 
           <ChatPanel key={threadKey} threadId={activeId} initialMessages={initialMessages} historyLoading={historyLoading} />
@@ -239,7 +256,7 @@ function ChatPage() {
 
 type DashboardData = Awaited<ReturnType<typeof getManovikDashboard>>;
 
-function DashboardPanel() {
+function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
   const fetchDashboard = useServerFn(getManovikDashboard);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["manovik-dashboard"],
@@ -253,7 +270,7 @@ function DashboardPanel() {
   const remainingPct = data?.user.isAdmin ? 100 : Math.max(0, Math.min(100, (credits / capacity) * 100));
 
   return (
-    <aside className="hidden w-72 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur md:block">
+    <aside className={mobile ? "h-full overflow-y-auto p-4" : "hidden w-72 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur md:block"}>
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
