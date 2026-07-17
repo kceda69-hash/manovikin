@@ -808,6 +808,7 @@ const MODELS = ["Claude Fable 5", "GPT-5.5", "Gemini 3 Pro", "Auto"] as const;
 
 function PromptComposer() {
   const [prompt, setPrompt] = useState("");
+  const [attachments, setAttachments] = useState<Array<{ name: string; content: string }>>([]);
   const [target, setTarget] = useState<(typeof TARGETS)[number]["id"]>("web");
   const [model, setModel] = useState<(typeof MODELS)[number]>("Claude Fable 5");
   const [output, setOutput] = useState("");
@@ -840,10 +841,16 @@ function PromptComposer() {
     if (status === "streaming") return;
 
     // Remember the request so the /login → chat handoff can resume it later.
+    const attachmentContext = attachments.length
+      ? `\n\nAttached files:\n${attachments
+          .map((file) => `--- ${file.name} ---\n${file.content.slice(0, 4000)}`)
+          .join("\n\n")}`
+      : "";
+
     try {
       sessionStorage.setItem(
         "manovik:pending-prompt",
-        JSON.stringify({ prompt: text, target, model }),
+        JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model }),
       );
     } catch {
       // ignore storage failures
@@ -860,7 +867,7 @@ function PromptComposer() {
       const res = await fetch("/api/public/demo-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: text, target, model, connected: hasFableSession() }),
+        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, connected: hasFableSession() }),
         signal: controller.signal,
       });
 
@@ -905,6 +912,24 @@ function PromptComposer() {
   };
 
   const isStreaming = status === "streaming";
+
+  const attachFiles = async (list: FileList | null) => {
+    if (!list?.length) return;
+    const picked = Array.from(list).slice(0, 4);
+    const loaded: Array<{ name: string; content: string }> = [];
+    for (const file of picked) {
+      if (file.size > 64_000) {
+        toast.error(`${file.name} is too large for the landing demo`);
+        continue;
+      }
+      const content = await file.text().catch(() => "");
+      loaded.push({ name: file.name, content });
+    }
+    if (loaded.length) {
+      setAttachments((cur) => [...cur, ...loaded].slice(-4));
+      toast.success(`Attached ${loaded.length} file${loaded.length === 1 ? "" : "s"}`);
+    }
+  };
 
   return (
     <div className="mt-24">
@@ -968,13 +993,19 @@ function PromptComposer() {
             <ChevronDown aria-hidden="true" className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-primary" />
           </div>
 
-          <button
-            type="button"
-            onClick={() => toast.info("File uploads unlock after sign-in")}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
-          >
+          <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-3 py-1.5 text-xs text-muted-foreground transition hover:text-foreground">
             <Paperclip className="h-3.5 w-3.5" /> Attach
-          </button>
+            <input
+              type="file"
+              multiple
+              className="sr-only"
+              accept=".txt,.md,.json,.js,.jsx,.ts,.tsx,.css,.html,.sql,.py,.go,.rs,.java,.kt,.swift,.yaml,.yml"
+              onChange={(e) => {
+                void attachFiles(e.currentTarget.files);
+                e.currentTarget.value = "";
+              }}
+            />
+          </label>
 
           <div className="ml-auto flex items-center gap-2">
             <span className="hidden md:inline text-[11px] text-muted-foreground">⌘/Ctrl + Enter</span>
@@ -1004,6 +1035,27 @@ function PromptComposer() {
             </button>
           ))}
         </div>
+
+        {attachments.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {attachments.map((file) => (
+              <span
+                key={file.name}
+                className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary"
+              >
+                <Paperclip className="h-3 w-3" /> {file.name}
+                <button
+                  type="button"
+                  onClick={() => setAttachments((cur) => cur.filter((f) => f.name !== file.name))}
+                  className="ml-1 rounded-full p-0.5 hover:bg-primary/15"
+                  aria-label={`Remove ${file.name}`}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
 
         {(output || isStreaming || errorMsg) && (
           <div className="mt-5 border-t border-border/60 pt-4">
@@ -1876,7 +1928,6 @@ function CodingWorkspace() {
   const submit = async () => {
     const text = prompt.trim();
     if (!text) return toast.error("Describe the edit you want");
-    if (!session) return toast.error("Connect Claude Fable 5 above to enable coding edits");
     if (status === "streaming") return;
     setStream("");
     setEdits([]);
@@ -1891,8 +1942,8 @@ function CodingWorkspace() {
         body: JSON.stringify({
           prompt: text,
           mode: "workspace",
-          model: "Claude Fable 5",
-          connected: true,
+          model: session ? "Claude Fable 5" : "Auto",
+          connected: Boolean(session),
           files,
         }),
         signal: controller.signal,
@@ -1952,11 +2003,11 @@ function CodingWorkspace() {
         <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
           <Terminal className="h-3.5 w-3.5" /> Live coding workspace
         </div>
-        <h2 className="mt-4 text-3xl md:text-4xl font-bold">Edit code with Fable 5, right here</h2>
+        <h2 className="mt-4 text-3xl md:text-4xl font-bold">Edit code live, right here</h2>
         <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
           {session
             ? "Ask for a change — Fable 5 streams multi-file edits into a proposed diff you can apply."
-            : "Connect Claude Fable 5 above to unlock streaming multi-file edits in this in-page IDE."}
+            : "Ask for a change — MANOVIK streams multi-file edits into a proposed diff you can apply immediately."}
         </p>
       </div>
 
@@ -2112,9 +2163,9 @@ function CodingWorkspace() {
                   placeholder={
                     session
                       ? "e.g. Add a dark-mode toggle to App.tsx and a /api/health route"
-                      : "Connect Claude Fable 5 above to enable edits…"
+                      : "e.g. Add a dark-mode toggle to App.tsx and a /api/health route"
                   }
-                  disabled={!session || status === "streaming"}
+                  disabled={status === "streaming"}
                   className="flex-1 resize-none rounded-lg border border-border/60 bg-background/40 p-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none disabled:opacity-60"
                 />
                 {status === "streaming" ? (
@@ -2129,8 +2180,7 @@ function CodingWorkspace() {
                   <button
                     type="button"
                     onClick={submit}
-                    disabled={!session}
-                    className="inline-flex items-center gap-1 rounded-lg bg-aurora px-3 py-2 text-sm font-semibold text-primary-foreground glow disabled:opacity-50"
+                    className="inline-flex items-center gap-1 rounded-lg bg-aurora px-3 py-2 text-sm font-semibold text-primary-foreground glow"
                   >
                     <Send className="h-4 w-4" /> Send
                   </button>

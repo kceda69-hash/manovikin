@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
@@ -16,6 +18,11 @@ import {
   Menu,
   MessageSquarePlus,
   Sparkles,
+  LayoutDashboard,
+  Wallet,
+  BarChart3,
+  Crown,
+  ArrowUpRight,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +31,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
+import { Progress } from "@/components/ui/progress";
+import { getManovikDashboard } from "@/lib/manovik-balance.functions";
 
 import {
   listThreads,
@@ -59,6 +68,7 @@ function ChatPage() {
   const [bootstrapping, setBootstrapping] = useState(true);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dashboardOpen, setDashboardOpen] = useState(false);
 
 
   useEffect(() => {
@@ -186,42 +196,206 @@ function ChatPage() {
         {sidebar}
       </aside>
 
-      {/* Chat column */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* Mobile top bar */}
-        <header className="flex items-center gap-2 border-b border-border/40 bg-background/80 px-3 py-2 backdrop-blur md:hidden">
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Open chats">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[85vw] max-w-sm p-0 bg-sidebar">
-              <SheetHeader className="sr-only">
-                <SheetTitle>Chats</SheetTitle>
-              </SheetHeader>
-              {sidebar}
-            </SheetContent>
-          </Sheet>
-          <Link to="/" className="flex min-w-0 flex-1 items-center gap-2">
-            <img src={logo} alt="MANOVIK AI" width={24} height={24} className="h-6 w-6 shrink-0" />
-            <span className="truncate text-sm font-bold tracking-wider text-gradient">
-              MANOVIK AI
-            </span>
-          </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="New chat"
-            onClick={handleNew}
-          >
-            <MessageSquarePlus className="h-5 w-5" />
-          </Button>
-        </header>
+      <div className="flex min-w-0 flex-1">
+        {/* Chat column */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Mobile top bar */}
+          <header className="flex items-center gap-2 border-b border-border/40 bg-background/80 px-3 py-2 backdrop-blur md:hidden">
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Open chats">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[85vw] max-w-sm p-0 bg-sidebar">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Chats</SheetTitle>
+                </SheetHeader>
+                {sidebar}
+              </SheetContent>
+            </Sheet>
+            <Link to="/" className="flex min-w-0 flex-1 items-center gap-2">
+              <img src={logo} alt="MANOVIK AI" width={24} height={24} className="h-6 w-6 shrink-0" />
+              <span className="truncate text-sm font-bold tracking-wider text-gradient">
+                MANOVIK AI
+              </span>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Open dashboard"
+              onClick={() => setDashboardOpen(true)}
+            >
+              <LayoutDashboard className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="New chat"
+              onClick={handleNew}
+            >
+              <MessageSquarePlus className="h-5 w-5" />
+            </Button>
+            <Sheet open={dashboardOpen} onOpenChange={setDashboardOpen}>
+              <SheetContent side="right" className="w-[88vw] max-w-sm p-0 bg-background">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Workspace dashboard</SheetTitle>
+                </SheetHeader>
+                <DashboardPanel mobile />
+              </SheetContent>
+            </Sheet>
+          </header>
 
-        <ChatPanel key={threadKey} threadId={activeId} initialMessages={initialMessages} historyLoading={historyLoading} />
+          <ChatPanel key={threadKey} threadId={activeId} initialMessages={initialMessages} historyLoading={historyLoading} />
+        </div>
+        <DashboardPanel />
       </div>
     </div>
+  );
+}
+
+type DashboardData = Awaited<ReturnType<typeof getManovikDashboard>>;
+
+function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
+  const fetchDashboard = useServerFn(getManovikDashboard);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["manovik-dashboard"],
+    queryFn: () => fetchDashboard() as Promise<DashboardData>,
+    refetchInterval: 20_000,
+  });
+
+  const credits = data?.balance.credits ?? 0;
+  const used = data?.balance.monthUsed ?? 0;
+  const capacity = Math.max(credits + used, 1);
+  const remainingPct = data?.user.isAdmin ? 100 : Math.max(0, Math.min(100, (credits / capacity) * 100));
+
+  return (
+    <aside className={mobile ? "h-full overflow-y-auto p-4" : "hidden w-72 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur md:block"}>
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
+            <LayoutDashboard className="h-4 w-4" />
+          </span>
+          <div>
+            <h2 className="text-sm font-semibold">Workspace dashboard</h2>
+            <p className="text-[11px] text-muted-foreground">Live account telemetry</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="rounded-md border border-border/60 px-2 py-1 text-[11px] text-muted-foreground transition hover:text-foreground"
+        >
+          Refresh
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3" aria-busy="true">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-24 animate-pulse rounded-xl bg-muted/40" />
+          ))}
+        </div>
+      ) : data ? (
+        <div className="space-y-3">
+          <section className="surface-card rounded-xl p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Remaining credits</p>
+                <div className="mt-1 flex items-baseline gap-2">
+                  <span className="text-3xl font-bold text-gradient">{data.user.isAdmin ? "∞" : credits}</span>
+                  <span className="text-xs text-muted-foreground">credits</span>
+                </div>
+              </div>
+              <Wallet className="h-5 w-5 text-primary" />
+            </div>
+            <Progress value={remainingPct} className="mt-4 h-2" />
+            <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
+              <span>{data.user.isAdmin ? "Admin bypass enabled" : `${used} used this month`}</span>
+              <span>{Math.round(remainingPct)}%</span>
+            </div>
+          </section>
+
+          <div className="grid grid-cols-2 gap-3">
+            <MetricCard icon={BarChart3} label="Messages" value={data.usage.messages.toLocaleString()} />
+            <MetricCard icon={MessageSquarePlus} label="Threads" value={data.usage.threads.toLocaleString()} />
+          </div>
+
+          <section className="surface-card rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Crown className="h-4 w-4 text-primary" />
+                <span className="text-sm font-semibold">{data.plan} plan</span>
+              </div>
+              <Button asChild size="sm" variant="outline" className="h-8 text-xs">
+                <Link to="/billing">
+                  Manage <ArrowUpRight className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {data.plan === "Free"
+                ? "Upgrade for higher usage and priority model routing."
+                : "Billing, receipts, and renewal controls are active."}
+            </p>
+          </section>
+
+          <section className="surface-card rounded-xl p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold">Credit activity</h3>
+              <Link to="/balance" className="text-xs text-primary hover:underline">Open</Link>
+            </div>
+            <div className="space-y-2">
+              {data.recentLedger.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No credit activity yet.</p>
+              ) : (
+                data.recentLedger.slice(0, 4).map((row: { delta: number; reason: string; created_at: string }, i: number) => (
+                  <div key={`${row.created_at}-${i}`} className="flex items-center justify-between gap-2 text-xs">
+                    <span className="truncate text-muted-foreground">{row.reason}</span>
+                    <span className={row.delta < 0 ? "text-destructive" : "text-primary"}>
+                      {row.delta > 0 ? `+${row.delta}` : row.delta}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+
+          <section className="surface-card rounded-xl p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold">Security</h3>
+              <Link to="/audit" className="text-xs text-primary hover:underline">Audit log</Link>
+            </div>
+            <div className="space-y-2">
+              {data.recentAudit.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No recent security events.</p>
+              ) : (
+                data.recentAudit.slice(0, 3).map((row: { event_type: string; summary: string | null; created_at: string }, i: number) => (
+                  <div key={`${row.created_at}-${i}`} className="rounded-lg border border-border/40 bg-background/40 p-2">
+                    <div className="text-[11px] font-medium">{row.event_type}</div>
+                    <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{row.summary ?? "Recorded"}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          Dashboard failed to load.
+        </div>
+      )}
+    </aside>
+  );
+}
+
+function MetricCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+  return (
+    <section className="surface-card rounded-xl p-3">
+      <Icon className="h-4 w-4 text-primary" />
+      <div className="mt-2 text-xl font-semibold">{value}</div>
+      <div className="text-[11px] text-muted-foreground">{label}</div>
+    </section>
   );
 }
 
@@ -340,10 +514,32 @@ function ChatPanel({
   });
 
   const [input, setInput] = useState("");
+  const queryClient = useQueryClient();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastUserSendRef = useRef(0);
+  const pendingPromptLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (pendingPromptLoadedRef.current || messages.length > 0 || status === "submitted" || status === "streaming") return;
+    pendingPromptLoadedRef.current = true;
+    try {
+      const raw = sessionStorage.getItem("manovik:pending-prompt");
+      if (!raw) return;
+      sessionStorage.removeItem("manovik:pending-prompt");
+      const saved = JSON.parse(raw) as { prompt?: string; target?: string; model?: string };
+      const prompt = saved.prompt?.trim();
+      if (!prompt) return;
+      const context = [saved.target && `Target: ${saved.target}`, saved.model && `Model: ${saved.model}`]
+        .filter(Boolean)
+        .join(" · ");
+      void sendMessage({ text: context ? `${prompt}\n\n${context}` : prompt });
+      lastUserSendRef.current = Date.now();
+    } catch {
+      // Ignore corrupted handoff state.
+    }
+  }, [messages.length, sendMessage, status]);
 
   useEffect(() => {
     textareaRef.current?.focus();
@@ -379,6 +575,7 @@ function ChatPanel({
     setInput("");
     lastUserSendRef.current = Date.now();
     await sendMessage({ text: trimmed });
+    void queryClient.invalidateQueries({ queryKey: ["manovik-dashboard"] });
     // Belt-and-braces: force scroll-into-view for mobile keyboards.
     requestAnimationFrame(() => {
       bottomRef.current?.scrollIntoView({ block: "end" });
@@ -467,7 +664,7 @@ function ChatPanel({
         className="border-t border-border/40 bg-background/60 px-3 py-3 backdrop-blur sm:px-4 sm:py-4"
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
-        <div className="surface-card mx-auto flex max-w-3xl items-end gap-2 rounded-2xl p-2 shadow-lg">
+        <div className="premium-composer surface-card mx-auto flex max-w-3xl items-end gap-2 rounded-2xl p-2 shadow-lg">
           <Textarea
             ref={textareaRef}
             value={input}
@@ -484,7 +681,7 @@ function ChatPanel({
             size="icon"
             aria-label="Send message"
             disabled={isBusy || !input.trim()}
-            className="h-11 w-11 shrink-0 bg-aurora text-primary-foreground glow hover:opacity-90"
+            className="premium-send h-11 w-11 shrink-0 bg-aurora text-primary-foreground glow hover:opacity-90"
           >
             {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>

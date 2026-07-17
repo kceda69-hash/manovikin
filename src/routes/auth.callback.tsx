@@ -6,6 +6,13 @@ import { Card } from "@/components/ui/card";
 
 type State = "processing" | "ok" | "error";
 
+function sanitizeNextPath(value: string | null) {
+  if (!value) return "/chat";
+  if (!value.startsWith("/") || value.startsWith("//")) return "/chat";
+  if (/^\/(?:login|auth\/callback)\b/.test(value)) return "/chat";
+  return value;
+}
+
 export const Route = createFileRoute("/auth/callback")({
   component: AuthCallbackPage,
   head: () => ({
@@ -33,6 +40,7 @@ function AuthCallbackPage() {
         // PKCE code flow: ?code=... in the query string.
         const url = new URL(window.location.href);
         const code = url.searchParams.get("code");
+        const next = sanitizeNextPath(url.searchParams.get("next"));
         const errorDesc =
           url.searchParams.get("error_description") ||
           url.hash.match(/error_description=([^&]+)/)?.[1];
@@ -57,7 +65,7 @@ function AuthCallbackPage() {
         setState("ok");
         // Clean the URL then redirect.
         window.history.replaceState({}, "", "/auth/callback");
-        setTimeout(() => navigate({ to: "/chat" }), 500);
+        setTimeout(() => navigate({ to: next as any }), 500);
       } catch (err) {
         if (cancelled) return;
         setErrMsg(err instanceof Error ? err.message : "Sign-in failed.");
