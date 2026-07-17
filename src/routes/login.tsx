@@ -9,7 +9,17 @@ import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { useAuth } from "@/hooks/useAuth";
 
+function sanitizeNextPath(value: unknown) {
+  if (typeof value !== "string") return "/chat";
+  if (!value.startsWith("/") || value.startsWith("//")) return "/chat";
+  if (/^\/(?:login|auth\/callback)\b/.test(value)) return "/chat";
+  return value;
+}
+
 export const Route = createFileRoute("/login")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    next: sanitizeNextPath(search.next),
+  }),
   component: LoginPage,
   head: () => ({
     meta: [
@@ -26,6 +36,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const { user, loading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -42,8 +53,8 @@ function LoginPage() {
   }, [magicCooldown]);
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/chat" });
-  }, [loading, user, navigate]);
+    if (!loading && user) navigate({ to: next as any });
+  }, [loading, user, navigate, next]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,14 +64,14 @@ function LoginPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/chat` },
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
         });
         if (error) throw error;
         toast.success("Check your email to confirm your account.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/chat" });
+        navigate({ to: next as any });
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Authentication failed");
@@ -73,7 +84,7 @@ function LoginPage() {
     setBusy(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/auth/callback`,
+        redirect_uri: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       });
       if (result.error) {
         toast.error(result.error.message ?? "Google sign-in failed");
@@ -82,7 +93,7 @@ function LoginPage() {
       }
       if (result.redirected) return;
       // Session was set by the lovable wrapper; navigate to app.
-      navigate({ to: "/chat" });
+      navigate({ to: next as any });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Sign-in failed");
       setBusy(false);
@@ -101,7 +112,7 @@ function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
         }),
       });
       if (res.status === 429) {
@@ -225,7 +236,8 @@ function LoginPage() {
 
         <div className="mt-6 border-t border-border/40 pt-3 text-center">
           <Link
-            to="/admin"
+            to="/login"
+            search={{ next: "/admin" } as any}
             className="text-[11px] uppercase tracking-wider text-muted-foreground/70 hover:text-foreground"
           >
             Admin sign-in →
