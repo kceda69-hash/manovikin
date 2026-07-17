@@ -253,7 +253,7 @@ function DashboardPanel() {
   const remainingPct = data?.user.isAdmin ? 100 : Math.max(0, Math.min(100, (credits / capacity) * 100));
 
   return (
-    <aside className="hidden w-80 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur xl:block">
+    <aside className="hidden w-72 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur md:block">
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
