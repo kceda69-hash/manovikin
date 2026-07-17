@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import ReactMarkdown from "react-markdown";
@@ -353,7 +353,7 @@ function DashboardPanel() {
               {data.recentAudit.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No recent security events.</p>
               ) : (
-                data.recentAudit.slice(0, 3).map((row, i) => (
+                data.recentAudit.slice(0, 3).map((row: { event_type: string; summary: string | null; created_at: string }, i: number) => (
                   <div key={`${row.created_at}-${i}`} className="rounded-lg border border-border/40 bg-background/40 p-2">
                     <div className="text-[11px] font-medium">{row.event_type}</div>
                     <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{row.summary ?? "Recorded"}</div>
