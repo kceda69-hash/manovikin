@@ -332,7 +332,7 @@ function DashboardPanel() {
               {data.recentLedger.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No credit activity yet.</p>
               ) : (
-                data.recentLedger.slice(0, 4).map((row, i) => (
+                data.recentLedger.slice(0, 4).map((row: { delta: number; reason: string; created_at: string }, i: number) => (
                   <div key={`${row.created_at}-${i}`} className="flex items-center justify-between gap-2 text-xs">
                     <span className="truncate text-muted-foreground">{row.reason}</span>
                     <span className={row.delta < 0 ? "text-destructive" : "text-primary"}>
