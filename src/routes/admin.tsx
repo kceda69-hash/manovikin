@@ -93,10 +93,6 @@ function AdminPage() {
     );
   }
 
-  if (who.aal !== "aal2") {
-    return <MfaGate onVerified={refreshWhoami} />;
-  }
-
   return <AdminConsole who={who} />;
 }
 
@@ -279,7 +275,7 @@ function AdminConsole({ who }: { who: Whoami }) {
           </Link>
           <div className="flex items-center gap-2 text-sm">
             <Badge variant="secondary" className="gap-1">
-              <ShieldCheck className="h-3 w-3" /> Admin · 2FA
+              <ShieldCheck className="h-3 w-3" /> Admin{who.aal === "aal2" ? " · 2FA" : ""}
             </Badge>
             <span className="text-muted-foreground">{who.email}</span>
             <Button
