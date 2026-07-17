@@ -1928,7 +1928,6 @@ function CodingWorkspace() {
   const submit = async () => {
     const text = prompt.trim();
     if (!text) return toast.error("Describe the edit you want");
-    if (!session) return toast.error("Connect Claude Fable 5 above to enable coding edits");
     if (status === "streaming") return;
     setStream("");
     setEdits([]);
@@ -1943,8 +1942,8 @@ function CodingWorkspace() {
         body: JSON.stringify({
           prompt: text,
           mode: "workspace",
-          model: "Claude Fable 5",
-          connected: true,
+          model: session ? "Claude Fable 5" : "Auto",
+          connected: Boolean(session),
           files,
         }),
         signal: controller.signal,
@@ -2004,11 +2003,11 @@ function CodingWorkspace() {
         <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
           <Terminal className="h-3.5 w-3.5" /> Live coding workspace
         </div>
-        <h2 className="mt-4 text-3xl md:text-4xl font-bold">Edit code with Fable 5, right here</h2>
+        <h2 className="mt-4 text-3xl md:text-4xl font-bold">Edit code live, right here</h2>
         <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
           {session
             ? "Ask for a change — Fable 5 streams multi-file edits into a proposed diff you can apply."
-            : "Connect Claude Fable 5 above to unlock streaming multi-file edits in this in-page IDE."}
+            : "Ask for a change — MANOVIK streams multi-file edits into a proposed diff you can apply immediately."}
         </p>
       </div>
 
@@ -2164,9 +2163,9 @@ function CodingWorkspace() {
                   placeholder={
                     session
                       ? "e.g. Add a dark-mode toggle to App.tsx and a /api/health route"
-                      : "Connect Claude Fable 5 above to enable edits…"
+                      : "e.g. Add a dark-mode toggle to App.tsx and a /api/health route"
                   }
-                  disabled={!session || status === "streaming"}
+                  disabled={status === "streaming"}
                   className="flex-1 resize-none rounded-lg border border-border/60 bg-background/40 p-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/60 focus:outline-none disabled:opacity-60"
                 />
                 {status === "streaming" ? (
@@ -2181,8 +2180,7 @@ function CodingWorkspace() {
                   <button
                     type="button"
                     onClick={submit}
-                    disabled={!session}
-                    className="inline-flex items-center gap-1 rounded-lg bg-aurora px-3 py-2 text-sm font-semibold text-primary-foreground glow disabled:opacity-50"
+                    className="inline-flex items-center gap-1 rounded-lg bg-aurora px-3 py-2 text-sm font-semibold text-primary-foreground glow"
                   >
                     <Send className="h-4 w-4" /> Send
                   </button>
