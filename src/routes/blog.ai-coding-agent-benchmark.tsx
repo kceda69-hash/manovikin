@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
-const TITLE = "AI Coding Agent Benchmark 2026: MANOVIK vs Cursor vs Windsurf";
+const TITLE = "AI Coding Agent Benchmark 2026: MANOVIK vs Cursor";
 const DESCRIPTION =
   "A technical benchmark comparing MANOVIK, Cursor, and Windsurf on SWE-bench Verified, feature-completion speed, PR acceptance rate, and cost per task.";
 const URL = "https://manovik.in/blog/ai-coding-agent-benchmark";
