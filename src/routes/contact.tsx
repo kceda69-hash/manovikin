@@ -16,6 +16,34 @@ export const Route = createFileRoute("/contact")({
       { name: "twitter:description", content: "Reach MANOVIK AI for support, sales, partnerships, and grievance redressal." },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/contact" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "MANOVIK AI",
+          url: "https://manovik.in",
+          email: "support@manovik.in",
+          areaServed: "IN",
+          contactPoint: [
+            {
+              "@type": "ContactPoint",
+              email: "support@manovik.in",
+              contactType: "customer support",
+              areaServed: "IN",
+              availableLanguage: ["English", "Hindi"],
+            },
+            {
+              "@type": "ContactPoint",
+              email: "sales@manovik.in",
+              contactType: "sales",
+              areaServed: "IN",
+            },
+          ],
+        }),
+      },
+    ],
   }),
 });
 
