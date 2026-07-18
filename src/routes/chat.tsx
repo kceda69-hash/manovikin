@@ -69,6 +69,15 @@ function ChatPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [desktopDashboardOpen, setDesktopDashboardOpen] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem("manovik:dashboard-open") !== "0";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("manovik:dashboard-open", desktopDashboardOpen ? "1" : "0");
+    }
+  }, [desktopDashboardOpen]);
 
 
   useEffect(() => {
