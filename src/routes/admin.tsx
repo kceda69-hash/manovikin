@@ -36,7 +36,9 @@ export const Route = createFileRoute("/admin")({
     meta: [
       { title: "Admin — MANOVIK" },
       { name: "robots", content: "noindex, nofollow" },
-      { name: "description", content: "MANOVIK admin console." },
+      { name: "description", content: "Internal MANOVIK admin console for managing users, roles, subscriptions, refunds, credits, and audit logs. Restricted to admins with 2FA." },
+      { property: "og:title", content: "Admin — MANOVIK" },
+      { property: "og:description", content: "Restricted MANOVIK admin console for user, subscription, and refund management." },
     ],
   }),
 });

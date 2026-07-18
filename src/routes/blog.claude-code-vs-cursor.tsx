@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
-const TITLE = "Claude Code vs Cursor (2026): What Claude Code Can Do That Cursor Can't";
+const TITLE = "Claude Code vs Cursor (2026): Key Differences";
 const DESCRIPTION =
   "A deep-dive comparison of Claude Code (CLI) and Cursor (IDE): tool use, terminal workflows, pricing, and what Claude Code does that Cursor doesn't. Plus MANOVIK as the sovereign alternative.";
 const URL = "https://manovik.in/blog/claude-code-vs-cursor";

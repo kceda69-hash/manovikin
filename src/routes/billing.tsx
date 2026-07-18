@@ -30,6 +30,7 @@ export const Route = createFileRoute("/billing")({
       { name: "description", content: "View your MANOVIK plan, purchase history, and download receipts." },
       { property: "og:title", content: "Billing & receipts — MANOVIK AI" },
       { property: "og:description", content: "Manage your MANOVIK plan, renewals, and download past receipts." },
+      { property: "og:url", content: "https://manovik.in/billing" },
       { name: "robots", content: "noindex" },
     ],
   }),
