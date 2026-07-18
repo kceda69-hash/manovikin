@@ -19,6 +19,8 @@ import {
   MessageSquarePlus,
   Sparkles,
   LayoutDashboard,
+  PanelRightClose,
+  PanelRightOpen,
   Wallet,
   BarChart3,
   Crown,
