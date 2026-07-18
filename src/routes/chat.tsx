@@ -19,6 +19,8 @@ import {
   MessageSquarePlus,
   Sparkles,
   LayoutDashboard,
+  PanelRightClose,
+  PanelRightOpen,
   Wallet,
   BarChart3,
   Crown,
@@ -69,6 +71,15 @@ function ChatPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [desktopDashboardOpen, setDesktopDashboardOpen] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.localStorage.getItem("manovik:dashboard-open") !== "0";
+  });
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("manovik:dashboard-open", desktopDashboardOpen ? "1" : "0");
+    }
+  }, [desktopDashboardOpen]);
 
 
   useEffect(() => {
@@ -248,7 +259,30 @@ function ChatPage() {
 
           <ChatPanel key={threadKey} threadId={activeId} initialMessages={initialMessages} historyLoading={historyLoading} />
         </div>
-        <DashboardPanel />
+        {desktopDashboardOpen ? (
+          <div className="relative hidden md:block">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Hide dashboard"
+              onClick={() => setDesktopDashboardOpen(false)}
+              className="absolute right-2 top-2 z-10 h-8 w-8"
+            >
+              <PanelRightClose className="h-4 w-4" />
+            </Button>
+            <DashboardPanel />
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Show dashboard"
+            onClick={() => setDesktopDashboardOpen(true)}
+            className="fixed right-4 top-4 z-20 hidden h-9 w-9 shadow-md md:inline-flex"
+          >
+            <PanelRightOpen className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
