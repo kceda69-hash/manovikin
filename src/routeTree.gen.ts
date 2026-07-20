@@ -40,6 +40,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReceiptIdRouteImport } from './routes/receipt.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogWillAiReplaceSoftwareEngineersRouteImport } from './routes/blog.will-ai-replace-software-engineers'
+import { Route as BlogSystemRulesRouteImport } from './routes/blog.system-rules'
 import { Route as BlogSelfHostingAiWithOllamaRouteImport } from './routes/blog.self-hosting-ai-with-ollama'
 import { Route as BlogMcpGuideRouteImport } from './routes/blog.mcp-guide'
 import { Route as BlogClaudeCodeVsCursorRouteImport } from './routes/blog.claude-code-vs-cursor'
@@ -220,6 +221,11 @@ const BlogWillAiReplaceSoftwareEngineersRoute =
     path: '/blog/will-ai-replace-software-engineers',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BlogSystemRulesRoute = BlogSystemRulesRouteImport.update({
+  id: '/blog/system-rules',
+  path: '/blog/system-rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogSelfHostingAiWithOllamaRoute =
   BlogSelfHostingAiWithOllamaRouteImport.update({
     id: '/blog/self-hosting-ai-with-ollama',
@@ -387,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/blog/claude-code-vs-cursor': typeof BlogClaudeCodeVsCursorRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
+  '/blog/system-rules': typeof BlogSystemRulesRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
@@ -443,6 +450,7 @@ export interface FileRoutesByTo {
   '/blog/claude-code-vs-cursor': typeof BlogClaudeCodeVsCursorRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
+  '/blog/system-rules': typeof BlogSystemRulesRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
@@ -500,6 +508,7 @@ export interface FileRoutesById {
   '/blog/claude-code-vs-cursor': typeof BlogClaudeCodeVsCursorRoute
   '/blog/mcp-guide': typeof BlogMcpGuideRoute
   '/blog/self-hosting-ai-with-ollama': typeof BlogSelfHostingAiWithOllamaRoute
+  '/blog/system-rules': typeof BlogSystemRulesRoute
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
@@ -558,6 +567,7 @@ export interface FileRouteTypes {
     | '/blog/claude-code-vs-cursor'
     | '/blog/mcp-guide'
     | '/blog/self-hosting-ai-with-ollama'
+    | '/blog/system-rules'
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
@@ -614,6 +624,7 @@ export interface FileRouteTypes {
     | '/blog/claude-code-vs-cursor'
     | '/blog/mcp-guide'
     | '/blog/self-hosting-ai-with-ollama'
+    | '/blog/system-rules'
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
@@ -670,6 +681,7 @@ export interface FileRouteTypes {
     | '/blog/claude-code-vs-cursor'
     | '/blog/mcp-guide'
     | '/blog/self-hosting-ai-with-ollama'
+    | '/blog/system-rules'
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
@@ -727,6 +739,7 @@ export interface RootRouteChildren {
   BlogClaudeCodeVsCursorRoute: typeof BlogClaudeCodeVsCursorRoute
   BlogMcpGuideRoute: typeof BlogMcpGuideRoute
   BlogSelfHostingAiWithOllamaRoute: typeof BlogSelfHostingAiWithOllamaRoute
+  BlogSystemRulesRoute: typeof BlogSystemRulesRoute
   BlogWillAiReplaceSoftwareEngineersRoute: typeof BlogWillAiReplaceSoftwareEngineersRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ReceiptIdRoute: typeof ReceiptIdRoute
@@ -964,6 +977,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogWillAiReplaceSoftwareEngineersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/system-rules': {
+      id: '/blog/system-rules'
+      path: '/blog/system-rules'
+      fullPath: '/blog/system-rules'
+      preLoaderRoute: typeof BlogSystemRulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/self-hosting-ai-with-ollama': {
       id: '/blog/self-hosting-ai-with-ollama'
       path: '/blog/self-hosting-ai-with-ollama'
@@ -1168,6 +1188,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogClaudeCodeVsCursorRoute: BlogClaudeCodeVsCursorRoute,
   BlogMcpGuideRoute: BlogMcpGuideRoute,
   BlogSelfHostingAiWithOllamaRoute: BlogSelfHostingAiWithOllamaRoute,
+  BlogSystemRulesRoute: BlogSystemRulesRoute,
   BlogWillAiReplaceSoftwareEngineersRoute:
     BlogWillAiReplaceSoftwareEngineersRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
