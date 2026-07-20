@@ -75,11 +75,32 @@ function ChatPage() {
     if (typeof window === "undefined") return true;
     return window.localStorage.getItem("manovik:dashboard-open") !== "0";
   });
+  const fetchUiPrefs = useServerFn(getUiPrefs);
+  const persistUiPref = useServerFn(setUiPref);
+  const prefsHydrated = useRef(false);
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetchUiPrefs()
+      .then((res) => {
+        if (cancelled) return;
+        prefsHydrated.current = true;
+        setDesktopDashboardOpen(res.dashboardOpen);
+      })
+      .catch(() => {
+        prefsHydrated.current = true;
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user, fetchUiPrefs]);
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.localStorage.setItem("manovik:dashboard-open", desktopDashboardOpen ? "1" : "0");
     }
-  }, [desktopDashboardOpen]);
+    if (!prefsHydrated.current || !user) return;
+    persistUiPref({ data: { key: "dashboardOpen", value: desktopDashboardOpen } }).catch(() => {});
+  }, [desktopDashboardOpen, user, persistUiPref]);
 
 
   useEffect(() => {
