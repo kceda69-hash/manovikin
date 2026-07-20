@@ -1,6 +1,39 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+export const getUiPrefs = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context as any;
+    const { data } = await supabase
+      .from("profiles")
+      .select("ui_prefs")
+      .eq("id", userId)
+      .maybeSingle();
+    const prefs = (data?.ui_prefs ?? {}) as Record<string, unknown>;
+    return { dashboardOpen: prefs.dashboardOpen !== false };
+  });
+
+export const setUiPref = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { key: string; value: unknown }) => {
+    if (!data || typeof data.key !== "string" || data.key.length > 64) {
+      throw new Error("Invalid pref key");
+    }
+    return data;
+  })
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context as any;
+    const { data: row } = await supabase
+      .from("profiles")
+      .select("ui_prefs")
+      .eq("id", userId)
+      .maybeSingle();
+    const prefs = { ...((row?.ui_prefs ?? {}) as Record<string, unknown>), [data.key]: data.value };
+    await supabase.from("profiles").update({ ui_prefs: prefs }).eq("id", userId);
+    return { ok: true, prefs };
+  });
+
 export const getManovikBalance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
