@@ -310,7 +310,7 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
   const remainingPct = data?.user.isAdmin ? 100 : Math.max(0, Math.min(100, (credits / capacity) * 100));
 
   return (
-    <aside className={mobile ? "h-full overflow-y-auto p-4" : "hidden w-72 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur md:block"}>
+    <aside className={mobile ? "h-full overflow-y-auto p-4" : "h-full w-72 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur"}>
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
