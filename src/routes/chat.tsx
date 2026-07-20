@@ -34,7 +34,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { Progress } from "@/components/ui/progress";
-import { getManovikDashboard } from "@/lib/manovik-balance.functions";
+import { getManovikDashboard, getUiPrefs, setUiPref } from "@/lib/manovik-balance.functions";
 
 import {
   listThreads,
