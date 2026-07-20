@@ -31,7 +31,7 @@ export const setUiPref = createServerFn({ method: "POST" })
       .maybeSingle();
     const prefs = { ...((row?.ui_prefs ?? {}) as Record<string, unknown>), [data.key]: data.value };
     await supabase.from("profiles").update({ ui_prefs: prefs }).eq("id", userId);
-    return { ok: true, prefs };
+    return { ok: true };
   });
 
 export const getManovikBalance = createServerFn({ method: "GET" })
