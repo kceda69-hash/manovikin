@@ -259,30 +259,36 @@ function ChatPage() {
 
           <ChatPanel key={threadKey} threadId={activeId} initialMessages={initialMessages} historyLoading={historyLoading} />
         </div>
-        {desktopDashboardOpen ? (
-          <div className="relative hidden md:block">
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Hide dashboard"
-              onClick={() => setDesktopDashboardOpen(false)}
-              className="absolute right-2 top-2 z-10 h-8 w-8"
-            >
-              <PanelRightClose className="h-4 w-4" />
-            </Button>
-            <DashboardPanel />
-          </div>
-        ) : (
+        <div
+          aria-hidden={!desktopDashboardOpen}
+          className={`relative hidden md:block shrink-0 overflow-hidden transition-[width,opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+            desktopDashboardOpen
+              ? "w-72 opacity-100 translate-x-0"
+              : "w-0 opacity-0 translate-x-4 pointer-events-none"
+          }`}
+        >
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
-            aria-label="Show dashboard"
-            onClick={() => setDesktopDashboardOpen(true)}
-            className="fixed right-4 top-4 z-20 hidden h-9 w-9 shadow-md md:inline-flex"
+            aria-label="Hide dashboard"
+            onClick={() => setDesktopDashboardOpen(false)}
+            className="absolute right-2 top-2 z-10 h-8 w-8"
           >
-            <PanelRightOpen className="h-4 w-4" />
+            <PanelRightClose className="h-4 w-4" />
           </Button>
-        )}
+          <DashboardPanel />
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Show dashboard"
+          onClick={() => setDesktopDashboardOpen(true)}
+          className={`fixed right-4 top-4 z-20 hidden h-9 w-9 shadow-md md:inline-flex transition-all duration-300 ease-out motion-reduce:transition-none ${
+            desktopDashboardOpen ? "pointer-events-none scale-90 opacity-0" : "scale-100 opacity-100"
+          }`}
+        >
+          <PanelRightOpen className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
@@ -304,7 +310,7 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
   const remainingPct = data?.user.isAdmin ? 100 : Math.max(0, Math.min(100, (credits / capacity) * 100));
 
   return (
-    <aside className={mobile ? "h-full overflow-y-auto p-4" : "hidden w-72 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur md:block"}>
+    <aside className={mobile ? "h-full overflow-y-auto p-4" : "h-full w-72 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur"}>
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
