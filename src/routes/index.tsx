@@ -175,6 +175,7 @@ const FAQ = [
 
 function Landing() {
   const navigate = useNavigate();
+  const { locale, setLocale, t: footerT } = useFooterI18n();
   const heroRef = useRef<HTMLDivElement>(null);
   const [wordIdx, setWordIdx] = useState(0);
   const [tourIdx, setTourIdx] = useState(0);
