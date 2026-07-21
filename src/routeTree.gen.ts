@@ -17,6 +17,7 @@ import { Route as VsDevinRouteImport } from './routes/vs-devin'
 import { Route as VsCursorRouteImport } from './routes/vs-cursor'
 import { Route as VsClineVsWindsurfRouteImport } from './routes/vs-cline-vs-windsurf'
 import { Route as VsClineRouteImport } from './routes/vs-cline'
+import { Route as VsBoltNewRouteImport } from './routes/vs-bolt-new'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StudentsRouteImport } from './routes/students'
@@ -103,6 +104,11 @@ const VsClineVsWindsurfRoute = VsClineVsWindsurfRouteImport.update({
 const VsClineRoute = VsClineRouteImport.update({
   id: '/vs-cline',
   path: '/vs-cline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VsBoltNewRoute = VsBoltNewRouteImport.update({
+  id: '/vs-bolt-new',
+  path: '/vs-bolt-new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -375,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vs-bolt-new': typeof VsBoltNewRoute
   '/vs-cline': typeof VsClineRoute
   '/vs-cline-vs-windsurf': typeof VsClineVsWindsurfRoute
   '/vs-cursor': typeof VsCursorRoute
@@ -432,6 +439,7 @@ export interface FileRoutesByTo {
   '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vs-bolt-new': typeof VsBoltNewRoute
   '/vs-cline': typeof VsClineRoute
   '/vs-cline-vs-windsurf': typeof VsClineVsWindsurfRoute
   '/vs-cursor': typeof VsCursorRoute
@@ -490,6 +498,7 @@ export interface FileRoutesById {
   '/students': typeof StudentsRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/vs-bolt-new': typeof VsBoltNewRoute
   '/vs-cline': typeof VsClineRoute
   '/vs-cline-vs-windsurf': typeof VsClineVsWindsurfRoute
   '/vs-cursor': typeof VsCursorRoute
@@ -549,6 +558,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/terms'
     | '/unsubscribe'
+    | '/vs-bolt-new'
     | '/vs-cline'
     | '/vs-cline-vs-windsurf'
     | '/vs-cursor'
@@ -606,6 +616,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/terms'
     | '/unsubscribe'
+    | '/vs-bolt-new'
     | '/vs-cline'
     | '/vs-cline-vs-windsurf'
     | '/vs-cursor'
@@ -663,6 +674,7 @@ export interface FileRouteTypes {
     | '/students'
     | '/terms'
     | '/unsubscribe'
+    | '/vs-bolt-new'
     | '/vs-cline'
     | '/vs-cline-vs-windsurf'
     | '/vs-cursor'
@@ -721,6 +733,7 @@ export interface RootRouteChildren {
   StudentsRoute: typeof StudentsRoute
   TermsRoute: typeof TermsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  VsBoltNewRoute: typeof VsBoltNewRoute
   VsClineRoute: typeof VsClineRoute
   VsClineVsWindsurfRoute: typeof VsClineVsWindsurfRoute
   VsCursorRoute: typeof VsCursorRoute
@@ -814,6 +827,13 @@ declare module '@tanstack/react-router' {
       path: '/vs-cline'
       fullPath: '/vs-cline'
       preLoaderRoute: typeof VsClineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vs-bolt-new': {
+      id: '/vs-bolt-new'
+      path: '/vs-bolt-new'
+      fullPath: '/vs-bolt-new'
+      preLoaderRoute: typeof VsBoltNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/unsubscribe': {
@@ -1169,6 +1189,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudentsRoute: StudentsRoute,
   TermsRoute: TermsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  VsBoltNewRoute: VsBoltNewRoute,
   VsClineRoute: VsClineRoute,
   VsClineVsWindsurfRoute: VsClineVsWindsurfRoute,
   VsCursorRoute: VsCursorRoute,
