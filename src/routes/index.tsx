@@ -772,7 +772,23 @@ function Landing() {
             </div>
           </div>
 
-          <div className="mt-8 border-t border-border/40 pt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="mt-8 flex flex-col items-center justify-center gap-2 text-center">
+            <div className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-[11px] font-medium tracking-[0.2em] text-primary/90 uppercase backdrop-blur">
+              <span className="inline-block -rotate-3 font-black">B</span>
+              <span className="inline-block translate-y-px font-black">u</span>
+              <span className="inline-block rotate-2 font-black">i</span>
+              <span className="inline-block -translate-y-px font-black">l</span>
+              <span className="inline-block rotate-1 font-black">t</span>
+              <span className="mx-1.5 inline-block h-3 w-px bg-primary/30" aria-hidden="true" />
+              <span className="inline-block -rotate-2 font-black">b</span>
+              <span className="inline-block translate-y-px font-black">y</span>
+              <span className="mx-1.5 inline-block h-3 w-px bg-primary/30" aria-hidden="true" />
+              <span className="inline-block rotate-3 bg-gradient-to-r from-primary to-aurora bg-clip-text text-transparent font-black">K</span>
+              <span className="inline-block -rotate-1 bg-gradient-to-r from-aurora to-primary bg-clip-text text-transparent font-black">C</span>
+            </div>
+          </div>
+
+          <div className="mt-4 border-t border-border/40 pt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <p className="text-[11px] leading-relaxed opacity-80 max-w-3xl">
               © {new Date().getFullYear()} MANOVIK AI. All Rights Reserved. "MANOVIK", "MANOVIK AI", the MANOVIK logo, and all related
               marks, content, designs, and code are the exclusive intellectual property of MANOVIK AI and are protected under Indian and
