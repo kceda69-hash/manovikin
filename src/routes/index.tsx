@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
+import { useFooterI18n, FOOTER_LOCALES } from "@/lib/i18n-footer";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -174,6 +175,7 @@ const FAQ = [
 
 function Landing() {
   const navigate = useNavigate();
+  const { locale, setLocale, t: footerT } = useFooterI18n();
   const heroRef = useRef<HTMLDivElement>(null);
   const [wordIdx, setWordIdx] = useState(0);
   const [tourIdx, setTourIdx] = useState(0);
@@ -773,15 +775,30 @@ function Landing() {
           </div>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-2 text-center">
-            <div className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-[11px] font-medium tracking-[0.2em] text-primary/90 uppercase backdrop-blur">
-              <span className="inline-block -rotate-3 font-black">B</span>
-              <span className="inline-block translate-y-px font-black">u</span>
-              <span className="inline-block rotate-2 font-black">i</span>
-              <span className="inline-block -translate-y-px font-black">l</span>
-              <span className="inline-block rotate-1 font-black">t</span>
+            <div
+              className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-[11px] font-medium tracking-[0.2em] text-primary/90 uppercase backdrop-blur"
+              aria-label={footerT.builtBy}
+              lang={locale}
+            >
+              {Array.from(footerT.builtWord).map((ch, i) => (
+                <span
+                  key={`b-${i}`}
+                  className="inline-block font-black"
+                  style={{ transform: `rotate(${((i % 3) - 1) * 2}deg) translateY(${(i % 2 === 0 ? -1 : 1)}px)` }}
+                >
+                  {ch}
+                </span>
+              ))}
               <span className="mx-1.5 inline-block h-3 w-px bg-primary/30" aria-hidden="true" />
-              <span className="inline-block -rotate-2 font-black">b</span>
-              <span className="inline-block translate-y-px font-black">y</span>
+              {Array.from(footerT.byWord).map((ch, i) => (
+                <span
+                  key={`y-${i}`}
+                  className="inline-block font-black"
+                  style={{ transform: `rotate(${((i % 3) - 1) * -2}deg) translateY(${(i % 2 === 0 ? 1 : -1)}px)` }}
+                >
+                  {ch}
+                </span>
+              ))}
               <span className="mx-1.5 inline-block h-3 w-px bg-primary/30" aria-hidden="true" />
               <span className="inline-block rotate-3 bg-gradient-to-r from-primary to-aurora bg-clip-text text-transparent font-black">K</span>
               <span className="inline-block -rotate-1 bg-gradient-to-r from-aurora to-primary bg-clip-text text-transparent font-black">C</span>
@@ -789,17 +806,30 @@ function Landing() {
           </div>
 
           <div className="mt-4 border-t border-border/40 pt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <p className="text-[11px] leading-relaxed opacity-80 max-w-3xl">
-              © {new Date().getFullYear()} MANOVIK AI. All Rights Reserved. "MANOVIK", "MANOVIK AI", the MANOVIK logo, and all related
-              marks, content, designs, and code are the exclusive intellectual property of MANOVIK AI and are protected under Indian and
-              international copyright, trademark, and unfair-competition laws. Unauthorized reproduction, redistribution, scraping,
-              cloning, reverse-engineering, or commercial use — in whole or in part — is strictly prohibited.
+            <p className="text-[11px] leading-relaxed opacity-80 max-w-3xl" lang={locale}>
+              {footerT.copyright(new Date().getFullYear())}
             </p>
-            <div className="text-[11px] opacity-70 flex items-center gap-2">
-              <span>Payments secured by</span>
-              <span className="rounded bg-foreground/10 px-2 py-0.5 font-semibold">Razorpay</span>
+            <div className="flex flex-col items-start gap-2 md:items-end">
+              <label className="text-[11px] opacity-70 flex items-center gap-2">
+                <span>{footerT.languageLabel}:</span>
+                <select
+                  value={locale}
+                  onChange={(e) => setLocale(e.target.value as typeof locale)}
+                  className="rounded border border-border/50 bg-background px-2 py-0.5 text-[11px] text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  aria-label={footerT.languageLabel}
+                >
+                  {FOOTER_LOCALES.map((l) => (
+                    <option key={l.code} value={l.code}>{l.label}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="text-[11px] opacity-70 flex items-center gap-2">
+                <span>{footerT.paymentsSecuredBy}</span>
+                <span className="rounded bg-foreground/10 px-2 py-0.5 font-semibold">Razorpay</span>
+              </div>
             </div>
           </div>
+
         </div>
       </footer>
 
