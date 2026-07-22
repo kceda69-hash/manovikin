@@ -761,10 +761,10 @@ function Landing() {
             <div>
               <div className="font-semibold text-foreground mb-2">Product</div>
               <ul className="space-y-1.5">
-                <li><Link to="/" hash="pricing" className="hover:text-primary">Pricing</Link></li>
+                <li><Link to="/" hash="pricing" className="hover:text-primary">{t("landing.footer.pricing")}</Link></li>
                 <li><Link to="/chat" className="hover:text-primary">Chat</Link></li>
                 <li><Link to="/billing" className="hover:text-primary">Billing</Link></li>
-                <li><Link to="/login" className="hover:text-primary">Sign in</Link></li>
+                <li><Link to="/login" className="hover:text-primary">{t("landing.footer.signin")}</Link></li>
                 <li><Link to="/connect" className="hover:text-primary">Connect AI assistants</Link></li>
               </ul>
             </div>
