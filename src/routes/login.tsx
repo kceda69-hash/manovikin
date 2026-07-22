@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { useAuth } from "@/hooks/useAuth";
+import { useI18n, LanguageSwitcher } from "@/lib/i18n";
 
 function sanitizeNextPath(value: unknown) {
   if (typeof value !== "string") return "/chat";
