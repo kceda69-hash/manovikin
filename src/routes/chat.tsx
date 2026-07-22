@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { Progress } from "@/components/ui/progress";
 import { getManovikDashboard, getUiPrefs, setUiPref } from "@/lib/manovik-balance.functions";
+import { useI18n } from "@/lib/i18n";
 
 import {
   listThreads,
