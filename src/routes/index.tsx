@@ -6,6 +6,7 @@ import logo from "@/assets/nova-x-logo.webp";
 import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { useFooterI18n, FOOTER_LOCALES } from "@/lib/i18n-footer";
+import { useI18n, LanguageSwitcher } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -176,6 +177,7 @@ const FAQ = [
 function Landing() {
   const navigate = useNavigate();
   const { locale, setLocale, t: footerT } = useFooterI18n();
+  const { t } = useI18n();
   const heroRef = useRef<HTMLDivElement>(null);
   const [wordIdx, setWordIdx] = useState(0);
   const [tourIdx, setTourIdx] = useState(0);
@@ -294,11 +296,14 @@ function Landing() {
             MANOVIK AI
           </span>
         </div>
-        <Link to="/login">
-          <Button variant="outline" className="border-primary/40 bg-card/40 backdrop-blur hover-scale">
-            Sign in
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher className="hidden sm:inline-flex" />
+          <Link to="/login">
+            <Button variant="outline" className="border-primary/40 bg-card/40 backdrop-blur hover-scale">
+              {t("nav.signin")}
+            </Button>
+          </Link>
+        </div>
       </header>
 
       <section className="relative z-10 mx-auto max-w-4xl px-6 pb-20 pt-16 text-center">
@@ -581,8 +586,8 @@ function Landing() {
         {/* Pricing */}
         <div id="pricing" className="mt-24 scroll-mt-20">
           <div className="text-center animate-fade-in">
-            <h2 className="text-3xl md:text-4xl font-bold">Simple pricing</h2>
-            <p className="mt-2 text-muted-foreground">Start free. Upgrade when you outgrow it.</p>
+            <h2 className="text-3xl md:text-4xl font-bold">{t("landing.pricing.title")}</h2>
+            <p className="mt-2 text-muted-foreground">{t("landing.pricing.sub")}</p>
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-3 text-left">
             {PRICING.map((p, i) => (
@@ -756,10 +761,10 @@ function Landing() {
             <div>
               <div className="font-semibold text-foreground mb-2">Product</div>
               <ul className="space-y-1.5">
-                <li><Link to="/" hash="pricing" className="hover:text-primary">Pricing</Link></li>
+                <li><Link to="/" hash="pricing" className="hover:text-primary">{t("landing.footer.pricing")}</Link></li>
                 <li><Link to="/chat" className="hover:text-primary">Chat</Link></li>
                 <li><Link to="/billing" className="hover:text-primary">Billing</Link></li>
-                <li><Link to="/login" className="hover:text-primary">Sign in</Link></li>
+                <li><Link to="/login" className="hover:text-primary">{t("landing.footer.signin")}</Link></li>
                 <li><Link to="/connect" className="hover:text-primary">Connect AI assistants</Link></li>
               </ul>
             </div>

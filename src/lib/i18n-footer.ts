@@ -88,6 +88,7 @@ const dict: Record<FooterLocale, FooterStrings> = {
 };
 
 const STORAGE_KEY = "manovik.footer.locale";
+const LOCALE_EVENT = "manovik-locale-change";
 
 function detectLocale(): FooterLocale {
   if (typeof window === "undefined") return "en";
@@ -105,6 +106,21 @@ export function useFooterI18n() {
 
   useEffect(() => {
     setLocaleState(detectLocale());
+    const onEvt = (e: Event) => {
+      const l = (e as CustomEvent<FooterLocale>).detail;
+      if (l && dict[l]) setLocaleState(l);
+    };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue && dict[e.newValue as FooterLocale]) {
+        setLocaleState(e.newValue as FooterLocale);
+      }
+    };
+    window.addEventListener(LOCALE_EVENT, onEvt as EventListener);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener(LOCALE_EVENT, onEvt as EventListener);
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
 
   const setLocale = useCallback((next: FooterLocale) => {
@@ -112,7 +128,11 @@ export function useFooterI18n() {
     try {
       window.localStorage.setItem(STORAGE_KEY, next);
     } catch {}
+    try {
+      window.dispatchEvent(new CustomEvent(LOCALE_EVENT, { detail: next }));
+    } catch {}
   }, []);
 
   return { locale, setLocale, t: dict[locale] };
 }
+
