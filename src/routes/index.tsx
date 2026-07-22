@@ -6,6 +6,7 @@ import logo from "@/assets/nova-x-logo.webp";
 import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { useFooterI18n, FOOTER_LOCALES } from "@/lib/i18n-footer";
+import { useI18n, LanguageSwitcher } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   component: Landing,
