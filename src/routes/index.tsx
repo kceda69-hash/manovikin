@@ -296,11 +296,14 @@ function Landing() {
             MANOVIK AI
           </span>
         </div>
-        <Link to="/login">
-          <Button variant="outline" className="border-primary/40 bg-card/40 backdrop-blur hover-scale">
-            Sign in
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher className="hidden sm:inline-flex" />
+          <Link to="/login">
+            <Button variant="outline" className="border-primary/40 bg-card/40 backdrop-blur hover-scale">
+              {t("nav.signin")}
+            </Button>
+          </Link>
+        </div>
       </header>
 
       <section className="relative z-10 mx-auto max-w-4xl px-6 pb-20 pt-16 text-center">
