@@ -39,6 +39,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const { next } = Route.useSearch();
   const { user, loading } = useAuth();
+  const { t } = useI18n();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -68,14 +69,14 @@ function LoginPage() {
           options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
         });
         if (error) throw error;
-        toast.success("Check your email to confirm your account.");
+        toast.success(t("login.toast.checkEmail"));
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         navigate({ to: next as any });
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Authentication failed");
+      toast.error(err instanceof Error ? err.message : t("login.toast.authFailed"));
     } finally {
       setBusy(false);
     }
@@ -88,22 +89,21 @@ function LoginPage() {
         redirect_uri: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       });
       if (result.error) {
-        toast.error(result.error.message ?? "Google sign-in failed");
+        toast.error(result.error.message ?? t("login.toast.googleFailed"));
         setBusy(false);
         return;
       }
       if (result.redirected) return;
-      // Session was set by the lovable wrapper; navigate to app.
       navigate({ to: next as any });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Sign-in failed");
+      toast.error(err instanceof Error ? err.message : t("login.toast.signinFailed"));
       setBusy(false);
     }
   };
 
   const handleMagicLink = async () => {
     if (!email) {
-      toast.error("Enter your email first.");
+      toast.error(t("login.toast.enterEmail"));
       return;
     }
     setMagicBusy(true);
@@ -120,18 +120,18 @@ function LoginPage() {
         const body = await res.json().catch(() => ({}));
         const secs: number = body.retryAfterSec ?? 60;
         setMagicCooldown(secs);
-        toast.error(`Too many attempts. Try again in ${secs}s.`);
+        toast.error(t("login.toast.tooMany", { s: secs }));
         return;
       }
       if (!res.ok) {
-        toast.error("Could not send magic link. Please try again.");
+        toast.error(t("login.toast.magicFail"));
         return;
       }
       setMagicSent(true);
       setMagicCooldown(60);
-      toast.success("Check your inbox for the login link.");
+      toast.success(t("login.toast.magicSent"));
     } catch {
-      toast.error("Network error. Please try again.");
+      toast.error(t("login.toast.network"));
     } finally {
       setMagicBusy(false);
     }
@@ -139,7 +139,6 @@ function LoginPage() {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
-      {/* Animated background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 mesh-aurora opacity-60" />
         <div className="absolute inset-0 bg-grid opacity-30" />
@@ -157,8 +156,12 @@ function LoginPage() {
         to="/"
         className="absolute top-6 left-6 inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm transition-colors hover:text-foreground hover:border-primary/60"
       >
-        <span aria-hidden="true">←</span> Back to home
+        <span aria-hidden="true">←</span> {t("nav.backHome")}
       </Link>
+
+      <div className="absolute top-6 right-6">
+        <LanguageSwitcher />
+      </div>
 
       <div className="surface-card relative w-full max-w-md rounded-2xl p-8 animate-fade-in">
         <Link to="/" className="mb-6 flex items-center justify-center gap-2">
@@ -166,10 +169,10 @@ function LoginPage() {
           <span className="text-xl font-bold tracking-wider text-gradient">MANOVIK AI</span>
         </Link>
         <h1 className="text-center text-2xl font-bold">
-          {mode === "signin" ? "Sign in to MANOVIK AI" : "Create your MANOVIK AI account"}
+          {mode === "signin" ? t("login.signinTitle") : t("login.signupTitle")}
         </h1>
         <p className="mt-1 text-center text-sm text-muted-foreground">
-          {mode === "signin" ? "Sign in to continue" : "Start commanding your AI agent"}
+          {mode === "signin" ? t("login.signinSub") : t("login.signupSub")}
         </p>
 
         <div className="mt-6 space-y-2">
@@ -181,26 +184,25 @@ function LoginPage() {
             disabled={busy}
           >
             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.55c2.08-1.92 3.29-4.74 3.29-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.55-2.76c-.98.66-2.24 1.06-3.73 1.06-2.87 0-5.3-1.94-6.17-4.55H2.18v2.85A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.83 14.09a6.61 6.61 0 0 1 0-4.18V7.07H2.18a11 11 0 0 0 0 9.86l3.65-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.65 2.84C6.7 7.32 9.13 5.38 12 5.38z"/></svg>
-            Continue with Google
+            {t("login.google")}
           </Button>
         </div>
 
-
         <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-          <div className="h-px flex-1 bg-border/60" /> or <div className="h-px flex-1 bg-border/60" />
+          <div className="h-px flex-1 bg-border/60" /> {t("login.or")} <div className="h-px flex-1 bg-border/60" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("login.email")}</Label>
             <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5 input-glow" />
           </div>
           <div>
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("login.password")}</Label>
             <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1.5 input-glow" />
           </div>
           <Button type="submit" disabled={busy} className="w-full bg-aurora text-primary-foreground glow hover:opacity-90">
-            {busy ? "..." : mode === "signin" ? "Sign in" : "Create account"}
+            {busy ? t("login.busy") : mode === "signin" ? t("login.submit.signin") : t("login.submit.signup")}
           </Button>
         </form>
 
@@ -213,16 +215,16 @@ function LoginPage() {
             disabled={magicBusy || magicCooldown > 0}
           >
             {magicBusy
-              ? "Sending…"
+              ? t("login.magicSending")
               : magicCooldown > 0
-                ? `Resend in ${magicCooldown}s`
+                ? t("login.magicResendIn", { s: magicCooldown })
                 : magicSent
-                  ? "Email another login link"
-                  : "Email me a magic link"}
+                  ? t("login.magicResendAnother")
+                  : t("login.magicSend")}
           </Button>
           {magicSent && magicCooldown === 0 && (
             <p className="mt-2 text-center text-xs text-muted-foreground">
-              Didn't get it? Check spam, or resend above.
+              {t("login.magicHelp")}
             </p>
           )}
         </div>
@@ -232,7 +234,7 @@ function LoginPage() {
           onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
           className="mt-5 w-full text-center text-sm text-muted-foreground hover:text-foreground"
         >
-          {mode === "signin" ? "No account? Sign up" : "Already have an account? Sign in"}
+          {mode === "signin" ? t("login.toSignup") : t("login.toSignin")}
         </button>
 
         <div className="mt-6 border-t border-border/40 pt-3 text-center">
@@ -241,7 +243,7 @@ function LoginPage() {
             search={{ next: "/admin" } as any}
             className="text-[11px] uppercase tracking-wider text-muted-foreground/70 hover:text-foreground"
           >
-            Admin sign-in →
+            {t("login.admin")}
           </Link>
         </div>
       </div>
