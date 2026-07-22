@@ -12,6 +12,7 @@ import { useEffect, useMemo } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { initPerf } from "@/lib/perf";
 import { initClientErrorMonitor } from "@/lib/client-error-monitor";
+import { I18nProvider, useI18n } from "@/lib/i18n";
 
 import appCss from "../styles.css?url";
 
