@@ -321,6 +321,7 @@ type DashboardData = Awaited<ReturnType<typeof getManovikDashboard>>;
 
 function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
   const fetchDashboard = useServerFn(getManovikDashboard);
+  const { t } = useI18n();
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["manovik-dashboard"],
     queryFn: () => fetchDashboard() as Promise<DashboardData>,
@@ -340,8 +341,8 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
             <LayoutDashboard className="h-4 w-4" />
           </span>
           <div>
-            <h2 className="text-sm font-semibold">Workspace dashboard</h2>
-            <p className="text-[11px] text-muted-foreground">Live account telemetry</p>
+            <h2 className="text-sm font-semibold">{t("dashboard.title")}</h2>
+            <p className="text-[11px] text-muted-foreground">{t("dashboard.subtitle")}</p>
           </div>
         </div>
         <button
@@ -349,7 +350,7 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
           onClick={() => refetch()}
           className="rounded-md border border-border/60 px-2 py-1 text-[11px] text-muted-foreground transition hover:text-foreground"
         >
-          Refresh
+          {t("cta.refresh")}
         </button>
       </div>
 
@@ -364,53 +365,53 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
           <section className="surface-card rounded-xl p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Remaining credits</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("dashboard.remaining")}</p>
                 <div className="mt-1 flex items-baseline gap-2">
                   <span className="text-3xl font-bold text-gradient">{data.user.isAdmin ? "∞" : credits}</span>
-                  <span className="text-xs text-muted-foreground">credits</span>
+                  <span className="text-xs text-muted-foreground">{t("dashboard.creditsUnit")}</span>
                 </div>
               </div>
               <Wallet className="h-5 w-5 text-primary" />
             </div>
             <Progress value={remainingPct} className="mt-4 h-2" />
             <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
-              <span>{data.user.isAdmin ? "Admin bypass enabled" : `${used} used this month`}</span>
+              <span>{data.user.isAdmin ? t("dashboard.adminBypass") : t("dashboard.usedMonth", { n: used })}</span>
               <span>{Math.round(remainingPct)}%</span>
             </div>
           </section>
 
           <div className="grid grid-cols-2 gap-3">
-            <MetricCard icon={BarChart3} label="Messages" value={data.usage.messages.toLocaleString()} />
-            <MetricCard icon={MessageSquarePlus} label="Threads" value={data.usage.threads.toLocaleString()} />
+            <MetricCard icon={BarChart3} label={t("dashboard.metric.messages")} value={data.usage.messages.toLocaleString()} />
+            <MetricCard icon={MessageSquarePlus} label={t("dashboard.metric.threads")} value={data.usage.threads.toLocaleString()} />
           </div>
 
           <section className="surface-card rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Crown className="h-4 w-4 text-primary" />
-                <span className="text-sm font-semibold">{data.plan} plan</span>
+                <span className="text-sm font-semibold">{data.plan} {t("dashboard.plan.suffix")}</span>
               </div>
               <Button asChild size="sm" variant="outline" className="h-8 text-xs">
                 <Link to="/billing">
-                  Manage <ArrowUpRight className="ml-1 h-3 w-3" />
+                  {t("cta.manage")} <ArrowUpRight className="ml-1 h-3 w-3" />
                 </Link>
               </Button>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
               {data.plan === "Free"
-                ? "Upgrade for higher usage and priority model routing."
-                : "Billing, receipts, and renewal controls are active."}
+                ? t("dashboard.plan.upgradeCopy")
+                : t("dashboard.plan.paidCopy")}
             </p>
           </section>
 
           <section className="surface-card rounded-xl p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Credit activity</h3>
-              <Link to="/balance" className="text-xs text-primary hover:underline">Open</Link>
+              <h3 className="text-sm font-semibold">{t("dashboard.creditActivity")}</h3>
+              <Link to="/balance" className="text-xs text-primary hover:underline">{t("cta.open")}</Link>
             </div>
             <div className="space-y-2">
               {data.recentLedger.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No credit activity yet.</p>
+                <p className="text-xs text-muted-foreground">{t("dashboard.noCredits")}</p>
               ) : (
                 data.recentLedger.slice(0, 4).map((row: { delta: number; reason: string; created_at: string }, i: number) => (
                   <div key={`${row.created_at}-${i}`} className="flex items-center justify-between gap-2 text-xs">
@@ -426,17 +427,17 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
 
           <section className="surface-card rounded-xl p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Security</h3>
-              <Link to="/audit" className="text-xs text-primary hover:underline">Audit log</Link>
+              <h3 className="text-sm font-semibold">{t("dashboard.security")}</h3>
+              <Link to="/audit" className="text-xs text-primary hover:underline">{t("dashboard.auditLog")}</Link>
             </div>
             <div className="space-y-2">
               {data.recentAudit.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No recent security events.</p>
+                <p className="text-xs text-muted-foreground">{t("dashboard.noSecurity")}</p>
               ) : (
                 data.recentAudit.slice(0, 3).map((row: { event_type: string; summary: string | null; created_at: string }, i: number) => (
                   <div key={`${row.created_at}-${i}`} className="rounded-lg border border-border/40 bg-background/40 p-2">
                     <div className="text-[11px] font-medium">{row.event_type}</div>
-                    <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{row.summary ?? "Recorded"}</div>
+                    <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{row.summary ?? t("dashboard.recorded")}</div>
                   </div>
                 ))
               )}
@@ -445,7 +446,7 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
         </div>
       ) : (
         <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-          Dashboard failed to load.
+          {t("dashboard.failed")}
         </div>
       )}
     </aside>
