@@ -586,8 +586,8 @@ function Landing() {
         {/* Pricing */}
         <div id="pricing" className="mt-24 scroll-mt-20">
           <div className="text-center animate-fade-in">
-            <h2 className="text-3xl md:text-4xl font-bold">Simple pricing</h2>
-            <p className="mt-2 text-muted-foreground">Start free. Upgrade when you outgrow it.</p>
+            <h2 className="text-3xl md:text-4xl font-bold">{t("landing.pricing.title")}</h2>
+            <p className="mt-2 text-muted-foreground">{t("landing.pricing.sub")}</p>
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-3 text-left">
             {PRICING.map((p, i) => (
