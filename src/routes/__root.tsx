@@ -226,9 +226,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BreadcrumbJsonLd />
-      <Outlet />
-      <Toaster richColors position="top-right" />
+      <I18nProvider>
+        <BreadcrumbJsonLd />
+        <Outlet />
+        <Toaster richColors position="top-right" />
+      </I18nProvider>
     </QueryClientProvider>
   );
 }
