@@ -257,7 +257,7 @@ function ChatPage() {
             <Button
               variant="ghost"
               size="icon"
-              aria-label="Open dashboard"
+              aria-label={t("aria.showDashboard")}
               onClick={() => setDashboardOpen(true)}
             >
               <LayoutDashboard className="h-5 w-5" />
@@ -265,7 +265,7 @@ function ChatPage() {
             <Button
               variant="ghost"
               size="icon"
-              aria-label="New chat"
+              aria-label={t("aria.newChat")}
               onClick={handleNew}
             >
               <MessageSquarePlus className="h-5 w-5" />
@@ -273,7 +273,7 @@ function ChatPage() {
             <Sheet open={dashboardOpen} onOpenChange={setDashboardOpen}>
               <SheetContent side="right" className="w-[88vw] max-w-sm p-0 bg-background">
                 <SheetHeader className="sr-only">
-                  <SheetTitle>Workspace dashboard</SheetTitle>
+                  <SheetTitle>{t("aria.workspaceDashboard")}</SheetTitle>
                 </SheetHeader>
                 <DashboardPanel mobile />
               </SheetContent>
@@ -293,7 +293,7 @@ function ChatPage() {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Hide dashboard"
+            aria-label={t("aria.hideDashboard")}
             onClick={() => setDesktopDashboardOpen(false)}
             className="absolute right-2 top-2 z-10 h-8 w-8"
           >
@@ -304,7 +304,7 @@ function ChatPage() {
         <Button
           variant="outline"
           size="icon"
-          aria-label="Show dashboard"
+          aria-label={t("aria.showDashboard")}
           onClick={() => setDesktopDashboardOpen(true)}
           className={`fixed right-4 top-4 z-20 hidden h-9 w-9 shadow-md md:inline-flex transition-all duration-300 ease-out motion-reduce:transition-none ${
             desktopDashboardOpen ? "pointer-events-none scale-90 opacity-0" : "scale-100 opacity-100"
