@@ -862,6 +862,7 @@ function PromptComposer() {
   const [attachments, setAttachments] = useState<Array<{ name: string; content: string }>>([]);
   const [target, setTarget] = useState<(typeof TARGETS)[number]["id"]>("web");
   const [model, setModel] = useState<(typeof MODELS)[number]>("Claude Fable 5");
+  const [dnaMode, setDnaMode] = useState<"build" | "reverse" | "clone" | "brain" | "ship-store">("build");
   const [output, setOutput] = useState("");
   const [status, setStatus] = useState<"idle" | "streaming" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
