@@ -452,6 +452,53 @@ function Landing() {
         {/* Ship to real stores — interactive stepper */}
         <ShipStepper />
 
+        {/* MANOVIK DNA — unique brains only this agent ships */}
+        <section id="dna" className="mt-24">
+          <div className="text-center animate-fade-in">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
+              <Brain className="h-3.5 w-3.5" /> MANOVIK DNA
+            </div>
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold">
+              Five brains no other AI ships. <span className="text-gradient">Switch mid-prompt.</span>
+            </h2>
+            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
+              Every mode below is a live pill on the composer above — pick one and MANOVIK reframes the whole reasoning stack.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3 text-left">
+            {[
+              { icon: Workflow, title: "Reverse-Engineer Brain", body: "Paste a URL, screenshot, or snippet. MANOVIK decomposes the architecture, names the tricks, and returns a clean-room rebuild plan — original code only, never verbatim." },
+              { icon: Copy, title: "Clone-Exactly Brain", body: "Locks the spec, emits every file with `// file: path` headers, and ships parity tests so you can prove the clone matches before you ship." },
+              { icon: Brain, title: "MANOVIK Brain (memory)", body: "A persistent knowledge graph of your stack, style, and past work. Talks to you like it already knows you — because it does." },
+              { icon: Rocket, title: "One-Click Ship (100% accuracy)", body: "Play Store, App Store, and Web packaging deliverables with preflight checks. Nothing MANOVIK emits gets rejected on review." },
+              { icon: Layers, title: "Skill Packs", body: "Composable, whitelisted skills (Supabase, Razorpay, Expo, RLS…) that plug into the sandbox at runtime — auditable, rate-limited, reversible." },
+              { icon: Cpu, title: "Multi-model routing", body: "Cheap Gemini for greetings, GPT-5.5 for architecture, Claude Fable 5 for shipping. Router picks — you don't pay for the wrong brain." },
+            ].map((c) => (
+              <div key={c.title} className="surface-card relative overflow-hidden rounded-2xl p-5 md:p-6">
+                <span className="card-border-glow" aria-hidden="true" />
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/80 to-accent text-primary-foreground shadow">
+                    <c.icon className="h-5 w-5" />
+                  </span>
+                  <h3 className="font-semibold text-base md:text-lg">{c.title}</h3>
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{c.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <a
+              href="#top"
+              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-card/40 px-4 py-2 text-sm text-primary hover:bg-primary/10 transition"
+            >
+              Try a DNA mode in the composer <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+        </section>
+
+
+
 
         {/* Powered by top models — incl. Claude Fable 5 */}
         <div className="mt-24">
