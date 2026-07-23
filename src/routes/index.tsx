@@ -452,6 +452,53 @@ function Landing() {
         {/* Ship to real stores — interactive stepper */}
         <ShipStepper />
 
+        {/* MANOVIK DNA — unique brains only this agent ships */}
+        <section id="dna" className="mt-24">
+          <div className="text-center animate-fade-in">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
+              <Brain className="h-3.5 w-3.5" /> MANOVIK DNA
+            </div>
+            <h2 className="mt-4 text-3xl md:text-4xl font-bold">
+              Five brains no other AI ships. <span className="text-gradient">Switch mid-prompt.</span>
+            </h2>
+            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
+              Every mode below is a live pill on the composer above — pick one and MANOVIK reframes the whole reasoning stack.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3 text-left">
+            {[
+              { icon: Workflow, title: "Reverse-Engineer Brain", body: "Paste a URL, screenshot, or snippet. MANOVIK decomposes the architecture, names the tricks, and returns a clean-room rebuild plan — original code only, never verbatim." },
+              { icon: Copy, title: "Clone-Exactly Brain", body: "Locks the spec, emits every file with `// file: path` headers, and ships parity tests so you can prove the clone matches before you ship." },
+              { icon: Brain, title: "MANOVIK Brain (memory)", body: "A persistent knowledge graph of your stack, style, and past work. Talks to you like it already knows you — because it does." },
+              { icon: Rocket, title: "One-Click Ship (100% accuracy)", body: "Play Store, App Store, and Web packaging deliverables with preflight checks. Nothing MANOVIK emits gets rejected on review." },
+              { icon: Layers, title: "Skill Packs", body: "Composable, whitelisted skills (Supabase, Razorpay, Expo, RLS…) that plug into the sandbox at runtime — auditable, rate-limited, reversible." },
+              { icon: Cpu, title: "Multi-model routing", body: "Cheap Gemini for greetings, GPT-5.5 for architecture, Claude Fable 5 for shipping. Router picks — you don't pay for the wrong brain." },
+            ].map((c) => (
+              <div key={c.title} className="surface-card relative overflow-hidden rounded-2xl p-5 md:p-6">
+                <span className="card-border-glow" aria-hidden="true" />
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/80 to-accent text-primary-foreground shadow">
+                    <c.icon className="h-5 w-5" />
+                  </span>
+                  <h3 className="font-semibold text-base md:text-lg">{c.title}</h3>
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{c.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <a
+              href="#top"
+              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-card/40 px-4 py-2 text-sm text-primary hover:bg-primary/10 transition"
+            >
+              Try a DNA mode in the composer <ArrowRight className="h-4 w-4" />
+            </a>
+          </div>
+        </section>
+
+
+
 
         {/* Powered by top models — incl. Claude Fable 5 */}
         <div className="mt-24">
@@ -862,6 +909,7 @@ function PromptComposer() {
   const [attachments, setAttachments] = useState<Array<{ name: string; content: string }>>([]);
   const [target, setTarget] = useState<(typeof TARGETS)[number]["id"]>("web");
   const [model, setModel] = useState<(typeof MODELS)[number]>("Claude Fable 5");
+  const [dnaMode, setDnaMode] = useState<"build" | "reverse" | "clone" | "brain" | "ship-store">("build");
   const [output, setOutput] = useState("");
   const [status, setStatus] = useState<"idle" | "streaming" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -918,7 +966,7 @@ function PromptComposer() {
       const res = await fetch("/api/public/demo-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, connected: hasFableSession() }),
+        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, dnaMode, connected: hasFableSession() }),
         signal: controller.signal,
       });
 
@@ -1011,7 +1059,33 @@ function PromptComposer() {
           className="w-full resize-none rounded-xl bg-background/40 border border-border/60 p-4 text-sm md:text-base outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/70 disabled:opacity-70"
         />
 
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground mr-1">Brain</span>
+          {([
+            { id: "build", label: "Build", icon: Sparkles },
+            { id: "reverse", label: "Reverse-Engineer", icon: Workflow },
+            { id: "clone", label: "Clone Exactly", icon: Copy },
+            { id: "brain", label: "MANOVIK Brain", icon: Brain },
+            { id: "ship-store", label: "One-Click Ship", icon: Rocket },
+          ] as const).map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => setDnaMode(m.id)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${
+                dnaMode === m.id
+                  ? "border-primary/60 bg-primary/15 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.3)]"
+                  : "border-border/60 bg-card/40 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <m.icon className="h-3 w-3" />
+              {m.label}
+            </button>
+          ))}
+        </div>
+
         <div className="mt-3 flex flex-wrap items-center gap-2">
+
           <div className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/40 p-1">
             {TARGETS.map((t) => (
               <button
