@@ -1012,7 +1012,33 @@ function PromptComposer() {
           className="w-full resize-none rounded-xl bg-background/40 border border-border/60 p-4 text-sm md:text-base outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/70 disabled:opacity-70"
         />
 
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground mr-1">Brain</span>
+          {([
+            { id: "build", label: "Build", icon: Sparkles },
+            { id: "reverse", label: "Reverse-Engineer", icon: Workflow },
+            { id: "clone", label: "Clone Exactly", icon: Copy },
+            { id: "brain", label: "MANOVIK Brain", icon: Brain },
+            { id: "ship-store", label: "One-Click Ship", icon: Rocket },
+          ] as const).map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => setDnaMode(m.id)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${
+                dnaMode === m.id
+                  ? "border-primary/60 bg-primary/15 text-primary shadow-[0_0_0_1px_hsl(var(--primary)/0.3)]"
+                  : "border-border/60 bg-card/40 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <m.icon className="h-3 w-3" />
+              {m.label}
+            </button>
+          ))}
+        </div>
+
         <div className="mt-3 flex flex-wrap items-center gap-2">
+
           <div className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/40 p-1">
             {TARGETS.map((t) => (
               <button
