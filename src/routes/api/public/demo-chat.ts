@@ -281,6 +281,10 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           typeof body.model === "string" && MODEL_MAP[body.model] ? body.model : "Auto";
         const mode =
           body.mode === "ship" ? "ship" : body.mode === "workspace" ? "workspace" : "plan";
+        const dnaMode: DnaMode =
+          typeof body.dnaMode === "string" && (DNA_MODES as readonly string[]).includes(body.dnaMode)
+            ? (body.dnaMode as DnaMode)
+            : "build";
         const connected = body.connected === true;
         const rawTargets = Array.isArray(body.targets) ? body.targets : [];
         const targets = rawTargets
