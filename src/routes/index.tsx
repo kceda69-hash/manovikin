@@ -919,7 +919,7 @@ function PromptComposer() {
       const res = await fetch("/api/public/demo-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, connected: hasFableSession() }),
+        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, dnaMode, connected: hasFableSession() }),
         signal: controller.signal,
       });
 
