@@ -317,7 +317,9 @@ export const Route = createFileRoute("/api/public/demo-chat")({
               ? shipSystemPrompt(targets.length ? targets : [target], modelLabel, connected)
               : mode === "workspace"
                 ? workspaceSystemPrompt(files, modelLabel, connected)
-                : systemPrompt(target, modelLabel, connected);
+                : dnaMode !== "build"
+                  ? dnaSystemPrompt(dnaMode, target, modelLabel, connected)
+                  : systemPrompt(target, modelLabel, connected);
           const result = streamText({
             model: gateway(MODEL_MAP[modelLabel]),
             system,
