@@ -265,6 +265,7 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           mode?: unknown;
           connected?: unknown;
           files?: unknown;
+          dnaMode?: unknown;
         };
         try {
           body = JSON.parse(raw);
