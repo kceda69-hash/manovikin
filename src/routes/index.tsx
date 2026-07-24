@@ -1248,7 +1248,7 @@ function PromptComposer() {
               Verify the generated files match the original spec.
             </span>
             <CloneVerifier
-              spec={input}
+              spec={prompt}
               files={parseDeliverables(output).files.map((f) => ({
                 path: f.filename,
                 content: f.content,
