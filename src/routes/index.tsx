@@ -7,6 +7,15 @@ import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { useFooterI18n, FOOTER_LOCALES } from "@/lib/i18n-footer";
 import { useI18n, LanguageSwitcher } from "@/lib/i18n";
+import {
+  ReverseEngineerPanel,
+  DnaPromptEditor,
+  CloneVerifier,
+  ShipPipeline,
+  getDnaOverride,
+  type ShipStageId,
+} from "@/components/manovik/dna-features";
+
 
 export const Route = createFileRoute("/")({
   component: Landing,
