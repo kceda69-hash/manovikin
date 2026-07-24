@@ -461,6 +461,10 @@ function Landing() {
         {/* Ship to real stores — interactive stepper */}
         <ShipStepper />
 
+        {/* Reverse-engineer workflow — extract requirements + change plan */}
+        <ReverseEngineerPanel />
+
+
         {/* MANOVIK DNA — unique brains only this agent ships */}
         <section id="dna" className="mt-24">
           <div className="text-center animate-fade-in">
@@ -919,6 +923,8 @@ function PromptComposer() {
   const [target, setTarget] = useState<(typeof TARGETS)[number]["id"]>("web");
   const [model, setModel] = useState<(typeof MODELS)[number]>("Claude Fable 5");
   const [dnaMode, setDnaMode] = useState<"build" | "reverse" | "clone" | "brain" | "ship-store">("build");
+  const [editorOpen, setEditorOpen] = useState(false);
+
   const [output, setOutput] = useState("");
   const [status, setStatus] = useState<"idle" | "streaming" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -975,7 +981,7 @@ function PromptComposer() {
       const res = await fetch("/api/public/demo-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, dnaMode, connected: hasFableSession() }),
+        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, dnaMode, connected: hasFableSession(), customSystem: getDnaOverride(dnaMode) }),
         signal: controller.signal,
       });
 
@@ -1091,7 +1097,16 @@ function PromptComposer() {
               {m.label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => setEditorOpen(true)}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-primary hover:border-primary/40 transition"
+            title="Edit MANOVIK's system prompt for each brain"
+          >
+            <Wand2 className="h-3 w-3" /> Edit DNA prompt
+          </button>
         </div>
+
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
 
