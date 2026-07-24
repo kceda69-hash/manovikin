@@ -1877,8 +1877,24 @@ Generate the packaging deliverables now.`;
                     )}
                   </>
                 )}
-              </div>
             </div>
+
+            <div className="mb-3">
+              <ShipPipeline
+                current={
+                  (status === "streaming" && !files.length
+                    ? "package"
+                    : status === "streaming"
+                      ? "sign"
+                      : status === "done" && files.length
+                        ? "submit"
+                        : "validate") as ShipStageId
+                }
+                status={status}
+              />
+            </div>
+
+
 
             {errMsg && (
               <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive mb-3">
