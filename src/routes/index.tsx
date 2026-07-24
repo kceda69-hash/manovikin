@@ -1877,7 +1877,10 @@ Generate the packaging deliverables now.`;
                     )}
                   </>
                 )}
+              </div>
             </div>
+
+
 
             <div className="mb-3">
               <ShipPipeline
