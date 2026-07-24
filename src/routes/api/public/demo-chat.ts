@@ -266,6 +266,9 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           connected?: unknown;
           files?: unknown;
           dnaMode?: unknown;
+          customSystem?: unknown;
+          spec?: unknown;
+          repoUrl?: unknown;
         };
         try {
           body = JSON.parse(raw);
@@ -281,7 +284,15 @@ export const Route = createFileRoute("/api/public/demo-chat")({
         const modelLabel =
           typeof body.model === "string" && MODEL_MAP[body.model] ? body.model : "Auto";
         const mode =
-          body.mode === "ship" ? "ship" : body.mode === "workspace" ? "workspace" : "plan";
+          body.mode === "ship"
+            ? "ship"
+            : body.mode === "workspace"
+              ? "workspace"
+              : body.mode === "reverse-engineer"
+                ? "reverse-engineer"
+                : body.mode === "verify"
+                  ? "verify"
+                  : "plan";
         const dnaMode: DnaMode =
           typeof body.dnaMode === "string" && (DNA_MODES as readonly string[]).includes(body.dnaMode)
             ? (body.dnaMode as DnaMode)
@@ -302,6 +313,12 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           )
           .slice(0, 12)
           .map((f) => ({ path: f.path.slice(0, 200), content: f.content.slice(0, 6000) }));
+        const customSystem =
+          typeof body.customSystem === "string" && body.customSystem.trim().length > 0
+            ? body.customSystem.trim().slice(0, 4000)
+            : "";
+        const spec = typeof body.spec === "string" ? body.spec.slice(0, 4000) : "";
+        const repoUrl = typeof body.repoUrl === "string" ? body.repoUrl.slice(0, 400) : "";
 
         if (!prompt) {
           return new Response("Prompt required", { status: 400 });
@@ -312,14 +329,87 @@ export const Route = createFileRoute("/api/public/demo-chat")({
 
         try {
           const gateway = createLovableAiGatewayProvider(apiKey);
-          const system =
+          const brain = connected ? `${modelLabel} (Claude Fable 5 session)` : modelLabel;
+          const baseSystem =
             mode === "ship"
               ? shipSystemPrompt(targets.length ? targets : [target], modelLabel, connected)
               : mode === "workspace"
                 ? workspaceSystemPrompt(files, modelLabel, connected)
-                : dnaMode !== "build"
-                  ? dnaSystemPrompt(dnaMode, target, modelLabel, connected)
-                  : systemPrompt(target, modelLabel, connected);
+                : mode === "reverse-engineer"
+                  ? `You are MANOVIK's Reverse-Engineering Brain. Model: ${brain}.
+
+Input: ${repoUrl ? `Repository URL: ${repoUrl}\n` : ""}${files.length ? `Source snapshot (${files.length} files) is attached in the user prompt.\n` : ""}The user wants an actionable change plan BEFORE any code is written.
+
+Reply as markdown with these exact sections in this order:
+
+### 1. Extracted Requirements
+Numbered functional requirements (max 10). One sentence each. Mark inferred vs stated.
+
+### 2. Non-Functional Requirements
+Bullets: perf, security, scale, compliance, i18n, a11y — only those actually implied.
+
+### 3. Architecture Map
+An ASCII tree of the system:
+\`\`\`
+app/
+├── ui/        # frameworks, key components
+├── api/       # routes, contracts
+├── data/      # tables, stores, caches
+└── infra/     # deploy, secrets, jobs
+\`\`\`
+Then 3-6 bullets naming the notable patterns/tricks used.
+
+### 4. Risks & Gaps
+Bullets of missing tests, security holes, dead code, tech debt — be specific.
+
+### 5. Actionable Change Plan
+Numbered steps (max 8), each: <verb> <scope> — <acceptance criterion>. Order by dependency.
+
+### 6. First PR
+One paragraph describing the smallest safe first PR MANOVIK would open, listing exact files touched.
+
+Rules:
+- Never emit implementation code in this reply — plan only.
+- Never copy proprietary code verbatim; describe patterns instead.
+- If input is thin, mark assumptions explicitly as "Assumption:".`
+                  : mode === "verify"
+                    ? `You are MANOVIK's Clone Verification Brain. Model: ${brain}.
+
+You are given the ORIGINAL SPEC and the GENERATED FILES from a Clone-Exactly session. Your job is to score parity, NOT to rewrite code.
+
+Original spec:
+"""${spec || "(none provided — infer from files)"}"""
+
+Generated files (${files.length}):
+${files.map((f) => `- ${f.path} (${f.content.length} chars)`).join("\n") || "(none)"}
+
+Reply as markdown:
+
+### Parity Score
+A single line: \`Overall: NN/100\` plus a one-sentence verdict.
+
+### Requirements Matrix
+A markdown table with columns: | # | Requirement | Status | Evidence |
+Status is one of: ✅ Met · ⚠️ Partial · ❌ Missing. Evidence cites the file(s) that satisfy it, or "not found".
+
+### Gaps
+Bullets naming every missing/partial requirement with a concrete fix (file + change).
+
+### Parity Test Plan
+Emit 1-3 fenced code blocks whose FIRST line is exactly \`// file: __tests__/<name>.test.ts\`. Each test asserts one gap-prone behavior. Use vitest.
+
+### Verdict
+One paragraph: ship / hold / rework, with the single blocking issue if any.
+
+Rules: never invent files that weren't provided. If evidence is ambiguous, mark ⚠️ Partial rather than ✅.`
+                    : dnaMode !== "build"
+                      ? dnaSystemPrompt(dnaMode, target, modelLabel, connected)
+                      : systemPrompt(target, modelLabel, connected);
+          // Custom system prompt override from DNA Prompt Editor — appended so
+          // the base contract still enforces safety, then user overrides tone/shape.
+          const system = customSystem
+            ? `${baseSystem}\n\n---\nUSER-OVERRIDE (from DNA Prompt Editor — obey unless it conflicts with safety rules above):\n${customSystem}`
+            : baseSystem;
           const result = streamText({
             model: gateway(MODEL_MAP[modelLabel]),
             system,
@@ -333,6 +423,7 @@ export const Route = createFileRoute("/api/public/demo-chat")({
               "X-Manovik-Mode": mode,
             },
           });
+
         } catch (err) {
           const msg = String((err as Error)?.message ?? err);
           const status = /402|credit/i.test(msg) ? 402 : /429|rate/i.test(msg) ? 429 : 500;

@@ -7,6 +7,15 @@ import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { useFooterI18n, FOOTER_LOCALES } from "@/lib/i18n-footer";
 import { useI18n, LanguageSwitcher } from "@/lib/i18n";
+import {
+  ReverseEngineerPanel,
+  DnaPromptEditor,
+  CloneVerifier,
+  ShipPipeline,
+  getDnaOverride,
+  type ShipStageId,
+} from "@/components/manovik/dna-features";
+
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -451,6 +460,10 @@ function Landing() {
 
         {/* Ship to real stores — interactive stepper */}
         <ShipStepper />
+
+        {/* Reverse-engineer workflow — extract requirements + change plan */}
+        <ReverseEngineerPanel />
+
 
         {/* MANOVIK DNA — unique brains only this agent ships */}
         <section id="dna" className="mt-24">
@@ -910,6 +923,8 @@ function PromptComposer() {
   const [target, setTarget] = useState<(typeof TARGETS)[number]["id"]>("web");
   const [model, setModel] = useState<(typeof MODELS)[number]>("Claude Fable 5");
   const [dnaMode, setDnaMode] = useState<"build" | "reverse" | "clone" | "brain" | "ship-store">("build");
+  const [editorOpen, setEditorOpen] = useState(false);
+
   const [output, setOutput] = useState("");
   const [status, setStatus] = useState<"idle" | "streaming" | "done" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -966,7 +981,7 @@ function PromptComposer() {
       const res = await fetch("/api/public/demo-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, dnaMode, connected: hasFableSession() }),
+        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, dnaMode, connected: hasFableSession(), customSystem: getDnaOverride(dnaMode) }),
         signal: controller.signal,
       });
 
@@ -1082,7 +1097,16 @@ function PromptComposer() {
               {m.label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={() => setEditorOpen(true)}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-primary hover:border-primary/40 transition"
+            title="Edit MANOVIK's system prompt for each brain"
+          >
+            <Wand2 className="h-3 w-3" /> Edit DNA prompt
+          </button>
         </div>
+
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
 
@@ -1217,10 +1241,27 @@ function PromptComposer() {
             </div>
           </div>
         )}
+
+        {dnaMode === "clone" && output && status === "done" && (
+          <div className="mt-4 flex items-center justify-between gap-2 flex-wrap">
+            <span className="text-[11px] text-muted-foreground">
+              Verify the generated files match the original spec.
+            </span>
+            <CloneVerifier
+              spec={prompt}
+              files={parseDeliverables(output).files.map((f) => ({
+                path: f.filename,
+                content: f.content,
+              }))}
+            />
+          </div>
+        )}
       </div>
+      <DnaPromptEditor open={editorOpen} onClose={() => setEditorOpen(false)} />
     </div>
   );
 }
+
 
 // ---------------- Claude Fable 5 connect flow ----------------
 // Client-side "connect" that authorizes higher-quality routing on the demo
@@ -1838,6 +1879,25 @@ Generate the packaging deliverables now.`;
                 )}
               </div>
             </div>
+
+
+
+            <div className="mb-3">
+              <ShipPipeline
+                current={
+                  (status === "streaming" && !files.length
+                    ? "package"
+                    : status === "streaming"
+                      ? "sign"
+                      : status === "done" && files.length
+                        ? "submit"
+                        : "validate") as ShipStageId
+                }
+                status={status}
+              />
+            </div>
+
+
 
             {errMsg && (
               <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive mb-3">
