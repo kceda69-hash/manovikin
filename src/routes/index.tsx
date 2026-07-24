@@ -1241,10 +1241,27 @@ function PromptComposer() {
             </div>
           </div>
         )}
+
+        {dnaMode === "clone" && output && status === "done" && (
+          <div className="mt-4 flex items-center justify-between gap-2 flex-wrap">
+            <span className="text-[11px] text-muted-foreground">
+              Verify the generated files match the original spec.
+            </span>
+            <CloneVerifier
+              spec={input}
+              files={parseDeliverables(output).files.map((f) => ({
+                path: f.filename,
+                content: f.content,
+              }))}
+            />
+          </div>
+        )}
       </div>
+      <DnaPromptEditor open={editorOpen} onClose={() => setEditorOpen(false)} />
     </div>
   );
 }
+
 
 // ---------------- Claude Fable 5 connect flow ----------------
 // Client-side "connect" that authorizes higher-quality routing on the demo
