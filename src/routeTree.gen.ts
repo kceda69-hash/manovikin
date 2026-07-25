@@ -38,6 +38,7 @@ import { Route as AuditRouteImport } from './routes/audit'
 import { Route as AiCodingAssistantRouteImport } from './routes/ai-coding-assistant'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RulesLibraryRouteImport } from './routes/rules.library'
 import { Route as ReceiptIdRouteImport } from './routes/receipt.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as BlogWillAiReplaceSoftwareEngineersRouteImport } from './routes/blog.will-ai-replace-software-engineers'
@@ -209,6 +210,11 @@ const AdminRoute = AdminRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RulesLibraryRoute = RulesLibraryRouteImport.update({
+  id: '/rules/library',
+  path: '/rules/library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReceiptIdRoute = ReceiptIdRouteImport.update({
@@ -404,6 +410,7 @@ export interface FileRoutesByFullPath {
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
+  '/rules/library': typeof RulesLibraryRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
@@ -462,6 +469,7 @@ export interface FileRoutesByTo {
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
+  '/rules/library': typeof RulesLibraryRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
@@ -521,6 +529,7 @@ export interface FileRoutesById {
   '/blog/will-ai-replace-software-engineers': typeof BlogWillAiReplaceSoftwareEngineersRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/receipt/$id': typeof ReceiptIdRoute
+  '/rules/library': typeof RulesLibraryRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
@@ -581,6 +590,7 @@ export interface FileRouteTypes {
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
+    | '/rules/library'
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
     | '/api/public/demo-chat'
@@ -639,6 +649,7 @@ export interface FileRouteTypes {
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
+    | '/rules/library'
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
     | '/api/public/demo-chat'
@@ -697,6 +708,7 @@ export interface FileRouteTypes {
     | '/blog/will-ai-replace-software-engineers'
     | '/email/unsubscribe'
     | '/receipt/$id'
+    | '/rules/library'
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
     | '/api/public/demo-chat'
@@ -756,6 +768,7 @@ export interface RootRouteChildren {
   BlogWillAiReplaceSoftwareEngineersRoute: typeof BlogWillAiReplaceSoftwareEngineersRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ReceiptIdRoute: typeof ReceiptIdRoute
+  RulesLibraryRoute: typeof RulesLibraryRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAuthMagicLinkRoute: typeof ApiAuthMagicLinkRoute
   ApiPublicDemoChatRoute: typeof ApiPublicDemoChatRoute
@@ -974,6 +987,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rules/library': {
+      id: '/rules/library'
+      path: '/rules/library'
+      fullPath: '/rules/library'
+      preLoaderRoute: typeof RulesLibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/receipt/$id': {
@@ -1214,6 +1234,7 @@ const rootRouteChildren: RootRouteChildren = {
     BlogWillAiReplaceSoftwareEngineersRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ReceiptIdRoute: ReceiptIdRoute,
+  RulesLibraryRoute: RulesLibraryRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAuthMagicLinkRoute: ApiAuthMagicLinkRoute,
   ApiPublicDemoChatRoute: ApiPublicDemoChatRoute,
