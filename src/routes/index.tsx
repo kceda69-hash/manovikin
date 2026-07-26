@@ -2512,6 +2512,7 @@ function RunBuildTerminal({ files }: { files: WorkspaceFile[] }) {
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs text-primary">›</span>
           <input
+            aria-label="Run JavaScript in the MANOVIK terminal"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
