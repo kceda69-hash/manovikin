@@ -30,6 +30,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConnectRouteImport } from './routes/connect'
+import { Route as CliRouteImport } from './routes/cli'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BillingRouteImport } from './routes/billing'
 import { Route as BestAiCodingAgentRouteImport } from './routes/best-ai-coding-agent'
@@ -170,6 +171,11 @@ const ContactRoute = ContactRouteImport.update({
 const ConnectRoute = ConnectRouteImport.update({
   id: '/connect',
   path: '/connect',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CliRoute = CliRouteImport.update({
+  id: '/cli',
+  path: '/cli',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
@@ -375,6 +381,7 @@ export interface FileRoutesByFullPath {
   '/best-ai-coding-agent': typeof BestAiCodingAgentRoute
   '/billing': typeof BillingRoute
   '/chat': typeof ChatRoute
+  '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
@@ -434,6 +441,7 @@ export interface FileRoutesByTo {
   '/best-ai-coding-agent': typeof BestAiCodingAgentRoute
   '/billing': typeof BillingRoute
   '/chat': typeof ChatRoute
+  '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
@@ -494,6 +502,7 @@ export interface FileRoutesById {
   '/best-ai-coding-agent': typeof BestAiCodingAgentRoute
   '/billing': typeof BillingRoute
   '/chat': typeof ChatRoute
+  '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/login': typeof LoginRoute
@@ -555,6 +564,7 @@ export interface FileRouteTypes {
     | '/best-ai-coding-agent'
     | '/billing'
     | '/chat'
+    | '/cli'
     | '/connect'
     | '/contact'
     | '/login'
@@ -614,6 +624,7 @@ export interface FileRouteTypes {
     | '/best-ai-coding-agent'
     | '/billing'
     | '/chat'
+    | '/cli'
     | '/connect'
     | '/contact'
     | '/login'
@@ -673,6 +684,7 @@ export interface FileRouteTypes {
     | '/best-ai-coding-agent'
     | '/billing'
     | '/chat'
+    | '/cli'
     | '/connect'
     | '/contact'
     | '/login'
@@ -733,6 +745,7 @@ export interface RootRouteChildren {
   BestAiCodingAgentRoute: typeof BestAiCodingAgentRoute
   BillingRoute: typeof BillingRoute
   ChatRoute: typeof ChatRoute
+  CliRoute: typeof CliRoute
   ConnectRoute: typeof ConnectRoute
   ContactRoute: typeof ContactRoute
   LoginRoute: typeof LoginRoute
@@ -931,6 +944,13 @@ declare module '@tanstack/react-router' {
       path: '/connect'
       fullPath: '/connect'
       preLoaderRoute: typeof ConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cli': {
+      id: '/cli'
+      path: '/cli'
+      fullPath: '/cli'
+      preLoaderRoute: typeof CliRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -1197,6 +1217,7 @@ const rootRouteChildren: RootRouteChildren = {
   BestAiCodingAgentRoute: BestAiCodingAgentRoute,
   BillingRoute: BillingRoute,
   ChatRoute: ChatRoute,
+  CliRoute: CliRoute,
   ConnectRoute: ConnectRoute,
   ContactRoute: ContactRoute,
   LoginRoute: LoginRoute,
