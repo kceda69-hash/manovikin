@@ -28,6 +28,7 @@ import { Route as RefundRouteImport } from './routes/refund'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as CliRouteImport } from './routes/cli'
@@ -163,6 +164,11 @@ const McpRoute = McpRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevicesRoute = DevicesRouteImport.update({
+  id: '/devices',
+  path: '/devices',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -396,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
+  '/devices': typeof DevicesRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
@@ -458,6 +465,7 @@ export interface FileRoutesByTo {
   '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
+  '/devices': typeof DevicesRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
@@ -521,6 +529,7 @@ export interface FileRoutesById {
   '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
+  '/devices': typeof DevicesRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
@@ -585,6 +594,7 @@ export interface FileRouteTypes {
     | '/cli'
     | '/connect'
     | '/contact'
+    | '/devices'
     | '/login'
     | '/mcp'
     | '/privacy'
@@ -647,6 +657,7 @@ export interface FileRouteTypes {
     | '/cli'
     | '/connect'
     | '/contact'
+    | '/devices'
     | '/login'
     | '/mcp'
     | '/privacy'
@@ -709,6 +720,7 @@ export interface FileRouteTypes {
     | '/cli'
     | '/connect'
     | '/contact'
+    | '/devices'
     | '/login'
     | '/mcp'
     | '/privacy'
@@ -772,6 +784,7 @@ export interface RootRouteChildren {
   CliRoute: typeof CliRoute
   ConnectRoute: typeof ConnectRoute
   ContactRoute: typeof ContactRoute
+  DevicesRoute: typeof DevicesRoute
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -956,6 +969,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/devices': {
+      id: '/devices'
+      path: '/devices'
+      fullPath: '/devices'
+      preLoaderRoute: typeof DevicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -1260,6 +1280,7 @@ const rootRouteChildren: RootRouteChildren = {
   CliRoute: CliRoute,
   ConnectRoute: ConnectRoute,
   ContactRoute: ContactRoute,
+  DevicesRoute: DevicesRoute,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
   PrivacyRoute: PrivacyRoute,
