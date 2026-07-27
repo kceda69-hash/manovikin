@@ -459,16 +459,22 @@ export const Route = createFileRoute("/api/chat")({
               candidate === route.model &&
               route.priority &&
               candidate.startsWith("openai/");
+            // GPT-5.6 models reject tool calls unless reasoning effort is "none".
+            const isGpt56 = candidate.startsWith("openai/gpt-5.6");
+            const lovableOptions: Record<string, unknown> = {};
+            if (usePriority) lovableOptions.service_tier = "priority";
+            if (isGpt56) lovableOptions.reasoningEffort = "none";
             result = streamText({
               model: gateway(candidate),
               system: systemPrompt,
               messages: modelMessages,
               tools,
               stopWhen: stepCountIs(50),
-              ...(usePriority
-                ? { providerOptions: { lovable: { service_tier: "priority" } } }
+              ...(Object.keys(lovableOptions).length
+                ? { providerOptions: { lovable: lovableOptions } }
                 : {}),
             });
+
             chosenModel = candidate;
             if (candidate !== primaryModel) {
               log.warn("chat.model.fallback", { from: primaryModel, to: candidate, userId, threadId });
