@@ -24,16 +24,17 @@ export const TIER_MODEL: Record<Tier, { model: string; priority: boolean }> = {
   // Cheapest + fastest Gemini; great for classification, small extraction, greetings.
   trivial:  { model: "google/gemini-3.1-flash-lite",   priority: false },
   // Default all-rounder. Cheap, fast, multimodal.
-  standard: { model: "google/gemini-3-flash-preview",  priority: false },
-  // Strong coding / multi-step reasoning with OpenAI priority tier for low TTFT.
-  hard:     { model: "openai/gpt-5.4-mini",            priority: true  },
+  standard: { model: "google/gemini-3.6-flash",        priority: false },
+  // Complex/quantum-grade coding: frontier model with OpenAI priority tier.
+  hard:     { model: "openai/gpt-5.5",                 priority: true  },
   // Multimodal + long-context; vision-heavy prompts land here.
-  vision:   { model: "google/gemini-2.5-pro",          priority: false },
+  vision:   { model: "google/gemini-3.1-pro-preview",  priority: false },
 };
 
 // "Very hard" escalation: if the prompt looks explicitly like a hard research /
-// architecture / proof / algorithm task, jump straight to gpt-5.5 with priority.
-const VERY_HARD_MODEL = { model: "openai/gpt-5.5", priority: true } as const;
+// architecture / proof / algorithm task, jump straight to the flagship model.
+const VERY_HARD_MODEL = { model: "openai/gpt-5.6-sol", priority: true } as const;
+
 
 // Keyword banks — kept short and precise. Order matters: vision > very-hard > hard > trivial > standard.
 const VISION_HINTS   = /\b(image|photo|picture|screenshot|diagram|chart|ocr|caption|attached (image|file))\b/i;

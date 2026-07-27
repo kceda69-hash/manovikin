@@ -14,13 +14,13 @@ describe("routeModel", () => {
   it("routes code prompts to hard tier with priority", () => {
     const r = routeModel("Write a TypeScript function that debounces a callback.");
     expect(r.tier).toBe("hard");
-    expect(r.model).toBe("openai/gpt-5.4-mini");
+    expect(r.model).toBe("openai/gpt-5.5");
     expect(r.priority).toBe(true);
   });
 
-  it("escalates architecture prompts to gpt-5.5", () => {
+  it("escalates architecture prompts to the flagship model", () => {
     const r = routeModel("Design a distributed consensus algorithm end-to-end.");
-    expect(r.model).toBe("openai/gpt-5.5");
+    expect(r.model).toBe("openai/gpt-5.6-sol");
     expect(r.priority).toBe(true);
   });
 
@@ -32,7 +32,7 @@ describe("routeModel", () => {
   it("routes vision cues to gemini-2.5-pro", () => {
     const r = routeModel("Describe the attached image and its colour palette.");
     expect(r.tier).toBe("vision");
-    expect(r.model).toBe("google/gemini-2.5-pro");
+    expect(r.model).toBe("google/gemini-3.1-pro-preview");
   });
 
   it("routes hasAttachments to vision tier even without cue", () => {
@@ -43,7 +43,7 @@ describe("routeModel", () => {
   it("defaults ordinary prose to standard tier", () => {
     const r = routeModel("Summarise the plot of Hamlet in two sentences.");
     expect(r.tier).toBe("standard");
-    expect(r.model).toBe("google/gemini-3-flash-preview");
+    expect(r.model).toBe("google/gemini-3.6-flash");
     expect(r.priority).toBe(false);
   });
 

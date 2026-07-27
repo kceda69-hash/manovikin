@@ -28,6 +28,7 @@ import { Route as RefundRouteImport } from './routes/refund'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as CliRouteImport } from './routes/cli'
@@ -51,6 +52,7 @@ import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-a
 import { Route as BlogAiPricingComparisonRouteImport } from './routes/blog.ai-pricing-comparison'
 import { Route as BlogAiCodingAgentBenchmarkRouteImport } from './routes/blog.ai-coding-agent-benchmark'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as ApiGenerateImageRouteImport } from './routes/api/generate-image'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -67,6 +69,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/public/hooks/security-scan'
 import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
 import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
+import { Route as ApiPublicDeviceActionRouteImport } from './routes/api/public/device/$action'
 
 const VsWindsurfRoute = VsWindsurfRouteImport.update({
   id: '/vs-windsurf',
@@ -161,6 +164,11 @@ const McpRoute = McpRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevicesRoute = DevicesRouteImport.update({
+  id: '/devices',
+  path: '/devices',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -281,6 +289,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGenerateImageRoute = ApiGenerateImageRouteImport.update({
+  id: '/api/generate-image',
+  path: '/api/generate-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -371,6 +384,11 @@ const ApiPublicHooksManovikSelfUpdateRoute =
     path: '/api/public/hooks/manovik-self-update',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDeviceActionRoute = ApiPublicDeviceActionRouteImport.update({
+  id: '/api/public/device/$action',
+  path: '/api/public/device/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -384,6 +402,7 @@ export interface FileRoutesByFullPath {
   '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
+  '/devices': typeof DevicesRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
@@ -406,6 +425,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/generate-image': typeof ApiGenerateImageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
@@ -423,6 +443,7 @@ export interface FileRoutesByFullPath {
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
@@ -444,6 +465,7 @@ export interface FileRoutesByTo {
   '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
+  '/devices': typeof DevicesRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
@@ -466,6 +488,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/generate-image': typeof ApiGenerateImageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
@@ -483,6 +506,7 @@ export interface FileRoutesByTo {
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
@@ -505,6 +529,7 @@ export interface FileRoutesById {
   '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
+  '/devices': typeof DevicesRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
@@ -527,6 +552,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/generate-image': typeof ApiGenerateImageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
@@ -544,6 +570,7 @@ export interface FileRoutesById {
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
@@ -567,6 +594,7 @@ export interface FileRouteTypes {
     | '/cli'
     | '/connect'
     | '/contact'
+    | '/devices'
     | '/login'
     | '/mcp'
     | '/privacy'
@@ -589,6 +617,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
+    | '/api/generate-image'
     | '/auth/callback'
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
@@ -606,6 +635,7 @@ export interface FileRouteTypes {
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/device/$action'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/security-scan'
@@ -627,6 +657,7 @@ export interface FileRouteTypes {
     | '/cli'
     | '/connect'
     | '/contact'
+    | '/devices'
     | '/login'
     | '/mcp'
     | '/privacy'
@@ -649,6 +680,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
+    | '/api/generate-image'
     | '/auth/callback'
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
@@ -666,6 +698,7 @@ export interface FileRouteTypes {
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/device/$action'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/security-scan'
@@ -687,6 +720,7 @@ export interface FileRouteTypes {
     | '/cli'
     | '/connect'
     | '/contact'
+    | '/devices'
     | '/login'
     | '/mcp'
     | '/privacy'
@@ -709,6 +743,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
+    | '/api/generate-image'
     | '/auth/callback'
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
@@ -726,6 +761,7 @@ export interface FileRouteTypes {
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/device/$action'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/security-scan'
@@ -748,6 +784,7 @@ export interface RootRouteChildren {
   CliRoute: typeof CliRoute
   ConnectRoute: typeof ConnectRoute
   ContactRoute: typeof ContactRoute
+  DevicesRoute: typeof DevicesRoute
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -770,6 +807,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiGenerateImageRoute: typeof ApiGenerateImageRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   BlogAiCodingAgentBenchmarkRoute: typeof BlogAiCodingAgentBenchmarkRoute
   BlogAiPricingComparisonRoute: typeof BlogAiPricingComparisonRoute
@@ -787,6 +825,7 @@ export interface RootRouteChildren {
   ApiPublicDemoChatRoute: typeof ApiPublicDemoChatRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicDeviceActionRoute: typeof ApiPublicDeviceActionRoute
   ApiPublicHooksManovikSelfUpdateRoute: typeof ApiPublicHooksManovikSelfUpdateRoute
   ApiPublicHooksResubmitSitemapRoute: typeof ApiPublicHooksResubmitSitemapRoute
   ApiPublicHooksSecurityScanRoute: typeof ApiPublicHooksSecurityScanRoute
@@ -930,6 +969,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/devices': {
+      id: '/devices'
+      path: '/devices'
+      fullPath: '/devices'
+      preLoaderRoute: typeof DevicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -1093,6 +1139,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/generate-image': {
+      id: '/api/generate-image'
+      path: '/api/generate-image'
+      fullPath: '/api/generate-image'
+      preLoaderRoute: typeof ApiGenerateImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -1205,6 +1258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksManovikSelfUpdateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/device/$action': {
+      id: '/api/public/device/$action'
+      path: '/api/public/device/$action'
+      fullPath: '/api/public/device/$action'
+      preLoaderRoute: typeof ApiPublicDeviceActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1220,6 +1280,7 @@ const rootRouteChildren: RootRouteChildren = {
   CliRoute: CliRoute,
   ConnectRoute: ConnectRoute,
   ContactRoute: ContactRoute,
+  DevicesRoute: DevicesRoute,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
   PrivacyRoute: PrivacyRoute,
@@ -1243,6 +1304,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiGenerateImageRoute: ApiGenerateImageRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   BlogAiCodingAgentBenchmarkRoute: BlogAiCodingAgentBenchmarkRoute,
   BlogAiPricingComparisonRoute: BlogAiPricingComparisonRoute,
@@ -1261,6 +1323,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDemoChatRoute: ApiPublicDemoChatRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicDeviceActionRoute: ApiPublicDeviceActionRoute,
   ApiPublicHooksManovikSelfUpdateRoute: ApiPublicHooksManovikSelfUpdateRoute,
   ApiPublicHooksResubmitSitemapRoute: ApiPublicHooksResubmitSitemapRoute,
   ApiPublicHooksSecurityScanRoute: ApiPublicHooksSecurityScanRoute,

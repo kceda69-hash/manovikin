@@ -25,6 +25,12 @@ import {
   BarChart3,
   Crown,
   ArrowUpRight,
+  ImageIcon,
+  Mic,
+  Square,
+  Volume2,
+  VolumeX,
+  Cpu,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,7 +41,9 @@ import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { Progress } from "@/components/ui/progress";
 import { getManovikDashboard, getUiPrefs, setUiPref } from "@/lib/manovik-balance.functions";
+import { streamImage } from "@/lib/streamImage";
 import { useI18n } from "@/lib/i18n";
+
 
 import {
   listThreads,
@@ -585,6 +593,108 @@ function ChatPanel({
   const lastUserSendRef = useRef(0);
   const pendingPromptLoadedRef = useRef(false);
 
+  // --- Image studio ---
+  const [imageMode, setImageMode] = useState(false);
+  const [imageQuality, setImageQuality] = useState<"4k" | "8k">("8k");
+  const [images, setImages] = useState<
+    Array<{ id: string; prompt: string; url: string; final: boolean }>
+  >([]);
+  const [imageBusy, setImageBusy] = useState(false);
+
+  // --- JARVIS voice ---
+  const [listening, setListening] = useState(false);
+  const [speakOn, setSpeakOn] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const spokenRef = useRef<string | null>(null);
+
+  const generateImage = useCallback(
+    async (prompt: string) => {
+      const id = crypto.randomUUID();
+      setImages((prev) => [...prev, { id, prompt, url: "", final: false }]);
+      setImageBusy(true);
+      try {
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        await streamImage(
+          "/api/generate-image",
+          { prompt, quality: imageQuality, aspect: "1:1" },
+          (dataUrl, isFinal) => {
+            setImages((prev) =>
+              prev.map((im) => (im.id === id ? { ...im, url: dataUrl, final: isFinal } : im)),
+            );
+          },
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+        );
+      } catch (err) {
+        setImages((prev) => prev.filter((im) => im.id !== id));
+        toast.error((err as Error).message || "Image generation failed");
+      } finally {
+        setImageBusy(false);
+        void queryClient.invalidateQueries({ queryKey: ["manovik-dashboard"] });
+      }
+    },
+    [imageQuality, queryClient],
+  );
+
+  const toggleListening = useCallback(() => {
+    const SR =
+      (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition ?? null;
+    if (!SR) {
+      toast.error("Voice input isn't supported in this browser");
+      return;
+    }
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const rec = new SR();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = navigator.language || "en-US";
+    rec.onresult = (e: any) => {
+      const transcript = Array.from(e.results)
+        .map((r: any) => r[0].transcript)
+        .join(" ");
+      setInput(transcript);
+    };
+    rec.onerror = () => setListening(false);
+    rec.onend = () => setListening(false);
+    recognitionRef.current = rec;
+    rec.start();
+    setListening(true);
+  }, [listening]);
+
+  // Speak the latest completed assistant reply when JARVIS voice output is on.
+  useEffect(() => {
+    if (!speakOn || status === "streaming" || status === "submitted") return;
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const last = [...messages].reverse().find((m) => m.role === "assistant");
+    if (!last) return;
+    const text = last.parts
+      .map((p) => (p.type === "text" ? (p as { text: string }).text : ""))
+      .join("")
+      .replace(/```[\s\S]*?```/g, " code block ")
+      .slice(0, 1200);
+    if (!text || spokenRef.current === last.id) return;
+    spokenRef.current = last.id;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = navigator.language || "en-US";
+    utter.rate = 1.03;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
+  }, [messages, speakOn, status]);
+
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop?.();
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+
   useEffect(() => {
     if (pendingPromptLoadedRef.current || messages.length > 0 || status === "submitted" || status === "streaming") return;
     pendingPromptLoadedRef.current = true;
@@ -630,7 +740,7 @@ function ChatPanel({
     el.style.height = `${Math.min(el.scrollHeight, 192)}px`;
   }, [input]);
 
-  const isBusy = status === "submitted" || status === "streaming";
+  const isBusy = status === "submitted" || status === "streaming" || imageBusy;
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -638,6 +748,11 @@ function ChatPanel({
     if (!trimmed || isBusy) return;
     setInput("");
     lastUserSendRef.current = Date.now();
+    if (imageMode) {
+      await generateImage(trimmed);
+      requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ block: "end" }));
+      return;
+    }
     await sendMessage({ text: trimmed });
     void queryClient.invalidateQueries({ queryKey: ["manovik-dashboard"] });
     // Belt-and-braces: force scroll-into-view for mobile keyboards.
@@ -645,6 +760,7 @@ function ChatPanel({
       bottomRef.current?.scrollIntoView({ block: "end" });
     });
   };
+
 
 
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -712,6 +828,34 @@ function ChatPanel({
             <MessageBubble key={m.id} message={m} />
           ))}
 
+          {images.length > 0 && (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {images.map((im) => (
+                <figure key={im.id} className="surface-card overflow-hidden rounded-xl">
+                  {im.url ? (
+                    <img
+                      src={im.url}
+                      alt={im.prompt}
+                      className={`w-full transition-[filter] duration-500 ${im.final ? "blur-0" : "blur-2xl"}`}
+                    />
+                  ) : (
+                    <div className="flex h-56 items-center justify-center text-sm text-muted-foreground">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Rendering…
+                    </div>
+                  )}
+                  <figcaption className="flex items-center justify-between gap-2 px-3 py-2 text-[11px] text-muted-foreground">
+                    <span className="line-clamp-1">{im.prompt}</span>
+                    {im.final && (
+                      <a href={im.url} download={`manovik-${im.id}.png`} className="underline">
+                        Download
+                      </a>
+                    )}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          )}
+
           {status === "submitted" && (
             <div className="flex items-center gap-2 pl-1 text-sm text-muted-foreground">
               <Sparkles className="h-4 w-4 animate-pulse text-primary" />
@@ -728,14 +872,73 @@ function ChatPanel({
         className="border-t border-border/40 bg-background/60 px-3 py-3 backdrop-blur sm:px-4 sm:py-4"
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
+        <div className="mx-auto mb-2 flex max-w-3xl flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={imageMode ? "default" : "outline"}
+            aria-pressed={imageMode}
+            onClick={() => setImageMode((v) => !v)}
+            className="h-8 rounded-full"
+          >
+            <ImageIcon className="mr-1.5 h-3.5 w-3.5" /> Image studio
+          </Button>
+          {imageMode && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-8 rounded-full"
+              onClick={() => setImageQuality((q) => (q === "8k" ? "4k" : "8k"))}
+            >
+              {imageQuality.toUpperCase()} ultra-HD
+            </Button>
+          )}
+          <Button
+            type="button"
+            size="sm"
+            variant={listening ? "default" : "outline"}
+            aria-pressed={listening}
+            aria-label={listening ? "Stop voice input" : "Start voice input"}
+            onClick={toggleListening}
+            className="h-8 rounded-full"
+          >
+            {listening ? <Square className="mr-1.5 h-3.5 w-3.5" /> : <Mic className="mr-1.5 h-3.5 w-3.5" />}
+            {listening ? "Listening…" : "Speak"}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={speakOn ? "default" : "outline"}
+            aria-pressed={speakOn}
+            aria-label={speakOn ? "Turn off spoken replies" : "Turn on spoken replies"}
+            onClick={() => {
+              setSpeakOn((v) => {
+                if (v && typeof window !== "undefined") window.speechSynthesis.cancel();
+                return !v;
+              });
+            }}
+            className="h-8 rounded-full"
+          >
+            {speakOn ? <Volume2 className="mr-1.5 h-3.5 w-3.5" /> : <VolumeX className="mr-1.5 h-3.5 w-3.5" />}
+            JARVIS voice
+          </Button>
+          <Button asChild type="button" size="sm" variant="outline" className="h-8 rounded-full">
+            <Link to="/devices">
+              <Cpu className="mr-1.5 h-3.5 w-3.5" /> Devices
+            </Link>
+          </Button>
+        </div>
         <div className="premium-composer surface-card mx-auto flex max-w-3xl items-end gap-2 rounded-2xl p-2 shadow-lg">
           <Textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
-            placeholder="Message MANOVIK AI…"
-            aria-label="Message MANOVIK AI"
+            placeholder={
+              imageMode ? `Describe the ${imageQuality.toUpperCase()} image to render…` : "Message MANOVIK AI…"
+            }
+            aria-label={imageMode ? "Describe the image to generate" : "Message MANOVIK AI"}
             rows={1}
             className="min-h-[44px] max-h-48 resize-none border-0 bg-transparent text-base focus-visible:ring-0"
             disabled={isBusy}
@@ -743,17 +946,24 @@ function ChatPanel({
           <Button
             type="submit"
             size="icon"
-            aria-label="Send message"
+            aria-label={imageMode ? "Generate image" : "Send message"}
             disabled={isBusy || !input.trim()}
             className="premium-send h-11 w-11 shrink-0 bg-aurora text-primary-foreground glow hover:opacity-90"
           >
-            {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            {isBusy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : imageMode ? (
+              <ImageIcon className="h-4 w-4" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
           </Button>
         </div>
         <p className="mt-2 hidden text-center text-[11px] text-muted-foreground sm:block">
           MANOVIK AI may make mistakes. Verify important information.
         </p>
       </form>
+
     </main>
   );
 }

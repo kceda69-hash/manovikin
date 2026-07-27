@@ -268,6 +268,92 @@ export type Database = {
         }
         Relationships: []
       }
+      manovik_device_commands: {
+        Row: {
+          command: string
+          completed_at: string | null
+          created_at: string
+          device_id: string
+          id: string
+          kind: string
+          result: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          command: string
+          completed_at?: string | null
+          created_at?: string
+          device_id: string
+          id?: string
+          kind?: string
+          result?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          command?: string
+          completed_at?: string | null
+          created_at?: string
+          device_id?: string
+          id?: string
+          kind?: string
+          result?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_device_commands_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_devices: {
+        Row: {
+          capabilities: Json
+          created_at: string
+          id: string
+          last_seen_at: string | null
+          name: string
+          pair_code: string | null
+          pair_code_expires_at: string | null
+          paired_at: string | null
+          platform: string
+          token_hash: string | null
+          user_id: string
+        }
+        Insert: {
+          capabilities?: Json
+          created_at?: string
+          id?: string
+          last_seen_at?: string | null
+          name: string
+          pair_code?: string | null
+          pair_code_expires_at?: string | null
+          paired_at?: string | null
+          platform?: string
+          token_hash?: string | null
+          user_id: string
+        }
+        Update: {
+          capabilities?: Json
+          created_at?: string
+          id?: string
+          last_seen_at?: string | null
+          name?: string
+          pair_code?: string | null
+          pair_code_expires_at?: string | null
+          paired_at?: string | null
+          platform?: string
+          token_hash?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           created_at: string
