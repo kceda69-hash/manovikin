@@ -68,6 +68,7 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/public/hooks/security-scan'
 import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
 import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
+import { Route as ApiPublicDeviceActionRouteImport } from './routes/api/public/device/$action'
 
 const VsWindsurfRoute = VsWindsurfRouteImport.update({
   id: '/vs-windsurf',
@@ -377,6 +378,11 @@ const ApiPublicHooksManovikSelfUpdateRoute =
     path: '/api/public/hooks/manovik-self-update',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDeviceActionRoute = ApiPublicDeviceActionRouteImport.update({
+  id: '/api/public/device/$action',
+  path: '/api/public/device/$action',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -430,6 +436,7 @@ export interface FileRoutesByFullPath {
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
@@ -491,6 +498,7 @@ export interface FileRoutesByTo {
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
@@ -553,6 +561,7 @@ export interface FileRoutesById {
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
@@ -616,6 +625,7 @@ export interface FileRouteTypes {
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/device/$action'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/security-scan'
@@ -677,6 +687,7 @@ export interface FileRouteTypes {
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/device/$action'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/security-scan'
@@ -738,6 +749,7 @@ export interface FileRouteTypes {
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/public/device/$action'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/security-scan'
@@ -800,6 +812,7 @@ export interface RootRouteChildren {
   ApiPublicDemoChatRoute: typeof ApiPublicDemoChatRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicDeviceActionRoute: typeof ApiPublicDeviceActionRoute
   ApiPublicHooksManovikSelfUpdateRoute: typeof ApiPublicHooksManovikSelfUpdateRoute
   ApiPublicHooksResubmitSitemapRoute: typeof ApiPublicHooksResubmitSitemapRoute
   ApiPublicHooksSecurityScanRoute: typeof ApiPublicHooksSecurityScanRoute
@@ -1225,6 +1238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksManovikSelfUpdateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/device/$action': {
+      id: '/api/public/device/$action'
+      path: '/api/public/device/$action'
+      fullPath: '/api/public/device/$action'
+      preLoaderRoute: typeof ApiPublicDeviceActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1282,6 +1302,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDemoChatRoute: ApiPublicDemoChatRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicDeviceActionRoute: ApiPublicDeviceActionRoute,
   ApiPublicHooksManovikSelfUpdateRoute: ApiPublicHooksManovikSelfUpdateRoute,
   ApiPublicHooksResubmitSitemapRoute: ApiPublicHooksResubmitSitemapRoute,
   ApiPublicHooksSecurityScanRoute: ApiPublicHooksSecurityScanRoute,
