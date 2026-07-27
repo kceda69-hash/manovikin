@@ -461,7 +461,7 @@ export const Route = createFileRoute("/api/chat")({
               candidate.startsWith("openai/");
             // GPT-5.6 models reject tool calls unless reasoning effort is "none".
             const isGpt56 = candidate.startsWith("openai/gpt-5.6");
-            const lovableOptions: Record<string, unknown> = {};
+            const lovableOptions: Record<string, string> = {};
             if (usePriority) lovableOptions.service_tier = "priority";
             if (isGpt56) lovableOptions.reasoningEffort = "none";
             result = streamText({
