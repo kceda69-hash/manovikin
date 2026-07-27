@@ -25,6 +25,12 @@ import {
   BarChart3,
   Crown,
   ArrowUpRight,
+  ImageIcon,
+  Mic,
+  Square,
+  Volume2,
+  VolumeX,
+  Cpu,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,7 +41,9 @@ import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { Progress } from "@/components/ui/progress";
 import { getManovikDashboard, getUiPrefs, setUiPref } from "@/lib/manovik-balance.functions";
+import { streamImage } from "@/lib/streamImage";
 import { useI18n } from "@/lib/i18n";
+
 
 import {
   listThreads,
