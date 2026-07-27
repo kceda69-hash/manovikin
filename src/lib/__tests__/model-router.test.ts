@@ -14,13 +14,13 @@ describe("routeModel", () => {
   it("routes code prompts to hard tier with priority", () => {
     const r = routeModel("Write a TypeScript function that debounces a callback.");
     expect(r.tier).toBe("hard");
-    expect(r.model).toBe("openai/gpt-5.6-sol");
+    expect(r.model).toBe("openai/gpt-5.5");
     expect(r.priority).toBe(true);
   });
 
   it("escalates architecture prompts to the flagship model", () => {
     const r = routeModel("Design a distributed consensus algorithm end-to-end.");
-    expect(r.model).toBe("openai/gpt-5.5");
+    expect(r.model).toBe("openai/gpt-5.6-sol");
     expect(r.priority).toBe(true);
   });
 
