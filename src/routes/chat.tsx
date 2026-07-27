@@ -593,6 +593,108 @@ function ChatPanel({
   const lastUserSendRef = useRef(0);
   const pendingPromptLoadedRef = useRef(false);
 
+  // --- Image studio ---
+  const [imageMode, setImageMode] = useState(false);
+  const [imageQuality, setImageQuality] = useState<"4k" | "8k">("8k");
+  const [images, setImages] = useState<
+    Array<{ id: string; prompt: string; url: string; final: boolean }>
+  >([]);
+  const [imageBusy, setImageBusy] = useState(false);
+
+  // --- JARVIS voice ---
+  const [listening, setListening] = useState(false);
+  const [speakOn, setSpeakOn] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const spokenRef = useRef<string | null>(null);
+
+  const generateImage = useCallback(
+    async (prompt: string) => {
+      const id = crypto.randomUUID();
+      setImages((prev) => [...prev, { id, prompt, url: "", final: false }]);
+      setImageBusy(true);
+      try {
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        await streamImage(
+          "/api/generate-image",
+          { prompt, quality: imageQuality, aspect: "1:1" },
+          (dataUrl, isFinal) => {
+            setImages((prev) =>
+              prev.map((im) => (im.id === id ? { ...im, url: dataUrl, final: isFinal } : im)),
+            );
+          },
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+        );
+      } catch (err) {
+        setImages((prev) => prev.filter((im) => im.id !== id));
+        toast.error((err as Error).message || "Image generation failed");
+      } finally {
+        setImageBusy(false);
+        void queryClient.invalidateQueries({ queryKey: ["manovik-dashboard"] });
+      }
+    },
+    [imageQuality, queryClient],
+  );
+
+  const toggleListening = useCallback(() => {
+    const SR =
+      (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition ?? null;
+    if (!SR) {
+      toast.error("Voice input isn't supported in this browser");
+      return;
+    }
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const rec = new SR();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = navigator.language || "en-US";
+    rec.onresult = (e: any) => {
+      const transcript = Array.from(e.results)
+        .map((r: any) => r[0].transcript)
+        .join(" ");
+      setInput(transcript);
+    };
+    rec.onerror = () => setListening(false);
+    rec.onend = () => setListening(false);
+    recognitionRef.current = rec;
+    rec.start();
+    setListening(true);
+  }, [listening]);
+
+  // Speak the latest completed assistant reply when JARVIS voice output is on.
+  useEffect(() => {
+    if (!speakOn || status === "streaming" || status === "submitted") return;
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const last = [...messages].reverse().find((m) => m.role === "assistant");
+    if (!last) return;
+    const text = last.parts
+      .map((p) => (p.type === "text" ? (p as { text: string }).text : ""))
+      .join("")
+      .replace(/```[\s\S]*?```/g, " code block ")
+      .slice(0, 1200);
+    if (!text || spokenRef.current === last.id) return;
+    spokenRef.current = last.id;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = navigator.language || "en-US";
+    utter.rate = 1.03;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
+  }, [messages, speakOn, status]);
+
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop?.();
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+
   useEffect(() => {
     if (pendingPromptLoadedRef.current || messages.length > 0 || status === "submitted" || status === "streaming") return;
     pendingPromptLoadedRef.current = true;
