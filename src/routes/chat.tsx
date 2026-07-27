@@ -740,7 +740,7 @@ function ChatPanel({
     el.style.height = `${Math.min(el.scrollHeight, 192)}px`;
   }, [input]);
 
-  const isBusy = status === "submitted" || status === "streaming";
+  const isBusy = status === "submitted" || status === "streaming" || imageBusy;
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -748,6 +748,11 @@ function ChatPanel({
     if (!trimmed || isBusy) return;
     setInput("");
     lastUserSendRef.current = Date.now();
+    if (imageMode) {
+      await generateImage(trimmed);
+      requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ block: "end" }));
+      return;
+    }
     await sendMessage({ text: trimmed });
     void queryClient.invalidateQueries({ queryKey: ["manovik-dashboard"] });
     // Belt-and-braces: force scroll-into-view for mobile keyboards.
@@ -755,6 +760,7 @@ function ChatPanel({
       bottomRef.current?.scrollIntoView({ block: "end" });
     });
   };
+
 
 
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
