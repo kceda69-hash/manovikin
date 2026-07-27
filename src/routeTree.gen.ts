@@ -51,6 +51,7 @@ import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-a
 import { Route as BlogAiPricingComparisonRouteImport } from './routes/blog.ai-pricing-comparison'
 import { Route as BlogAiCodingAgentBenchmarkRouteImport } from './routes/blog.ai-coding-agent-benchmark'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as ApiGenerateImageRouteImport } from './routes/api/generate-image'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -281,6 +282,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGenerateImageRoute = ApiGenerateImageRouteImport.update({
+  id: '/api/generate-image',
+  path: '/api/generate-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -406,6 +412,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/generate-image': typeof ApiGenerateImageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
@@ -466,6 +473,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/generate-image': typeof ApiGenerateImageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
@@ -527,6 +535,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/generate-image': typeof ApiGenerateImageRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
@@ -589,6 +598,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
+    | '/api/generate-image'
     | '/auth/callback'
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
@@ -649,6 +659,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
+    | '/api/generate-image'
     | '/auth/callback'
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
@@ -709,6 +720,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
+    | '/api/generate-image'
     | '/auth/callback'
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
@@ -770,6 +782,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiGenerateImageRoute: typeof ApiGenerateImageRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   BlogAiCodingAgentBenchmarkRoute: typeof BlogAiCodingAgentBenchmarkRoute
   BlogAiPricingComparisonRoute: typeof BlogAiPricingComparisonRoute
@@ -1093,6 +1106,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/generate-image': {
+      id: '/api/generate-image'
+      path: '/api/generate-image'
+      fullPath: '/api/generate-image'
+      preLoaderRoute: typeof ApiGenerateImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -1243,6 +1263,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiGenerateImageRoute: ApiGenerateImageRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   BlogAiCodingAgentBenchmarkRoute: BlogAiCodingAgentBenchmarkRoute,
   BlogAiPricingComparisonRoute: BlogAiPricingComparisonRoute,
