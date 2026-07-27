@@ -28,6 +28,8 @@ const EXCLUDED_PATHS = new Set([
   "/billing",
   "/seo",
   "/unsubscribe",
+  "/devices",
+
 ]);
 
 const EXCLUDED_PREFIXES = [
