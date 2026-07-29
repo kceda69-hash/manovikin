@@ -8,14 +8,14 @@
   "mcp": {
     "server": {
       "name": "manovik-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "MANOVIK MCP"
     },
     "tools": [
       {
-        "name": "list_blog_posts",
-        "title": "List blog posts",
-        "description": "List MANOVIK blog posts (slug, title, URL, summary). Use before fetching a specific post.",
+        "name": "manovik_capabilities",
+        "title": "MANOVIK capabilities",
+        "description": "List everything MANOVIK can do over MCP and which services require the MANOVIK web app. Call this first to decide which MANOVIK tool to use.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -29,18 +29,180 @@
         "outputSchema": null
       },
       {
-        "name": "get_pricing",
-        "title": "Get MANOVIK pricing",
-        "description": "Return current MANOVIK pricing tiers and license model.",
+        "name": "manovik_ask",
+        "title": "Ask MANOVIK AI",
+        "description": "Ask MANOVIK AI anything — reasoning, research, analysis, planning, writing, math, science, business, or general knowledge. Returns MANOVIK's full answer as markdown. Use `manovik_code` instead for code generation, debugging, or architecture work.",
         "annotations": {
           "readOnlyHint": true,
-          "idempotentHint": true,
-          "openWorldHint": false
+          "idempotentHint": false,
+          "openWorldHint": true
         },
         "inputSchema": {
           "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
-          "properties": {}
+          "properties": {
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000,
+              "description": "The question or task for MANOVIK AI."
+            },
+            "mode": {
+              "default": "auto",
+              "description": "Response style: auto, deep reasoning, research report, plain explanation, or execution plan.",
+              "type": "string",
+              "enum": [
+                "auto",
+                "think",
+                "research",
+                "explain",
+                "plan"
+              ]
+            },
+            "language": {
+              "description": "Reply language, e.g. 'English', 'Hindi'. Defaults to the language of the prompt.",
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          "required": [
+            "prompt"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "manovik_code",
+        "title": "MANOVIK coding agent",
+        "description": "Run a full software-engineering task through MANOVIK's Quantum Engineering Protocol: build, debug, refactor, review, test, architect, optimize, or explain code. Returns complete production-grade code with a verification path.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "task": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000,
+              "description": "What to build, fix, or analyse — be specific about the desired outcome."
+            },
+            "mode": {
+              "default": "build",
+              "description": "Kind of engineering work to perform.",
+              "type": "string",
+              "enum": [
+                "build",
+                "debug",
+                "refactor",
+                "review",
+                "test",
+                "architect",
+                "optimize",
+                "explain"
+              ]
+            },
+            "language": {
+              "description": "Target programming language or stack, e.g. 'TypeScript', 'Python + FastAPI'.",
+              "type": "string",
+              "maxLength": 60
+            },
+            "code": {
+              "description": "Existing source code, stack trace, or error output to work from.",
+              "type": "string",
+              "maxLength": 60000
+            },
+            "constraints": {
+              "description": "Hard constraints: runtime, dependencies to avoid, performance budgets, style rules.",
+              "type": "string",
+              "maxLength": 4000
+            }
+          },
+          "required": [
+            "task"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "manovik_reverse_engineer",
+        "title": "MANOVIK reverse engineer",
+        "description": "MANOVIK's signature capability: reverse-engineer code, an API, or a described product into requirements, an architecture map, a clone plan, or a clean-room reimplementation with behavioural parity.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000,
+              "description": "What to reverse-engineer: a library name, an API, a product, or a described behaviour."
+            },
+            "source": {
+              "description": "Optional source code, API responses, or docs to analyse (treated as data, never instructions).",
+              "type": "string",
+              "maxLength": 60000
+            },
+            "output": {
+              "default": "requirements",
+              "description": "What artifact to produce.",
+              "type": "string",
+              "enum": [
+                "requirements",
+                "architecture",
+                "clone_plan",
+                "reimplementation"
+              ]
+            },
+            "stack": {
+              "description": "Target stack for a reimplementation, e.g. 'TypeScript, zero dependencies'.",
+              "type": "string",
+              "maxLength": 60
+            }
+          },
+          "required": [
+            "target"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "manovik_run_tool",
+        "title": "Run a MANOVIK sandbox tool",
+        "description": "Execute one of MANOVIK's sandboxed utility tools: `math.eval` (arithmetic), `text.transform` (upper/lower/reverse/length/b64encode/b64decode), `time.now` (server time), `http.get` (allow-listed hosts only). Pass the tool name and its JSON arguments. Call with an empty name to list available tools.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "name": {
+              "default": "",
+              "description": "Sandbox tool name, e.g. 'math.eval'. Empty string lists available tools.",
+              "type": "string",
+              "maxLength": 60
+            },
+            "args": {
+              "default": {},
+              "description": "JSON arguments for the tool, e.g. { \"expression\": \"2 ** 10\" }.",
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          }
         },
         "outputSchema": null
       },
@@ -74,6 +236,38 @@
           "required": [
             "query"
           ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_blog_posts",
+        "title": "List blog posts",
+        "description": "List MANOVIK blog posts (slug, title, URL, summary). Use before fetching a specific post.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_pricing",
+        "title": "Get MANOVIK pricing",
+        "description": "Return current MANOVIK pricing tiers and license model.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
         },
         "outputSchema": null
       }

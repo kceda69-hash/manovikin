@@ -55,9 +55,13 @@ function ConnectPage() {
             Connect your AI assistant to MANOVIK
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Paste this URL into ChatGPT or Claude and your assistant can look up
-            MANOVIK pricing, browse posts, and search the site for you.
+            Paste this URL into ChatGPT or Claude and your assistant can use
+            MANOVIK's full brain — ask anything, generate and debug production
+            code with the Quantum Engineering Protocol, reverse-engineer
+            software, run sandboxed tools, and look up MANOVIK pricing, posts
+            and pages.
           </p>
+
         </div>
 
         <Card className="mb-10 border-primary/30">
