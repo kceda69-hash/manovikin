@@ -35,7 +35,7 @@ export default defineTool({
           `Unknown tool "${name}". Available: ${available.map((t) => t.name).join(", ")}`,
         );
       }
-      const result = await sandbox.run(name, args, { userId: "mcp:public" });
+      const result = await sandbox.run(name, args, "mcp:public");
       if (!result.ok) throw new Error(result.error ?? "Tool execution failed");
       return {
         content: [{ type: "text", text: JSON.stringify(result.output, null, 2) }],
