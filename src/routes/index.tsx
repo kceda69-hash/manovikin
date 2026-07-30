@@ -464,7 +464,9 @@ function Landing() {
         <ShipStepper />
 
         {/* Reverse-engineer workflow — extract requirements + change plan */}
-        <ReverseEngineerPanel />
+        <Suspense fallback={<div className="mt-24 h-64 rounded-xl border border-border/60 bg-muted/20 animate-pulse" aria-hidden />}>
+          <ReverseEngineerPanel />
+        </Suspense>
 
 
         {/* MANOVIK DNA — unique brains only this agent ships */}
