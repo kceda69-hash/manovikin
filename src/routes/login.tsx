@@ -18,7 +18,9 @@ function sanitizeNextPath(value: unknown) {
 }
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  // `next` is optional so every `<Link to="/login">` in the app stays valid
+  // without having to pass a search object.
+  validateSearch: (search: Record<string, unknown>): { next?: string } => ({
     next: sanitizeNextPath(search.next),
   }),
   component: LoginPage,
@@ -37,7 +39,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { next } = Route.useSearch();
+  const { next = "/chat" } = Route.useSearch();
   const { user, loading } = useAuth();
   const { t } = useI18n();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
