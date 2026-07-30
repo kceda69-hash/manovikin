@@ -37,7 +37,24 @@ function patchServerFnFetch() {
 
 export const getRouter = () => {
   patchServerFnFetch();
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        // Production defaults: avoid refetch storms and don't burn retries on
+        // errors that will never succeed (auth/validation/not-found).
+        staleTime: 30_000,
+        gcTime: 5 * 60_000,
+        refetchOnWindowFocus: false,
+        retry: (failureCount, error) => {
+          const status = (error as { status?: number })?.status;
+          if (typeof status === "number" && status >= 400 && status < 500) return false;
+          return failureCount < 2;
+        },
+        retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+      },
+      mutations: { retry: 0 },
+    },
+  });
 
   const router = createRouter({
     routeTree,
