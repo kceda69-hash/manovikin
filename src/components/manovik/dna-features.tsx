@@ -537,15 +537,11 @@ export function CloneVerifier({
 // 4. Ship Pipeline (visual stages for the one-click ship flow)
 // ============================================================
 
-export const SHIP_PIPELINE_STAGES = [
-  { id: "validate", label: "Validate inputs" },
-  { id: "package", label: "Package deliverables" },
-  { id: "sign", label: "Sign & preflight" },
-  { id: "preview", label: "Ephemeral preview" },
-  { id: "submit", label: "Submit to store" },
-] as const;
+import { SHIP_PIPELINE_STAGES, type ShipStageId } from "./dna-storage";
 
-export type ShipStageId = (typeof SHIP_PIPELINE_STAGES)[number]["id"];
+export { SHIP_PIPELINE_STAGES };
+export type { ShipStageId };
+
 
 export function ShipPipeline({
   current,
