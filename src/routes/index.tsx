@@ -41,7 +41,7 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: "https://manovik.in/" },
-      { rel: "preload", as: "image", href: logo, fetchpriority: "high" },
+      { rel: "preload", as: "image", href: logo, fetchPriority: "high" },
       { rel: "dns-prefetch", href: "https://checkout.razorpay.com" },
     ],
     scripts: [
