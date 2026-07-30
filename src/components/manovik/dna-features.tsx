@@ -234,14 +234,25 @@ export function ReverseEngineerPanel() {
 
 // The storage/meta primitives live in ./dna-storage so the landing page can
 // import them without pulling in this (much larger) UI module.
+import {
+  DNA_MODE_META,
+  getDnaOverride,
+  useDnaOverride,
+  readOverrides,
+  writeOverrides,
+  type DnaModeId,
+  type DnaOverrides,
+} from "./dna-storage";
+
 export {
   DNA_MODE_META,
   getDnaOverride,
   useDnaOverride,
   readOverrides,
   writeOverrides,
-} from "./dna-storage";
-export type { DnaModeId, DnaOverrides } from "./dna-storage";
+};
+export type { DnaModeId, DnaOverrides };
+
 
 
 export function DnaPromptEditor({ open, onClose }: { open: boolean; onClose: () => void }) {
