@@ -37,10 +37,32 @@ function NotFoundComponent() {
   );
 }
 
+// After a new deploy, hashed chunk filenames change. A tab that was open
+// across the deploy fails to fetch a lazy chunk — recoverable with exactly one
+// hard reload, which is what this guard does (the sessionStorage flag stops
+// a genuine, non-transient failure from becoming a reload loop).
+const CHUNK_RELOAD_KEY = "manovik:chunk-reloaded";
+
+function isChunkLoadError(error: unknown) {
+  const message = error instanceof Error ? `${error.name} ${error.message}` : String(error);
+  return /dynamically imported module|Importing a module script failed|ChunkLoadError|Loading chunk .* failed/i.test(
+    message,
+  );
+}
+
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   const { t } = useI18n();
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !isChunkLoadError(error)) return;
+    if (window.sessionStorage.getItem(CHUNK_RELOAD_KEY)) return;
+    window.sessionStorage.setItem(CHUNK_RELOAD_KEY, "1");
+    window.location.reload();
+  }, [error]);
+
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
