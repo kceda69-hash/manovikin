@@ -366,6 +366,7 @@ function Landing() {
           </Link>
         </div>
 
+        <h2 className="sr-only">What MANOVIK can do</h2>
         <div className="mt-20 grid gap-4 md:grid-cols-3">
           {[
             { icon: Code2, title: "Polyglot coder", desc: "Ships production code in any language or stack." },
@@ -382,7 +383,7 @@ function Landing() {
             >
               <span className="card-border-glow" aria-hidden="true" />
               <f.icon className="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110" />
-              <h2 className="mt-3 font-semibold">{f.title}</h2>
+              <h3 className="mt-3 font-semibold">{f.title}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{f.desc}</p>
             </div>
           ))}
