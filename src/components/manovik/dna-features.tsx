@@ -232,58 +232,17 @@ export function ReverseEngineerPanel() {
 // Lets users override the system prompt used for each DNA mode.
 // Persisted in localStorage; PromptComposer reads via getDnaOverride().
 
-export const DNA_MODE_META = [
-  { id: "build", label: "Build" },
-  { id: "reverse", label: "Reverse-Engineer" },
-  { id: "clone", label: "Clone Exactly" },
-  { id: "brain", label: "MANOVIK Brain" },
-  { id: "ship-store", label: "One-Click Ship" },
-] as const;
+// The storage/meta primitives live in ./dna-storage so the landing page can
+// import them without pulling in this (much larger) UI module.
+export {
+  DNA_MODE_META,
+  getDnaOverride,
+  useDnaOverride,
+  readOverrides,
+  writeOverrides,
+} from "./dna-storage";
+export type { DnaModeId, DnaOverrides } from "./dna-storage";
 
-export type DnaModeId = (typeof DNA_MODE_META)[number]["id"];
-
-const DNA_STORAGE_KEY = "manovik:dna-overrides";
-
-type DnaOverrides = Partial<Record<DnaModeId, string>>;
-
-function readOverrides(): DnaOverrides {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(DNA_STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    return typeof parsed === "object" && parsed ? (parsed as DnaOverrides) : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeOverrides(o: DnaOverrides) {
-  try {
-    window.localStorage.setItem(DNA_STORAGE_KEY, JSON.stringify(o));
-    window.dispatchEvent(new CustomEvent("manovik:dna-overrides-changed"));
-  } catch {
-    // ignore
-  }
-}
-
-export function getDnaOverride(mode: DnaModeId): string {
-  return readOverrides()[mode] ?? "";
-}
-
-export function useDnaOverride(mode: DnaModeId): string {
-  const [val, setVal] = useState<string>(() => getDnaOverride(mode));
-  useEffect(() => {
-    const sync = () => setVal(getDnaOverride(mode));
-    window.addEventListener("manovik:dna-overrides-changed", sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener("manovik:dna-overrides-changed", sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, [mode]);
-  return val;
-}
 
 export function DnaPromptEditor({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [active, setActive] = useState<DnaModeId>("build");
