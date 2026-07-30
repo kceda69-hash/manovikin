@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight, Globe, Workflow, Terminal, Check, ChevronDown, Smartphone, Apple, Rocket, Cpu, Paperclip, Send, Store, Bot, Layers, Wand2, Download, Copy, Loader2, KeyRound, ShieldCheck, X, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
@@ -7,14 +7,15 @@ import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { useFooterI18n, FOOTER_LOCALES } from "@/lib/i18n-footer";
 import { useI18n, LanguageSwitcher } from "@/lib/i18n";
-import {
-  ReverseEngineerPanel,
-  DnaPromptEditor,
-  CloneVerifier,
-  ShipPipeline,
-  getDnaOverride,
-  type ShipStageId,
-} from "@/components/manovik/dna-features";
+// Only the tiny storage/meta helpers are loaded eagerly. The interactive DNA
+// panels are code-split so they don't block first paint of the landing page.
+import { getDnaOverride, type ShipStageId } from "@/components/manovik/dna-storage";
+
+const dnaFeatures = () => import("@/components/manovik/dna-features");
+const ReverseEngineerPanel = lazy(() => dnaFeatures().then((m) => ({ default: m.ReverseEngineerPanel })));
+const DnaPromptEditor = lazy(() => dnaFeatures().then((m) => ({ default: m.DnaPromptEditor })));
+const CloneVerifier = lazy(() => dnaFeatures().then((m) => ({ default: m.CloneVerifier })));
+const ShipPipeline = lazy(() => dnaFeatures().then((m) => ({ default: m.ShipPipeline })));
 
 
 export const Route = createFileRoute("/")({
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: "https://manovik.in/" },
-      { rel: "preload", as: "image", href: logo, fetchpriority: "high" },
+      { rel: "preload", as: "image", href: logo, fetchPriority: "high" },
       { rel: "dns-prefetch", href: "https://checkout.razorpay.com" },
     ],
     scripts: [
@@ -463,7 +464,9 @@ function Landing() {
         <ShipStepper />
 
         {/* Reverse-engineer workflow — extract requirements + change plan */}
-        <ReverseEngineerPanel />
+        <Suspense fallback={<div className="mt-24 h-64 rounded-xl border border-border/60 bg-muted/20 animate-pulse" aria-hidden />}>
+          <ReverseEngineerPanel />
+        </Suspense>
 
 
         {/* MANOVIK DNA — unique brains only this agent ships */}
@@ -1248,17 +1251,23 @@ function PromptComposer() {
             <span className="text-[11px] text-muted-foreground">
               Verify the generated files match the original spec.
             </span>
-            <CloneVerifier
-              spec={prompt}
-              files={parseDeliverables(output).files.map((f) => ({
-                path: f.filename,
-                content: f.content,
-              }))}
-            />
+            <Suspense fallback={null}>
+              <CloneVerifier
+                spec={prompt}
+                files={parseDeliverables(output).files.map((f) => ({
+                  path: f.filename,
+                  content: f.content,
+                }))}
+              />
+            </Suspense>
           </div>
         )}
       </div>
-      <DnaPromptEditor open={editorOpen} onClose={() => setEditorOpen(false)} />
+      {editorOpen && (
+        <Suspense fallback={null}>
+          <DnaPromptEditor open onClose={() => setEditorOpen(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }
@@ -1884,18 +1893,20 @@ Generate the packaging deliverables now.`;
 
 
             <div className="mb-3">
-              <ShipPipeline
-                current={
-                  (status === "streaming" && !files.length
-                    ? "package"
-                    : status === "streaming"
-                      ? "sign"
-                      : status === "done" && files.length
-                        ? "submit"
-                        : "validate") as ShipStageId
-                }
-                status={status}
-              />
+              <Suspense fallback={<div className="h-10 rounded-lg bg-muted/30 animate-pulse" aria-hidden />}>
+                <ShipPipeline
+                  current={
+                    (status === "streaming" && !files.length
+                      ? "package"
+                      : status === "streaming"
+                        ? "sign"
+                        : status === "done" && files.length
+                          ? "submit"
+                          : "validate") as ShipStageId
+                  }
+                  status={status}
+                />
+              </Suspense>
             </div>
 
 

@@ -14,7 +14,9 @@
     "seo:audit": "node scripts/seo-audit.mjs",
     "seo:snapshot": "node scripts/seo-snapshot.mjs",
     "seo:autofix": "node scripts/seo-autofix.mjs",
-    "seo:autofix:check": "node scripts/seo-autofix.mjs --check"
+    "seo:autofix:check": "node scripts/seo-autofix.mjs --check",
+    "typecheck": "tsgo --noEmit",
+    "verify": "bun run typecheck && bun run test"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.47",
