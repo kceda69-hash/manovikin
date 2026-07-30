@@ -1893,18 +1893,20 @@ Generate the packaging deliverables now.`;
 
 
             <div className="mb-3">
-              <ShipPipeline
-                current={
-                  (status === "streaming" && !files.length
-                    ? "package"
-                    : status === "streaming"
-                      ? "sign"
-                      : status === "done" && files.length
-                        ? "submit"
-                        : "validate") as ShipStageId
-                }
-                status={status}
-              />
+              <Suspense fallback={<div className="h-10 rounded-lg bg-muted/30 animate-pulse" aria-hidden />}>
+                <ShipPipeline
+                  current={
+                    (status === "streaming" && !files.length
+                      ? "package"
+                      : status === "streaming"
+                        ? "sign"
+                        : status === "done" && files.length
+                          ? "submit"
+                          : "validate") as ShipStageId
+                  }
+                  status={status}
+                />
+              </Suspense>
             </div>
 
 
