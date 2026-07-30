@@ -39,7 +39,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { next } = Route.useSearch();
+  const { next = "/chat" } = Route.useSearch();
   const { user, loading } = useAuth();
   const { t } = useI18n();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
