@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
 import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight, Globe, Workflow, Terminal, Check, ChevronDown, Smartphone, Apple, Rocket, Cpu, Paperclip, Send, Store, Bot, Layers, Wand2, Download, Copy, Loader2, KeyRound, ShieldCheck, X, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
@@ -7,14 +7,15 @@ import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { useFooterI18n, FOOTER_LOCALES } from "@/lib/i18n-footer";
 import { useI18n, LanguageSwitcher } from "@/lib/i18n";
-import {
-  ReverseEngineerPanel,
-  DnaPromptEditor,
-  CloneVerifier,
-  ShipPipeline,
-  getDnaOverride,
-  type ShipStageId,
-} from "@/components/manovik/dna-features";
+// Only the tiny storage/meta helpers are loaded eagerly. The interactive DNA
+// panels are code-split so they don't block first paint of the landing page.
+import { getDnaOverride, type ShipStageId } from "@/components/manovik/dna-storage";
+
+const dnaFeatures = () => import("@/components/manovik/dna-features");
+const ReverseEngineerPanel = lazy(() => dnaFeatures().then((m) => ({ default: m.ReverseEngineerPanel })));
+const DnaPromptEditor = lazy(() => dnaFeatures().then((m) => ({ default: m.DnaPromptEditor })));
+const CloneVerifier = lazy(() => dnaFeatures().then((m) => ({ default: m.CloneVerifier })));
+const ShipPipeline = lazy(() => dnaFeatures().then((m) => ({ default: m.ShipPipeline })));
 
 
 export const Route = createFileRoute("/")({
