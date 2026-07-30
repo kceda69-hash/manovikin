@@ -244,7 +244,16 @@ function BreadcrumbJsonLd() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  useEffect(() => { initPerf(); initClientErrorMonitor(); }, []);
+  useEffect(() => {
+    initPerf();
+    initClientErrorMonitor();
+    // The app mounted fine, so any earlier chunk-recovery reload succeeded.
+    try {
+      window.sessionStorage.removeItem(CHUNK_RELOAD_KEY);
+    } catch {
+      // storage unavailable (private mode) — nothing to clean up
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
