@@ -1251,17 +1251,23 @@ function PromptComposer() {
             <span className="text-[11px] text-muted-foreground">
               Verify the generated files match the original spec.
             </span>
-            <CloneVerifier
-              spec={prompt}
-              files={parseDeliverables(output).files.map((f) => ({
-                path: f.filename,
-                content: f.content,
-              }))}
-            />
+            <Suspense fallback={null}>
+              <CloneVerifier
+                spec={prompt}
+                files={parseDeliverables(output).files.map((f) => ({
+                  path: f.filename,
+                  content: f.content,
+                }))}
+              />
+            </Suspense>
           </div>
         )}
       </div>
-      <DnaPromptEditor open={editorOpen} onClose={() => setEditorOpen(false)} />
+      {editorOpen && (
+        <Suspense fallback={null}>
+          <DnaPromptEditor open onClose={() => setEditorOpen(false)} />
+        </Suspense>
+      )}
     </div>
   );
 }
