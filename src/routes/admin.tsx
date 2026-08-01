@@ -28,6 +28,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { SupplyChainTab } from "@/components/admin/SupplyChainTab";
 import { ArrowLeft, Shield, ShieldCheck, RefreshCw, Search, Ban, Coins, Trash2, UserPlus } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -306,11 +307,13 @@ function AdminConsole({ who }: { who: Whoami }) {
             <TabsTrigger value="purchases">Purchases</TabsTrigger>
             <TabsTrigger value="audit">Audit log</TabsTrigger>
             <TabsTrigger value="manovik">MANOVIK</TabsTrigger>
+            <TabsTrigger value="supply-chain">Supply chain</TabsTrigger>
           </TabsList>
           <TabsContent value="users" className="mt-4"><UsersTab currentAdminId={who.userId} /></TabsContent>
           <TabsContent value="purchases" className="mt-4"><PurchasesTab /></TabsContent>
           <TabsContent value="audit" className="mt-4"><AuditTab /></TabsContent>
           <TabsContent value="manovik" className="mt-4"><ManovikTab /></TabsContent>
+          <TabsContent value="supply-chain" className="mt-4"><SupplyChainTab /></TabsContent>
         </Tabs>
       </main>
     </div>
