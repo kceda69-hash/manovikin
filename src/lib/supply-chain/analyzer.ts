@@ -14,6 +14,7 @@ import {
   TRUSTED_REGISTRY_HOSTS,
   TYPOSQUAT_TARGETS,
   editDistance,
+  isTransposition,
 } from "./catalog";
 
 export type Severity = "critical" | "high" | "medium" | "low" | "info";
@@ -139,7 +140,8 @@ export function analyzeDependencies(input: ScanInput): Finding[] {
     }
 
     for (const target of TYPOSQUAT_TARGETS) {
-      if (name !== target && !name.startsWith("@") && editDistance(name, target) === 1) {
+      const near = editDistance(name, target) === 1 || isTransposition(name, target);
+      if (name !== target && !name.startsWith("@") && near) {
         findings.push({
           id: `dep.typosquat.${name}`,
           category: "dependency",
