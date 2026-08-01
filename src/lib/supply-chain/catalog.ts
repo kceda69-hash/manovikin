@@ -134,3 +134,13 @@ export function editDistance(a: string, b: string): number {
   }
   return prev[n] ?? 3;
 }
+
+/** True when b is a with exactly one adjacent character swap (e.g. raect ↔ react). */
+export function isTransposition(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  const diff: number[] = [];
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) diff.push(i);
+  if (diff.length !== 2) return false;
+  const [i, j] = diff as [number, number];
+  return j === i + 1 && a[i] === b[j] && a[j] === b[i];
+}
