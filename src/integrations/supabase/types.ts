@@ -268,6 +268,56 @@ export type Database = {
         }
         Relationships: []
       }
+      manovik_builds: {
+        Row: {
+          command: string
+          created_at: string
+          duration_ms: number | null
+          exit_code: number | null
+          finished_at: string | null
+          id: string
+          logs: string
+          metadata: Json
+          project_id: string
+          status: Database["public"]["Enums"]["build_status"]
+          user_id: string
+        }
+        Insert: {
+          command?: string
+          created_at?: string
+          duration_ms?: number | null
+          exit_code?: number | null
+          finished_at?: string | null
+          id?: string
+          logs?: string
+          metadata?: Json
+          project_id: string
+          status?: Database["public"]["Enums"]["build_status"]
+          user_id: string
+        }
+        Update: {
+          command?: string
+          created_at?: string
+          duration_ms?: number | null
+          exit_code?: number | null
+          finished_at?: string | null
+          id?: string
+          logs?: string
+          metadata?: Json
+          project_id?: string
+          status?: Database["public"]["Enums"]["build_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_builds_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       manovik_device_commands: {
         Row: {
           command: string
@@ -351,6 +401,330 @@ export type Database = {
           platform?: string
           token_hash?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      manovik_project_files: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          language: string | null
+          path: string
+          project_id: string
+          size_bytes: number
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          language?: string | null
+          path: string
+          project_id: string
+          size_bytes?: number
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          language?: string | null
+          path?: string
+          project_id?: string
+          size_bytes?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_project_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_project_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          label: string | null
+          project_id: string
+          snapshot: Json
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          project_id: string
+          snapshot?: Json
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          label?: string | null
+          project_id?: string
+          snapshot?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_project_versions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_projects: {
+        Row: {
+          archived: boolean
+          created_at: string
+          description: string | null
+          entry_path: string
+          framework: string
+          id: string
+          name: string
+          owner_id: string
+          share_token: string
+          updated_at: string
+          visibility: Database["public"]["Enums"]["project_visibility"]
+          workspace_id: string | null
+        }
+        Insert: {
+          archived?: boolean
+          created_at?: string
+          description?: string | null
+          entry_path?: string
+          framework?: string
+          id?: string
+          name: string
+          owner_id: string
+          share_token?: string
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["project_visibility"]
+          workspace_id?: string | null
+        }
+        Update: {
+          archived?: boolean
+          created_at?: string
+          description?: string | null
+          entry_path?: string
+          framework?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          share_token?: string
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["project_visibility"]
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_projects_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          metadata: Json
+          monthly_credit_limit: number
+          period_start: string
+          plan: string
+          renews_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          metadata?: Json
+          monthly_credit_limit?: number
+          period_start?: string
+          plan?: string
+          renews_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          metadata?: Json
+          monthly_credit_limit?: number
+          period_start?: string
+          plan?: string
+          renews_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      manovik_usage_events: {
+        Row: {
+          cost_micros: number
+          created_at: string
+          credits: number
+          id: string
+          input_tokens: number
+          kind: string
+          metadata: Json
+          model: string | null
+          output_tokens: number
+          project_id: string | null
+          user_id: string
+        }
+        Insert: {
+          cost_micros?: number
+          created_at?: string
+          credits?: number
+          id?: string
+          input_tokens?: number
+          kind: string
+          metadata?: Json
+          model?: string | null
+          output_tokens?: number
+          project_id?: string | null
+          user_id: string
+        }
+        Update: {
+          cost_micros?: number
+          created_at?: string
+          credits?: number
+          id?: string
+          input_tokens?: number
+          kind?: string
+          metadata?: Json
+          model?: string | null
+          output_tokens?: number
+          project_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_usage_events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_workspace_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["workspace_role"]
+          token: string
+          workspace_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["workspace_role"]
+          token?: string
+          workspace_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["workspace_role"]
+          token?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_workspace_invites_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_workspace_members: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["workspace_role"]
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["workspace_role"]
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["workspace_role"]
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_workspace_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_workspaces: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          slug?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -565,6 +939,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_read_project: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_write_project: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_write_workspace: {
+        Args: { _user_id: string; _workspace_id: string }
+        Returns: boolean
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -580,6 +966,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_workspace_member: {
+        Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
       }
       magic_link_check_and_record: {
@@ -619,9 +1009,16 @@ export type Database = {
           status: string
         }[]
       }
+      workspace_role_of: {
+        Args: { _user_id: string; _workspace_id: string }
+        Returns: Database["public"]["Enums"]["workspace_role"]
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      build_status: "queued" | "running" | "success" | "failed" | "cancelled"
+      project_visibility: "private" | "link" | "public"
+      workspace_role: "owner" | "admin" | "editor" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -750,6 +1147,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      build_status: ["queued", "running", "success", "failed", "cancelled"],
+      project_visibility: ["private", "link", "public"],
+      workspace_role: ["owner", "admin", "editor", "viewer"],
     },
   },
 } as const
