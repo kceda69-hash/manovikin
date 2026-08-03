@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 
 const TITLE = "Claude Code vs Cursor (2026): Key Differences";
 const DESCRIPTION =
-  "A deep-dive comparison of Claude Code (CLI) and Cursor (IDE): tool use, terminal workflows, pricing, and what Claude Code does that Cursor doesn't. Plus MANOVIK as the sovereign alternative.";
+  "Claude Code (CLI) vs Cursor (IDE) compared: tool use, terminal workflows, and pricing — plus MANOVIK as the sovereign alternative.";
 const URL = "https://manovik.in/blog/claude-code-vs-cursor";
 
 export const Route = createFileRoute("/blog/claude-code-vs-cursor")({

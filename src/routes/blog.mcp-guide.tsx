@@ -8,7 +8,7 @@ export const Route = createFileRoute("/blog/mcp-guide")({
       {
         name: "description",
         content:
-          "How to extend MANOVIK AI with Model Context Protocol (MCP) servers. Run local MCP tools alongside a sovereign, self-hosted deployment for private, extendable AI.",
+          "How to extend MANOVIK AI with Model Context Protocol (MCP) servers: run local MCP tools alongside a sovereign, self-hosted deployment.",
       },
       {
         name: "keywords",
