@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 const TITLE = "MANOVIK System Rules — Steer Your AI Agent with a .manovikrules File";
 const DESCRIPTION =
-  "Define project-specific coding standards, architectural patterns, and library preferences with a .manovikrules file. A practical guide to system rules for the MANOVIK autonomous agent — the sovereign alternative to Cursor rules and .cursorrules.";
+  "Define coding standards, architecture patterns, and library preferences with a .manovikrules file — a practical guide to MANOVIK system rules.";
 const URL = "https://manovik.in/blog/system-rules";
 
 export const Route = createFileRoute("/blog/system-rules")({

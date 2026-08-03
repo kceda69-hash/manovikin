@@ -8,7 +8,7 @@ export const Route = createFileRoute("/vs-bolt-new")({
       {
         name: "description",
         content:
-          "Bolt.new alternative: MANOVIK AI ships prompt-to-app building with sovereign hosting, multi-language support, and lifetime pricing versus Bolt's web-only subscription.",
+          "Bolt.new alternative: MANOVIK AI ships prompt-to-app building with sovereign hosting, multi-language support, and lifetime pricing.",
       },
       {
         name: "keywords",

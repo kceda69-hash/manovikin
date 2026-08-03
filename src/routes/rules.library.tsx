@@ -4,7 +4,7 @@ import { Copy, Check } from "lucide-react";
 
 const TITLE = "MANOVIK Rules Library — Ready-to-use .manovikrules templates";
 const DESCRIPTION =
-  "A curated gallery of copy-paste .manovikrules templates for Next.js, React, FastAPI, Tailwind, Django, TanStack Start, Expo, and more. Steer the MANOVIK AI agent with proven system rules — a sovereign alternative to .cursorrules libraries.";
+  "A curated gallery of copy-paste .manovikrules templates for Next.js, React, FastAPI, Tailwind, Django, Expo and more — steer the MANOVIK AI agent.";
 const URL = "https://manovik.in/rules/library";
 
 type Template = {
