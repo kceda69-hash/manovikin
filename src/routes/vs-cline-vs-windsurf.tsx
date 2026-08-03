@@ -8,7 +8,7 @@ export const Route = createFileRoute("/vs-cline-vs-windsurf")({
       {
         name: "description",
         content:
-          "Cline vs Windsurf: agentic autonomy, pricing, privacy, and IDE experience compared. Plus how MANOVIK gives you the best of both with sovereign, lifetime-priced hosting.",
+          "Cline vs Windsurf: agentic autonomy, pricing, privacy, and IDE experience compared — plus how MANOVIK offers sovereign, lifetime-priced hosting.",
       },
       {
         name: "keywords",
