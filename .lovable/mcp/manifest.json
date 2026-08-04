@@ -8,7 +8,7 @@
   "mcp": {
     "server": {
       "name": "manovik-mcp",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "title": "MANOVIK MCP"
     },
     "tools": [
@@ -171,6 +171,313 @@
           "required": [
             "target"
           ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "manovik_write",
+        "title": "MANOVIK writing studio",
+        "description": "Generate publication-ready written content: articles, blog posts, landing-page copy, emails, social posts, documentation or outlines. Supports tone, audience, target length, SEO keywords and language.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "topic": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8000,
+              "description": "What to write about, including any key facts to include."
+            },
+            "format": {
+              "default": "article",
+              "description": "Kind of content to produce.",
+              "type": "string",
+              "enum": [
+                "article",
+                "blog",
+                "landing",
+                "email",
+                "social",
+                "docs",
+                "outline"
+              ]
+            },
+            "tone": {
+              "description": "Desired tone, e.g. 'confident, technical, no hype'.",
+              "type": "string",
+              "maxLength": 80
+            },
+            "audience": {
+              "description": "Who is reading, e.g. 'senior backend engineers'.",
+              "type": "string",
+              "maxLength": 160
+            },
+            "words": {
+              "description": "Approximate target word count.",
+              "type": "integer",
+              "minimum": 50,
+              "maximum": 4000
+            },
+            "keywords": {
+              "description": "SEO keywords to weave in naturally.",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 60
+              }
+            },
+            "language": {
+              "description": "Output language. Defaults to the input language.",
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          "required": [
+            "topic"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "manovik_translate",
+        "title": "MANOVIK translate & localize",
+        "description": "Translate or localize text between any languages while preserving markdown, code blocks, placeholders ({name}, %s, {{var}}) and formatting. Supports formal/informal register and glossary terms that must stay untranslated.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000,
+              "description": "Text to translate. Markdown and code are preserved."
+            },
+            "to": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 40,
+              "description": "Target language, e.g. 'Hindi', 'Japanese', 'pt-BR'."
+            },
+            "from": {
+              "description": "Source language. Auto-detected when omitted.",
+              "type": "string",
+              "maxLength": 40
+            },
+            "register": {
+              "default": "neutral",
+              "description": "Tone/register of the translation.",
+              "type": "string",
+              "enum": [
+                "neutral",
+                "formal",
+                "informal",
+                "marketing",
+                "technical"
+              ]
+            },
+            "keep_terms": {
+              "description": "Terms that must remain untranslated, e.g. brand names.",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 60
+              }
+            }
+          },
+          "required": [
+            "text",
+            "to"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "manovik_extract",
+        "title": "MANOVIK structured extraction",
+        "description": "Turn messy text (emails, invoices, logs, articles, transcripts, HTML) into structured JSON. Describe the fields you want, or pass a JSON Schema / example shape. Also handles classification, sentiment, entity extraction and summarisation into fixed keys.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40000,
+              "description": "The source text to extract from."
+            },
+            "fields": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000,
+              "description": "Fields to extract — plain description or a JSON shape, e.g. '{ name, total, due_date }'."
+            },
+            "mode": {
+              "default": "extract",
+              "description": "Kind of structured analysis to run.",
+              "type": "string",
+              "enum": [
+                "extract",
+                "classify",
+                "entities",
+                "sentiment",
+                "summarize"
+              ]
+            },
+            "strict": {
+              "default": true,
+              "description": "When true, unknown values are null instead of guessed.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "text",
+            "fields"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "manovik_optimize_prompt",
+        "title": "MANOVIK prompt engineer",
+        "description": "Rewrite a weak prompt into a high-precision one using MANOVIK's prompt-engineering playbook. Returns the optimized prompt plus what changed and what still needs deciding. Use before running an expensive generation.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 12000,
+              "description": "The prompt to improve."
+            },
+            "target": {
+              "default": "chat",
+              "description": "What the prompt will be used for.",
+              "type": "string",
+              "enum": [
+                "chat",
+                "coding",
+                "image",
+                "agent",
+                "search"
+              ]
+            },
+            "goal": {
+              "description": "What a perfect result would look like.",
+              "type": "string",
+              "maxLength": 1000
+            }
+          },
+          "required": [
+            "prompt"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "manovik_supply_chain_scan",
+        "title": "Supply-chain & model provenance scan",
+        "description": "Audit a project's dependencies and AI configuration offline: paste a package.json (and optionally a lockfile, env var NAMES, AI hosts and model ids). Detects unpinned/floating versions, remote git/file deps, pre-release builds in production, known-compromised packages, typosquats, unapproved AI endpoints, leaked-key patterns and bad model config. Returns a 0-100 score with prioritised findings. Never send secret values — names only.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "package_json": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 200000,
+              "description": "Raw package.json contents to analyse."
+            },
+            "lockfile_name": {
+              "description": "Lockfile filename, e.g. 'bun.lock' or 'package-lock.json'.",
+              "type": "string",
+              "maxLength": 60
+            },
+            "lockfile_text": {
+              "description": "Raw lockfile contents (optional, improves provenance checks).",
+              "type": "string",
+              "maxLength": 400000
+            },
+            "env_names": {
+              "description": "Environment variable NAMES only (never values), e.g. ['VITE_API_URL'].",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 120
+              }
+            },
+            "ai_hosts": {
+              "description": "Hosts the app sends inference traffic to, e.g. ['api.openai.com'].",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 200
+              }
+            },
+            "models": {
+              "description": "Model ids the app calls, e.g. ['google/gemini-3.6-flash'].",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 120
+              }
+            }
+          },
+          "required": [
+            "package_json"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "manovik_models",
+        "title": "MANOVIK model routing",
+        "description": "Inspect MANOVIK's model router: list the tiers (trivial, standard, hard, vision) and the model each maps to, and — when a prompt is supplied — show which model MANOVIK would route that prompt to, with its fallback chain. Useful for cost/latency planning before calling `manovik_ask` or `manovik_code`.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "prompt": {
+              "description": "Optional prompt to preview routing for (no model call is made).",
+              "type": "string",
+              "maxLength": 8000
+            },
+            "has_attachments": {
+              "default": false,
+              "description": "Whether the request would include images or files.",
+              "type": "boolean"
+            }
+          }
         },
         "outputSchema": null
       },
