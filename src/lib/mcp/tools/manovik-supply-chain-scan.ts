@@ -55,7 +55,7 @@ export default defineTool({
         lockfileText: lockfile_text ?? null,
         envNames: env_names ?? [],
         aiHosts: ai_hosts ?? [],
-        models: (models ?? []).map((id) => ({ id, where: "mcp-input" })),
+        models: (models ?? []).map((model) => ({ model, surface: "mcp-input" })),
       });
 
       return {
