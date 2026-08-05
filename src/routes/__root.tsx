@@ -61,8 +61,6 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     window.location.reload();
   }, [error]);
 
-
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -127,12 +125,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
                 "@type": "ImageObject",
                 url: "https://manovik.in/favicon.ico",
               },
-              description:
-                "Autonomous AI agent that codes, builds, and ships software 24/7.",
-              sameAs: [
-                "https://twitter.com/manovikai",
-                "https://manovikin.lovable.app",
-              ],
+              description: "Autonomous AI agent that codes, builds, and ships software 24/7.",
+              sameAs: ["https://twitter.com/manovikai", "https://manovikin.lovable.app"],
               contactPoint: {
                 "@type": "ContactPoint",
                 contactType: "customer support",
@@ -229,16 +223,16 @@ function BreadcrumbJsonLd() {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: items,
-    }).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+    })
+      .replace(/</g, "\\u003c")
+      .replace(/>/g, "\\u003e")
+      .replace(/&/g, "\\u0026")
+      .replace(/\u2028/g, "\\u2028")
+      .replace(/\u2029/g, "\\u2029");
   }, [pathname]);
 
   if (!json) return null;
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: json }}
-    />
-  );
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />;
 }
 
 function RootComponent() {

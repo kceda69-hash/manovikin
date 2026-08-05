@@ -185,12 +185,8 @@ export function DnaPromptEditor({ open, onClose }: { open: boolean; onClose: () 
             className="mt-2 w-full resize-y rounded-lg bg-background/40 border border-border/60 px-3 py-2 text-xs font-mono outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
           />
           <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-            <span>
-              {current.length}/4000 chars · Empty = use MANOVIK default for this mode.
-            </span>
-            <span>
-              Safety rules (no malware, refuse unsafe requests) always apply.
-            </span>
+            <span>{current.length}/4000 chars · Empty = use MANOVIK default for this mode.</span>
+            <span>Safety rules (no malware, refuse unsafe requests) always apply.</span>
           </div>
         </div>
 
@@ -354,5 +350,3 @@ import { SHIP_PIPELINE_STAGES, type ShipStageId } from "./dna-storage";
 
 export { SHIP_PIPELINE_STAGES };
 export type { ShipStageId };
-
-

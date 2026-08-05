@@ -1,6 +1,35 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, lazy, Suspense } from "react";
-import { Sparkles, Code2, Zap, Shield, Brain, ArrowRight, Globe, Workflow, Terminal, Check, ChevronDown, Smartphone, Apple, Rocket, Cpu, Paperclip, Send, Store, Bot, Layers, Wand2, Download, Copy, Loader2, KeyRound, ShieldCheck, X, Link2 } from "lucide-react";
+import {
+  Sparkles,
+  Code2,
+  Zap,
+  Shield,
+  Brain,
+  ArrowRight,
+  Globe,
+  Workflow,
+  Terminal,
+  Check,
+  ChevronDown,
+  Smartphone,
+  Apple,
+  Rocket,
+  Cpu,
+  Paperclip,
+  Send,
+  Store,
+  Bot,
+  Layers,
+  Wand2,
+  Download,
+  Copy,
+  Loader2,
+  KeyRound,
+  ShieldCheck,
+  X,
+  Link2,
+} from "lucide-react";
 import { toast } from "sonner";
 import logo from "@/assets/nova-x-logo.webp";
 import { startCheckout, type CheckoutPlan } from "@/lib/razorpay-checkout";
@@ -15,7 +44,6 @@ const dnaFeatures = () => import("@/components/manovik/dna-features");
 const DnaPromptEditor = lazy(() => dnaFeatures().then((m) => ({ default: m.DnaPromptEditor })));
 const CloneVerifier = lazy(() => dnaFeatures().then((m) => ({ default: m.CloneVerifier })));
 
-
 export const Route = createFileRoute("/")({
   component: Landing,
   head: () => ({
@@ -26,16 +54,34 @@ export const Route = createFileRoute("/")({
         content:
           "MANOVIK AI: autonomous coding agent that builds apps, APIs & automations 24/7. Pro ₹699/mo (10% off). Lifetime self-host ₹4999 (20% off).",
       },
-      { name: "keywords", content: "AI coding agent, autonomous AI, MANOVIK, build apps with AI, AI APIs, self-hosted AI, Indian AI startup" },
+      {
+        name: "keywords",
+        content:
+          "AI coding agent, autonomous AI, MANOVIK, build apps with AI, AI APIs, self-hosted AI, Indian AI startup",
+      },
       { property: "og:title", content: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
-      { property: "og:description", content: "Codes, builds, and ships software 24/7. Pro ₹699/mo · Sovereign lifetime ₹4999." },
+      {
+        property: "og:description",
+        content: "Codes, builds, and ships software 24/7. Pro ₹699/mo · Sovereign lifetime ₹4999.",
+      },
       { property: "og:url", content: "https://manovik.in/" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
-      { name: "twitter:description", content: "Codes, builds, and ships software 24/7. Pro ₹699/mo · Sovereign lifetime ₹4999." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b60b2fb0-e5b2-4664-957d-ccee1257580a/id-preview-b60afdf7--9e140ba8-6acc-42f5-8e24-1a6609f849b5.lovable.app-1778327527940.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b60b2fb0-e5b2-4664-957d-ccee1257580a/id-preview-b60afdf7--9e140ba8-6acc-42f5-8e24-1a6609f849b5.lovable.app-1778327527940.png" },
+      {
+        name: "twitter:description",
+        content: "Codes, builds, and ships software 24/7. Pro ₹699/mo · Sovereign lifetime ₹4999.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b60b2fb0-e5b2-4664-957d-ccee1257580a/id-preview-b60afdf7--9e140ba8-6acc-42f5-8e24-1a6609f849b5.lovable.app-1778327527940.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b60b2fb0-e5b2-4664-957d-ccee1257580a/id-preview-b60afdf7--9e140ba8-6acc-42f5-8e24-1a6609f849b5.lovable.app-1778327527940.png",
+      },
     ],
     links: [
       { rel: "canonical", href: "https://manovik.in/" },
@@ -53,22 +99,62 @@ export const Route = createFileRoute("/")({
               name: "MANOVIK AI Pro",
               description: "Unlimited messages and priority models for builders shipping daily.",
               brand: { "@type": "Brand", name: "MANOVIK AI" },
-              offers: { "@type": "Offer", price: "699", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
+              offers: {
+                "@type": "Offer",
+                price: "699",
+                priceCurrency: "INR",
+                availability: "https://schema.org/InStock",
+                url: "https://manovik.in/#pricing",
+              },
             },
             {
               "@type": "Product",
               name: "MANOVIK AI Sovereign (Lifetime Self-Host)",
               description: "Run MANOVIK on your own infrastructure forever. One-time payment.",
               brand: { "@type": "Brand", name: "MANOVIK AI" },
-              offers: { "@type": "Offer", price: "4999", priceCurrency: "INR", availability: "https://schema.org/InStock", url: "https://manovik.in/#pricing" },
+              offers: {
+                "@type": "Offer",
+                price: "4999",
+                priceCurrency: "INR",
+                availability: "https://schema.org/InStock",
+                url: "https://manovik.in/#pricing",
+              },
             },
             {
               "@type": "FAQPage",
               mainEntity: [
-                { "@type": "Question", name: "What is MANOVIK AI?", acceptedAnswer: { "@type": "Answer", text: "MANOVIK is an autonomous AI agent that codes, builds, and ships software for you." } },
-                { "@type": "Question", name: "Which languages does it support?", acceptedAnswer: { "@type": "Answer", text: "Any major language — JavaScript, TypeScript, Python, Go, Rust, Java, Swift, Kotlin, SQL and more." } },
-                { "@type": "Question", name: "Can I run MANOVIK on my own server?", acceptedAnswer: { "@type": "Answer", text: "Yes. The Sovereign lifetime plan (₹4999, 20% off) includes the self-host setup wizard, Docker support, and BYOK." } },
-                { "@type": "Question", name: "Is my data private?", acceptedAnswer: { "@type": "Answer", text: "Threads are encrypted at rest and never used to train third-party models." } },
+                {
+                  "@type": "Question",
+                  name: "What is MANOVIK AI?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "MANOVIK is an autonomous AI agent that codes, builds, and ships software for you.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "Which languages does it support?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Any major language — JavaScript, TypeScript, Python, Go, Rust, Java, Swift, Kotlin, SQL and more.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "Can I run MANOVIK on my own server?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Yes. The Sovereign lifetime plan (₹4999, 20% off) includes the self-host setup wizard, Docker support, and BYOK.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "Is my data private?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Threads are encrypted at rest and never used to train third-party models.",
+                  },
+                },
               ],
             },
           ],
@@ -87,7 +173,7 @@ const TOUR = [
     title: "Build full-stack apps",
     desc: "MANOVIK scaffolds the UI, wires the database, and ships auth — all from one prompt.",
     lines: [
-      "› manovik build \"task tracker with auth\"",
+      '› manovik build "task tracker with auth"',
       "✓ Planning routes & schema…",
       "✓ Generating React + Tailwind UI",
       "✓ Wiring Supabase auth + RLS",
@@ -100,7 +186,7 @@ const TOUR = [
     title: "Spin up production APIs",
     desc: "REST or RPC endpoints, typed validators, rate-limits and logs included.",
     lines: [
-      "› manovik api \"POST /invoice with stripe\"",
+      '› manovik api "POST /invoice with stripe"',
       "✓ Zod validator generated",
       "✓ Stripe SDK integrated",
       "✓ Tests passing (12/12)",
@@ -113,7 +199,7 @@ const TOUR = [
     title: "Automate everything",
     desc: "Cron jobs, webhooks, AI workflows — MANOVIK glues your tools together.",
     lines: [
-      "› manovik automate \"slack daily report\"",
+      '› manovik automate "slack daily report"',
       "✓ Fetching analytics @ 9am IST",
       "✓ Summarizing with GPT",
       "✓ Posting to #growth",
@@ -156,7 +242,12 @@ const PRICING: Pricing[] = [
     discountPct: 10,
     period: "/month",
     desc: "For builders shipping daily.",
-    features: ["Unlimited messages", "Priority models (GPT-5, Gemini Pro)", "File uploads", "Email support"],
+    features: [
+      "Unlimited messages",
+      "Priority models (GPT-5, Gemini Pro)",
+      "File uploads",
+      "Email support",
+    ],
     cta: "Go Pro",
     highlight: true,
   },
@@ -168,18 +259,39 @@ const PRICING: Pricing[] = [
     discountPct: 20,
     period: "lifetime",
     desc: "One-time payment. Run MANOVIK on your own infra forever.",
-    features: ["Bring your own keys", "Ollama / OpenAI / Groq", "Zero vendor lock-in", "Setup wizard + Docker", "Lifetime updates"],
+    features: [
+      "Bring your own keys",
+      "Ollama / OpenAI / Groq",
+      "Zero vendor lock-in",
+      "Setup wizard + Docker",
+      "Lifetime updates",
+    ],
     cta: "Buy lifetime",
     highlight: false,
   },
 ];
 
 const FAQ = [
-  { q: "What is MANOVIK AI?", a: "MANOVIK is an autonomous AI agent that codes, builds, and ships software for you. Think of it as a digital employee that turns ideas into working products." },
-  { q: "Which languages does it support?", a: "Any major language — JavaScript, TypeScript, Python, Go, Rust, Java, Swift, Kotlin, SQL and more. It picks the right stack for the job." },
-  { q: "Can I run MANOVIK on my own server?", a: "Yes. MANOVIK is sovereign-ready. Use the in-app /setup wizard to deploy with Docker, your own database, and any OpenAI-compatible model (Ollama, Groq, OpenAI)." },
-  { q: "Is my data private?", a: "Threads are encrypted at rest and never used to train third-party models. In sovereign mode, your data never leaves your infrastructure." },
-  { q: "Do I need to know how to code?", a: "No. Describe what you want in plain English and MANOVIK handles the rest — planning, coding, testing, and deployment." },
+  {
+    q: "What is MANOVIK AI?",
+    a: "MANOVIK is an autonomous AI agent that codes, builds, and ships software for you. Think of it as a digital employee that turns ideas into working products.",
+  },
+  {
+    q: "Which languages does it support?",
+    a: "Any major language — JavaScript, TypeScript, Python, Go, Rust, Java, Swift, Kotlin, SQL and more. It picks the right stack for the job.",
+  },
+  {
+    q: "Can I run MANOVIK on my own server?",
+    a: "Yes. MANOVIK is sovereign-ready. Use the in-app /setup wizard to deploy with Docker, your own database, and any OpenAI-compatible model (Ollama, Groq, OpenAI).",
+  },
+  {
+    q: "Is my data private?",
+    a: "Threads are encrypted at rest and never used to train third-party models. In sovereign mode, your data never leaves your infrastructure.",
+  },
+  {
+    q: "Do I need to know how to code?",
+    a: "No. Describe what you want in plain English and MANOVIK handles the rest — planning, coding, testing, and deployment.",
+  },
 ];
 
 function Landing() {
@@ -195,7 +307,9 @@ function Landing() {
     if (faqLockRef.current) return;
     faqLockRef.current = true;
     setFaqOpen((cur) => (cur === i ? null : i));
-    setTimeout(() => { faqLockRef.current = false; }, 180);
+    setTimeout(() => {
+      faqLockRef.current = false;
+    }, 180);
   };
   const [buying, setBuying] = useState<CheckoutPlan | null>(null);
 
@@ -256,7 +370,8 @@ function Landing() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) return;
     let raf = 0;
-    let tx = 50, ty = 30;
+    let tx = 50,
+      ty = 30;
     const onMove = (e: PointerEvent) => {
       const r = el.getBoundingClientRect();
       tx = ((e.clientX - r.left) / r.width) * 100;
@@ -307,7 +422,10 @@ function Landing() {
         <div className="flex items-center gap-2">
           <LanguageSwitcher className="hidden sm:inline-flex" />
           <Link to="/login">
-            <Button variant="outline" className="border-primary/40 bg-card/40 backdrop-blur hover-scale">
+            <Button
+              variant="outline"
+              className="border-primary/40 bg-card/40 backdrop-blur hover-scale"
+            >
               {t("nav.signin")}
             </Button>
           </Link>
@@ -343,8 +461,8 @@ function Landing() {
           className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground md:text-xl animate-fade-in"
           style={{ animationDelay: "180ms", animationFillMode: "both" }}
         >
-          A futuristic agent that writes code in any language, builds websites, apps, and APIs,
-          and gets the job done — autonomously.
+          A futuristic agent that writes code in any language, builds websites, apps, and APIs, and
+          gets the job done — autonomously.
         </p>
 
         <div
@@ -368,12 +486,32 @@ function Landing() {
         <h2 className="sr-only">What MANOVIK can do</h2>
         <div className="mt-20 grid gap-4 md:grid-cols-3">
           {[
-            { icon: Code2, title: "Polyglot coder", desc: "Ships production code in any language or stack." },
-            { icon: Brain, title: "Reasoning core", desc: "Plans, breaks down, and executes complex tasks." },
+            {
+              icon: Code2,
+              title: "Polyglot coder",
+              desc: "Ships production code in any language or stack.",
+            },
+            {
+              icon: Brain,
+              title: "Reasoning core",
+              desc: "Plans, breaks down, and executes complex tasks.",
+            },
             { icon: Zap, title: "Streaming fast", desc: "Real-time responses, no waiting around." },
-            { icon: Shield, title: "Private threads", desc: "Your conversations are yours — encrypted at rest." },
-            { icon: Sparkles, title: "Markdown native", desc: "Beautiful code blocks, tables, and rich output." },
-            { icon: Brain, title: "Memory across threads", desc: "Organized conversations you can revisit." },
+            {
+              icon: Shield,
+              title: "Private threads",
+              desc: "Your conversations are yours — encrypted at rest.",
+            },
+            {
+              icon: Sparkles,
+              title: "Markdown native",
+              desc: "Beautiful code blocks, tables, and rich output.",
+            },
+            {
+              icon: Brain,
+              title: "Memory across threads",
+              desc: "Organized conversations you can revisit.",
+            },
           ].map((f, i) => (
             <div
               key={f.title}
@@ -392,7 +530,9 @@ function Landing() {
         <div className="mt-24 text-left">
           <div className="text-center mb-8 animate-fade-in">
             <h2 className="text-3xl md:text-4xl font-bold">See MANOVIK in action</h2>
-            <p className="mt-2 text-muted-foreground">One agent. Three superpowers. Click to explore.</p>
+            <p className="mt-2 text-muted-foreground">
+              One agent. Three superpowers. Click to explore.
+            </p>
           </div>
           <div className="surface-card relative overflow-hidden rounded-2xl p-2 md:p-3">
             <span className="card-border-glow" aria-hidden="true" />
@@ -420,7 +560,10 @@ function Landing() {
             <div key={tourIdx} className="grid md:grid-cols-2 gap-6 p-5 md:p-8 animate-tour-fade">
               <div>
                 <div className="inline-flex items-center gap-2 text-primary text-xs uppercase tracking-wider mb-3">
-                  {(() => { const Icon = TOUR[tourIdx].icon; return <Icon className="h-4 w-4" />; })()}
+                  {(() => {
+                    const Icon = TOUR[tourIdx].icon;
+                    return <Icon className="h-4 w-4" />;
+                  })()}
                   {TOUR[tourIdx].label}
                 </div>
                 <h3 className="text-2xl md:text-3xl font-bold">{TOUR[tourIdx].title}</h3>
@@ -437,7 +580,9 @@ function Landing() {
                   <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
                   <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
                   <span className="h-2.5 w-2.5 rounded-full bg-green-500/70" />
-                  <span className="ml-2 text-[10px] text-muted-foreground font-mono">manovik · live</span>
+                  <span className="ml-2 text-[10px] text-muted-foreground font-mono">
+                    manovik · live
+                  </span>
                 </div>
                 <pre className="p-4 text-xs md:text-sm font-mono leading-relaxed text-foreground/90 overflow-hidden">
                   {TOUR[tourIdx].lines.map((line, i) => (
@@ -458,7 +603,6 @@ function Landing() {
         {/* Prompt-to-Build composer */}
         <PromptComposer />
 
-
         {/* MANOVIK DNA — unique brains only this agent ships */}
         <section id="dna" className="mt-24">
           <div className="text-center animate-fade-in">
@@ -466,22 +610,51 @@ function Landing() {
               <Brain className="h-3.5 w-3.5" /> MANOVIK DNA
             </div>
             <h2 className="mt-4 text-3xl md:text-4xl font-bold">
-              Five brains no other AI ships. <span className="text-gradient">Switch mid-prompt.</span>
+              Five brains no other AI ships.{" "}
+              <span className="text-gradient">Switch mid-prompt.</span>
             </h2>
             <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-              Every mode below is a live pill on the composer above — pick one and MANOVIK reframes the whole reasoning stack.
+              Every mode below is a live pill on the composer above — pick one and MANOVIK reframes
+              the whole reasoning stack.
             </p>
           </div>
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3 text-left">
             {[
-              { icon: Workflow, title: "Reverse-Engineer Brain", body: "Paste a URL, screenshot, or snippet. MANOVIK decomposes the architecture, names the tricks, and returns a clean-room rebuild plan — original code only, never verbatim." },
-              { icon: Copy, title: "Clone-Exactly Brain", body: "Locks the spec, emits every file with `// file: path` headers, and ships parity tests so you can prove the clone matches before you ship." },
-              { icon: Brain, title: "MANOVIK Brain (memory)", body: "A persistent knowledge graph of your stack, style, and past work. Talks to you like it already knows you — because it does." },
-              { icon: Rocket, title: "One-Click Ship (100% accuracy)", body: "Play Store, App Store, and Web packaging deliverables with preflight checks. Nothing MANOVIK emits gets rejected on review." },
-              { icon: Layers, title: "Skill Packs", body: "Composable, whitelisted skills (Supabase, Razorpay, Expo, RLS…) that plug into the sandbox at runtime — auditable, rate-limited, reversible." },
-              { icon: Cpu, title: "Multi-model routing", body: "Cheap Gemini for greetings, GPT-5.5 for architecture, Claude Fable 5 for shipping. Router picks — you don't pay for the wrong brain." },
+              {
+                icon: Workflow,
+                title: "Reverse-Engineer Brain",
+                body: "Paste a URL, screenshot, or snippet. MANOVIK decomposes the architecture, names the tricks, and returns a clean-room rebuild plan — original code only, never verbatim.",
+              },
+              {
+                icon: Copy,
+                title: "Clone-Exactly Brain",
+                body: "Locks the spec, emits every file with `// file: path` headers, and ships parity tests so you can prove the clone matches before you ship.",
+              },
+              {
+                icon: Brain,
+                title: "MANOVIK Brain (memory)",
+                body: "A persistent knowledge graph of your stack, style, and past work. Talks to you like it already knows you — because it does.",
+              },
+              {
+                icon: Rocket,
+                title: "One-Click Ship (100% accuracy)",
+                body: "Play Store, App Store, and Web packaging deliverables with preflight checks. Nothing MANOVIK emits gets rejected on review.",
+              },
+              {
+                icon: Layers,
+                title: "Skill Packs",
+                body: "Composable, whitelisted skills (Supabase, Razorpay, Expo, RLS…) that plug into the sandbox at runtime — auditable, rate-limited, reversible.",
+              },
+              {
+                icon: Cpu,
+                title: "Multi-model routing",
+                body: "Cheap Gemini for greetings, GPT-5.5 for architecture, Claude Fable 5 for shipping. Router picks — you don't pay for the wrong brain.",
+              },
             ].map((c) => (
-              <div key={c.title} className="surface-card relative overflow-hidden rounded-2xl p-5 md:p-6">
+              <div
+                key={c.title}
+                className="surface-card relative overflow-hidden rounded-2xl p-5 md:p-6"
+              >
                 <span className="card-border-glow" aria-hidden="true" />
                 <div className="flex items-center gap-3">
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/80 to-accent text-primary-foreground shadow">
@@ -496,16 +669,16 @@ function Landing() {
           <div className="mt-8 text-center">
             <a
               href="#top"
-              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
               className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-card/40 px-4 py-2 text-sm text-primary hover:bg-primary/10 transition"
             >
               Try a DNA mode in the composer <ArrowRight className="h-4 w-4" />
             </a>
           </div>
         </section>
-
-
-
 
         {/* Powered by top models — incl. Claude Fable 5 */}
         <div className="mt-24">
@@ -517,7 +690,8 @@ function Landing() {
               Now with <span className="text-gradient text-shimmer">Claude Fable 5</span>
             </h2>
             <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-              Route complex refactors, long-context reasoning, and production ship-work to Anthropic's newest model — right inside MANOVIK.
+              Route complex refactors, long-context reasoning, and production ship-work to
+              Anthropic's newest model — right inside MANOVIK.
             </p>
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-2 text-left">
@@ -529,9 +703,13 @@ function Landing() {
                 </span>
                 <div>
                   <h3 className="font-semibold text-lg">Claude Fable 5</h3>
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Recommended for shipping</div>
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    Recommended for shipping
+                  </div>
                 </div>
-                <span className="ml-auto rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">New</span>
+                <span className="ml-auto rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                  New
+                </span>
               </div>
               <ul className="mt-5 space-y-2.5 text-sm">
                 {[
@@ -569,9 +747,21 @@ function Landing() {
 
         <div className="mt-8 grid gap-6 md:grid-cols-3 text-left">
           {[
-            { step: "01", title: "Describe", desc: "Tell MANOVIK what to build — a site, an API, an agent, a script." },
-            { step: "02", title: "Reason & Plan", desc: "It breaks the goal into steps, picks tools, and writes the code." },
-            { step: "03", title: "Ship", desc: "Streaming output, instant preview, and production-ready files." },
+            {
+              step: "01",
+              title: "Describe",
+              desc: "Tell MANOVIK what to build — a site, an API, an agent, a script.",
+            },
+            {
+              step: "02",
+              title: "Reason & Plan",
+              desc: "It breaks the goal into steps, picks tools, and writes the code.",
+            },
+            {
+              step: "03",
+              title: "Ship",
+              desc: "Streaming output, instant preview, and production-ready files.",
+            },
           ].map((s, i) => (
             <div
               key={s.step}
@@ -600,7 +790,9 @@ function Landing() {
               style={{ animationDelay: `${1100 + i * 100}ms`, animationFillMode: "both" }}
             >
               <div className="text-3xl font-bold text-gradient text-shimmer">{s.k}</div>
-              <div className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">{s.v}</div>
+              <div className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">
+                {s.v}
+              </div>
             </div>
           ))}
         </div>
@@ -613,20 +805,24 @@ function Landing() {
           <span className="card-border-glow" aria-hidden="true" />
           <h2 className="text-3xl md:text-4xl font-bold text-gradient">Why MANOVIK?</h2>
           <p className="mt-4 text-muted-foreground md:text-lg leading-relaxed">
-            MANOVIK AI is your autonomous digital employee. It doesn't just answer —
-            it <span className="text-primary">plans</span>,{" "}
+            MANOVIK AI is your autonomous digital employee. It doesn't just answer — it{" "}
+            <span className="text-primary">plans</span>,{" "}
             <span className="text-primary">builds</span>, and{" "}
-            <span className="text-primary">delivers</span>. From a one-line idea to a
-            deployable product, MANOVIK reasons across files, calls tools, and ships
-            real software. Sovereign-ready — run it on your own infrastructure, with
-            your keys and your rules.
+            <span className="text-primary">delivers</span>. From a one-line idea to a deployable
+            product, MANOVIK reasons across files, calls tools, and ships real software.
+            Sovereign-ready — run it on your own infrastructure, with your keys and your rules.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
-            {["Autonomous", "Sovereign", "Polyglot", "Streaming", "Private", "Made in 🇮🇳"].map((t) => (
-              <span key={t} className="rounded-full border border-primary/30 bg-card/50 px-3 py-1 text-xs text-primary backdrop-blur">
-                {t}
-              </span>
-            ))}
+            {["Autonomous", "Sovereign", "Polyglot", "Streaming", "Private", "Made in 🇮🇳"].map(
+              (t) => (
+                <span
+                  key={t}
+                  className="rounded-full border border-primary/30 bg-card/50 px-3 py-1 text-xs text-primary backdrop-blur"
+                >
+                  {t}
+                </span>
+              ),
+            )}
           </div>
         </div>
 
@@ -675,7 +871,9 @@ function Landing() {
                     p.highlight || p.discountPct ? "mt-5" : "",
                     p.highlight ? "pr-20" : "",
                     p.discountPct ? "pl-20" : "",
-                  ].filter(Boolean).join(" ")}
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                 >
                   {p.name}
                 </div>
@@ -685,7 +883,9 @@ function Landing() {
                       {p.originalPrice}
                     </span>
                   )}
-                  <span className="text-4xl font-bold price-liquid animate-price-pop">{p.price}</span>
+                  <span className="text-4xl font-bold price-liquid animate-price-pop">
+                    {p.price}
+                  </span>
                   <span className="text-sm text-muted-foreground">{p.period}</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
@@ -768,11 +968,17 @@ function Landing() {
         </div>
 
         {/* Final CTA */}
-        <div className="mt-20 text-center animate-fade-in" style={{ animationDelay: "1700ms", animationFillMode: "both" }}>
+        <div
+          className="mt-20 text-center animate-fade-in"
+          style={{ animationDelay: "1700ms", animationFillMode: "both" }}
+        >
           <h2 className="text-3xl md:text-5xl font-bold">Ready to hire your AI employee?</h2>
           <p className="mt-4 text-muted-foreground">No setup. No limits. Just describe and ship.</p>
           <Link to="/login">
-            <Button size="lg" className="mt-6 group relative overflow-hidden bg-aurora text-primary-foreground glow">
+            <Button
+              size="lg"
+              className="mt-6 group relative overflow-hidden bg-aurora text-primary-foreground glow"
+            >
               <span className="relative z-10 inline-flex items-center">
                 Start building free
                 <ArrowRight className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -789,7 +995,11 @@ function Landing() {
             <div className="md:col-span-2">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-base text-gradient">MANOVIK AI</span>
-                <span className="inline-flex h-4 w-6 overflow-hidden rounded-sm ring-1 ring-border/60" aria-label="Indian flag" title="Made in India">
+                <span
+                  className="inline-flex h-4 w-6 overflow-hidden rounded-sm ring-1 ring-border/60"
+                  aria-label="Indian flag"
+                  title="Made in India"
+                >
                   <span className="flex-1 bg-[#FF9933]" />
                   <span className="flex-1 bg-white relative flex items-center justify-center">
                     <span className="h-1.5 w-1.5 rounded-full border border-[#000080]" />
@@ -801,27 +1011,74 @@ function Landing() {
                 Autonomous AI employee that plans, builds, and ships software 24/7. Made in India.
               </p>
               <div className="mt-3 inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-primary">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
                 Official Verified Website · manovik.in
               </div>
             </div>
             <div>
               <div className="font-semibold text-foreground mb-2">Product</div>
               <ul className="space-y-1.5">
-                <li><Link to="/" hash="pricing" className="hover:text-primary">{t("landing.footer.pricing")}</Link></li>
-                <li><Link to="/chat" className="hover:text-primary">Chat</Link></li>
-                <li><Link to="/billing" className="hover:text-primary">Billing</Link></li>
-                <li><Link to="/login" className="hover:text-primary">{t("landing.footer.signin")}</Link></li>
-                <li><Link to="/connect" className="hover:text-primary">Connect AI assistants</Link></li>
+                <li>
+                  <Link to="/" hash="pricing" className="hover:text-primary">
+                    {t("landing.footer.pricing")}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/chat" className="hover:text-primary">
+                    Chat
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/billing" className="hover:text-primary">
+                    Billing
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/login" className="hover:text-primary">
+                    {t("landing.footer.signin")}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/connect" className="hover:text-primary">
+                    Connect AI assistants
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
               <div className="font-semibold text-foreground mb-2">Legal & Support</div>
               <ul className="space-y-1.5">
-                <li><Link to="/terms" className="hover:text-primary">Terms of Service</Link></li>
-                <li><Link to="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
-                <li><Link to="/refund" className="hover:text-primary">Refund & Cancellation</Link></li>
-                <li><Link to="/contact" className="hover:text-primary">Contact</Link></li>
+                <li>
+                  <Link to="/terms" className="hover:text-primary">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/privacy" className="hover:text-primary">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/refund" className="hover:text-primary">
+                    Refund & Cancellation
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/contact" className="hover:text-primary">
+                    Contact
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -836,7 +1093,9 @@ function Landing() {
                 <span
                   key={`b-${i}`}
                   className="inline-block font-black"
-                  style={{ transform: `rotate(${((i % 3) - 1) * 2}deg) translateY(${(i % 2 === 0 ? -1 : 1)}px)` }}
+                  style={{
+                    transform: `rotate(${((i % 3) - 1) * 2}deg) translateY(${i % 2 === 0 ? -1 : 1}px)`,
+                  }}
                 >
                   {ch}
                 </span>
@@ -846,14 +1105,20 @@ function Landing() {
                 <span
                   key={`y-${i}`}
                   className="inline-block font-black"
-                  style={{ transform: `rotate(${((i % 3) - 1) * -2}deg) translateY(${(i % 2 === 0 ? 1 : -1)}px)` }}
+                  style={{
+                    transform: `rotate(${((i % 3) - 1) * -2}deg) translateY(${i % 2 === 0 ? 1 : -1}px)`,
+                  }}
                 >
                   {ch}
                 </span>
               ))}
               <span className="mx-1.5 inline-block h-3 w-px bg-primary/30" aria-hidden="true" />
-              <span className="inline-block rotate-3 bg-gradient-to-r from-primary to-aurora bg-clip-text text-transparent font-black">K</span>
-              <span className="inline-block -rotate-1 bg-gradient-to-r from-aurora to-primary bg-clip-text text-transparent font-black">C</span>
+              <span className="inline-block rotate-3 bg-gradient-to-r from-primary to-aurora bg-clip-text text-transparent font-black">
+                K
+              </span>
+              <span className="inline-block -rotate-1 bg-gradient-to-r from-aurora to-primary bg-clip-text text-transparent font-black">
+                C
+              </span>
             </div>
           </div>
 
@@ -871,7 +1136,9 @@ function Landing() {
                   aria-label={footerT.languageLabel}
                 >
                   {FOOTER_LOCALES.map((l) => (
-                    <option key={l.code} value={l.code}>{l.label}</option>
+                    <option key={l.code} value={l.code}>
+                      {l.label}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -881,19 +1148,35 @@ function Landing() {
               </div>
             </div>
           </div>
-
         </div>
       </footer>
-
     </main>
   );
 }
 
 const PROMPT_PRESETS = [
-  { icon: Smartphone, label: "Multiplayer mobile game", prompt: "Build a multiplayer trivia game for iOS & Android with Google login and realtime rooms." },
-  { icon: Store, label: "Shopify-style storefront", prompt: "Build a product storefront with cart, Razorpay checkout, and an admin dashboard." },
-  { icon: Bot, label: "AI SaaS with billing", prompt: "Build an AI writing SaaS with Supabase auth, Stripe subscriptions, and streaming responses." },
-  { icon: Workflow, label: "Automation dashboard", prompt: "Build a Zapier-style automation dashboard with triggers, actions and scheduled runs." },
+  {
+    icon: Smartphone,
+    label: "Multiplayer mobile game",
+    prompt:
+      "Build a multiplayer trivia game for iOS & Android with Google login and realtime rooms.",
+  },
+  {
+    icon: Store,
+    label: "Shopify-style storefront",
+    prompt: "Build a product storefront with cart, Razorpay checkout, and an admin dashboard.",
+  },
+  {
+    icon: Bot,
+    label: "AI SaaS with billing",
+    prompt:
+      "Build an AI writing SaaS with Supabase auth, Stripe subscriptions, and streaming responses.",
+  },
+  {
+    icon: Workflow,
+    label: "Automation dashboard",
+    prompt: "Build a Zapier-style automation dashboard with triggers, actions and scheduled runs.",
+  },
 ];
 
 const TARGETS = [
@@ -909,7 +1192,9 @@ function PromptComposer() {
   const [attachments, setAttachments] = useState<Array<{ name: string; content: string }>>([]);
   const [target, setTarget] = useState<(typeof TARGETS)[number]["id"]>("web");
   const [model, setModel] = useState<(typeof MODELS)[number]>("Claude Fable 5");
-  const [dnaMode, setDnaMode] = useState<"build" | "reverse" | "clone" | "brain" | "ship-store">("build");
+  const [dnaMode, setDnaMode] = useState<"build" | "reverse" | "clone" | "brain" | "ship-store">(
+    "build",
+  );
   const [editorOpen, setEditorOpen] = useState(false);
 
   const [output, setOutput] = useState("");
@@ -968,7 +1253,13 @@ function PromptComposer() {
       const res = await fetch("/api/public/demo-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, dnaMode, customSystem: getDnaOverride(dnaMode) }),
+        body: JSON.stringify({
+          prompt: `${text}${attachmentContext}`,
+          target,
+          model,
+          dnaMode,
+          customSystem: getDnaOverride(dnaMode),
+        }),
         signal: controller.signal,
       });
 
@@ -1062,14 +1353,18 @@ function PromptComposer() {
         />
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] uppercase tracking-wider text-muted-foreground mr-1">Brain</span>
-          {([
-            { id: "build", label: "Build", icon: Sparkles },
-            { id: "reverse", label: "Reverse-Engineer", icon: Workflow },
-            { id: "clone", label: "Clone Exactly", icon: Copy },
-            { id: "brain", label: "MANOVIK Brain", icon: Brain },
-            { id: "ship-store", label: "One-Click Ship", icon: Rocket },
-          ] as const).map((m) => (
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground mr-1">
+            Brain
+          </span>
+          {(
+            [
+              { id: "build", label: "Build", icon: Sparkles },
+              { id: "reverse", label: "Reverse-Engineer", icon: Workflow },
+              { id: "clone", label: "Clone Exactly", icon: Copy },
+              { id: "brain", label: "MANOVIK Brain", icon: Brain },
+              { id: "ship-store", label: "One-Click Ship", icon: Rocket },
+            ] as const
+          ).map((m) => (
             <button
               key={m.id}
               type="button"
@@ -1094,9 +1389,7 @@ function PromptComposer() {
           </button>
         </div>
 
-
         <div className="mt-3 flex flex-wrap items-center gap-2">
-
           <div className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/40 p-1">
             {TARGETS.map((t) => (
               <button
@@ -1104,7 +1397,9 @@ function PromptComposer() {
                 type="button"
                 onClick={() => setTarget(t.id)}
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
-                  target === t.id ? "bg-aurora text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+                  target === t.id
+                    ? "bg-aurora text-primary-foreground shadow"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <t.icon className="h-3.5 w-3.5" />
@@ -1126,7 +1421,10 @@ function PromptComposer() {
                 </option>
               ))}
             </select>
-            <ChevronDown aria-hidden="true" className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-primary" />
+            <ChevronDown
+              aria-hidden="true"
+              className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-primary"
+            />
           </div>
 
           <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-3 py-1.5 text-xs text-muted-foreground transition hover:text-foreground">
@@ -1144,13 +1442,18 @@ function PromptComposer() {
           </label>
 
           <div className="ml-auto flex items-center gap-2">
-            <span className="hidden md:inline text-[11px] text-muted-foreground">⌘/Ctrl + Enter</span>
+            <span className="hidden md:inline text-[11px] text-muted-foreground">
+              ⌘/Ctrl + Enter
+            </span>
             {isStreaming ? (
               <Button onClick={stop} variant="outline" className="border-primary/40 text-primary">
                 Stop
               </Button>
             ) : (
-              <Button onClick={submit} className="bg-aurora text-primary-foreground glow hover:opacity-95">
+              <Button
+                onClick={submit}
+                className="bg-aurora text-primary-foreground glow hover:opacity-95"
+              >
                 <Send className="mr-1 h-4 w-4" /> Build it
               </Button>
             )}
@@ -1220,7 +1523,9 @@ function PromptComposer() {
               ) : output ? (
                 <>
                   {output}
-                  {isStreaming && <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-primary align-middle" />}
+                  {isStreaming && (
+                    <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-primary align-middle" />
+                  )}
                 </>
               ) : (
                 <span className="text-muted-foreground">Thinking…</span>
@@ -1254,7 +1559,6 @@ function PromptComposer() {
     </div>
   );
 }
-
 
 // Extract deliverables from streamed markdown. Files are fenced code blocks
 // whose first line is `// file: <name>`.
