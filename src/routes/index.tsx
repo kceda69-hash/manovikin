@@ -578,8 +578,7 @@ function Landing() {
           </div>
         </div>
 
-        {/* In-page coding workspace — streams edits from Claude Fable 5 */}
-        <CodingWorkspace />
+        {/* How it works */}
 
         {/* How it works */}
         <h2 className="mt-24 text-3xl md:text-4xl font-bold text-center">How it works</h2>
