@@ -12,10 +12,8 @@ import { useI18n, LanguageSwitcher } from "@/lib/i18n";
 import { getDnaOverride, type ShipStageId } from "@/components/manovik/dna-storage";
 
 const dnaFeatures = () => import("@/components/manovik/dna-features");
-const ReverseEngineerPanel = lazy(() => dnaFeatures().then((m) => ({ default: m.ReverseEngineerPanel })));
 const DnaPromptEditor = lazy(() => dnaFeatures().then((m) => ({ default: m.DnaPromptEditor })));
 const CloneVerifier = lazy(() => dnaFeatures().then((m) => ({ default: m.CloneVerifier })));
-const ShipPipeline = lazy(() => dnaFeatures().then((m) => ({ default: m.ShipPipeline })));
 
 
 export const Route = createFileRoute("/")({
@@ -460,14 +458,6 @@ function Landing() {
         {/* Prompt-to-Build composer */}
         <PromptComposer />
 
-        {/* Ship to real stores — interactive stepper */}
-        <ShipStepper />
-
-        {/* Reverse-engineer workflow — extract requirements + change plan */}
-        <Suspense fallback={<div className="mt-24 h-64 rounded-xl border border-border/60 bg-muted/20 animate-pulse" aria-hidden />}>
-          <ReverseEngineerPanel />
-        </Suspense>
-
 
         {/* MANOVIK DNA — unique brains only this agent ships */}
         <section id="dna" className="mt-24">
@@ -556,10 +546,6 @@ function Landing() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-6">
-                <ConnectFableButton />
-              </div>
-
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
@@ -577,8 +563,6 @@ function Landing() {
             </div>
           </div>
         </div>
-
-        {/* How it works */}
 
         {/* How it works */}
         <h2 className="mt-24 text-3xl md:text-4xl font-bold text-center">How it works</h2>
@@ -984,7 +968,7 @@ function PromptComposer() {
       const res = await fetch("/api/public/demo-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, dnaMode, connected: hasFableSession(), customSystem: getDnaOverride(dnaMode) }),
+        body: JSON.stringify({ prompt: `${text}${attachmentContext}`, target, model, dnaMode, customSystem: getDnaOverride(dnaMode) }),
         signal: controller.signal,
       });
 

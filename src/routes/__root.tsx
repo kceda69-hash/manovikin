@@ -10,7 +10,6 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { Toaster } from "@/components/ui/sonner";
-import { initPerf } from "@/lib/perf";
 import { initClientErrorMonitor } from "@/lib/client-error-monitor";
 import { I18nProvider, useI18n } from "@/lib/i18n";
 
@@ -245,7 +244,6 @@ function BreadcrumbJsonLd() {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useEffect(() => {
-    initPerf();
     initClientErrorMonitor();
     // The app mounted fine, so any earlier chunk-recovery reload succeeded.
     try {
