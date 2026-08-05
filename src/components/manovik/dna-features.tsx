@@ -17,6 +17,13 @@ import {
   FileCode,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DNA_MODE_META,
+  readOverrides,
+  writeOverrides,
+  type DnaModeId,
+  type DnaOverrides,
+} from "@/components/manovik/dna-storage";
 
 // ---------------- Shared streaming helper ----------------
 
