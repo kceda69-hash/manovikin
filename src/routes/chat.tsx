@@ -793,7 +793,7 @@ function ChatPanel({
                 <div className="absolute inset-0 rounded-full bg-aurora opacity-30 blur-2xl" />
                 <img
                   src={logo}
-                  alt=""
+                  alt="MANOVIK AI logo"
                   width={72}
                   height={72}
                   className="relative h-16 w-16 animate-float sm:h-20 sm:w-20"
@@ -985,7 +985,7 @@ function MessageBubble({ message }: { message: UIMessage }) {
 
   return (
     <div className="flex gap-2 sm:gap-3">
-      <img src={logo} alt="" width={28} height={28} className="mt-1 h-7 w-7 shrink-0" />
+      <img src={logo} alt="MANOVIK AI" width={28} height={28} className="mt-1 h-7 w-7 shrink-0" />
       <div className="prose prose-invert min-w-0 max-w-none flex-1 text-foreground prose-pre:my-2 prose-pre:rounded-lg prose-pre:bg-secondary prose-pre:p-3 prose-pre:text-xs prose-code:rounded prose-code:bg-secondary prose-code:px-1.5 prose-code:py-0.5 prose-code:text-[0.85em] prose-code:before:content-[''] prose-code:after:content-['']">
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ pre: PreBlock }}>{text}</ReactMarkdown>
       </div>

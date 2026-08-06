@@ -277,7 +277,13 @@ VITE_SUPABASE_PUBLISHABLE_KEY=${supabaseAnon || "eyJ...your-anon-key..."}
               </CardHeader>
               <CardContent className="space-y-4">
                 <CodeBlock code={envFile} />
-                <Textarea value={envFile} readOnly rows={10} className="font-mono text-xs" />
+                <Textarea
+                  aria-label="Generated .env file contents"
+                  value={envFile}
+                  readOnly
+                  rows={10}
+                  className="font-mono text-xs"
+                />
                 <Button
                   onClick={() => {
                     const blob = new Blob([envFile], { type: "text/plain" });

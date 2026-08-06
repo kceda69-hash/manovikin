@@ -4,7 +4,7 @@ export const Route = createFileRoute("/vs-bolt-new")({
   component: VsBoltNewPage,
   head: () => ({
     meta: [
-      { title: "MANOVIK AI vs Bolt.new — Sovereign, Lifetime-Priced Alternative" },
+      { title: "MANOVIK AI vs Bolt.new — Lifetime-Priced Alternative" },
       {
         name: "description",
         content:

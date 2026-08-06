@@ -1341,6 +1341,7 @@ function PromptComposer() {
         <span className="card-border-glow" aria-hidden="true" />
 
         <textarea
+          aria-label="Describe the app you want MANOVIK AI to build"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={(e) => {
