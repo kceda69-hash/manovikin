@@ -3,9 +3,16 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Search, CheckCircle2, AlertCircle, RefreshCw, UploadCloud } from "lucide-react";
+import { ArrowLeft, Loader2, Search, CheckCircle2, AlertCircle, RefreshCw, UploadCloud, BellRing, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { getSeoHealth, submitSitemap, verifySite } from "@/lib/seo.functions";
+import {
+  getSeoHealth,
+  submitSitemap,
+  verifySite,
+  getSeoMonitor,
+  runSeoMonitorNow,
+  acknowledgeSeoAlert,
+} from "@/lib/seo.functions";
 
 export const Route = createFileRoute("/seo")({
   component: SeoPage,
@@ -19,11 +26,13 @@ export const Route = createFileRoute("/seo")({
 });
 
 type Health = Awaited<ReturnType<typeof getSeoHealth>>;
+type Monitor = Awaited<ReturnType<typeof getSeoMonitor>>;
 
 function SeoPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [data, setData] = useState<Health | null>(null);
+  const [monitor, setMonitor] = useState<Monitor | null>(null);
   const [busy, setBusy] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
 
@@ -34,14 +43,42 @@ function SeoPage() {
   const load = async () => {
     setBusy(true);
     try {
-      const h = await getSeoHealth();
+      const [h, m] = await Promise.all([getSeoHealth(), getSeoMonitor()]);
       setData(h);
+      setMonitor(m);
     } catch (e) {
       toast.error("Failed to load SEO health", { description: String(e) });
     } finally {
       setBusy(false);
     }
   };
+
+  const onRunMonitor = async () => {
+    setActing("monitor");
+    try {
+      const r = await runSeoMonitorNow();
+      if (r.alerts.length) {
+        toast.warning(`${r.alerts.length} new SEO alert(s)`, { description: r.alerts[0]!.message });
+      } else {
+        toast.success("SEO check complete — no new crawl or indexing alerts");
+      }
+      await load();
+    } catch (e) {
+      toast.error("SEO check failed", { description: String(e) });
+    } finally {
+      setActing(null);
+    }
+  };
+
+  const onAck = async (id: string) => {
+    try {
+      await acknowledgeSeoAlert({ data: { id } });
+      await load();
+    } catch (e) {
+      toast.error("Could not acknowledge alert", { description: String(e) });
+    }
+  };
+
 
   useEffect(() => {
     if (user) load();
@@ -93,6 +130,11 @@ function SeoPage() {
           <Button size="sm" variant="outline" onClick={load} disabled={busy}>
             <RefreshCw className={`size-4 mr-1 ${busy ? "animate-spin" : ""}`} /> Refresh
           </Button>
+          <Button size="sm" variant="outline" onClick={onRunMonitor} disabled={!!acting}>
+            {acting === "monitor" ? <Loader2 className="size-4 mr-1 animate-spin" /> : <BellRing className="size-4 mr-1" />}
+            Run check
+          </Button>
+
           <Button size="sm" variant="outline" onClick={onVerify} disabled={!!acting}>
             {acting === "verify" ? <Loader2 className="size-4 mr-1 animate-spin" /> : <CheckCircle2 className="size-4 mr-1" />}
             Verify
@@ -105,6 +147,8 @@ function SeoPage() {
       </header>
 
       <main className="max-w-5xl mx-auto p-4 space-y-4">
+        <AlertsCard monitor={monitor} onAck={onAck} />
+
         {busy && !data ? (
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="size-4 animate-spin" /> Loading…
@@ -201,5 +245,73 @@ function Table({ rows }: { rows: Array<{ keys: string[]; clicks: number; impress
         </li>
       ))}
     </ul>
+  );
+}
+
+function AlertsCard({
+  monitor,
+  onAck,
+}: {
+  monitor: Monitor | null;
+  onAck: (id: string) => void;
+}) {
+  const alerts = monitor?.alerts ?? [];
+  const open = alerts.filter((a) => !a.acknowledged_at);
+  const last = monitor?.snapshots?.[0];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          {open.length ? (
+            <>
+              <BellRing className="size-4 text-destructive" /> {open.length} open SEO alert
+              {open.length > 1 ? "s" : ""}
+            </>
+          ) : (
+            <>
+              <ShieldCheck className="size-4 text-primary" /> Monitoring active — no open alerts
+            </>
+          )}
+        </CardTitle>
+        <CardDescription>
+          Automated daily crawl &amp; indexing checks.{" "}
+          {last
+            ? `Last check ${new Date(last.captured_at).toLocaleString()} — ${last.sitemap_errors} crawl errors, ${
+                last.indexed_urls ?? "?"
+              } indexed URLs.`
+            : "No checks recorded yet — click “Run check”."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {open.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            You&apos;ll be emailed automatically if crawl errors rise or indexed pages drop.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border/60 text-sm">
+            {open.map((a) => (
+              <li key={a.id} className="py-2 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle
+                      className={`size-4 shrink-0 ${a.severity === "critical" ? "text-destructive" : "text-muted-foreground"}`}
+                    />
+                    <span className="font-medium">{a.message}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {a.kind} • {new Date(a.created_at).toLocaleString()}
+                    {a.notified_at ? " • emailed" : ""}
+                  </div>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => onAck(a.id)}>
+                  Dismiss
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 }

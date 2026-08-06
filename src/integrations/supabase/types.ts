@@ -865,6 +865,95 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_monitor_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string
+          details: Json
+          id: string
+          kind: string
+          message: string
+          notified_at: string | null
+          severity: string
+          snapshot_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          kind: string
+          message: string
+          notified_at?: string | null
+          severity?: string
+          snapshot_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          kind?: string
+          message?: string
+          notified_at?: string | null
+          severity?: string
+          snapshot_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_monitor_alerts_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "seo_monitor_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_monitor_snapshots: {
+        Row: {
+          avg_position: number | null
+          captured_at: string
+          clicks: number
+          id: string
+          impressions: number
+          indexed_urls: number | null
+          ok: boolean
+          raw: Json
+          site_url: string
+          sitemap_errors: number
+          sitemap_warnings: number
+        }
+        Insert: {
+          avg_position?: number | null
+          captured_at?: string
+          clicks?: number
+          id?: string
+          impressions?: number
+          indexed_urls?: number | null
+          ok?: boolean
+          raw?: Json
+          site_url: string
+          sitemap_errors?: number
+          sitemap_warnings?: number
+        }
+        Update: {
+          avg_position?: number | null
+          captured_at?: string
+          clicks?: number
+          id?: string
+          impressions?: number
+          indexed_urls?: number | null
+          ok?: boolean
+          raw?: Json
+          site_url?: string
+          sitemap_errors?: number
+          sitemap_warnings?: number
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string
@@ -961,6 +1050,7 @@ export type Database = {
         Returns: number
       }
       get_security_scan_token: { Args: never; Returns: string }
+      get_seo_monitor_token: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
