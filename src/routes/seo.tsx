@@ -26,11 +26,13 @@ export const Route = createFileRoute("/seo")({
 });
 
 type Health = Awaited<ReturnType<typeof getSeoHealth>>;
+type Monitor = Awaited<ReturnType<typeof getSeoMonitor>>;
 
 function SeoPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [data, setData] = useState<Health | null>(null);
+  const [monitor, setMonitor] = useState<Monitor | null>(null);
   const [busy, setBusy] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
 
@@ -41,14 +43,42 @@ function SeoPage() {
   const load = async () => {
     setBusy(true);
     try {
-      const h = await getSeoHealth();
+      const [h, m] = await Promise.all([getSeoHealth(), getSeoMonitor()]);
       setData(h);
+      setMonitor(m);
     } catch (e) {
       toast.error("Failed to load SEO health", { description: String(e) });
     } finally {
       setBusy(false);
     }
   };
+
+  const onRunMonitor = async () => {
+    setActing("monitor");
+    try {
+      const r = await runSeoMonitorNow();
+      if (r.alerts.length) {
+        toast.warning(`${r.alerts.length} new SEO alert(s)`, { description: r.alerts[0]!.message });
+      } else {
+        toast.success("SEO check complete — no new crawl or indexing alerts");
+      }
+      await load();
+    } catch (e) {
+      toast.error("SEO check failed", { description: String(e) });
+    } finally {
+      setActing(null);
+    }
+  };
+
+  const onAck = async (id: string) => {
+    try {
+      await acknowledgeSeoAlert({ data: { id } });
+      await load();
+    } catch (e) {
+      toast.error("Could not acknowledge alert", { description: String(e) });
+    }
+  };
+
 
   useEffect(() => {
     if (user) load();
