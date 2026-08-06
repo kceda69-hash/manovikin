@@ -799,6 +799,7 @@ function ManovikTab() {
           Announces a new brain version. Admin chat calls skip credit metering server-side.
         </p>
         <textarea
+          aria-label="Brain update release notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={5}

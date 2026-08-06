@@ -450,9 +450,10 @@ function Landing() {
           <br />
           that builds{" "}
           <span className="relative inline-block align-baseline">
-            <span key={wordIdx} className="inline-block text-gradient animate-word-swap">
+            <span key={wordIdx} className="inline-block text-gradient animate-word-swap" aria-hidden="true">
               {ROTATING_WORDS[wordIdx]}
             </span>
+            <span className="sr-only">websites, apps, APIs and automations</span>
             <span className="caret" aria-hidden="true" />
           </span>
         </h1>
@@ -1341,6 +1342,7 @@ function PromptComposer() {
         <span className="card-border-glow" aria-hidden="true" />
 
         <textarea
+          aria-label="Describe the app you want MANOVIK AI to build"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={(e) => {
