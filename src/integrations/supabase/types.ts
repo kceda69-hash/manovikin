@@ -1050,6 +1050,7 @@ export type Database = {
         Returns: number
       }
       get_security_scan_token: { Args: never; Returns: string }
+      get_seo_monitor_token: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
