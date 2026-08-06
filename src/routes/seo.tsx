@@ -3,9 +3,16 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Search, CheckCircle2, AlertCircle, RefreshCw, UploadCloud } from "lucide-react";
+import { ArrowLeft, Loader2, Search, CheckCircle2, AlertCircle, RefreshCw, UploadCloud, BellRing, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { getSeoHealth, submitSitemap, verifySite } from "@/lib/seo.functions";
+import {
+  getSeoHealth,
+  submitSitemap,
+  verifySite,
+  getSeoMonitor,
+  runSeoMonitorNow,
+  acknowledgeSeoAlert,
+} from "@/lib/seo.functions";
 
 export const Route = createFileRoute("/seo")({
   component: SeoPage,
