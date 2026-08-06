@@ -247,3 +247,71 @@ function Table({ rows }: { rows: Array<{ keys: string[]; clicks: number; impress
     </ul>
   );
 }
+
+function AlertsCard({
+  monitor,
+  onAck,
+}: {
+  monitor: Monitor | null;
+  onAck: (id: string) => void;
+}) {
+  const alerts = monitor?.alerts ?? [];
+  const open = alerts.filter((a) => !a.acknowledged_at);
+  const last = monitor?.snapshots?.[0];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-base">
+          {open.length ? (
+            <>
+              <BellRing className="size-4 text-destructive" /> {open.length} open SEO alert
+              {open.length > 1 ? "s" : ""}
+            </>
+          ) : (
+            <>
+              <ShieldCheck className="size-4 text-primary" /> Monitoring active — no open alerts
+            </>
+          )}
+        </CardTitle>
+        <CardDescription>
+          Automated daily crawl &amp; indexing checks.{" "}
+          {last
+            ? `Last check ${new Date(last.captured_at).toLocaleString()} — ${last.sitemap_errors} crawl errors, ${
+                last.indexed_urls ?? "?"
+              } indexed URLs.`
+            : "No checks recorded yet — click “Run check”."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {open.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            You&apos;ll be emailed automatically if crawl errors rise or indexed pages drop.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border/60 text-sm">
+            {open.map((a) => (
+              <li key={a.id} className="py-2 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle
+                      className={`size-4 shrink-0 ${a.severity === "critical" ? "text-destructive" : "text-muted-foreground"}`}
+                    />
+                    <span className="font-medium">{a.message}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {a.kind} • {new Date(a.created_at).toLocaleString()}
+                    {a.notified_at ? " • emailed" : ""}
+                  </div>
+                </div>
+                <Button size="sm" variant="ghost" onClick={() => onAck(a.id)}>
+                  Dismiss
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
