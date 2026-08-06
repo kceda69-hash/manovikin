@@ -137,3 +137,48 @@ export const inspectUrl = createServerFn({ method: "POST" })
 
     return { ok: r.ok, status: r.status, body: r.body };
   });
+
+/** Latest monitoring snapshots + open alerts (admin only). */
+export const getSeoMonitor = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabase } = context;
+    const [{ data: alerts }, { data: snapshots }] = await Promise.all([
+      supabase
+        .from("seo_monitor_alerts")
+        .select("id, created_at, kind, severity, message, details, acknowledged_at, notified_at")
+        .order("created_at", { ascending: false })
+        .limit(25),
+      supabase
+        .from("seo_monitor_snapshots")
+        .select("id, captured_at, sitemap_errors, sitemap_warnings, indexed_urls, clicks, impressions, ok")
+        .order("captured_at", { ascending: false })
+        .limit(14),
+    ]);
+    return { alerts: alerts ?? [], snapshots: snapshots ?? [] };
+  });
+
+/** Run a monitoring cycle immediately (admin only). */
+export const runSeoMonitorNow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { runSeoMonitor } = await import("@/lib/seo-monitor.server");
+    return runSeoMonitor();
+  });
+
+const ackInput = z.object({ id: z.string().uuid() });
+/** Acknowledge (dismiss) an alert so a future recurrence re-notifies. */
+export const acknowledgeSeoAlert = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => ackInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId } = await assertAdmin(context);
+    const { error } = await context.supabase
+      .from("seo_monitor_alerts")
+      .update({ acknowledged_at: new Date().toISOString(), acknowledged_by: userId })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
