@@ -147,6 +147,8 @@ function SeoPage() {
       </header>
 
       <main className="max-w-5xl mx-auto p-4 space-y-4">
+        <AlertsCard monitor={monitor} onAck={onAck} />
+
         {busy && !data ? (
           <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="size-4 animate-spin" /> Loading…
