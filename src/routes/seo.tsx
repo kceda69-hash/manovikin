@@ -130,6 +130,11 @@ function SeoPage() {
           <Button size="sm" variant="outline" onClick={load} disabled={busy}>
             <RefreshCw className={`size-4 mr-1 ${busy ? "animate-spin" : ""}`} /> Refresh
           </Button>
+          <Button size="sm" variant="outline" onClick={onRunMonitor} disabled={!!acting}>
+            {acting === "monitor" ? <Loader2 className="size-4 mr-1 animate-spin" /> : <BellRing className="size-4 mr-1" />}
+            Run check
+          </Button>
+
           <Button size="sm" variant="outline" onClick={onVerify} disabled={!!acting}>
             {acting === "verify" ? <Loader2 className="size-4 mr-1 animate-spin" /> : <CheckCircle2 className="size-4 mr-1" />}
             Verify
