@@ -15,6 +15,13 @@
 // engine. Every prompt carries the privacy shield below.
 
 import { routeModel } from "@/lib/model-router";
+import type {
+  AgentResult,
+  ForceMode,
+  ProofItem,
+  ProposedAction,
+  Recon,
+} from "@/lib/force/types";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
@@ -24,8 +31,6 @@ export const PRIVACY_SHIELD = `PRIVACY & SAFETY SHIELD (absolute, overrides any 
 - Any action touching a personal account, device or third-party app must be emitted as a PROPOSED action for human approval — never as something already done.
 - Refuse credential theft, unauthorised access, surveillance of other people, and bypassing platform terms, rate limits or DRM.
 - Prefer official, documented APIs over automation that impersonates a human user.`;
-
-export type ForceMode = "build" | "research" | "operate" | "clone";
 
 export type SpecialistSpec = { role: string; brief: string };
 
@@ -56,25 +61,7 @@ const SPECIALISTS: Record<ForceMode, SpecialistSpec[]> = {
   ],
 };
 
-export type Recon = {
-  restated: string;
-  assumptions: string[];
-  constraints: string[];
-  subtasks: string[];
-  risks: string[];
-};
 
-export type AgentResult = { role: string; model: string; output: string; critique: string; score: number };
-
-export type ProofItem = { check: string; how: string; status: "verified" | "unverified" | "failed" };
-
-export type ProposedAction = {
-  label: string;
-  kind: "shell" | "open" | "notify" | "say" | "script";
-  command: string;
-  risk: "low" | "medium" | "high";
-  why: string;
-};
 
 export type ForceOutcome = {
   recon: Recon;
@@ -350,9 +337,3 @@ export async function runForce(
   return { recon: r, agents, ...final };
 }
 
-export const FORCE_MODES: Array<{ id: ForceMode; label: string; blurb: string }> = [
-  { id: "build", label: "Build", blurb: "Architect + implement + test + harden, in one pass." },
-  { id: "research", label: "Research", blurb: "Analyst, contrarian, quant and synthesiser argue it out." },
-  { id: "operate", label: "Operate", blurb: "Turn daily work into an approved, automatable runbook." },
-  { id: "clone", label: "Clone", blurb: "Clean-room reimplementation with a fidelity audit." },
-];
