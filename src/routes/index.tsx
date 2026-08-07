@@ -681,67 +681,6 @@ function Landing() {
           </div>
         </section>
 
-        {/* Powered by top models — incl. Claude Fable 5 */}
-        <div className="mt-24">
-          <div className="text-center animate-fade-in">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
-              <Cpu className="h-3.5 w-3.5" /> Multi-model brain
-            </div>
-            <h2 className="mt-4 text-3xl md:text-4xl font-bold">
-              Now with <span className="text-gradient text-shimmer">Claude Fable 5</span>
-            </h2>
-            <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
-              Route complex refactors, long-context reasoning, and production ship-work to
-              Anthropic's newest model — right inside MANOVIK.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-2 text-left">
-            <div className="surface-card relative overflow-hidden rounded-2xl p-6 md:p-8">
-              <span className="card-border-glow" aria-hidden="true" />
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-lg">
-                  <Wand2 className="h-5 w-5" />
-                </span>
-                <div>
-                  <h3 className="font-semibold text-lg">Claude Fable 5</h3>
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                    Recommended for shipping
-                  </div>
-                </div>
-                <span className="ml-auto rounded-full bg-aurora px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
-                  New
-                </span>
-              </div>
-              <ul className="mt-5 space-y-2.5 text-sm">
-                {[
-                  "Multi-file refactors across a whole repo",
-                  "Long-context reasoning up to 1M tokens",
-                  "Tool-use loops for build → test → deploy",
-                  "Best-in-class native app scaffolding",
-                ].map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: Bot, title: "GPT-5.5", desc: "Deep reasoning & polish" },
-                { icon: Sparkles, title: "Gemini 3 Pro", desc: "Massive multimodal context" },
-                { icon: Layers, title: "Llama 3 · Local", desc: "Sovereign / on-device" },
-                { icon: Cpu, title: "Auto-router", desc: "Picks the cheapest capable model" },
-              ].map((m) => (
-                <div key={m.title} className="surface-card rounded-xl p-4">
-                  <m.icon className="h-5 w-5 text-primary" />
-                  <div className="mt-2 font-semibold text-sm">{m.title}</div>
-                  <div className="text-xs text-muted-foreground">{m.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
 
         {/* How it works */}
         <h2 className="mt-24 text-3xl md:text-4xl font-bold text-center">How it works</h2>
