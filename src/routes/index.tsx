@@ -1270,7 +1270,7 @@ function PromptComposer() {
           <Sparkles className="h-3.5 w-3.5" /> Start with a prompt
         </div>
         <h2 className="mt-4 text-3xl md:text-4xl font-bold">
-          Describe your app. <span className="text-gradient">MANOVIK ships it.</span>
+          Start building with MANOVIK.
         </h2>
         <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
           Type an idea, pick a target and a model. We stream a live build plan — sign in to run it.
