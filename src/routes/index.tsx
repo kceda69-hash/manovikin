@@ -649,7 +649,7 @@ function Landing() {
               {
                 icon: Cpu,
                 title: "Multi-model routing",
-                body: "Cheap Gemini for greetings, GPT-5.5 for architecture, Claude Fable 5 for shipping. Router picks — you don't pay for the wrong brain.",
+                body: "The router selects the best available model for each task, so you get the right brain without paying for unnecessary capacity.",
               },
             ].map((c) => (
               <div
