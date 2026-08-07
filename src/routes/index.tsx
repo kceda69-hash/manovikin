@@ -1125,13 +1125,13 @@ const TARGETS = [
   { id: "android", label: "Android", icon: Smartphone },
 ] as const;
 
-const MODELS = ["Claude Fable 5", "GPT-5.5", "Gemini 3 Pro", "Auto"] as const;
+const MODELS = ["GPT-5.5", "Gemini 3 Pro", "Auto"] as const;
 
 function PromptComposer() {
   const [prompt, setPrompt] = useState("");
   const [attachments, setAttachments] = useState<Array<{ name: string; content: string }>>([]);
   const [target, setTarget] = useState<(typeof TARGETS)[number]["id"]>("web");
-  const [model, setModel] = useState<(typeof MODELS)[number]>("Claude Fable 5");
+  const [model, setModel] = useState<(typeof MODELS)[number]>("Auto");
   const [dnaMode, setDnaMode] = useState<"build" | "reverse" | "clone" | "brain" | "ship-store">(
     "build",
   );
