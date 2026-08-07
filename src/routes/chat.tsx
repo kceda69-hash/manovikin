@@ -515,6 +515,7 @@ function SidebarBody({
               <button
                 type="button"
                 onClick={() => onSelect(t.id)}
+                aria-label={`Open conversation: ${t.title || "New conversation"}`}
                 className="min-w-0 flex-1 truncate text-left"
               >
                 {t.title || "New conversation"}
