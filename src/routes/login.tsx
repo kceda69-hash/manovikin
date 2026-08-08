@@ -87,8 +87,15 @@ function LoginPage() {
   const handleGoogleSignIn = async () => {
     setBusy(true);
     try {
+      // Keep the destination out of the redirect URI: the OAuth broker matches
+      // the registered callback exactly, so extra query params can break it.
+      try {
+        sessionStorage.setItem("manovik.auth.next", next);
+      } catch {
+        /* storage unavailable — fall back to the default destination */
+      }
       const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        redirect_uri: `${window.location.origin}/auth/callback`,
       });
       if (result.error) {
         toast.error(result.error.message ?? t("login.toast.googleFailed"));
@@ -102,6 +109,7 @@ function LoginPage() {
       setBusy(false);
     }
   };
+
 
   const handleMagicLink = async () => {
     if (!email) {
