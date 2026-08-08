@@ -8,6 +8,10 @@ Disallow: /seo
 Disallow: /unsubscribe
 Disallow: /devices
 Disallow: /admin
+Disallow: /memory
+Disallow: /agents
+Disallow: /keys
+Disallow: /team
 Disallow: /receipt/
 Disallow: /api/
 Disallow: /auth/
