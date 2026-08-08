@@ -13,6 +13,18 @@ function sanitizeNextPath(value: string | null) {
   return value;
 }
 
+/** Wait for the Supabase client to hydrate a session from the URL. */
+async function waitForSession(ms = 6000) {
+  const deadline = Date.now() + ms;
+  for (;;) {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) return data.session;
+    if (Date.now() > deadline) return null;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+}
+
+
 export const Route = createFileRoute("/auth/callback")({
   component: AuthCallbackPage,
   head: () => ({
