@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.manovik_match_memory(uuid, vector, integer) FROM authenticated;
