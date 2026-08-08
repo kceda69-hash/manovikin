@@ -4,7 +4,7 @@ export const Route = createFileRoute("/vs-roo-code")({
   component: VsRooCodePage,
   head: () => ({
     meta: [
-      { title: "MANOVIK AI vs Roo Code — Sovereign, Lifetime-Priced Alternative" },
+      { title: "MANOVIK AI vs Roo Code — The Sovereign Alternative" },
       {
         name: "description",
         content:
