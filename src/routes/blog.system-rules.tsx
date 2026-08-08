@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-const TITLE = "MANOVIK System Rules — Steer Your AI Agent with a .manovikrules File";
+const TITLE = "MANOVIK System Rules — Guide to .manovikrules Files";
 const DESCRIPTION =
   "Define coding standards, architecture patterns, and library preferences with a .manovikrules file — a practical guide to MANOVIK system rules.";
 const URL = "https://manovik.in/blog/system-rules";
