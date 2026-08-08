@@ -29,6 +29,10 @@ const EXCLUDED_PATHS = new Set([
   "/seo",
   "/unsubscribe",
   "/devices",
+  "/memory",
+  "/agents",
+  "/keys",
+  "/team",
 
 ]);
 

@@ -20,14 +20,17 @@ import { Route as VsClineRouteImport } from './routes/vs-cline'
 import { Route as VsBoltNewRouteImport } from './routes/vs-bolt-new'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TeamRouteImport } from './routes/team'
 import { Route as StudentsRouteImport } from './routes/students'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SeoRouteImport } from './routes/seo'
 import { Route as RefundRouteImport } from './routes/refund'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as KeysRouteImport } from './routes/keys'
 import { Route as ForceRouteImport } from './routes/force'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -39,6 +42,7 @@ import { Route as BestAiCodingAgentRouteImport } from './routes/best-ai-coding-a
 import { Route as BalanceRouteImport } from './routes/balance'
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as AiCodingAssistantRouteImport } from './routes/ai-coding-assistant'
+import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RulesLibraryRouteImport } from './routes/rules.library'
@@ -67,8 +71,10 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicV1AskRouteImport } from './routes/api/public/v1/ask'
 import { Route as ApiPublicHooksSeoMonitorRouteImport } from './routes/api/public/hooks/seo-monitor'
 import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/public/hooks/security-scan'
+import { Route as ApiPublicHooksRunSchedulesRouteImport } from './routes/api/public/hooks/run-schedules'
 import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
 import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
 import { Route as ApiPublicDeviceActionRouteImport } from './routes/api/public/device/$action'
@@ -128,6 +134,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StudentsRoute = StudentsRouteImport.update({
   id: '/students',
   path: '/students',
@@ -158,6 +169,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MemoryRoute = MemoryRouteImport.update({
+  id: '/memory',
+  path: '/memory',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
@@ -166,6 +182,11 @@ const McpRoute = McpRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KeysRoute = KeysRouteImport.update({
+  id: '/keys',
+  path: '/keys',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForceRoute = ForceRouteImport.update({
@@ -221,6 +242,11 @@ const AuditRoute = AuditRouteImport.update({
 const AiCodingAssistantRoute = AiCodingAssistantRouteImport.update({
   id: '/ai-coding-assistant',
   path: '/ai-coding-assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsRoute = AgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -373,6 +399,11 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1AskRoute = ApiPublicV1AskRouteImport.update({
+  id: '/api/public/v1/ask',
+  path: '/api/public/v1/ask',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSeoMonitorRoute =
   ApiPublicHooksSeoMonitorRouteImport.update({
     id: '/api/public/hooks/seo-monitor',
@@ -383,6 +414,12 @@ const ApiPublicHooksSecurityScanRoute =
   ApiPublicHooksSecurityScanRouteImport.update({
     id: '/api/public/hooks/security-scan',
     path: '/api/public/hooks/security-scan',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksRunSchedulesRoute =
+  ApiPublicHooksRunSchedulesRouteImport.update({
+    id: '/api/public/hooks/run-schedules',
+    path: '/api/public/hooks/run-schedules',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksResubmitSitemapRoute =
@@ -406,6 +443,7 @@ const ApiPublicDeviceActionRoute = ApiPublicDeviceActionRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/agents': typeof AgentsRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/audit': typeof AuditRoute
   '/balance': typeof BalanceRoute
@@ -417,14 +455,17 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/memory': typeof MemoryRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
   '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/students': typeof StudentsRoute
+  '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vs-bolt-new': typeof VsBoltNewRoute
@@ -460,8 +501,10 @@ export interface FileRoutesByFullPath {
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
+  '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
   '/api/public/hooks/seo-monitor': typeof ApiPublicHooksSeoMonitorRoute
+  '/api/public/v1/ask': typeof ApiPublicV1AskRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -471,6 +514,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/agents': typeof AgentsRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/audit': typeof AuditRoute
   '/balance': typeof BalanceRoute
@@ -482,14 +526,17 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/memory': typeof MemoryRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
   '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/students': typeof StudentsRoute
+  '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vs-bolt-new': typeof VsBoltNewRoute
@@ -525,8 +572,10 @@ export interface FileRoutesByTo {
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
+  '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
   '/api/public/hooks/seo-monitor': typeof ApiPublicHooksSeoMonitorRoute
+  '/api/public/v1/ask': typeof ApiPublicV1AskRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -537,6 +586,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/agents': typeof AgentsRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/audit': typeof AuditRoute
   '/balance': typeof BalanceRoute
@@ -548,14 +598,17 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/memory': typeof MemoryRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
   '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/students': typeof StudentsRoute
+  '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vs-bolt-new': typeof VsBoltNewRoute
@@ -591,8 +644,10 @@ export interface FileRoutesById {
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
+  '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
   '/api/public/hooks/seo-monitor': typeof ApiPublicHooksSeoMonitorRoute
+  '/api/public/v1/ask': typeof ApiPublicV1AskRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -604,6 +659,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/agents'
     | '/ai-coding-assistant'
     | '/audit'
     | '/balance'
@@ -615,14 +671,17 @@ export interface FileRouteTypes {
     | '/contact'
     | '/devices'
     | '/force'
+    | '/keys'
     | '/login'
     | '/mcp'
+    | '/memory'
     | '/privacy'
     | '/refund'
     | '/seo'
     | '/setup'
     | '/sitemap.xml'
     | '/students'
+    | '/team'
     | '/terms'
     | '/unsubscribe'
     | '/vs-bolt-new'
@@ -658,8 +717,10 @@ export interface FileRouteTypes {
     | '/api/public/device/$action'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
+    | '/api/public/hooks/run-schedules'
     | '/api/public/hooks/security-scan'
     | '/api/public/hooks/seo-monitor'
+    | '/api/public/v1/ask'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -669,6 +730,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/agents'
     | '/ai-coding-assistant'
     | '/audit'
     | '/balance'
@@ -680,14 +742,17 @@ export interface FileRouteTypes {
     | '/contact'
     | '/devices'
     | '/force'
+    | '/keys'
     | '/login'
     | '/mcp'
+    | '/memory'
     | '/privacy'
     | '/refund'
     | '/seo'
     | '/setup'
     | '/sitemap.xml'
     | '/students'
+    | '/team'
     | '/terms'
     | '/unsubscribe'
     | '/vs-bolt-new'
@@ -723,8 +788,10 @@ export interface FileRouteTypes {
     | '/api/public/device/$action'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
+    | '/api/public/hooks/run-schedules'
     | '/api/public/hooks/security-scan'
     | '/api/public/hooks/seo-monitor'
+    | '/api/public/v1/ask'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -734,6 +801,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/agents'
     | '/ai-coding-assistant'
     | '/audit'
     | '/balance'
@@ -745,14 +813,17 @@ export interface FileRouteTypes {
     | '/contact'
     | '/devices'
     | '/force'
+    | '/keys'
     | '/login'
     | '/mcp'
+    | '/memory'
     | '/privacy'
     | '/refund'
     | '/seo'
     | '/setup'
     | '/sitemap.xml'
     | '/students'
+    | '/team'
     | '/terms'
     | '/unsubscribe'
     | '/vs-bolt-new'
@@ -788,8 +859,10 @@ export interface FileRouteTypes {
     | '/api/public/device/$action'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
+    | '/api/public/hooks/run-schedules'
     | '/api/public/hooks/security-scan'
     | '/api/public/hooks/seo-monitor'
+    | '/api/public/v1/ask'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -800,6 +873,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AgentsRoute: typeof AgentsRoute
   AiCodingAssistantRoute: typeof AiCodingAssistantRoute
   AuditRoute: typeof AuditRoute
   BalanceRoute: typeof BalanceRoute
@@ -811,14 +885,17 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DevicesRoute: typeof DevicesRoute
   ForceRoute: typeof ForceRoute
+  KeysRoute: typeof KeysRoute
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
+  MemoryRoute: typeof MemoryRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundRoute: typeof RefundRoute
   SeoRoute: typeof SeoRoute
   SetupRoute: typeof SetupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StudentsRoute: typeof StudentsRoute
+  TeamRoute: typeof TeamRoute
   TermsRoute: typeof TermsRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   VsBoltNewRoute: typeof VsBoltNewRoute
@@ -854,8 +931,10 @@ export interface RootRouteChildren {
   ApiPublicDeviceActionRoute: typeof ApiPublicDeviceActionRoute
   ApiPublicHooksManovikSelfUpdateRoute: typeof ApiPublicHooksManovikSelfUpdateRoute
   ApiPublicHooksResubmitSitemapRoute: typeof ApiPublicHooksResubmitSitemapRoute
+  ApiPublicHooksRunSchedulesRoute: typeof ApiPublicHooksRunSchedulesRoute
   ApiPublicHooksSecurityScanRoute: typeof ApiPublicHooksSecurityScanRoute
   ApiPublicHooksSeoMonitorRoute: typeof ApiPublicHooksSeoMonitorRoute
+  ApiPublicV1AskRoute: typeof ApiPublicV1AskRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -942,6 +1021,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/students': {
       id: '/students'
       path: '/students'
@@ -984,6 +1070,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/memory': {
+      id: '/memory'
+      path: '/memory'
+      fullPath: '/memory'
+      preLoaderRoute: typeof MemoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mcp': {
       id: '/mcp'
       path: '/mcp'
@@ -996,6 +1089,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/keys': {
+      id: '/keys'
+      path: '/keys'
+      fullPath: '/keys'
+      preLoaderRoute: typeof KeysRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/force': {
@@ -1073,6 +1173,13 @@ declare module '@tanstack/react-router' {
       path: '/ai-coding-assistant'
       fullPath: '/ai-coding-assistant'
       preLoaderRoute: typeof AiCodingAssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents': {
+      id: '/agents'
+      path: '/agents'
+      fullPath: '/agents'
+      preLoaderRoute: typeof AgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -1271,6 +1378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/ask': {
+      id: '/api/public/v1/ask'
+      path: '/api/public/v1/ask'
+      fullPath: '/api/public/v1/ask'
+      preLoaderRoute: typeof ApiPublicV1AskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/seo-monitor': {
       id: '/api/public/hooks/seo-monitor'
       path: '/api/public/hooks/seo-monitor'
@@ -1283,6 +1397,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/security-scan'
       fullPath: '/api/public/hooks/security-scan'
       preLoaderRoute: typeof ApiPublicHooksSecurityScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/run-schedules': {
+      id: '/api/public/hooks/run-schedules'
+      path: '/api/public/hooks/run-schedules'
+      fullPath: '/api/public/hooks/run-schedules'
+      preLoaderRoute: typeof ApiPublicHooksRunSchedulesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/resubmit-sitemap': {
@@ -1312,6 +1433,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AgentsRoute: AgentsRoute,
   AiCodingAssistantRoute: AiCodingAssistantRoute,
   AuditRoute: AuditRoute,
   BalanceRoute: BalanceRoute,
@@ -1323,14 +1445,17 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DevicesRoute: DevicesRoute,
   ForceRoute: ForceRoute,
+  KeysRoute: KeysRoute,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
+  MemoryRoute: MemoryRoute,
   PrivacyRoute: PrivacyRoute,
   RefundRoute: RefundRoute,
   SeoRoute: SeoRoute,
   SetupRoute: SetupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StudentsRoute: StudentsRoute,
+  TeamRoute: TeamRoute,
   TermsRoute: TermsRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   VsBoltNewRoute: VsBoltNewRoute,
@@ -1368,8 +1493,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDeviceActionRoute: ApiPublicDeviceActionRoute,
   ApiPublicHooksManovikSelfUpdateRoute: ApiPublicHooksManovikSelfUpdateRoute,
   ApiPublicHooksResubmitSitemapRoute: ApiPublicHooksResubmitSitemapRoute,
+  ApiPublicHooksRunSchedulesRoute: ApiPublicHooksRunSchedulesRoute,
   ApiPublicHooksSecurityScanRoute: ApiPublicHooksSecurityScanRoute,
   ApiPublicHooksSeoMonitorRoute: ApiPublicHooksSeoMonitorRoute,
+  ApiPublicV1AskRoute: ApiPublicV1AskRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,

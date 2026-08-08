@@ -244,6 +244,48 @@ export type Database = {
         }
         Relationships: []
       }
+      manovik_api_keys: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          key_hash: string
+          key_prefix: string
+          label: string
+          last_used_at: string | null
+          revoked_at: string | null
+          scopes: string[]
+          use_count: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          key_hash: string
+          key_prefix: string
+          label: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          scopes?: string[]
+          use_count?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          label?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          scopes?: string[]
+          use_count?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       manovik_brain_updates: {
         Row: {
           created_at: string
@@ -404,6 +446,91 @@ export type Database = {
         }
         Relationships: []
       }
+      manovik_memory_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          created_at: string
+          doc_id: string
+          embedding: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          created_at?: string
+          doc_id: string
+          embedding?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          created_at?: string
+          doc_id?: string
+          embedding?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_memory_chunks_doc_id_fkey"
+            columns: ["doc_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_memory_docs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_memory_docs: {
+        Row: {
+          chars: number
+          created_at: string
+          id: string
+          metadata: Json
+          source: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          workspace_id: string | null
+        }
+        Insert: {
+          chars?: number
+          created_at?: string
+          id?: string
+          metadata?: Json
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          workspace_id?: string | null
+        }
+        Update: {
+          chars?: number
+          created_at?: string
+          id?: string
+          metadata?: Json
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_memory_docs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       manovik_project_files: {
         Row: {
           content: string
@@ -535,6 +662,92 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      manovik_schedule_runs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error: string | null
+          id: string
+          result: string | null
+          schedule_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          result?: string | null
+          schedule_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          result?: string | null
+          schedule_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_schedule_runs_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_schedules: {
+        Row: {
+          cadence: string
+          created_at: string
+          enabled: boolean
+          id: string
+          last_run_at: string | null
+          mode: string
+          name: string
+          next_run_at: string
+          objective: string
+          run_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cadence?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_run_at?: string | null
+          mode?: string
+          name: string
+          next_run_at?: string
+          objective: string
+          run_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cadence?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_run_at?: string | null
+          mode?: string
+          name?: string
+          next_run_at?: string
+          objective?: string
+          run_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       manovik_subscriptions: {
         Row: {
@@ -1049,6 +1262,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_schedules_run_token: { Args: never; Returns: string }
       get_security_scan_token: { Args: never; Returns: string }
       get_seo_monitor_token: { Args: never; Returns: string }
       has_role: {
@@ -1065,6 +1279,20 @@ export type Database = {
       magic_link_check_and_record: {
         Args: { _email: string; _ip: string }
         Returns: Json
+      }
+      manovik_match_memory: {
+        Args: {
+          _user_id: string
+          match_count?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          doc_id: string
+          id: string
+          similarity: number
+          title: string
+        }[]
       }
       manovik_spend_credit: {
         Args: { _amount: number; _reason: string; _user_id: string }
