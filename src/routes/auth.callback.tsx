@@ -49,41 +49,59 @@ function AuthCallbackPage() {
 
     async function complete() {
       try {
-        // PKCE code flow: ?code=... in the query string.
         const url = new URL(window.location.href);
-        const code = url.searchParams.get("code");
-        const next = sanitizeNextPath(url.searchParams.get("next"));
-        const errorDesc =
-          url.searchParams.get("error_description") ||
-          url.hash.match(/error_description=([^&]+)/)?.[1];
+        const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+        const param = (k: string) => url.searchParams.get(k) ?? hash.get(k);
 
-        if (errorDesc) throw new Error(decodeURIComponent(errorDesc));
-
-        if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) throw error;
-        } else {
-          // Implicit flow: tokens land in the URL hash.
-          // Supabase JS auto-detects when detectSessionInUrl is true (default).
-          // Give it a moment to hydrate.
-          await new Promise((r) => setTimeout(r, 250));
+        let next = sanitizeNextPath(param("next"));
+        if (next === "/chat") {
+          try {
+            next = sanitizeNextPath(sessionStorage.getItem("manovik.auth.next"));
+          } catch {
+            /* ignore */
+          }
+        }
+        try {
+          sessionStorage.removeItem("manovik.auth.next");
+        } catch {
+          /* ignore */
         }
 
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        if (!data.session) throw new Error("No session was created.");
+        const errorDesc = param("error_description") || param("error");
+        if (errorDesc) throw new Error(decodeURIComponent(errorDesc));
+
+        // 1) Tokens delivered directly (OAuth broker / implicit flow).
+        const accessToken = param("access_token");
+        const refreshToken = param("refresh_token");
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error) throw error;
+        } else {
+          // 2) PKCE code flow. If the verifier isn't ours (broker-issued code),
+          // the exchange fails — the session may still arrive via the client's
+          // own URL detection, so fall through to polling instead of erroring.
+          const code = param("code");
+          if (code) await supabase.auth.exchangeCodeForSession(code).catch(() => undefined);
+        }
+
+        const session = await waitForSession();
+        if (!session) throw new Error("No session was created. Please try signing in again.");
 
         if (cancelled) return;
         setState("ok");
         // Clean the URL then redirect.
         window.history.replaceState({}, "", "/auth/callback");
-        setTimeout(() => navigate({ to: next as any }), 500);
+        setTimeout(() => navigate({ to: next as any }), 400);
       } catch (err) {
         if (cancelled) return;
         setErrMsg(err instanceof Error ? err.message : "Sign-in failed.");
         setState("error");
       }
     }
+
 
     complete();
     return () => {
