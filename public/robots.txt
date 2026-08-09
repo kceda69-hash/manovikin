@@ -12,6 +12,7 @@ Disallow: /memory
 Disallow: /agents
 Disallow: /keys
 Disallow: /team
+Disallow: /account
 Disallow: /receipt/
 Disallow: /api/
 Disallow: /auth/
