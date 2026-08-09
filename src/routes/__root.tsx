@@ -12,6 +12,8 @@ import { useEffect, useMemo } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { initClientErrorMonitor } from "@/lib/client-error-monitor";
 import { I18nProvider, useI18n } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
+import { purgeLocalAuthStorage, repairStaleSession } from "@/lib/auth-signout";
 
 import appCss from "../styles.css?url";
 
