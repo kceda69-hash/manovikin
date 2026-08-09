@@ -33,6 +33,7 @@ import {
   Cpu,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { signOutEverywhere } from "@/lib/auth-signout";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,6 +72,7 @@ type Thread = { id: string; title: string; updated_at: string };
 
 function ChatPage() {
   const { user, loading } = useAuth();
+  const rootQueryClient = useQueryClient();
   const navigate = useNavigate();
   const { t } = useI18n();
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -198,8 +200,8 @@ function ChatPage() {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate({ to: "/" });
+    await signOutEverywhere(rootQueryClient);
+    navigate({ to: "/", replace: true });
   };
 
   if (loading || !user || bootstrapping || !activeId) {

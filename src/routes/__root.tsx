@@ -12,6 +12,8 @@ import { useEffect, useMemo } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { initClientErrorMonitor } from "@/lib/client-error-monitor";
 import { I18nProvider, useI18n } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
+import { purgeLocalAuthStorage, repairStaleSession } from "@/lib/auth-signout";
 
 import appCss from "../styles.css?url";
 
@@ -237,6 +239,27 @@ function BreadcrumbJsonLd() {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  // One global auth subscriber: keep router/cache in sync and make sure a
+  // stale or revoked session can never linger and break the next sign-in.
+  useEffect(() => {
+    void repairStaleSession();
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      if (event === "SIGNED_OUT") {
+        purgeLocalAuthStorage();
+        void queryClient.cancelQueries().catch(() => undefined);
+        queryClient.clear();
+        router.invalidate();
+        return;
+      }
+      router.invalidate();
+      queryClient.invalidateQueries();
+    });
+    return () => sub.subscription.unsubscribe();
+  }, [queryClient, router]);
+
   useEffect(() => {
     initClientErrorMonitor();
     // The app mounted fine, so any earlier chunk-recovery reload succeeded.
