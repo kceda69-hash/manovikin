@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { signOutEverywhere } from "@/lib/auth-signout";
 import { useAuth } from "@/hooks/useAuth";
 import {
   adminWhoami,
@@ -285,8 +286,8 @@ function AdminConsole({ who }: { who: Whoami }) {
               size="sm"
               variant="outline"
               onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = "/";
+                await signOutEverywhere();
+                window.location.replace("/");
               }}
             >
               Sign out
