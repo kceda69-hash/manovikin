@@ -72,6 +72,7 @@ type Thread = { id: string; title: string; updated_at: string };
 
 function ChatPage() {
   const { user, loading } = useAuth();
+  const rootQueryClient = useQueryClient();
   const navigate = useNavigate();
   const { t } = useI18n();
   const [threads, setThreads] = useState<Thread[]>([]);
