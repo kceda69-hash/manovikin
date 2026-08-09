@@ -33,6 +33,7 @@ const EXCLUDED_PATHS = new Set([
   "/agents",
   "/keys",
   "/team",
+  "/account",
 
 ]);
 
