@@ -68,7 +68,7 @@ export default defineTool({
         prompt,
         system: `${TASK_PROMPT[mode]}\nApply the Quantum Engineering Protocol in full. Always end with a concrete verification step.`,
         // Engineering work always deserves the frontier tier.
-        model: mode === "architect" ? "openai/gpt-5.6-sol" : "openai/gpt-5.5",
+        model: mode === "architect" ? "openai/gpt-5.6-sol" : "openai/gpt-5.6-terra",
         maxTokens: 8000,
       });
 
