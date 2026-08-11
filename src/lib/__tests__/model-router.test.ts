@@ -14,7 +14,7 @@ describe("routeModel", () => {
   it("routes code prompts to hard tier with priority", () => {
     const r = routeModel("Write a TypeScript function that debounces a callback.");
     expect(r.tier).toBe("hard");
-    expect(r.model).toBe("openai/gpt-5.5");
+    expect(r.model).toBe("openai/gpt-5.6-terra");
     expect(r.priority).toBe(true);
   });
 

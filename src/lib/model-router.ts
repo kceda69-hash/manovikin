@@ -25,14 +25,14 @@ export const TIER_MODEL: Record<Tier, { model: string; priority: boolean }> = {
   trivial:  { model: "google/gemini-3.1-flash-lite",   priority: false },
   // Default all-rounder. Cheap, fast, multimodal.
   standard: { model: "google/gemini-3.6-flash",        priority: false },
-  // Complex/quantum-grade coding: frontier model with OpenAI priority tier.
-  hard:     { model: "openai/gpt-5.5",                 priority: true  },
+  // Complex/quantum-grade coding: latest frontier model with OpenAI priority tier.
+  hard:     { model: "openai/gpt-5.6-terra",           priority: true  },
   // Multimodal + long-context; vision-heavy prompts land here.
   vision:   { model: "google/gemini-3.1-pro-preview",  priority: false },
 };
 
 // "Very hard" escalation: if the prompt looks explicitly like a hard research /
-// architecture / proof / algorithm task, jump straight to the flagship model.
+// architecture / proof / algorithm task, jump straight to the deepest model.
 const VERY_HARD_MODEL = { model: "openai/gpt-5.6-sol", priority: true } as const;
 
 
@@ -70,7 +70,7 @@ export function routeModel(
   }
 
   if (VERY_HARD_HINTS.test(p)) {
-    return { ...VERY_HARD_MODEL, tier: "hard", reason: "very-hard cue → gpt-5.5" };
+    return { ...VERY_HARD_MODEL, tier: "hard", reason: "very-hard cue → gpt-5.6-sol" };
   }
 
   if (CODE_HINTS.test(p) || REASON_HINTS.test(p)) {
