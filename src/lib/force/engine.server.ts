@@ -91,8 +91,13 @@ async function callModel(opts: {
       { role: "system", content: `${opts.system}\n\n${PRIVACY_SHIELD}` },
       { role: "user", content: opts.prompt },
     ],
-    max_tokens: opts.maxTokens ?? 4000,
   };
+  // OpenAI models reject `max_tokens`; they require `max_completion_tokens`.
+  if (opts.model.startsWith("openai/")) {
+    body["max_completion_tokens"] = opts.maxTokens ?? 4000;
+  } else {
+    body["max_tokens"] = opts.maxTokens ?? 4000;
+  }
   if (opts.model.startsWith("openai/gpt-5.6")) body["reasoning_effort"] = "none";
   if (opts.priority) body["service_tier"] = "priority";
 

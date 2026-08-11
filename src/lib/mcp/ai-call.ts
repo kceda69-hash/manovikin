@@ -89,8 +89,13 @@ export async function askManovik(opts: AskOptions): Promise<AskResult> {
       { role: "system", content: opts.system ? `${MANOVIK_SYSTEM}\n\n${opts.system}` : MANOVIK_SYSTEM },
       { role: "user", content: opts.prompt },
     ],
-    max_tokens: opts.maxTokens ?? 4000,
   };
+  // OpenAI models reject `max_tokens`; they require `max_completion_tokens`.
+  if (route.model.startsWith("openai/")) {
+    body.max_completion_tokens = opts.maxTokens ?? 4000;
+  } else {
+    body.max_tokens = opts.maxTokens ?? 4000;
+  }
   // GPT-5.6 models reject chat-completions unless reasoning is explicitly off.
   if (route.model.startsWith("openai/gpt-5.6")) body.reasoning_effort = "none";
   if (route.priority) body.service_tier = "priority";
