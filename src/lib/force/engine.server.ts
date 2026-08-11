@@ -211,7 +211,7 @@ async function adversary(
   drafts: Array<{ role: string; output: string }>,
 ): Promise<Array<{ role: string; critique: string; score: number }>> {
   const text = await callModel({
-    model: "openai/gpt-5.5",
+    model: "openai/gpt-5.6-terra",
     priority: true,
     maxTokens: 3000,
     system:
