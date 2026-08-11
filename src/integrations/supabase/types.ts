@@ -446,6 +446,153 @@ export type Database = {
         }
         Relationships: []
       }
+      manovik_force_agents: {
+        Row: {
+          created_at: string
+          critique: string | null
+          id: string
+          model: string
+          output: string
+          role: string
+          run_id: string
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          critique?: string | null
+          id?: string
+          model: string
+          output?: string
+          role: string
+          run_id: string
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          critique?: string | null
+          id?: string
+          model?: string
+          output?: string
+          role?: string
+          run_id?: string
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_force_agents_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_force_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_force_runs: {
+        Row: {
+          actions: Json
+          answer: string | null
+          completed_at: string | null
+          created_at: string
+          error: string | null
+          fork_from_step: number | null
+          id: string
+          mode: string
+          objective: string
+          parent_run_id: string | null
+          proof: Json
+          score: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actions?: Json
+          answer?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          fork_from_step?: number | null
+          id?: string
+          mode?: string
+          objective: string
+          parent_run_id?: string | null
+          proof?: Json
+          score?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actions?: Json
+          answer?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error?: string | null
+          fork_from_step?: number | null
+          id?: string
+          mode?: string
+          objective?: string
+          parent_run_id?: string | null
+          proof?: Json
+          score?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_force_runs_parent_run_id_fkey"
+            columns: ["parent_run_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_force_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manovik_force_steps: {
+        Row: {
+          created_at: string
+          id: string
+          idx: number
+          label: string
+          payload: Json
+          phase: string
+          run_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          idx: number
+          label: string
+          payload?: Json
+          phase: string
+          run_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          idx?: number
+          label?: string
+          payload?: Json
+          phase?: string
+          run_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manovik_force_steps_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "manovik_force_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       manovik_memory_chunks: {
         Row: {
           chunk_index: number
