@@ -39,6 +39,7 @@ import { useI18n, LanguageSwitcher } from "@/lib/i18n";
 // Only the tiny storage/meta helpers are loaded eagerly. The interactive DNA
 // panels are code-split so they don't block first paint of the landing page.
 import { getDnaOverride, type ShipStageId } from "@/components/manovik/dna-storage";
+import { useAuth } from "@/hooks/useAuth";
 
 const dnaFeatures = () => import("@/components/manovik/dna-features");
 const DnaPromptEditor = lazy(() => dnaFeatures().then((m) => ({ default: m.DnaPromptEditor })));
@@ -421,7 +422,7 @@ function Landing() {
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher className="hidden sm:inline-flex" />
-          <Link to="/login">
+          <Link to={ctaTo}>
             <Button
               variant="outline"
               className="border-primary/40 bg-card/40 backdrop-blur hover-scale"
@@ -470,7 +471,7 @@ function Landing() {
           className="mt-10 flex flex-wrap items-center justify-center gap-3 animate-fade-in"
           style={{ animationDelay: "300ms", animationFillMode: "both" }}
         >
-          <Link to="/login">
+          <Link to={ctaTo}>
             <Button
               size="lg"
               className="group relative overflow-hidden bg-aurora text-primary-foreground glow hover:opacity-95"
@@ -569,7 +570,7 @@ function Landing() {
                 </div>
                 <h3 className="text-2xl md:text-3xl font-bold">{TOUR[tourIdx].title}</h3>
                 <p className="mt-3 text-muted-foreground">{TOUR[tourIdx].desc}</p>
-                <Link to="/login">
+                <Link to={ctaTo}>
                   <Button variant="outline" className="mt-5 border-primary/40 hover-scale">
                     Try it now <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
@@ -838,7 +839,7 @@ function Landing() {
                   ))}
                 </ul>
                 {p.id === "free" ? (
-                  <Link to="/login" className="block mt-6">
+                  <Link to={ctaTo} className="block mt-6">
                     <Button
                       className={`w-full ${p.highlight ? "bg-aurora text-primary-foreground glow hover:opacity-95" : ""}`}
                       variant={p.highlight ? "default" : "outline"}
@@ -914,7 +915,7 @@ function Landing() {
         >
           <h2 className="text-3xl md:text-5xl font-bold">Ready to hire your AI employee?</h2>
           <p className="mt-4 text-muted-foreground">No setup. No limits. Just describe and ship.</p>
-          <Link to="/login">
+          <Link to={ctaTo}>
             <Button
               size="lg"
               className="mt-6 group relative overflow-hidden bg-aurora text-primary-foreground glow"
