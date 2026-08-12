@@ -33,6 +33,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as KeysRouteImport } from './routes/keys'
 import { Route as ForceRouteImport } from './routes/force'
 import { Route as DevicesRouteImport } from './routes/devices'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConnectRouteImport } from './routes/connect'
 import { Route as CliRouteImport } from './routes/cli'
@@ -198,6 +199,11 @@ const ForceRoute = ForceRouteImport.update({
 const DevicesRoute = DevicesRouteImport.update({
   id: '/devices',
   path: '/devices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -460,6 +466,7 @@ export interface FileRoutesByFullPath {
   '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
   '/keys': typeof KeysRoute
@@ -532,6 +539,7 @@ export interface FileRoutesByTo {
   '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
   '/keys': typeof KeysRoute
@@ -605,6 +613,7 @@ export interface FileRoutesById {
   '/cli': typeof CliRoute
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
   '/keys': typeof KeysRoute
@@ -679,6 +688,7 @@ export interface FileRouteTypes {
     | '/cli'
     | '/connect'
     | '/contact'
+    | '/dashboard'
     | '/devices'
     | '/force'
     | '/keys'
@@ -751,6 +761,7 @@ export interface FileRouteTypes {
     | '/cli'
     | '/connect'
     | '/contact'
+    | '/dashboard'
     | '/devices'
     | '/force'
     | '/keys'
@@ -823,6 +834,7 @@ export interface FileRouteTypes {
     | '/cli'
     | '/connect'
     | '/contact'
+    | '/dashboard'
     | '/devices'
     | '/force'
     | '/keys'
@@ -896,6 +908,7 @@ export interface RootRouteChildren {
   CliRoute: typeof CliRoute
   ConnectRoute: typeof ConnectRoute
   ContactRoute: typeof ContactRoute
+  DashboardRoute: typeof DashboardRoute
   DevicesRoute: typeof DevicesRoute
   ForceRoute: typeof ForceRoute
   KeysRoute: typeof KeysRoute
@@ -1123,6 +1136,13 @@ declare module '@tanstack/react-router' {
       path: '/devices'
       fullPath: '/devices'
       preLoaderRoute: typeof DevicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -1464,6 +1484,7 @@ const rootRouteChildren: RootRouteChildren = {
   CliRoute: CliRoute,
   ConnectRoute: ConnectRoute,
   ContactRoute: ContactRoute,
+  DashboardRoute: DashboardRoute,
   DevicesRoute: DevicesRoute,
   ForceRoute: ForceRoute,
   KeysRoute: KeysRoute,
