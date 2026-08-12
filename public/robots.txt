@@ -13,6 +13,7 @@ Disallow: /agents
 Disallow: /keys
 Disallow: /team
 Disallow: /account
+Disallow: /dashboard
 Disallow: /receipt/
 Disallow: /api/
 Disallow: /auth/

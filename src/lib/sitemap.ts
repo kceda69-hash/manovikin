@@ -34,6 +34,7 @@ const EXCLUDED_PATHS = new Set([
   "/keys",
   "/team",
   "/account",
+  "/dashboard",
 
 ]);
 

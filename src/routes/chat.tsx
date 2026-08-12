@@ -418,6 +418,7 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold">{t("dashboard.creditActivity")}</h3>
               <div className="flex items-center gap-3">
+                <Link to="/dashboard" className="text-xs text-muted-foreground hover:text-foreground">Dashboard</Link>
                 <Link to="/account" className="text-xs text-muted-foreground hover:text-foreground">Account</Link>
                 <Link to="/balance" className="text-xs text-primary hover:underline">{t("cta.open")}</Link>
               </div>
