@@ -430,7 +430,7 @@ function Landing() {
               variant="outline"
               className="border-primary/40 bg-card/40 backdrop-blur hover-scale"
             >
-              {t("nav.signin")}
+              {signedIn ? "Dashboard" : t("nav.signin")}
             </Button>
           </Link>
         </div>
