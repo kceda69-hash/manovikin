@@ -86,7 +86,7 @@ export const getManovikDashboard = createServerFn({ method: "GET" })
         supabase.from("messages").select("id", { count: "exact", head: true }).eq("user_id", userId),
         supabase
           .from("purchases")
-          .select("plan, status, created_at, metadata")
+          .select("plan, status, amount, currency, receipt_no, created_at, metadata")
           .eq("user_id", userId)
           .order("created_at", { ascending: false })
           .limit(20),
