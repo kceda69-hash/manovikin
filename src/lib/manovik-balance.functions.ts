@@ -133,6 +133,14 @@ export const getManovikDashboard = createServerFn({ method: "GET" })
       },
       plan,
       recentLedger,
+      purchases: (purchasesRes.data ?? []) as Array<{
+        plan: string;
+        status: string;
+        amount: number | null;
+        currency: string | null;
+        receipt_no: string | null;
+        created_at: string;
+      }>,
       recentAudit: auditRes.data ?? [],
     };
   });
