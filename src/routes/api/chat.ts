@@ -436,9 +436,19 @@ export const Route = createFileRoute("/api/chat")({
         );
 
 
+        // Knowledge Memory (RAG): inject the user's most relevant stored notes.
+        let knowledgeBlock = "";
+        try {
+          const { buildMemoryContext } = await import("@/lib/memory/retrieve.server");
+          knowledgeBlock = await buildMemoryContext(userId, lastUserText || lastText);
+        } catch (e) {
+          console.warn("[chat] memory context skipped", e);
+        }
+
         const systemPrompt =
           SYSTEM_PROMPT +
           langMemoryBlock +
+          knowledgeBlock +
           `\n\nDetected user language: ${langCode}. Reply in that language unless the user switches.` +
           `\n\nYou may call sandboxed tools: ${sandbox
             .list()

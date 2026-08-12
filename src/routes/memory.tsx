@@ -89,13 +89,42 @@ function MemoryPage() {
           onChange={(e) => setContent(e.target.value)}
           className="mb-3"
         />
-        <Button
-          onClick={() => addMut.mutate()}
-          disabled={addMut.isPending || !title.trim() || !content.trim()}
-        >
-          {addMut.isPending ? "Indexing…" : "Store & index"}
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            onClick={() => addMut.mutate()}
+            disabled={addMut.isPending || !title.trim() || !content.trim()}
+          >
+            {addMut.isPending ? "Indexing…" : "Store & index"}
+          </Button>
+          <label className="text-sm text-muted-foreground">
+            <span className="cursor-pointer underline underline-offset-4">Import a file</span>
+            <input
+              type="file"
+              accept=".txt,.md,.markdown,.csv,.json,.log,text/*"
+              className="sr-only"
+              aria-label="Import a text file into memory"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (!file) return;
+                if (file.size > 2_000_000) {
+                  toast.error("File too large — keep it under 2 MB.");
+                  return;
+                }
+                const text = await file.text();
+                if (!text.trim()) {
+                  toast.error("That file is empty.");
+                  return;
+                }
+                setTitle((t) => t || file.name);
+                setContent(text.slice(0, 200_000));
+                toast.success(`Loaded ${file.name} — review, then store it.`);
+              }}
+            />
+          </label>
+        </div>
       </section>
+
 
       <section className="rounded-2xl border bg-card p-6 mb-8">
         <h2 className="font-semibold mb-4">Semantic search</h2>
