@@ -447,6 +447,7 @@ export const Route = createFileRoute("/api/chat")({
 
         const systemPrompt =
           SYSTEM_PROMPT +
+          fullstackDoctrineFor(lastUserText || lastText) +
           langMemoryBlock +
           knowledgeBlock +
           `\n\nDetected user language: ${langCode}. Reply in that language unless the user switches.` +
