@@ -8,6 +8,8 @@
 // Zero-latency heuristic — no extra model call. Every id here is verified
 // against the current chat-model catalog (see `ai-models-chat` knowledge).
 
+import { isFullStackBuildRequest } from "@/lib/fullstack-doctrine";
+
 export type Tier = "trivial" | "standard" | "hard" | "vision";
 
 export type Route = {
