@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 import { routeModel, fallbackChainFor } from "@/lib/model-router";
+import { fullstackDoctrineFor } from "@/lib/fullstack-doctrine";
 import { redactMessage } from "@/lib/redact";
 import { sandbox } from "@/lib/agent-tools";
 import { log } from "@/lib/logger";
@@ -447,6 +448,7 @@ export const Route = createFileRoute("/api/chat")({
 
         const systemPrompt =
           SYSTEM_PROMPT +
+          fullstackDoctrineFor(lastUserText || lastText) +
           langMemoryBlock +
           knowledgeBlock +
           `\n\nDetected user language: ${langCode}. Reply in that language unless the user switches.` +

@@ -8,6 +8,8 @@
 // Zero-latency heuristic — no extra model call. Every id here is verified
 // against the current chat-model catalog (see `ai-models-chat` knowledge).
 
+import { isFullStackBuildRequest } from "@/lib/fullstack-doctrine";
+
 export type Tier = "trivial" | "standard" | "hard" | "vision";
 
 export type Route = {
@@ -71,6 +73,11 @@ export function routeModel(
 
   if (VERY_HARD_HINTS.test(p)) {
     return { ...VERY_HARD_MODEL, tier: "hard", reason: "very-hard cue → gpt-5.6-sol" };
+  }
+
+  // Full-stack product builds need frontier coding + long coherent output.
+  if (isFullStackBuildRequest(p)) {
+    return { ...TIER_MODEL.hard, tier: "hard", reason: "full-stack build cue" };
   }
 
   if (CODE_HINTS.test(p) || REASON_HINTS.test(p)) {
