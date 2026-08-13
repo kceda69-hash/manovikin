@@ -249,6 +249,7 @@ function ChatPage() {
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Open chats">
                   <Menu className="h-5 w-5" />
+                  <span className="sr-only">Open chats</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[85vw] max-w-sm p-0 bg-sidebar">
