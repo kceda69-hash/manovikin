@@ -965,6 +965,7 @@ function ChatPanel({
             ) : (
               <Send className="h-4 w-4" />
             )}
+            <span className="sr-only">{imageMode ? "Generate image" : "Send message"}</span>
           </Button>
         </div>
         <p className="mt-2 hidden text-center text-[11px] text-muted-foreground sm:block">
