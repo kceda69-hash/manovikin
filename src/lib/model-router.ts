@@ -73,6 +73,11 @@ export function routeModel(
     return { ...VERY_HARD_MODEL, tier: "hard", reason: "very-hard cue → gpt-5.6-sol" };
   }
 
+  // Full-stack product builds need frontier coding + long coherent output.
+  if (isFullStackBuildRequest(p)) {
+    return { ...TIER_MODEL.hard, tier: "hard", reason: "full-stack build cue" };
+  }
+
   if (CODE_HINTS.test(p) || REASON_HINTS.test(p)) {
     return { ...TIER_MODEL.hard, tier: "hard", reason: "code/reasoning cue" };
   }
