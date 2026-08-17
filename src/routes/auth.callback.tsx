@@ -14,13 +14,29 @@ function sanitizeNextPath(value: string | null) {
 }
 
 /** Wait for the Supabase client to hydrate a session from the URL. */
-async function waitForSession(ms = 6000) {
+async function waitForSession(ms = 12000) {
   const deadline = Date.now() + ms;
-  for (;;) {
-    const { data } = await supabase.auth.getSession();
-    if (data.session) return data.session;
-    if (Date.now() > deadline) return null;
-    await new Promise((r) => setTimeout(r, 200));
+  // Resolve as soon as the client reports a sign-in, instead of relying on
+  // polling alone (detectSessionInUrl can land between two polls).
+  let signedIn: (() => void) | null = null;
+  const signal = new Promise<void>((resolve) => {
+    signedIn = resolve;
+  });
+  const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") signedIn?.();
+  });
+  try {
+    for (;;) {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) return data.session;
+      if (Date.now() > deadline) return null;
+      await Promise.race([
+        signal,
+        new Promise((r) => setTimeout(r, 250)),
+      ]);
+    }
+  } finally {
+    sub.subscription.unsubscribe();
   }
 }
 
