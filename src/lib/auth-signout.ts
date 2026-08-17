@@ -74,15 +74,27 @@ export async function signOutEverywhere(queryClient?: QueryClient) {
  */
 export async function repairStaleSession() {
   if (typeof window === "undefined") return;
+  // Never interfere with an in-flight OAuth/magic-link completion: the callback
+  // page is mid-handshake and a defensive purge there kills the fresh session.
+  if (/^\/auth\/callback/.test(window.location.pathname)) return;
   try {
     const { data } = await supabase.auth.getSession();
     if (!data.session) return;
     const { error } = await supabase.auth.getUser();
-    if (error) {
+    // Only a genuine rejected-credentials answer means the stored session is
+    // dead. Network blips / rate limits must NOT wipe a valid session.
+    const status = (error as { status?: number } | null)?.status;
+    const rejected =
+      !!error &&
+      (status === 400 ||
+        status === 401 ||
+        status === 403 ||
+        /invalid refresh token|refresh token not found|jwt/i.test(error.message));
+    if (rejected) {
       await supabase.auth.signOut({ scope: "local" }).catch(() => undefined);
       purgeLocalAuthStorage();
     }
   } catch {
-    purgeLocalAuthStorage();
+    /* network failure — keep the session, the user may just be offline */
   }
 }
