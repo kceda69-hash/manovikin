@@ -41,6 +41,7 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as BillingRouteImport } from './routes/billing'
 import { Route as BestAiCodingAgentRouteImport } from './routes/best-ai-coding-agent'
 import { Route as BalanceRouteImport } from './routes/balance'
+import { Route as AutonomousAiSoftwareEngineerRouteImport } from './routes/autonomous-ai-software-engineer'
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as AiCodingAssistantRouteImport } from './routes/ai-coding-assistant'
 import { Route as AgentsRouteImport } from './routes/agents'
@@ -241,6 +242,12 @@ const BalanceRoute = BalanceRouteImport.update({
   path: '/balance',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AutonomousAiSoftwareEngineerRoute =
+  AutonomousAiSoftwareEngineerRouteImport.update({
+    id: '/autonomous-ai-software-engineer',
+    path: '/autonomous-ai-software-engineer',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuditRoute = AuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -459,6 +466,7 @@ export interface FileRoutesByFullPath {
   '/agents': typeof AgentsRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/audit': typeof AuditRoute
+  '/autonomous-ai-software-engineer': typeof AutonomousAiSoftwareEngineerRoute
   '/balance': typeof BalanceRoute
   '/best-ai-coding-agent': typeof BestAiCodingAgentRoute
   '/billing': typeof BillingRoute
@@ -532,6 +540,7 @@ export interface FileRoutesByTo {
   '/agents': typeof AgentsRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/audit': typeof AuditRoute
+  '/autonomous-ai-software-engineer': typeof AutonomousAiSoftwareEngineerRoute
   '/balance': typeof BalanceRoute
   '/best-ai-coding-agent': typeof BestAiCodingAgentRoute
   '/billing': typeof BillingRoute
@@ -606,6 +615,7 @@ export interface FileRoutesById {
   '/agents': typeof AgentsRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/audit': typeof AuditRoute
+  '/autonomous-ai-software-engineer': typeof AutonomousAiSoftwareEngineerRoute
   '/balance': typeof BalanceRoute
   '/best-ai-coding-agent': typeof BestAiCodingAgentRoute
   '/billing': typeof BillingRoute
@@ -681,6 +691,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/ai-coding-assistant'
     | '/audit'
+    | '/autonomous-ai-software-engineer'
     | '/balance'
     | '/best-ai-coding-agent'
     | '/billing'
@@ -754,6 +765,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/ai-coding-assistant'
     | '/audit'
+    | '/autonomous-ai-software-engineer'
     | '/balance'
     | '/best-ai-coding-agent'
     | '/billing'
@@ -827,6 +839,7 @@ export interface FileRouteTypes {
     | '/agents'
     | '/ai-coding-assistant'
     | '/audit'
+    | '/autonomous-ai-software-engineer'
     | '/balance'
     | '/best-ai-coding-agent'
     | '/billing'
@@ -901,6 +914,7 @@ export interface RootRouteChildren {
   AgentsRoute: typeof AgentsRoute
   AiCodingAssistantRoute: typeof AiCodingAssistantRoute
   AuditRoute: typeof AuditRoute
+  AutonomousAiSoftwareEngineerRoute: typeof AutonomousAiSoftwareEngineerRoute
   BalanceRoute: typeof BalanceRoute
   BestAiCodingAgentRoute: typeof BestAiCodingAgentRoute
   BillingRoute: typeof BillingRoute
@@ -1194,6 +1208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BalanceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/autonomous-ai-software-engineer': {
+      id: '/autonomous-ai-software-engineer'
+      path: '/autonomous-ai-software-engineer'
+      fullPath: '/autonomous-ai-software-engineer'
+      preLoaderRoute: typeof AutonomousAiSoftwareEngineerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/audit': {
       id: '/audit'
       path: '/audit'
@@ -1477,6 +1498,7 @@ const rootRouteChildren: RootRouteChildren = {
   AgentsRoute: AgentsRoute,
   AiCodingAssistantRoute: AiCodingAssistantRoute,
   AuditRoute: AuditRoute,
+  AutonomousAiSoftwareEngineerRoute: AutonomousAiSoftwareEngineerRoute,
   BalanceRoute: BalanceRoute,
   BestAiCodingAgentRoute: BestAiCodingAgentRoute,
   BillingRoute: BillingRoute,
