@@ -76,7 +76,7 @@ export const startForceRun = createServerFn({ method: "POST" })
       );
       if (agentsError) fail("saveAgents", agentsError);
 
-      await supabase
+      const { error: finishError } = await supabase
         .from(RUNS)
         .update({
           status: "done",
@@ -87,6 +87,9 @@ export const startForceRun = createServerFn({ method: "POST" })
           completed_at: new Date().toISOString(),
         })
         .eq("id", runId);
+      // Without this the swarm result is computed but never persisted, and the
+      // mission stays stuck on "running" for the user.
+      if (finishError) fail("finishRun", finishError);
 
       return { runId };
     } catch (err) {
