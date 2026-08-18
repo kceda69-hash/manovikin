@@ -51,7 +51,7 @@ export const startForceRun = createServerFn({ method: "POST" })
     try {
       const { runForce } = await import("@/lib/force/engine.server");
       const outcome = await runForce(data.objective, data.mode as ForceMode, data.agents, async (phase, label, payload) => {
-        await supabase.from(STEPS).insert({
+        const { error: stepError } = await supabase.from(STEPS).insert({
           run_id: runId,
           user_id: userId,
           idx: idx++,
@@ -59,9 +59,11 @@ export const startForceRun = createServerFn({ method: "POST" })
           label,
           payload: payload as Record<string, unknown>,
         });
+        // A dropped step silently breaks the rewind timeline — surface it.
+        if (stepError) fail("saveStep", stepError);
       });
 
-      await supabase.from(AGENTS).insert(
+      const { error: agentsError } = await supabase.from(AGENTS).insert(
         outcome.agents.map((a) => ({
           run_id: runId,
           user_id: userId,
@@ -72,6 +74,7 @@ export const startForceRun = createServerFn({ method: "POST" })
           score: a.score,
         })),
       );
+      if (agentsError) fail("saveAgents", agentsError);
 
       await supabase
         .from(RUNS)
