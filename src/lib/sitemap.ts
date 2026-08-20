@@ -104,7 +104,11 @@ export function sitemapMetadataForPath(path: string): Omit<SitemapEntry, "path">
     return { changefreq: "weekly", priority: "1.0" };
   }
 
-  if (path === "/best-ai-coding-agent" || path === "/ai-coding-assistant") {
+  if (
+    path === "/best-ai-coding-agent" ||
+    path === "/ai-coding-assistant" ||
+    path === "/autonomous-ai-software-engineer"
+  ) {
     return { changefreq: "weekly", priority: "0.9" };
   }
 
