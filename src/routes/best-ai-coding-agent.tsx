@@ -109,6 +109,12 @@ function BestAiCodingAgentPage() {
             >
               Read the comparison →
             </Link>
+            <Link
+              to="/autonomous-ai-software-engineer"
+              className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold"
+            >
+              Autonomous AI software engineer →
+            </Link>
           </div>
         </section>
 
