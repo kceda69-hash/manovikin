@@ -31,6 +31,7 @@ import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KeysRouteImport } from './routes/keys'
+import { Route as HowToMakeAWebsiteWithAiRouteImport } from './routes/how-to-make-a-website-with-ai'
 import { Route as ForceRouteImport } from './routes/force'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -43,6 +44,7 @@ import { Route as BestAiCodingAgentRouteImport } from './routes/best-ai-coding-a
 import { Route as BalanceRouteImport } from './routes/balance'
 import { Route as AutonomousAiSoftwareEngineerRouteImport } from './routes/autonomous-ai-software-engineer'
 import { Route as AuditRouteImport } from './routes/audit'
+import { Route as AiWebsiteBuilderRouteImport } from './routes/ai-website-builder'
 import { Route as AiCodingAssistantRouteImport } from './routes/ai-coding-assistant'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -192,6 +194,11 @@ const KeysRoute = KeysRouteImport.update({
   path: '/keys',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HowToMakeAWebsiteWithAiRoute = HowToMakeAWebsiteWithAiRouteImport.update({
+  id: '/how-to-make-a-website-with-ai',
+  path: '/how-to-make-a-website-with-ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForceRoute = ForceRouteImport.update({
   id: '/force',
   path: '/force',
@@ -251,6 +258,11 @@ const AutonomousAiSoftwareEngineerRoute =
 const AuditRoute = AuditRouteImport.update({
   id: '/audit',
   path: '/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiWebsiteBuilderRoute = AiWebsiteBuilderRouteImport.update({
+  id: '/ai-website-builder',
+  path: '/ai-website-builder',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AiCodingAssistantRoute = AiCodingAssistantRouteImport.update({
@@ -465,6 +477,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
+  '/ai-website-builder': typeof AiWebsiteBuilderRoute
   '/audit': typeof AuditRoute
   '/autonomous-ai-software-engineer': typeof AutonomousAiSoftwareEngineerRoute
   '/balance': typeof BalanceRoute
@@ -477,6 +490,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
   '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
@@ -539,6 +553,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
+  '/ai-website-builder': typeof AiWebsiteBuilderRoute
   '/audit': typeof AuditRoute
   '/autonomous-ai-software-engineer': typeof AutonomousAiSoftwareEngineerRoute
   '/balance': typeof BalanceRoute
@@ -551,6 +566,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
   '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
@@ -614,6 +630,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
+  '/ai-website-builder': typeof AiWebsiteBuilderRoute
   '/audit': typeof AuditRoute
   '/autonomous-ai-software-engineer': typeof AutonomousAiSoftwareEngineerRoute
   '/balance': typeof BalanceRoute
@@ -626,6 +643,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
   '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
@@ -690,6 +708,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/agents'
     | '/ai-coding-assistant'
+    | '/ai-website-builder'
     | '/audit'
     | '/autonomous-ai-software-engineer'
     | '/balance'
@@ -702,6 +721,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/devices'
     | '/force'
+    | '/how-to-make-a-website-with-ai'
     | '/keys'
     | '/login'
     | '/mcp'
@@ -764,6 +784,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/agents'
     | '/ai-coding-assistant'
+    | '/ai-website-builder'
     | '/audit'
     | '/autonomous-ai-software-engineer'
     | '/balance'
@@ -776,6 +797,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/devices'
     | '/force'
+    | '/how-to-make-a-website-with-ai'
     | '/keys'
     | '/login'
     | '/mcp'
@@ -838,6 +860,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/agents'
     | '/ai-coding-assistant'
+    | '/ai-website-builder'
     | '/audit'
     | '/autonomous-ai-software-engineer'
     | '/balance'
@@ -850,6 +873,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/devices'
     | '/force'
+    | '/how-to-make-a-website-with-ai'
     | '/keys'
     | '/login'
     | '/mcp'
@@ -913,6 +937,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AgentsRoute: typeof AgentsRoute
   AiCodingAssistantRoute: typeof AiCodingAssistantRoute
+  AiWebsiteBuilderRoute: typeof AiWebsiteBuilderRoute
   AuditRoute: typeof AuditRoute
   AutonomousAiSoftwareEngineerRoute: typeof AutonomousAiSoftwareEngineerRoute
   BalanceRoute: typeof BalanceRoute
@@ -925,6 +950,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DevicesRoute: typeof DevicesRoute
   ForceRoute: typeof ForceRoute
+  HowToMakeAWebsiteWithAiRoute: typeof HowToMakeAWebsiteWithAiRoute
   KeysRoute: typeof KeysRoute
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
@@ -1138,6 +1164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KeysRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/how-to-make-a-website-with-ai': {
+      id: '/how-to-make-a-website-with-ai'
+      path: '/how-to-make-a-website-with-ai'
+      fullPath: '/how-to-make-a-website-with-ai'
+      preLoaderRoute: typeof HowToMakeAWebsiteWithAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/force': {
       id: '/force'
       path: '/force'
@@ -1220,6 +1253,13 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/audit'
       preLoaderRoute: typeof AuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-website-builder': {
+      id: '/ai-website-builder'
+      path: '/ai-website-builder'
+      fullPath: '/ai-website-builder'
+      preLoaderRoute: typeof AiWebsiteBuilderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ai-coding-assistant': {
@@ -1497,6 +1537,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AgentsRoute: AgentsRoute,
   AiCodingAssistantRoute: AiCodingAssistantRoute,
+  AiWebsiteBuilderRoute: AiWebsiteBuilderRoute,
   AuditRoute: AuditRoute,
   AutonomousAiSoftwareEngineerRoute: AutonomousAiSoftwareEngineerRoute,
   BalanceRoute: BalanceRoute,
@@ -1509,6 +1550,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DevicesRoute: DevicesRoute,
   ForceRoute: ForceRoute,
+  HowToMakeAWebsiteWithAiRoute: HowToMakeAWebsiteWithAiRoute,
   KeysRoute: KeysRoute,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
