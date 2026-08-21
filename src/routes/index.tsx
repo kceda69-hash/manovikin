@@ -40,6 +40,7 @@ import { useI18n, LanguageSwitcher } from "@/lib/i18n";
 // panels are code-split so they don't block first paint of the landing page.
 import { getDnaOverride, type ShipStageId } from "@/components/manovik/dna-storage";
 import { useAuth } from "@/hooks/useAuth";
+import { ShareManovik } from "@/components/manovik/share-manovik";
 
 const dnaFeatures = () => import("@/components/manovik/dna-features");
 const DnaPromptEditor = lazy(() => dnaFeatures().then((m) => ({ default: m.DnaPromptEditor })));
