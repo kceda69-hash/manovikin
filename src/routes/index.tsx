@@ -1050,6 +1050,12 @@ function Landing() {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/case-studies" className="hover:text-primary">
+                    Missions &amp; case studies
+                  </Link>
+                </li>
+
+                <li>
                   <Link to="/best-ai-coding-agent" className="hover:text-primary">
                     Best AI coding agents
                   </Link>

@@ -177,10 +177,14 @@ function AiWebsiteBuilderPage() {
           <div className="font-semibold">Describe your site, get a working version today</div>
           <p className="mt-1 text-sm text-muted-foreground">
             Start free, no card needed.{" "}
+            <Link to="/case-studies" className="underline">
+              See real missions MANOVIK has shipped →
+            </Link>{" "}
             <Link to="/best-ai-coding-agent" className="underline">
               Compare MANOVIK with other AI builders →
             </Link>
           </p>
+
         </section>
       </main>
     </div>
