@@ -967,6 +967,9 @@ function Landing() {
               <span className="btn-sheen" aria-hidden="true" />
             </Button>
           </Link>
+          <div className="mx-auto mt-8 max-w-md text-left">
+            <ShareManovik source="landing" />
+          </div>
         </div>
       </section>
 
