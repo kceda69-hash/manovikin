@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getManovikDashboard } from "@/lib/manovik-balance.functions";
 import { Button } from "@/components/ui/button";
+import { ShareManovik } from "@/components/manovik/share-manovik";
 import {
   Coins,
   MessageSquare,
@@ -212,6 +213,10 @@ function DashboardPage() {
                 {l.label}
               </Link>
             ))}
+          </div>
+
+          <div className="mt-8 max-w-xl">
+            <ShareManovik source="dashboard" />
           </div>
         </>
       )}

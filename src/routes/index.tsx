@@ -40,6 +40,7 @@ import { useI18n, LanguageSwitcher } from "@/lib/i18n";
 // panels are code-split so they don't block first paint of the landing page.
 import { getDnaOverride, type ShipStageId } from "@/components/manovik/dna-storage";
 import { useAuth } from "@/hooks/useAuth";
+import { ShareManovik } from "@/components/manovik/share-manovik";
 
 const dnaFeatures = () => import("@/components/manovik/dna-features");
 const DnaPromptEditor = lazy(() => dnaFeatures().then((m) => ({ default: m.DnaPromptEditor })));
@@ -95,6 +96,43 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://manovik.in/#organization",
+              name: "MANOVIK AI",
+              url: "https://manovik.in/",
+              description:
+                "MANOVIK AI is an autonomous AI agent that plans, builds and ships websites, apps and APIs.",
+              foundingLocation: { "@type": "Place", name: "India" },
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer support",
+                url: "https://manovik.in/contact",
+                availableLanguage: ["en", "hi"],
+              },
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://manovik.in/#website",
+              name: "MANOVIK AI",
+              url: "https://manovik.in/",
+              publisher: { "@id": "https://manovik.in/#organization" },
+              inLanguage: "en-IN",
+            },
+            {
+              "@type": "SoftwareApplication",
+              name: "MANOVIK AI",
+              applicationCategory: "DeveloperApplication",
+              operatingSystem: "Web, Windows, macOS, Linux, Android, iOS",
+              url: "https://manovik.in/",
+              publisher: { "@id": "https://manovik.in/#organization" },
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "INR",
+                description: "Free tier — start building without a card.",
+              },
+            },
             {
               "@type": "Product",
               name: "MANOVIK AI Pro",
@@ -930,6 +968,9 @@ function Landing() {
               <span className="btn-sheen" aria-hidden="true" />
             </Button>
           </Link>
+          <div className="mx-auto mt-8 max-w-md text-left">
+            <ShareManovik source="landing" />
+          </div>
         </div>
       </section>
 
@@ -996,6 +1037,21 @@ function Landing() {
                 <li>
                   <Link to="/connect" className="hover:text-primary">
                     Connect AI assistants
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/ai-website-builder" className="hover:text-primary">
+                    AI website builder
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/how-to-make-a-website-with-ai" className="hover:text-primary">
+                    How to make a website with AI
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/best-ai-coding-agent" className="hover:text-primary">
+                    Best AI coding agents
                   </Link>
                 </li>
               </ul>
