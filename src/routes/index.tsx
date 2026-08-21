@@ -1035,6 +1035,21 @@ function Landing() {
                     Connect AI assistants
                   </Link>
                 </li>
+                <li>
+                  <Link to="/ai-website-builder" className="hover:text-primary">
+                    AI website builder
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/how-to-make-a-website-with-ai" className="hover:text-primary">
+                    How to make a website with AI
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/best-ai-coding-agent" className="hover:text-primary">
+                    Best AI coding agents
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
