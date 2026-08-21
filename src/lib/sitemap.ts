@@ -112,9 +112,14 @@ export function sitemapMetadataForPath(path: string): Omit<SitemapEntry, "path">
     return { changefreq: "weekly", priority: "0.9" };
   }
 
+  if (path === "/case-studies") {
+    return { changefreq: "monthly", priority: "0.8" };
+  }
+
   if (path.startsWith("/vs-")) {
     return { changefreq: "monthly", priority: "0.8" };
   }
+
 
   if (path.startsWith("/blog/")) {
     return { changefreq: "monthly", priority: "0.7" };
