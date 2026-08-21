@@ -96,6 +96,43 @@ export const Route = createFileRoute("/")({
           "@context": "https://schema.org",
           "@graph": [
             {
+              "@type": "Organization",
+              "@id": "https://manovik.in/#organization",
+              name: "MANOVIK AI",
+              url: "https://manovik.in/",
+              description:
+                "MANOVIK AI is an autonomous AI agent that plans, builds and ships websites, apps and APIs.",
+              foundingLocation: { "@type": "Place", name: "India" },
+              contactPoint: {
+                "@type": "ContactPoint",
+                contactType: "customer support",
+                url: "https://manovik.in/contact",
+                availableLanguage: ["en", "hi"],
+              },
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://manovik.in/#website",
+              name: "MANOVIK AI",
+              url: "https://manovik.in/",
+              publisher: { "@id": "https://manovik.in/#organization" },
+              inLanguage: "en-IN",
+            },
+            {
+              "@type": "SoftwareApplication",
+              name: "MANOVIK AI",
+              applicationCategory: "DeveloperApplication",
+              operatingSystem: "Web, Windows, macOS, Linux, Android, iOS",
+              url: "https://manovik.in/",
+              publisher: { "@id": "https://manovik.in/#organization" },
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "INR",
+                description: "Free tier — start building without a card.",
+              },
+            },
+            {
               "@type": "Product",
               name: "MANOVIK AI Pro",
               description: "Unlimited messages and priority models for builders shipping daily.",
