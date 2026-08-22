@@ -37,7 +37,7 @@ export default defineTool({
     models: z
       .array(z.string().max(120))
       .optional()
-      .describe("Model ids the app calls, e.g. ['google/gemini-3.6-flash']."),
+      .describe("Model ids the app calls, e.g. ['google/gemini-3.7-flash']."),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: ({ package_json, lockfile_name, lockfile_text, env_names, ai_hosts, models }) => {

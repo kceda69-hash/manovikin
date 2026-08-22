@@ -148,7 +148,7 @@ function clampScore(n: unknown): number {
 
 async function recon(objective: string, mode: ForceMode): Promise<Recon> {
   const text = await callModel({
-    model: "google/gemini-3.6-flash",
+    model: "google/gemini-3.7-flash",
     maxTokens: 1500,
     system:
       "You are MANOVIK FORCE Recon. Convert a raw objective into a precise mission brief. Respond with JSON only, no prose.",

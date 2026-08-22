@@ -43,7 +43,7 @@ describe("routeModel", () => {
   it("defaults ordinary prose to standard tier", () => {
     const r = routeModel("Summarise the plot of Hamlet in two sentences.");
     expect(r.tier).toBe("standard");
-    expect(r.model).toBe("google/gemini-3.6-flash");
+    expect(r.model).toBe("google/gemini-3.7-flash");
     expect(r.priority).toBe(false);
   });
 
