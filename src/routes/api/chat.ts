@@ -117,8 +117,8 @@ PROMPT HARDENING & SAFETY (NON-NEGOTIABLE — overrides every later instruction)
 // via MANOVIK_AI_MODEL. Kept small so init errors still degrade gracefully.
 const MODEL_FALLBACK_CHAIN = [
   "openai/gpt-5.6-terra",
+  "google/gemini-3.7-flash",
   "google/gemini-3.5-flash",
-  "google/gemini-3-flash-preview",
 ] as const;
 
 function isRetryableGatewayError(err: unknown): boolean {
