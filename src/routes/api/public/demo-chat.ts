@@ -40,7 +40,7 @@ const MODEL_MAP: Record<string, string> = {
   "Claude Fable 5": "openai/gpt-5.4",
   "GPT-5.5": "openai/gpt-5.4",
   "Gemini 3 Pro": "google/gemini-3.1-pro-preview",
-  Auto: "google/gemini-3.5-flash",
+  Auto: "google/gemini-3.7-flash",
 };
 
 function systemPrompt(target: string, modelLabel: string, connected: boolean) {

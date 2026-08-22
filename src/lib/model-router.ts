@@ -26,7 +26,7 @@ export const TIER_MODEL: Record<Tier, { model: string; priority: boolean }> = {
   // Cheapest + fastest Gemini; great for classification, small extraction, greetings.
   trivial:  { model: "google/gemini-3.1-flash-lite",   priority: false },
   // Default all-rounder. Cheap, fast, multimodal.
-  standard: { model: "google/gemini-3.6-flash",        priority: false },
+  standard: { model: "google/gemini-3.7-flash",        priority: false },
   // Complex/quantum-grade coding: latest frontier model with OpenAI priority tier.
   hard:     { model: "openai/gpt-5.6-terra",           priority: true  },
   // Multimodal + long-context; vision-heavy prompts land here.

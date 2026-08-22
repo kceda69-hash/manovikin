@@ -7,7 +7,7 @@ const base: ScanInput = {
   lockfileText: 'https://registry.npmjs.org/react/-/react-19.2.0.tgz',
   envNames: ["LOVABLE_API_KEY", "VITE_SUPABASE_PUBLISHABLE_KEY"],
   aiHosts: ["ai.gateway.lovable.dev"],
-  models: [{ surface: "chat:standard", model: "google/gemini-3.6-flash" }],
+  models: [{ surface: "chat:standard", model: "google/gemini-3.7-flash" }],
 };
 
 const ids = (i: ScanInput) => scanSupplyChain(i).findings.map((f) => f.id);
@@ -64,12 +64,12 @@ describe("supply-chain scanner", () => {
       ...base,
       models: [
         { surface: "chat", model: "openai/gpt-4o" },
-        { surface: "chat", model: "google/gemini-3.6-flash", priority: true },
+        { surface: "chat", model: "google/gemini-3.7-flash", priority: true },
         { surface: "chat", model: "openai/gpt-5.6-sol" },
       ],
     });
     expect(found).toContain("model.unapproved.chat.openai/gpt-4o");
-    expect(found).toContain("model.priority.chat.google/gemini-3.6-flash");
+    expect(found).toContain("model.priority.chat.google/gemini-3.7-flash");
     expect(found).toContain("model.reasoning.chat.openai/gpt-5.6-sol");
   });
 
