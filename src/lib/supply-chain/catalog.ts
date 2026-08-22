@@ -46,7 +46,28 @@ export const APPROVED_MODEL_IDS = [
   "google/gemini-2.5-flash-image",
   "google/gemini-3-pro-image",
   "google/gemini-3.1-flash-image",
+  "google/gemini-3.1-flash-lite-image",
+  "openai/gpt-image-2",
+  "openai/gpt-image-1-mini",
+  // video
+  "google/veo-3.1",
+  "google/veo-3.1-fast",
+  "google/veo-3.1-lite",
+  // embeddings
+  "openai/text-embedding-3-small",
+  "openai/text-embedding-3-large",
+  "google/gemini-embedding-001",
+  "google/gemini-embedding-2",
+  // speech
+  "google/gemini-2.5-flash-tts",
+  "google/gemini-2.5-flash-lite-preview-tts",
+  "google/gemini-2.5-pro-tts",
+  "google/gemini-3.1-flash-tts-preview",
+  "openai/gpt-4o-mini-tts",
+  "openai/gpt-4o-transcribe",
+  "openai/gpt-4o-mini-transcribe",
 ];
+
 
 /** Models that support the OpenAI priority ("fast mode") serving tier. */
 export const PRIORITY_CAPABLE_MODELS = [
