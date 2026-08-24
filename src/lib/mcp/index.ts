@@ -3,6 +3,7 @@ import listBlogPostsTool from "./tools/list-blog-posts";
 import getPricingTool from "./tools/get-pricing";
 import searchSiteTool from "./tools/search-site";
 import manovikCapabilitiesTool from "./tools/manovik-capabilities";
+import manoTool from "./tools/mano";
 import manovikAskTool from "./tools/manovik-ask";
 import manovikCodeTool from "./tools/manovik-code";
 import manovikReverseEngineerTool from "./tools/manovik-reverse-engineer";
@@ -17,10 +18,11 @@ import manovikSupplyChainScanTool from "./tools/manovik-supply-chain-scan";
 export default defineMcp({
   name: "manovik-mcp",
   title: "MANOVIK MCP",
-  version: "0.3.0",
+  version: "0.4.0",
   instructions:
-    "MANOVIK AI over MCP. Reasoning/research/planning: `manovik_ask`. Engineering (build, debug, refactor, review, test, architect, optimize) via the Quantum Engineering Protocol: `manovik_code`. Requirements extraction, architecture maps, clone plans and clean-room reimplementation: `manovik_reverse_engineer`. Content and copy: `manovik_write`. Translation and localization: `manovik_translate`. Messy text to structured JSON, classification, entities, sentiment: `manovik_extract`. Prompt rewriting: `manovik_optimize_prompt`. Offline dependency and AI-config auditing: `manovik_supply_chain_scan`. Model/tier routing preview: `manovik_models`. Sandboxed utilities (math, text, time, allow-listed HTTP GET): `manovik_run_tool`. `manovik_capabilities` lists everything, including features that live in the MANOVIK web app. `search_site`, `list_blog_posts` and `get_pricing` cover manovik.in content and pricing.",
+    "MANOVIK AI over MCP. MANOVIK's own model MANO 1.1 (plan → draft → adversarial review → synthesis): `mano`. Reasoning/research/planning: `manovik_ask`. Engineering (build, debug, refactor, review, test, architect, optimize) via the Quantum Engineering Protocol: `manovik_code`. Requirements extraction, architecture maps, clone plans and clean-room reimplementation: `manovik_reverse_engineer`. Content and copy: `manovik_write`. Translation and localization: `manovik_translate`. Messy text to structured JSON, classification, entities, sentiment: `manovik_extract`. Prompt rewriting: `manovik_optimize_prompt`. Offline dependency and AI-config auditing: `manovik_supply_chain_scan`. Model/tier routing preview: `manovik_models`. Sandboxed utilities (math, text, time, allow-listed HTTP GET): `manovik_run_tool`. `manovik_capabilities` lists everything, including features that live in the MANOVIK web app. `search_site`, `list_blog_posts` and `get_pricing` cover manovik.in content and pricing.",
   tools: [
+    manoTool,
     manovikCapabilitiesTool,
     manovikAskTool,
     manovikCodeTool,

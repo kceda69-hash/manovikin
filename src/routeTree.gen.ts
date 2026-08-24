@@ -77,6 +77,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as ApiPublicV1ManoRouteImport } from './routes/api/public/v1/mano'
 import { Route as ApiPublicV1AskRouteImport } from './routes/api/public/v1/ask'
 import { Route as ApiPublicHooksSeoMonitorRouteImport } from './routes/api/public/hooks/seo-monitor'
 import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/public/hooks/security-scan'
@@ -436,6 +437,11 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
   path: '/lovable/email/auth/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1ManoRoute = ApiPublicV1ManoRouteImport.update({
+  id: '/api/public/v1/mano',
+  path: '/api/public/v1/mano',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicV1AskRoute = ApiPublicV1AskRouteImport.update({
   id: '/api/public/v1/ask',
   path: '/api/public/v1/ask',
@@ -548,6 +554,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
   '/api/public/hooks/seo-monitor': typeof ApiPublicHooksSeoMonitorRoute
   '/api/public/v1/ask': typeof ApiPublicV1AskRoute
+  '/api/public/v1/mano': typeof ApiPublicV1ManoRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -625,6 +632,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
   '/api/public/hooks/seo-monitor': typeof ApiPublicHooksSeoMonitorRoute
   '/api/public/v1/ask': typeof ApiPublicV1AskRoute
+  '/api/public/v1/mano': typeof ApiPublicV1ManoRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -703,6 +711,7 @@ export interface FileRoutesById {
   '/api/public/hooks/security-scan': typeof ApiPublicHooksSecurityScanRoute
   '/api/public/hooks/seo-monitor': typeof ApiPublicHooksSeoMonitorRoute
   '/api/public/v1/ask': typeof ApiPublicV1AskRoute
+  '/api/public/v1/mano': typeof ApiPublicV1ManoRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -782,6 +791,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/security-scan'
     | '/api/public/hooks/seo-monitor'
     | '/api/public/v1/ask'
+    | '/api/public/v1/mano'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -859,6 +869,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/security-scan'
     | '/api/public/hooks/seo-monitor'
     | '/api/public/v1/ask'
+    | '/api/public/v1/mano'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -936,6 +947,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/security-scan'
     | '/api/public/hooks/seo-monitor'
     | '/api/public/v1/ask'
+    | '/api/public/v1/mano'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
@@ -1014,6 +1026,7 @@ export interface RootRouteChildren {
   ApiPublicHooksSecurityScanRoute: typeof ApiPublicHooksSecurityScanRoute
   ApiPublicHooksSeoMonitorRoute: typeof ApiPublicHooksSeoMonitorRoute
   ApiPublicV1AskRoute: typeof ApiPublicV1AskRoute
+  ApiPublicV1ManoRoute: typeof ApiPublicV1ManoRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
@@ -1499,6 +1512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/mano': {
+      id: '/api/public/v1/mano'
+      path: '/api/public/v1/mano'
+      fullPath: '/api/public/v1/mano'
+      preLoaderRoute: typeof ApiPublicV1ManoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/v1/ask': {
       id: '/api/public/v1/ask'
       path: '/api/public/v1/ask'
@@ -1624,6 +1644,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksSecurityScanRoute: ApiPublicHooksSecurityScanRoute,
   ApiPublicHooksSeoMonitorRoute: ApiPublicHooksSeoMonitorRoute,
   ApiPublicV1AskRoute: ApiPublicV1AskRoute,
+  ApiPublicV1ManoRoute: ApiPublicV1ManoRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,

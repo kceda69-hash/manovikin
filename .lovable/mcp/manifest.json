@@ -8,10 +8,50 @@
   "mcp": {
     "server": {
       "name": "manovik-mcp",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "title": "MANOVIK MCP"
     },
     "tools": [
+      {
+        "name": "mano",
+        "title": "MANO 1.1 (MANOVIK's own model)",
+        "description": "Run MANO 1.1 — MANOVIK's own model. It plans, drafts, adversarially reviews and synthesises the answer in one call, so use it for hard coding, architecture, reasoning, research and writing tasks where correctness matters more than latency.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "prompt": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000,
+              "description": "The task for MANO 1.1."
+            },
+            "depth": {
+              "description": "Inference depth. Omit to let MANO decide.",
+              "type": "string",
+              "enum": [
+                "lite",
+                "standard",
+                "deep"
+              ]
+            },
+            "system": {
+              "description": "Extra operator instruction.",
+              "type": "string",
+              "maxLength": 4000
+            }
+          },
+          "required": [
+            "prompt"
+          ]
+        },
+        "outputSchema": null
+      },
       {
         "name": "manovik_capabilities",
         "title": "MANOVIK capabilities",
