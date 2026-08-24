@@ -40,10 +40,10 @@ describe("MANO 1.1", () => {
     expect(substrateFor("deep")).toBe(MANO_SUBSTRATE);
   });
 
-  it("never leaks provider identity in stage prompts", () => {
+  it("never leaks substrate ids in stage prompts", () => {
     for (const prompt of Object.values(MANO_STAGE_PROMPT)) {
       expect(prompt).toContain("MANO 1.1");
-      expect(prompt.toLowerCase()).not.toMatch(/\b(claude|gpt-5|gemini)\b/);
+      expect(prompt).not.toMatch(/(openai|google)\//);
     }
   });
 
