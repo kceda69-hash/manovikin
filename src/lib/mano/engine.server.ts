@@ -12,6 +12,7 @@ import {
   type ManoComplexity,
   type ManoStage,
 } from "./mano1";
+import { throttle } from "@/lib/mcp/throttle";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
