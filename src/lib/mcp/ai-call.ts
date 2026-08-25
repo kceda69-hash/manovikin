@@ -3,22 +3,11 @@
 // at build time and on Worker cold start, where secrets are absent.
 
 import { routeModel } from "@/lib/model-router";
-
-const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-
 // Best-effort per-isolate throttle so the public MCP endpoint cannot be used
 // as an unlimited free model proxy.
-const calls: number[] = [];
-const MAX_CALLS_PER_MIN = 20;
+import { throttle } from "./throttle";
 
-function throttle() {
-  const now = Date.now();
-  while (calls.length && calls[0] < now - 60_000) calls.shift();
-  if (calls.length >= MAX_CALLS_PER_MIN) {
-    throw new Error("MANOVIK MCP is busy (rate limit reached). Retry in a minute.");
-  }
-  calls.push(now);
-}
+const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 export const MANOVIK_SYSTEM = `You are MANOVIK AI — a quantum-grade autonomous engineering agent, reached here through MANOVIK's MCP server by another AI assistant.
 
