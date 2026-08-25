@@ -125,6 +125,10 @@ export async function runMano(input: ManoRunInput): Promise<ManoRunResult> {
   const depth = input.depth ?? classifyMano(prompt, input.hasAttachments);
   const substrates = substrateFor(depth);
   const stages = stagesFor(depth);
+  // Each stage is a separate paid model call, so charge the shared per-isolate
+  // budget once per stage before any substrate is touched.
+  throttle(stages.length, "MANO 1.1");
+
   const maxTokens = input.maxTokens ?? 6000;
   const extra = input.system ? `\n\nADDITIONAL OPERATOR INSTRUCTION:\n${input.system}` : "";
 
