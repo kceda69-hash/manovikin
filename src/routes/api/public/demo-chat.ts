@@ -408,10 +408,11 @@ Rules: never invent files that weren't provided. If evidence is ambiguous, mark 
           // Custom system prompt override from DNA Prompt Editor — appended so
           // the base contract still enforces safety, then user overrides tone/shape.
           const system = customSystem
-            ? `${baseSystem}\n\n---\nUSER-OVERRIDE (from DNA Prompt Editor — obey unless it conflicts with safety rules above):\n${customSystem}`
-            : baseSystem;
+            ? `${MANO_CHAT_SYSTEM}\n\n${baseSystem}\n\n---\nUSER-OVERRIDE (from DNA Prompt Editor — obey unless it conflicts with safety rules above):\n${customSystem}`
+            : `${MANO_CHAT_SYSTEM}\n\n${baseSystem}`;
           const result = streamText({
-            model: gateway(MODEL_MAP[modelLabel]),
+            // MANO 1.1 runs the public demo too — substrate is compute only.
+            model: gateway(manoStreamChain(prompt)[0]!),
             system,
             prompt,
             temperature: mode === "plan" ? 0.5 : 0.3,
