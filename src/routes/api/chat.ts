@@ -4,7 +4,8 @@ import { convertToModelMessages, streamText, stepCountIs, tool, type UIMessage }
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
-import { routeModel, fallbackChainFor } from "@/lib/model-router";
+import { routeModel } from "@/lib/model-router";
+import { MANO_CHAT_SYSTEM, manoStreamChain } from "@/lib/mano/mano1";
 import { fullstackDoctrineFor } from "@/lib/fullstack-doctrine";
 import { redactMessage } from "@/lib/redact";
 import { sandbox } from "@/lib/agent-tools";
