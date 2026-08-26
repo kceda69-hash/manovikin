@@ -277,8 +277,7 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           typeof body.target === "string" && ["web", "ios", "android"].includes(body.target)
             ? body.target
             : "web";
-        const modelLabel =
-          typeof body.model === "string" && MODEL_MAP[body.model] ? body.model : "Auto";
+        const modelLabel = MANO_LABEL;
         const mode =
           body.mode === "ship"
             ? "ship"
