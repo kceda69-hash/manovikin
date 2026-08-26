@@ -35,14 +35,9 @@ const TARGET_LABEL: Record<string, string> = {
 
 // Whitelist of demo model ids. "Claude Fable 5" is a marketing alias mapped to
 // the strongest available OpenAI reasoning model in the gateway catalog.
-const MODEL_MAP: Record<string, string> = {
-  // gpt-5.4 streams plain text on the chat path (reasoning-only gpt-5.5 can
-  // return empty text through streamText without the Responses API).
-  "Claude Fable 5": "openai/gpt-5.4",
-  "GPT-5.5": "openai/gpt-5.4",
-  "Gemini 3 Pro": "google/gemini-3.1-pro-preview",
-  Auto: "google/gemini-3.7-flash",
-};
+// Every MANOVIK surface runs MANOVIK's own model, so there is no model choice
+// to expose here — the label the prompts quote is always MANO 1.1.
+const MANO_LABEL = `MANO 1.1 (${MANO_MODEL_ID} v${MANO_VERSION})`;
 
 function systemPrompt(target: string, modelLabel: string, connected: boolean) {
   const goal = TARGET_LABEL[target] ?? TARGET_LABEL.web;
