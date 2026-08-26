@@ -371,8 +371,9 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const gateway = createLovableAiGatewayProvider(apiKey);
-        // BRAIN v∞ — task-aware routing. Cheapest capable model per prompt +
-        // OpenAI priority tier where supported for low TTFT. Env override wins.
+        // MANO 1.1 — every MANOVIK surface runs MANOVIK's own model. The
+        // substrates below are interchangeable compute only; callers see
+        // `manovik/mano-1.1`. Env override still wins for self-hosting.
         const forcedModel = process.env.MANOVIK_AI_MODEL;
         const lastUserText = lastUserMsg ? summarize(lastUserMsg as any) : "";
         const hasAttachments = !!(lastUserMsg as any)?.parts?.some(
@@ -381,7 +382,7 @@ export const Route = createFileRoute("/api/chat")({
         const route = routeModel(lastUserText, { forceModel: forcedModel, hasAttachments });
         const modelCandidates = forcedModel
           ? Array.from(new Set([forcedModel, ...MODEL_FALLBACK_CHAIN]))
-          : fallbackChainFor(route);
+          : manoStreamChain(lastUserText, hasAttachments);
         const primaryModel = modelCandidates[0];
 
         // Build AI SDK tools from the sandbox registry. Every tool execution
