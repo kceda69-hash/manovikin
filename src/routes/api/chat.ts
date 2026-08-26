@@ -4,7 +4,8 @@ import { convertToModelMessages, streamText, stepCountIs, tool, type UIMessage }
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
-import { routeModel, fallbackChainFor } from "@/lib/model-router";
+import { routeModel } from "@/lib/model-router";
+import { MANO_CHAT_SYSTEM, manoStreamChain } from "@/lib/mano/mano1";
 import { fullstackDoctrineFor } from "@/lib/fullstack-doctrine";
 import { redactMessage } from "@/lib/redact";
 import { sandbox } from "@/lib/agent-tools";
@@ -371,8 +372,9 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const gateway = createLovableAiGatewayProvider(apiKey);
-        // BRAIN v∞ — task-aware routing. Cheapest capable model per prompt +
-        // OpenAI priority tier where supported for low TTFT. Env override wins.
+        // MANO 1.1 — every MANOVIK surface runs MANOVIK's own model. The
+        // substrates below are interchangeable compute only; callers see
+        // `manovik/mano-1.1`. Env override still wins for self-hosting.
         const forcedModel = process.env.MANOVIK_AI_MODEL;
         const lastUserText = lastUserMsg ? summarize(lastUserMsg as any) : "";
         const hasAttachments = !!(lastUserMsg as any)?.parts?.some(
@@ -381,7 +383,7 @@ export const Route = createFileRoute("/api/chat")({
         const route = routeModel(lastUserText, { forceModel: forcedModel, hasAttachments });
         const modelCandidates = forcedModel
           ? Array.from(new Set([forcedModel, ...MODEL_FALLBACK_CHAIN]))
-          : fallbackChainFor(route);
+          : manoStreamChain(lastUserText, hasAttachments);
         const primaryModel = modelCandidates[0];
 
         // Build AI SDK tools from the sandbox registry. Every tool execution
@@ -447,6 +449,8 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const systemPrompt =
+          MANO_CHAT_SYSTEM +
+          "\n\n" +
           SYSTEM_PROMPT +
           fullstackDoctrineFor(lastUserText || lastText) +
           langMemoryBlock +

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { streamText } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
+import { MANO_CHAT_SYSTEM, MANO_MODEL_ID, MANO_VERSION, manoStreamChain } from "@/lib/mano/mano1";
 
 // Public, unauthenticated streaming demo endpoint that powers the landing-page
 // PromptComposer. It is intentionally lightweight:
@@ -34,14 +35,9 @@ const TARGET_LABEL: Record<string, string> = {
 
 // Whitelist of demo model ids. "Claude Fable 5" is a marketing alias mapped to
 // the strongest available OpenAI reasoning model in the gateway catalog.
-const MODEL_MAP: Record<string, string> = {
-  // gpt-5.4 streams plain text on the chat path (reasoning-only gpt-5.5 can
-  // return empty text through streamText without the Responses API).
-  "Claude Fable 5": "openai/gpt-5.4",
-  "GPT-5.5": "openai/gpt-5.4",
-  "Gemini 3 Pro": "google/gemini-3.1-pro-preview",
-  Auto: "google/gemini-3.7-flash",
-};
+// Every MANOVIK surface runs MANOVIK's own model, so there is no model choice
+// to expose here — the label the prompts quote is always MANO 1.1.
+const MANO_LABEL = `MANO 1.1 (${MANO_MODEL_ID} v${MANO_VERSION})`;
 
 function systemPrompt(target: string, modelLabel: string, connected: boolean) {
   const goal = TARGET_LABEL[target] ?? TARGET_LABEL.web;
@@ -281,8 +277,7 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           typeof body.target === "string" && ["web", "ios", "android"].includes(body.target)
             ? body.target
             : "web";
-        const modelLabel =
-          typeof body.model === "string" && MODEL_MAP[body.model] ? body.model : "Auto";
+        const modelLabel = MANO_LABEL;
         const mode =
           body.mode === "ship"
             ? "ship"
@@ -408,13 +403,23 @@ Rules: never invent files that weren't provided. If evidence is ambiguous, mark 
           // Custom system prompt override from DNA Prompt Editor — appended so
           // the base contract still enforces safety, then user overrides tone/shape.
           const system = customSystem
-            ? `${baseSystem}\n\n---\nUSER-OVERRIDE (from DNA Prompt Editor — obey unless it conflicts with safety rules above):\n${customSystem}`
-            : baseSystem;
+            ? `${MANO_CHAT_SYSTEM}\n\n${baseSystem}\n\n---\nUSER-OVERRIDE (from DNA Prompt Editor — obey unless it conflicts with safety rules above):\n${customSystem}`
+            : `${MANO_CHAT_SYSTEM}\n\n${baseSystem}`;
+          // MANO 1.1 runs the public demo too — substrate is compute only.
+          const substrate = manoStreamChain(prompt)[0]!;
+          const isOpenAiSubstrate = substrate.startsWith("openai/");
           const result = streamText({
-            model: gateway(MODEL_MAP[modelLabel]),
+            model: gateway(substrate),
             system,
             prompt,
-            temperature: mode === "plan" ? 0.5 : 0.3,
+            // OpenAI substrates only accept the default temperature; gpt-5.6
+            // additionally needs reasoning switched off on the chat path.
+            ...(isOpenAiSubstrate
+              ? {}
+              : { temperature: mode === "plan" ? 0.5 : 0.3 }),
+            ...(substrate.startsWith("openai/gpt-5.6")
+              ? { providerOptions: { lovable: { reasoningEffort: "none" } } }
+              : {}),
           });
           return result.toTextStreamResponse({
             headers: {

@@ -110,3 +110,29 @@ export function stagesFor(complexity: ManoComplexity): ManoStage[] {
 export function substrateFor(complexity: ManoComplexity): Record<ManoStage, string> {
   return complexity === "lite" ? MANO_SUBSTRATE_LITE : MANO_SUBSTRATE;
 }
+
+/**
+ * Single-pass variant of the MANO cycle, for streaming surfaces (chat) where
+ * the four-stage engine cannot be used without killing token-by-token output.
+ * The plan / adversary / synthesis stages are folded into one internal protocol.
+ */
+export const MANO_CHAT_SYSTEM = `${MANO_IDENTITY}
+
+MANO INFERENCE CYCLE (run internally, in this order, before and while you write):
+1. PLAN — the real goal, the stack, the hard constraints, and the smallest independently verifiable units. State assumptions instead of asking.
+2. DRAFT — execute the plan completely. No placeholders, no "TODO", no "rest unchanged": imports, types, error handling and edge cases included.
+3. ADVERSARY — review your own draft as a hostile reviewer: correctness, type errors, null/undefined, off-by-one, async races, unhandled rejections, injection, N+1, leaks, missing cleanup, wrong API usage, missed requirements. Fix every defect silently.
+4. SYNTHESIS — deliver only the corrected result, then a short verification path (command / test / expected output), then the single next actionable step. Never mention the stages, the review, or any underlying model.
+
+Output style: clean markdown, fenced code blocks with language tags, tables where they help.`;
+
+/**
+ * Ordered substrate chain MANO 1.1 uses on streaming surfaces: the depth's
+ * draft substrate first, then progressively cheaper/faster substitutes.
+ */
+export function manoStreamChain(prompt: string, hasAttachments = false): string[] {
+  const depth = classifyMano(prompt, hasAttachments);
+  const primary = substrateFor(depth).draft;
+  const chain = [primary, MANO_SUBSTRATE_LITE.draft, "google/gemini-3.5-flash"];
+  return Array.from(new Set(chain));
+}

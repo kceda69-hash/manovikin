@@ -42,10 +42,25 @@ export type AskOptions = {
 export type AskResult = { text: string; model: string; tier: string };
 
 /**
- * Call MANOVIK's brain through the AI gateway (non-streaming).
- * Reads secrets inside the function — never at module scope.
+ * Call MANOVIK's brain (non-streaming).
+ *
+ * Default path: MANO 1.1 — MANOVIK's own model and multi-stage inference cycle.
+ * Only an explicit substrate override (`opts.model` or MANOVIK_AI_MODEL) drops
+ * to a single raw substrate call. Reads secrets inside the function.
  */
 export async function askManovik(opts: AskOptions): Promise<AskResult> {
+  const override = opts.model ?? process.env.MANOVIK_AI_MODEL;
+  if (!override) {
+    const { runMano } = await import("@/lib/mano/engine.server");
+    const result = await runMano({
+      prompt: opts.prompt,
+      system: opts.system,
+      hasAttachments: opts.hasAttachments,
+      maxTokens: opts.maxTokens,
+    });
+    return { text: result.text, model: result.model, tier: result.depth };
+  }
+
   throttle();
 
   const sovereignBaseUrl = process.env.MANOVIK_AI_BASE_URL;
