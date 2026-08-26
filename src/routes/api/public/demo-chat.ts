@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { streamText } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
+import { MANO_CHAT_SYSTEM, MANO_MODEL_ID, MANO_VERSION, manoStreamChain } from "@/lib/mano/mano1";
 
 // Public, unauthenticated streaming demo endpoint that powers the landing-page
 // PromptComposer. It is intentionally lightweight:
