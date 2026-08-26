@@ -405,8 +405,10 @@ Rules: never invent files that weren't provided. If evidence is ambiguous, mark 
           const system = customSystem
             ? `${MANO_CHAT_SYSTEM}\n\n${baseSystem}\n\n---\nUSER-OVERRIDE (from DNA Prompt Editor — obey unless it conflicts with safety rules above):\n${customSystem}`
             : `${MANO_CHAT_SYSTEM}\n\n${baseSystem}`;
+          // MANO 1.1 runs the public demo too — substrate is compute only.
+          const substrate = manoStreamChain(prompt)[0]!;
+          const isOpenAiSubstrate = substrate.startsWith("openai/");
           const result = streamText({
-            // MANO 1.1 runs the public demo too — substrate is compute only.
             model: gateway(substrate),
             system,
             prompt,
