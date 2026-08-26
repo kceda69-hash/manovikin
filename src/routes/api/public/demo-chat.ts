@@ -407,10 +407,17 @@ Rules: never invent files that weren't provided. If evidence is ambiguous, mark 
             : `${MANO_CHAT_SYSTEM}\n\n${baseSystem}`;
           const result = streamText({
             // MANO 1.1 runs the public demo too — substrate is compute only.
-            model: gateway(manoStreamChain(prompt)[0]!),
+            model: gateway(substrate),
             system,
             prompt,
-            temperature: mode === "plan" ? 0.5 : 0.3,
+            // OpenAI substrates only accept the default temperature; gpt-5.6
+            // additionally needs reasoning switched off on the chat path.
+            ...(isOpenAiSubstrate
+              ? {}
+              : { temperature: mode === "plan" ? 0.5 : 0.3 }),
+            ...(substrate.startsWith("openai/gpt-5.6")
+              ? { providerOptions: { lovable: { reasoningEffort: "none" } } }
+              : {}),
           });
           return result.toTextStreamResponse({
             headers: {
