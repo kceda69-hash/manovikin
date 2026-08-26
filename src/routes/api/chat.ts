@@ -448,6 +448,8 @@ export const Route = createFileRoute("/api/chat")({
         }
 
         const systemPrompt =
+          MANO_CHAT_SYSTEM +
+          "\n\n" +
           SYSTEM_PROMPT +
           fullstackDoctrineFor(lastUserText || lastText) +
           langMemoryBlock +
