@@ -149,7 +149,11 @@ export async function runMano(input: ManoRunInput): Promise<ManoRunResult> {
     else user = `TASK:\n${prompt}\n\nDRAFT:\n${draft}\n\nREVIEW FINDINGS:\n${critique}`;
 
     const tokens = stage === "plan" || stage === "adversary" ? Math.min(maxTokens, 1500) : maxTokens;
-    const { text, substrate } = await callWithFallback(substrates[stage], system, user, tokens);
+    // When MANOVIK's own trained weights are deployed, MANOVIK_AI_MODEL_ID
+    // pins every stage to them behind the same mano-1.1 id; otherwise the
+    // stage runs on its assigned interchangeable substrate.
+    const target = process.env.MANOVIK_AI_MODEL_ID?.trim() || substrates[stage];
+    const { text, substrate } = await callWithFallback(target, system, user, tokens);
 
     if (stage === "plan") plan = text;
     else if (stage === "draft") {
