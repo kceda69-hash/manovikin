@@ -28,6 +28,7 @@ import { Route as SeoRouteImport } from './routes/seo'
 import { Route as RefundRouteImport } from './routes/refund'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MemoryRouteImport } from './routes/memory'
+import { Route as McpServersListRouteImport } from './routes/mcp-servers-list'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KeysRouteImport } from './routes/keys'
@@ -179,6 +180,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const MemoryRoute = MemoryRouteImport.update({
   id: '/memory',
   path: '/memory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpServersListRoute = McpServersListRouteImport.update({
+  id: '/mcp-servers-list',
+  path: '/mcp-servers-list',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -507,6 +513,7 @@ export interface FileRoutesByFullPath {
   '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/mcp-servers-list': typeof McpServersListRoute
   '/memory': typeof MemoryRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
@@ -585,6 +592,7 @@ export interface FileRoutesByTo {
   '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/mcp-servers-list': typeof McpServersListRoute
   '/memory': typeof MemoryRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
@@ -664,6 +672,7 @@ export interface FileRoutesById {
   '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
   '/mcp': typeof McpRoute
+  '/mcp-servers-list': typeof McpServersListRoute
   '/memory': typeof MemoryRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
@@ -744,6 +753,7 @@ export interface FileRouteTypes {
     | '/keys'
     | '/login'
     | '/mcp'
+    | '/mcp-servers-list'
     | '/memory'
     | '/privacy'
     | '/refund'
@@ -822,6 +832,7 @@ export interface FileRouteTypes {
     | '/keys'
     | '/login'
     | '/mcp'
+    | '/mcp-servers-list'
     | '/memory'
     | '/privacy'
     | '/refund'
@@ -900,6 +911,7 @@ export interface FileRouteTypes {
     | '/keys'
     | '/login'
     | '/mcp'
+    | '/mcp-servers-list'
     | '/memory'
     | '/privacy'
     | '/refund'
@@ -979,6 +991,7 @@ export interface RootRouteChildren {
   KeysRoute: typeof KeysRoute
   LoginRoute: typeof LoginRoute
   McpRoute: typeof McpRoute
+  McpServersListRoute: typeof McpServersListRoute
   MemoryRoute: typeof MemoryRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundRoute: typeof RefundRoute
@@ -1167,6 +1180,13 @@ declare module '@tanstack/react-router' {
       path: '/memory'
       fullPath: '/memory'
       preLoaderRoute: typeof MemoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp-servers-list': {
+      id: '/mcp-servers-list'
+      path: '/mcp-servers-list'
+      fullPath: '/mcp-servers-list'
+      preLoaderRoute: typeof McpServersListRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -1595,6 +1615,7 @@ const rootRouteChildren: RootRouteChildren = {
   KeysRoute: KeysRoute,
   LoginRoute: LoginRoute,
   McpRoute: McpRoute,
+  McpServersListRoute: McpServersListRoute,
   MemoryRoute: MemoryRoute,
   PrivacyRoute: PrivacyRoute,
   RefundRoute: RefundRoute,

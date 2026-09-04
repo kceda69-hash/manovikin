@@ -112,7 +112,7 @@ export function sitemapMetadataForPath(path: string): Omit<SitemapEntry, "path">
     return { changefreq: "weekly", priority: "0.9" };
   }
 
-  if (path === "/case-studies") {
+  if (path === "/case-studies" || path === "/mcp-servers-list") {
     return { changefreq: "monthly", priority: "0.8" };
   }
 
