@@ -18,6 +18,7 @@ const PAGES = [
   { path: "/ai-coding-assistant", title: "AI Coding Assistant", keywords: ["ai", "coding", "assistant"] },
   { path: "/best-ai-coding-agent", title: "Best AI Coding Agent", keywords: ["best", "coding", "agent"] },
   { path: "/blog/mcp-guide", title: "MCP Servers with MANOVIK", keywords: ["mcp", "guide", "servers"] },
+  { path: "/mcp-servers-list", title: "MCP Servers List", keywords: ["mcp", "servers", "list", "directory"] },
   { path: "/blog/self-hosting-ai-with-ollama", title: "Self-Hosting AI with Ollama", keywords: ["ollama", "self-host"] },
   { path: "/blog/best-ai-coding-agents", title: "Best AI Coding Agents", keywords: ["blog", "coding", "agents"] },
   { path: "/blog/ai-pricing-comparison", title: "AI Pricing Comparison", keywords: ["pricing", "comparison"] },
