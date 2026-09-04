@@ -143,8 +143,9 @@ function MCPGuidePost() {
 
         <h2>Next steps</h2>
         <p>
-          Read the <Link to="/setup">setup guide</Link> to install MANOVIK, then browse the
-          official MCP server registry to pick your first three tools.
+          Read the <Link to="/setup">setup guide</Link> to install MANOVIK, then pick your first
+          three tools from the curated{" "}
+          <Link to="/mcp-servers-list">MCP servers list</Link>.
         </p>
       </article>
     </main>
