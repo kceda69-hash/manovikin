@@ -90,15 +90,20 @@ STAGE: PLAN. Do not answer the task. Output a compact execution plan (max 12 lin
   draft: `${MANO_IDENTITY}
 
 STAGE: DRAFT. Execute the plan and produce the complete answer.
-Rules: no placeholders, no "TODO", no "rest unchanged". Include imports, types, error handling and edge cases.
-Use clean markdown, fenced code blocks with language tags, tables when they help.`,
+Before writing, build a silent requirement ledger: every explicit ask, every implied ask, every constraint. Satisfy each one; drop none.
+Rules: no placeholders, no "TODO", no "rest unchanged". Include imports, types, error handling, edge cases, and cleanup.
+Code must run exactly as delivered: complete files or exact diffs, correct API usage for the stated versions, no invented libraries, flags or fields.
+Prefer the simplest design that meets every requirement; state assumptions inline instead of asking questions.
+Use clean markdown, fenced code blocks with language tags, tables when they help. When a schema or format is requested, match it exactly with no extra prose.`,
 
   adversary: `${MANO_IDENTITY}
 
 STAGE: ADVERSARY. You are a hostile reviewer of the draft below. Do not rewrite it.
 List only concrete defects, each on one line as "SEVERITY | WHERE | WHAT | FIX":
-correctness, type errors, null/undefined, off-by-one, async races, unhandled rejections, injection, N+1, leaks, missing cleanup, wrong API usage, unverifiable claims, missed requirements.
+correctness, type errors, null/undefined, off-by-one, async races, unhandled rejections, injection, N+1, leaks, missing cleanup, wrong API usage, invented APIs, unverifiable claims, dropped requirements, format violations.
+Check the draft against every requirement in the task; a missed requirement is a CRITICAL defect.
 If the draft is sound, output exactly: NO DEFECTS.`,
+
 
   synthesis: `${MANO_IDENTITY}
 
@@ -132,6 +137,48 @@ export function stagesFor(complexity: ManoComplexity): ManoStage[] {
 
 export function substrateFor(complexity: ManoComplexity): Record<ManoStage, string> {
   return complexity === "lite" ? MANO_SUBSTRATE_LITE : MANO_SUBSTRATE;
+}
+
+/** Task domain — decides which compute carries the heavy draft stage. */
+export type ManoDomain = "code" | "reasoning" | "vision" | "writing" | "data" | "general";
+
+const DOMAIN_HINTS: Array<[ManoDomain, RegExp]> = [
+  ["code", /\b(code|function|class|typescript|javascript|python|sql|api|bug|error|stack ?trace|refactor|migration|deploy|build|test|component|repo|regex)\b/i],
+  ["reasoning", /\b(prove|proof|theorem|algorithm|complexity|big-?o|optimi[sz]e|architecture|distributed|trade-?off|strategy|derive|calculate)\b/i],
+  ["data", /\b(json|csv|schema|extract|parse|table|dataset|normalize|aggregate|report on the data)\b/i],
+  ["writing", /\b(write|blog|essay|email|translate|rewrite|copy|headline|summar(y|ise|ize)|story|script)\b/i],
+];
+
+/** Pure domain classifier — no I/O, safe on client and server. */
+export function classifyDomain(prompt: string, hasAttachments = false): ManoDomain {
+  if (hasAttachments) return "vision";
+  const p = (prompt ?? "").trim();
+  for (const [domain, re] of DOMAIN_HINTS) if (re.test(p)) return domain;
+  return "general";
+}
+
+/** Strongest approved compute per domain for the draft (answer-producing) stage. */
+export const MANO_DOMAIN_DRAFT: Record<ManoDomain, string> = {
+  code: "openai/gpt-5.6-sol",
+  reasoning: "openai/gpt-5.6-sol",
+  vision: "google/gemini-3.1-pro-preview",
+  writing: "openai/gpt-5.6-terra",
+  data: "google/gemini-3.1-pro-preview",
+  general: "openai/gpt-5.6-terra",
+};
+
+/**
+ * Full substrate map for one request: depth chooses the baseline, domain
+ * upgrades the draft stage to the strongest compute for that kind of work.
+ * Lite runs stay on the cheap map — latency matters more than depth there.
+ */
+export function routeMano(
+  complexity: ManoComplexity,
+  domain: ManoDomain,
+): Record<ManoStage, string> {
+  const base = substrateFor(complexity);
+  if (complexity === "lite") return base;
+  return { ...base, draft: MANO_DOMAIN_DRAFT[domain] };
 }
 
 /**
