@@ -202,7 +202,7 @@ Output style: clean markdown, fenced code blocks with language tags, tables wher
  */
 export function manoStreamChain(prompt: string, hasAttachments = false): string[] {
   const depth = classifyMano(prompt, hasAttachments);
-  const primary = substrateFor(depth).draft;
+  const primary = routeMano(depth, classifyDomain(prompt, hasAttachments)).draft;
   const chain = [primary, MANO_SUBSTRATE_LITE.draft, "google/gemini-3.5-flash"];
   return Array.from(new Set(chain));
 }
