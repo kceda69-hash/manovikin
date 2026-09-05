@@ -7,8 +7,9 @@ import {
   MANO_VERSION,
   MANO_STAGE_PROMPT,
   classifyMano,
+  classifyDomain,
+  routeMano,
   stagesFor,
-  substrateFor,
   type ManoComplexity,
   type ManoStage,
 } from "./mano1";
@@ -32,6 +33,7 @@ export type ManoRunResult = {
   model: string;
   version: string;
   depth: ManoComplexity;
+  domain: string;
   stages: Array<{ stage: ManoStage; substrate: string; ms: number }>;
   text: string;
 };
@@ -123,7 +125,8 @@ export async function runMano(input: ManoRunInput): Promise<ManoRunResult> {
   if (!prompt) throw new Error("MANO 1.1 requires a prompt.");
 
   const depth = input.depth ?? classifyMano(prompt, input.hasAttachments);
-  const substrates = substrateFor(depth);
+  const domain = classifyDomain(prompt, input.hasAttachments);
+  const substrates = routeMano(depth, domain);
   const stages = stagesFor(depth);
   // Each stage is a separate paid model call, so charge the shared per-isolate
   // budget once per stage before any substrate is touched.
@@ -173,5 +176,5 @@ export async function runMano(input: ManoRunInput): Promise<ManoRunResult> {
     trace.push({ stage, substrate, ms: Date.now() - started });
   }
 
-  return { model: MANO_MODEL_ID, version: MANO_VERSION, depth, stages: trace, text: final };
+  return { model: MANO_MODEL_ID, version: MANO_VERSION, depth, domain, stages: trace, text: final };
 }

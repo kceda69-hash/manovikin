@@ -143,6 +143,7 @@ function PlaygroundPage() {
               <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span className="rounded bg-muted px-2 py-1 font-mono">{result.model}</span>
                 <span className="rounded bg-muted px-2 py-1">depth: {result.depth}</span>
+                <span className="rounded bg-muted px-2 py-1">domain: {result.domain}</span>
                 <span className="rounded bg-muted px-2 py-1">{result.totalMs} ms total</span>
               </div>
               <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap break-words text-sm leading-relaxed">
@@ -191,6 +192,18 @@ function PlaygroundPage() {
                 Run a prompt to see how MANO 1.1 spent its passes.
               </p>
             )}
+          </div>
+
+          <div className="rounded-lg border border-border bg-card p-4">
+            <h2 className="text-sm font-semibold">Capabilities</h2>
+            <ul className="mt-3 space-y-2 text-sm">
+              {(model.data?.capabilities ?? []).map((c) => (
+                <li key={c.id}>
+                  <span className="font-medium">{c.label}</span>
+                  <p className="text-xs text-muted-foreground">{c.detail}</p>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="rounded-lg border border-border bg-card p-4">

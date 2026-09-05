@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { MANO_MODEL_ID, MANO_SKILLS, MANO_VERSION } from "./mano1";
+import { MANO_CAPABILITIES, MANO_MODEL_ID, MANO_SKILLS, MANO_VERSION } from "./mano1";
 
 const playgroundInput = z.object({
   prompt: z.string().trim().min(1).max(20000),
@@ -38,6 +38,7 @@ export const getManoCard = createServerFn({ method: "GET" }).handler(async () =>
     model: MANO_MODEL_ID,
     version: MANO_VERSION,
     skills: MANO_SKILLS,
+    capabilities: MANO_CAPABILITIES,
     serving: sovereign ? ("manovik-cloud" as const) : ("substrate" as const),
     weights: process.env.MANOVIK_AI_MODEL_ID ? "manovik-trained" : "composite",
   };

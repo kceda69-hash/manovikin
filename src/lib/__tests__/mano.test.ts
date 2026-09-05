@@ -5,7 +5,11 @@ import {
   MANO_STAGE_PROMPT,
   MANO_SUBSTRATE,
   MANO_SUBSTRATE_LITE,
+  MANO_CAPABILITIES,
+  MANO_DOMAIN_DRAFT,
+  classifyDomain,
   classifyMano,
+  routeMano,
   stagesFor,
   substrateFor,
 } from "@/lib/mano/mano1";
@@ -17,7 +21,11 @@ describe("MANO 1.1", () => {
   });
 
   it("only uses approved substrates", () => {
-    for (const model of [...Object.values(MANO_SUBSTRATE), ...Object.values(MANO_SUBSTRATE_LITE)]) {
+    for (const model of [
+      ...Object.values(MANO_SUBSTRATE),
+      ...Object.values(MANO_SUBSTRATE_LITE),
+      ...Object.values(MANO_DOMAIN_DRAFT),
+    ]) {
       expect(APPROVED_MODEL_IDS).toContain(model);
     }
   });
@@ -45,6 +53,21 @@ describe("MANO 1.1", () => {
       expect(prompt).toContain("MANO 1.1");
       expect(prompt).not.toMatch(/(openai|google)\//);
     }
+  });
+
+  it("routes each domain to its strongest draft compute", () => {
+    expect(classifyDomain("fix this typescript error")).toBe("code");
+    expect(classifyDomain("prove the algorithm is O(n log n)")).toBe("reasoning");
+    expect(classifyDomain("write a blog post about rain")).toBe("writing");
+    expect(classifyDomain("what is in this", true)).toBe("vision");
+    expect(classifyDomain("say something nice")).toBe("general");
+    expect(routeMano("deep", "code").draft).toBe(MANO_DOMAIN_DRAFT.code);
+    expect(routeMano("lite", "code").draft).toBe(MANO_SUBSTRATE_LITE.draft);
+    expect(routeMano("deep", "code").adversary).toBe(MANO_SUBSTRATE.adversary);
+  });
+
+  it("declares a capability doctrine", () => {
+    expect(MANO_CAPABILITIES.length).toBeGreaterThanOrEqual(6);
   });
 
   it("declares a skill surface", () => {
