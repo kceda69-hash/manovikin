@@ -14,6 +14,7 @@ Disallow: /keys
 Disallow: /team
 Disallow: /account
 Disallow: /dashboard
+Disallow: /playground
 Disallow: /receipt/
 Disallow: /api/
 Disallow: /auth/
