@@ -115,6 +115,24 @@ async function callWithFallback(
 }
 
 /**
+ * Single substrate completion under MANO's identity, with fallbacks.
+ * Used by the autonomous loop for cheap control-plane decisions.
+ */
+export async function manoComplete(
+  model: string,
+  system: string,
+  user: string,
+  maxTokens = 1200,
+): Promise<string> {
+  throttle(1, "MANO 1.1");
+  const target = process.env.MANOVIK_AI_MODEL_ID?.trim() || model;
+  const { text } = await callWithFallback(target, system, user, maxTokens);
+  return text;
+}
+
+
+
+/**
  * Run MANO 1.1 end to end.
  * lite     → draft only
  * standard → draft → adversary → synthesis
