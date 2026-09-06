@@ -28,6 +28,7 @@ import { Route as SeoRouteImport } from './routes/seo'
 import { Route as RefundRouteImport } from './routes/refund'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PlaygroundRouteImport } from './routes/playground'
+import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as MemoryRouteImport } from './routes/memory'
 import { Route as McpServersListRouteImport } from './routes/mcp-servers-list'
 import { Route as McpRouteImport } from './routes/mcp'
@@ -182,6 +183,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PlaygroundRoute = PlaygroundRouteImport.update({
   id: '/playground',
   path: '/playground',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionsRoute = MissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MemoryRoute = MemoryRouteImport.update({
@@ -527,6 +533,7 @@ export interface FileRoutesByFullPath {
   '/mcp': typeof McpRoute
   '/mcp-servers-list': typeof McpServersListRoute
   '/memory': typeof MemoryRoute
+  '/missions': typeof MissionsRoute
   '/playground': typeof PlaygroundRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
@@ -608,6 +615,7 @@ export interface FileRoutesByTo {
   '/mcp': typeof McpRoute
   '/mcp-servers-list': typeof McpServersListRoute
   '/memory': typeof MemoryRoute
+  '/missions': typeof MissionsRoute
   '/playground': typeof PlaygroundRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
@@ -690,6 +698,7 @@ export interface FileRoutesById {
   '/mcp': typeof McpRoute
   '/mcp-servers-list': typeof McpServersListRoute
   '/memory': typeof MemoryRoute
+  '/missions': typeof MissionsRoute
   '/playground': typeof PlaygroundRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
@@ -773,6 +782,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/mcp-servers-list'
     | '/memory'
+    | '/missions'
     | '/playground'
     | '/privacy'
     | '/refund'
@@ -854,6 +864,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/mcp-servers-list'
     | '/memory'
+    | '/missions'
     | '/playground'
     | '/privacy'
     | '/refund'
@@ -935,6 +946,7 @@ export interface FileRouteTypes {
     | '/mcp'
     | '/mcp-servers-list'
     | '/memory'
+    | '/missions'
     | '/playground'
     | '/privacy'
     | '/refund'
@@ -1017,6 +1029,7 @@ export interface RootRouteChildren {
   McpRoute: typeof McpRoute
   McpServersListRoute: typeof McpServersListRoute
   MemoryRoute: typeof MemoryRoute
+  MissionsRoute: typeof MissionsRoute
   PlaygroundRoute: typeof PlaygroundRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundRoute: typeof RefundRoute
@@ -1206,6 +1219,13 @@ declare module '@tanstack/react-router' {
       path: '/playground'
       fullPath: '/playground'
       preLoaderRoute: typeof PlaygroundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/missions': {
+      id: '/missions'
+      path: '/missions'
+      fullPath: '/missions'
+      preLoaderRoute: typeof MissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/memory': {
@@ -1657,6 +1677,7 @@ const rootRouteChildren: RootRouteChildren = {
   McpRoute: McpRoute,
   McpServersListRoute: McpServersListRoute,
   MemoryRoute: MemoryRoute,
+  MissionsRoute: MissionsRoute,
   PlaygroundRoute: PlaygroundRoute,
   PrivacyRoute: PrivacyRoute,
   RefundRoute: RefundRoute,
