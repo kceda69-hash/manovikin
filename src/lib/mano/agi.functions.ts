@@ -89,6 +89,30 @@ export const listMissions = createServerFn({ method: "GET" })
     return { runs: runs.data ?? [], lessons: lessons.data ?? [] };
   });
 
+/** Compile past missions + lessons into MANO's active doctrine (self-training). */
+export const trainMano = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context as Ctx;
+    const { trainDoctrine } = await import("./training.server");
+    return await trainDoctrine(supabase, userId);
+  });
+
+/** The doctrine currently loaded into MANO's brain for this user. */
+export const getDoctrine = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context as Ctx;
+    const { data } = await supabase
+      .from("manovik_agi_doctrine")
+      .select("doctrine, runs_used, lessons_used, created_at")
+      .eq("user_id", userId)
+      .eq("active", true)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    return { doctrine: (data ?? [])[0] ?? null };
+  });
+
 /** Delete one learned lesson. */
 export const forgetLesson = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
