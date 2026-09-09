@@ -5,7 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { forgetLesson, listMissions, runMission } from "@/lib/mano/agi.functions";
+import { forgetLesson, getDoctrine, listMissions, runMission, trainMano } from "@/lib/mano/agi.functions";
 
 const TITLE = "MANO Missions — Autonomous Agent | MANOVIK";
 const DESC =
@@ -34,6 +34,8 @@ function MissionsPage() {
   const start = useServerFn(runMission);
   const list = useServerFn(listMissions);
   const forget = useServerFn(forgetLesson);
+  const train = useServerFn(trainMano);
+  const doctrineFn = useServerFn(getDoctrine);
   const qc = useQueryClient();
 
   const [goal, setGoal] = useState("");
@@ -41,6 +43,16 @@ function MissionsPage() {
   const [result, setResult] = useState<MissionResult | null>(null);
 
   const history = useQuery({ queryKey: ["missions"], queryFn: () => list({}) });
+  const doctrine = useQuery({ queryKey: ["mano-doctrine"], queryFn: () => doctrineFn({}) });
+
+  const training = useMutation({
+    mutationFn: () => train({}),
+    onSuccess: (d: { runsUsed: number; lessonsUsed: number }) => {
+      toast.success(`MANO retrained on ${d.runsUsed} missions and ${d.lessonsUsed} lessons.`);
+      void qc.invalidateQueries({ queryKey: ["mano-doctrine"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const run = useMutation({
     mutationFn: () => start({ data: { goal, maxSteps: steps } }),
@@ -126,6 +138,31 @@ function MissionsPage() {
           </div>
         </section>
       ) : null}
+
+      <section className="mt-10 rounded-xl border border-border bg-card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">MANO's trained doctrine</h2>
+          <Button variant="outline" onClick={() => training.mutate()} disabled={training.isPending}>
+            {training.isPending ? "Training…" : "Train MANO on past missions"}
+          </Button>
+        </div>
+        {doctrine.data?.doctrine ? (
+          <>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Compiled from {(doctrine.data.doctrine as any).runs_used} missions and{" "}
+              {(doctrine.data.doctrine as any).lessons_used} lessons. Loaded into every new mission.
+            </p>
+            <pre className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed">
+              {(doctrine.data.doctrine as any).doctrine}
+            </pre>
+          </>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">
+            No doctrine yet. Run missions, then train — MANO turns its own history into rules it
+            follows next time.
+          </p>
+        )}
+      </section>
 
       <section className="mt-10 grid gap-6 md:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5">

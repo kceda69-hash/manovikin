@@ -15,6 +15,7 @@ Disallow: /team
 Disallow: /account
 Disallow: /dashboard
 Disallow: /playground
+Disallow: /missions
 Disallow: /receipt/
 Disallow: /api/
 Disallow: /auth/

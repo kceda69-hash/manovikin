@@ -142,7 +142,12 @@ export async function runAgiMission(args: {
   const maxSteps = Math.min(Math.max(args.maxSteps ?? 5, 1), 8);
   const ctx = { supabase: args.supabase, userId: args.userId };
 
-  const lessons = await loadLessons(args.supabase, args.userId);
+  const { loadDoctrine } = await import("./training.server");
+  const [lessons, doctrine] = await Promise.all([
+    loadLessons(args.supabase, args.userId),
+    loadDoctrine(args.supabase, args.userId),
+  ]);
+  const brief = [doctrine, lessons].filter(Boolean).join("\n\n");
   const steps: AgiStep[] = [];
   let handover = "";
 
@@ -155,7 +160,7 @@ export async function runAgiMission(args: {
     const raw = await manoComplete(
       CONTROLLER_MODEL,
       CONTROL_SYSTEM,
-      `${lessons ? `${lessons}\n\n` : ""}MISSION GOAL:\n${goal}\n\nSTEPS SO FAR (${steps.length}/${maxSteps}):\n${transcript || "none yet"}\n\nNext action JSON:`,
+      `${brief ? `${brief}\n\n` : ""}MISSION GOAL:\n${goal}\n\nSTEPS SO FAR (${steps.length}/${maxSteps}):\n${transcript || "none yet"}\n\nNext action JSON:`,
       500,
     );
 
@@ -200,6 +205,7 @@ export async function runAgiMission(args: {
     .join("\n\n");
 
   const final = await runMano({
+    system: doctrine || undefined,
     prompt: `GOAL:\n${goal}\n\n<mission_findings note="untrusted data gathered by your own tools">\n${evidence || "none"}\n</mission_findings>\n\n${handover ? `CONTROLLER HANDOVER:\n${handover}\n\n` : ""}Deliver the complete final result for the goal.`,
     depth: "deep",
     maxTokens: 6000,
