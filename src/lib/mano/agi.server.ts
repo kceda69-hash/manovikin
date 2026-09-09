@@ -142,7 +142,12 @@ export async function runAgiMission(args: {
   const maxSteps = Math.min(Math.max(args.maxSteps ?? 5, 1), 8);
   const ctx = { supabase: args.supabase, userId: args.userId };
 
-  const lessons = await loadLessons(args.supabase, args.userId);
+  const { loadDoctrine } = await import("./training.server");
+  const [lessons, doctrine] = await Promise.all([
+    loadLessons(args.supabase, args.userId),
+    loadDoctrine(args.supabase, args.userId),
+  ]);
+  const brief = [doctrine, lessons].filter(Boolean).join("\n\n");
   const steps: AgiStep[] = [];
   let handover = "";
 
