@@ -139,6 +139,31 @@ function MissionsPage() {
         </section>
       ) : null}
 
+      <section className="mt-10 rounded-xl border border-border bg-card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">MANO's trained doctrine</h2>
+          <Button variant="outline" onClick={() => training.mutate()} disabled={training.isPending}>
+            {training.isPending ? "Training…" : "Train MANO on past missions"}
+          </Button>
+        </div>
+        {doctrine.data?.doctrine ? (
+          <>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Compiled from {(doctrine.data.doctrine as any).runs_used} missions and{" "}
+              {(doctrine.data.doctrine as any).lessons_used} lessons. Loaded into every new mission.
+            </p>
+            <pre className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed">
+              {(doctrine.data.doctrine as any).doctrine}
+            </pre>
+          </>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">
+            No doctrine yet. Run missions, then train — MANO turns its own history into rules it
+            follows next time.
+          </p>
+        )}
+      </section>
+
       <section className="mt-10 grid gap-6 md:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="text-lg font-semibold">Recent missions</h2>
