@@ -43,6 +43,16 @@ function MissionsPage() {
   const [result, setResult] = useState<MissionResult | null>(null);
 
   const history = useQuery({ queryKey: ["missions"], queryFn: () => list({}) });
+  const doctrine = useQuery({ queryKey: ["mano-doctrine"], queryFn: () => doctrineFn({}) });
+
+  const training = useMutation({
+    mutationFn: () => train({}),
+    onSuccess: (d: { runsUsed: number; lessonsUsed: number }) => {
+      toast.success(`MANO retrained on ${d.runsUsed} missions and ${d.lessonsUsed} lessons.`);
+      void qc.invalidateQueries({ queryKey: ["mano-doctrine"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const run = useMutation({
     mutationFn: () => start({ data: { goal, maxSteps: steps } }),
