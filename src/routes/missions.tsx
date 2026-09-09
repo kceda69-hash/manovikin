@@ -5,7 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { forgetLesson, listMissions, runMission } from "@/lib/mano/agi.functions";
+import { forgetLesson, getDoctrine, listMissions, runMission, trainMano } from "@/lib/mano/agi.functions";
 
 const TITLE = "MANO Missions — Autonomous Agent | MANOVIK";
 const DESC =
