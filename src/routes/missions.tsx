@@ -34,6 +34,8 @@ function MissionsPage() {
   const start = useServerFn(runMission);
   const list = useServerFn(listMissions);
   const forget = useServerFn(forgetLesson);
+  const train = useServerFn(trainMano);
+  const doctrineFn = useServerFn(getDoctrine);
   const qc = useQueryClient();
 
   const [goal, setGoal] = useState("");
