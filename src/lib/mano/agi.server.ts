@@ -160,7 +160,7 @@ export async function runAgiMission(args: {
     const raw = await manoComplete(
       CONTROLLER_MODEL,
       CONTROL_SYSTEM,
-      `${lessons ? `${lessons}\n\n` : ""}MISSION GOAL:\n${goal}\n\nSTEPS SO FAR (${steps.length}/${maxSteps}):\n${transcript || "none yet"}\n\nNext action JSON:`,
+      `${brief ? `${brief}\n\n` : ""}MISSION GOAL:\n${goal}\n\nSTEPS SO FAR (${steps.length}/${maxSteps}):\n${transcript || "none yet"}\n\nNext action JSON:`,
       500,
     );
 
