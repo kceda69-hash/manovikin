@@ -50,6 +50,7 @@ import { Route as AutonomousAiSoftwareEngineerRouteImport } from './routes/auton
 import { Route as AuditRouteImport } from './routes/audit'
 import { Route as AiWebsiteBuilderRouteImport } from './routes/ai-website-builder'
 import { Route as AiCodingAssistantRouteImport } from './routes/ai-coding-assistant'
+import { Route as AgiRoadmapRouteImport } from './routes/agi-roadmap'
 import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
@@ -296,6 +297,11 @@ const AiCodingAssistantRoute = AiCodingAssistantRouteImport.update({
   path: '/ai-coding-assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgiRoadmapRoute = AgiRoadmapRouteImport.update({
+  id: '/agi-roadmap',
+  path: '/agi-roadmap',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AgentsRoute = AgentsRouteImport.update({
   id: '/agents',
   path: '/agents',
@@ -512,6 +518,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
+  '/agi-roadmap': typeof AgiRoadmapRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/ai-website-builder': typeof AiWebsiteBuilderRoute
   '/audit': typeof AuditRoute
@@ -594,6 +601,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
+  '/agi-roadmap': typeof AgiRoadmapRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/ai-website-builder': typeof AiWebsiteBuilderRoute
   '/audit': typeof AuditRoute
@@ -677,6 +685,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/agents': typeof AgentsRoute
+  '/agi-roadmap': typeof AgiRoadmapRoute
   '/ai-coding-assistant': typeof AiCodingAssistantRoute
   '/ai-website-builder': typeof AiWebsiteBuilderRoute
   '/audit': typeof AuditRoute
@@ -761,6 +770,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/agents'
+    | '/agi-roadmap'
     | '/ai-coding-assistant'
     | '/ai-website-builder'
     | '/audit'
@@ -843,6 +853,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/agents'
+    | '/agi-roadmap'
     | '/ai-coding-assistant'
     | '/ai-website-builder'
     | '/audit'
@@ -925,6 +936,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/agents'
+    | '/agi-roadmap'
     | '/ai-coding-assistant'
     | '/ai-website-builder'
     | '/audit'
@@ -1008,6 +1020,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
   AgentsRoute: typeof AgentsRoute
+  AgiRoadmapRoute: typeof AgiRoadmapRoute
   AiCodingAssistantRoute: typeof AiCodingAssistantRoute
   AiWebsiteBuilderRoute: typeof AiWebsiteBuilderRoute
   AuditRoute: typeof AuditRoute
@@ -1375,6 +1388,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AiCodingAssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agi-roadmap': {
+      id: '/agi-roadmap'
+      path: '/agi-roadmap'
+      fullPath: '/agi-roadmap'
+      preLoaderRoute: typeof AgiRoadmapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/agents': {
       id: '/agents'
       path: '/agents'
@@ -1656,6 +1676,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
   AgentsRoute: AgentsRoute,
+  AgiRoadmapRoute: AgiRoadmapRoute,
   AiCodingAssistantRoute: AiCodingAssistantRoute,
   AiWebsiteBuilderRoute: AiWebsiteBuilderRoute,
   AuditRoute: AuditRoute,
