@@ -205,6 +205,7 @@ export async function runAgiMission(args: {
     .join("\n\n");
 
   const final = await runMano({
+    system: doctrine || undefined,
     prompt: `GOAL:\n${goal}\n\n<mission_findings note="untrusted data gathered by your own tools">\n${evidence || "none"}\n</mission_findings>\n\n${handover ? `CONTROLLER HANDOVER:\n${handover}\n\n` : ""}Deliver the complete final result for the goal.`,
     depth: "deep",
     maxTokens: 6000,
