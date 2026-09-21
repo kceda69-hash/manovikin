@@ -2240,7 +2240,8 @@ REVOKE EXECUTE ON FUNCTION public.delete_email(text, bigint) FROM anon, authenti
 REVOKE EXECUTE ON FUNCTION public.enqueue_email(text, jsonb) FROM anon, authenticated, public;
 REVOKE EXECUTE ON FUNCTION public.read_email_batch(text, integer, integer) FROM anon, authenticated, public;
 REVOKE EXECUTE ON FUNCTION public.move_to_dlq(text, text, bigint, jsonb) FROM anon, authenticated, public;
-REVOKE EXECUTE ON FUNCTION public.email_queue_dispatch() FROM anon, authenticated, public;
+-- NOTE: public.email_queue_dispatch() was never created in migrations
+-- (provisioned out-of-band on older projects); no REVOKE needed.
 REVOKE EXECUTE ON FUNCTION public.get_security_scan_token() FROM anon, authenticated, public;
 REVOKE EXECUTE ON FUNCTION public.magic_link_check_and_record(text, text) FROM anon, authenticated, public;
 REVOKE EXECUTE ON FUNCTION public.manovik_spend_credit(uuid, integer, text) FROM anon, authenticated, public;
