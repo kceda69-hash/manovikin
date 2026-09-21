@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { timingSafeEqual } from "crypto";
+import { hookSecret } from "@/lib/hook-auth";
 
 function safeEqual(a: string, b: string): boolean {
   const ab = Buffer.from(a);
@@ -14,7 +15,8 @@ function safeEqual(a: string, b: string): boolean {
 
 /**
  * Scheduled agents tick (pg_cron, hourly).
- * Authorised with `Bearer <LOVABLE_API_KEY>` — same shape as the other hooks.
+ * Authorised with `Bearer <hook-secret>` (MANOVIK_HOOK_SECRET, or
+ * LOVABLE_API_KEY on Lovable-cloud deployments) — same shape as the other hooks.
  */
 export const Route = createFileRoute("/api/public/hooks/run-schedules")({
   server: {
@@ -26,7 +28,7 @@ export const Route = createFileRoute("/api/public/hooks/run-schedules")({
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: tokenData } = await supabaseAdmin.rpc("get_schedules_run_token" as never);
         const cronToken = typeof tokenData === "string" ? tokenData : null;
-        const apiKey = process.env["LOVABLE_API_KEY"] ?? "";
+        const apiKey = hookSecret();
 
         const authorised =
           (cronToken && safeEqual(got, cronToken)) || (apiKey && safeEqual(got, apiKey));

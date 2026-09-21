@@ -118,10 +118,26 @@ export type ForceOutcome = {
   actions: ProposedAction[];
 };
 
-function apiKey() {
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new Error("MANOVIK FORCE is not configured on this deployment.");
-  return key;
+/** Resolve the model endpoint: sovereign (self-hosted) when MANOVIK_AI_BASE_URL
+ *  is set, otherwise the Lovable AI Gateway. Mirrors mcp/ai-call.ts. */
+function resolveEndpoint(): { url: string; headers: Record<string, string> } {
+  const sovereignBaseUrl = process.env.MANOVIK_AI_BASE_URL;
+  const sovereignKey = process.env.MANOVIK_AI_API_KEY;
+  if (sovereignBaseUrl) {
+    return {
+      url: `${sovereignBaseUrl.replace(/\/$/, "")}/chat/completions`,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sovereignKey ?? "manovik"}`,
+      },
+    };
+  }
+  const lovableKey = process.env["LOVABLE_API_KEY"];
+  if (!lovableKey) throw new Error("MANOVIK FORCE is not configured on this deployment.");
+  return {
+    url: GATEWAY,
+    headers: { "Content-Type": "application/json", "Lovable-API-Key": lovableKey },
+  };
 }
 
 async function callModel(opts: {
@@ -147,12 +163,10 @@ async function callModel(opts: {
   if (opts.model.startsWith("openai/gpt-5.6")) body["reasoning_effort"] = "none";
   if (opts.priority) body["service_tier"] = "priority";
 
-  const res = await fetch(GATEWAY, {
+  const endpoint = resolveEndpoint();
+  const res = await fetch(endpoint.url, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Lovable-API-Key": apiKey(),
-    },
+    headers: endpoint.headers,
     body: JSON.stringify(body),
   });
 

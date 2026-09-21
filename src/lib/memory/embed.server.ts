@@ -1,8 +1,11 @@
 // Server-only embedding bridge for MANOVIK Knowledge Memory.
-// Uses the Lovable AI Gateway embeddings endpoint (OpenAI-compatible).
+// Sovereign-first: uses MANOVIK_AI_BASE_URL + MANOVIK_AI_EMBED_MODEL when set
+// (any OpenAI-compatible /v1/embeddings endpoint, e.g. Ollama with
+// nomic-embed-text — note the DB column expects EMBED_DIMS dimensions).
+// Falls back to the Lovable AI Gateway embeddings endpoint otherwise.
 // 1536 dims matches the `vector(1536)` column on manovik_memory_chunks.
 
-const EMBED_URL = "https://ai.gateway.lovable.dev/v1/embeddings";
+const GATEWAY_EMBED_URL = "https://ai.gateway.lovable.dev/v1/embeddings";
 export const EMBED_MODEL = "openai/text-embedding-3-small";
 export const EMBED_DIMS = 1536;
 
@@ -22,17 +25,41 @@ export function chunkText(text: string, size = 1200, overlap = 150): string[] {
 
 export async function embedTexts(inputs: string[]): Promise<number[][]> {
   if (inputs.length === 0) return [];
-  const key = process.env["LOVABLE_API_KEY"];
-  if (!key) throw new Error("MANOVIK memory is not configured on this deployment.");
+
+  const sovereignBaseUrl = process.env.MANOVIK_AI_BASE_URL;
+  const sovereignKey = process.env.MANOVIK_AI_API_KEY;
+  const lovableKey = process.env["LOVABLE_API_KEY"];
+
+  let url: string;
+  let headers: Record<string, string>;
+  let body: Record<string, unknown>;
+  if (sovereignBaseUrl) {
+    // Any OpenAI-compatible embeddings endpoint. The model must return
+    // EMBED_DIMS-dimensional vectors to match the manovik_memory_chunks column.
+    url = `${sovereignBaseUrl.replace(/\/$/, "")}/embeddings`;
+    headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${sovereignKey ?? "manovik"}`,
+    };
+    body = {
+      model: process.env.MANOVIK_AI_EMBED_MODEL ?? "nomic-embed-text",
+      input: [] as string[],
+    };
+  } else {
+    if (!lovableKey) throw new Error("MANOVIK memory is not configured on this deployment.");
+    url = GATEWAY_EMBED_URL;
+    headers = { "Content-Type": "application/json", "Lovable-API-Key": lovableKey };
+    body = { model: EMBED_MODEL, input: [] as string[], dimensions: EMBED_DIMS };
+  }
 
   const out: number[][] = [];
   // OpenAI accepts large batches; keep them modest for latency and error isolation.
   for (let i = 0; i < inputs.length; i += 64) {
     const batch = inputs.slice(i, i + 64);
-    const res = await fetch(EMBED_URL, {
+    const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Lovable-API-Key": key },
-      body: JSON.stringify({ model: EMBED_MODEL, input: batch, dimensions: EMBED_DIMS }),
+      headers,
+      body: JSON.stringify({ ...body, input: batch }),
     });
     if (!res.ok) {
       const detail = await res.text();
@@ -42,7 +69,15 @@ export async function embedTexts(inputs: string[]): Promise<number[][]> {
     }
     const json = (await res.json()) as { data?: Array<{ index: number; embedding: number[] }> };
     const rows = (json.data ?? []).slice().sort((a, b) => a.index - b.index);
-    for (const r of rows) out.push(r.embedding);
+    for (const r of rows) {
+      if (r.embedding.length !== EMBED_DIMS) {
+        throw new Error(
+          `Embedding model returned ${r.embedding.length} dimensions, but MANOVIK memory needs ${EMBED_DIMS}. ` +
+            `Set MANOVIK_AI_EMBED_MODEL to a ${EMBED_DIMS}-dimensional model on your sovereign endpoint.`,
+        );
+      }
+      out.push(r.embedding);
+    }
   }
   return out;
 }

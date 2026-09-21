@@ -16,8 +16,14 @@ export const Route = createFileRoute("/api/generate-image")({
   server: {
     handlers: {
       POST: async ({ request }: { request: Request }) => {
+        const sovereignBaseUrl = process.env.MANOVIK_AI_BASE_URL;
+        const sovereignKey = process.env.MANOVIK_AI_API_KEY;
         const apiKey = process.env.LOVABLE_API_KEY;
-        if (!apiKey) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+        if (!sovereignBaseUrl && !apiKey)
+          return new Response(
+            "Missing LOVABLE_API_KEY (or set MANOVIK_AI_BASE_URL for sovereign mode)",
+            { status: 500 },
+          );
 
         const authHeader = request.headers.get("authorization");
         if (!authHeader?.startsWith("Bearer "))
@@ -74,11 +80,24 @@ export const Route = createFileRoute("/api/generate-image")({
 
         const enriched = `${prompt}\n\nRendering brief: ${QUALITY_SUFFIX[quality]} Aspect ratio ${aspect}. Follow the prompt exactly — every named object, colour, count and placement must appear.`;
 
-        const upstream = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
+        // Sovereign: any OpenAI-compatible /images/generations endpoint
+        // (e.g. OpenAI gpt-image-1 via MANOVIK_AI_IMAGE_MODEL). Ollama cannot
+        // generate images, so point MANOVIK_AI_BASE_URL at a capable provider
+        // for this route, or keep the Lovable gateway.
+        const imageUrl = sovereignBaseUrl
+          ? `${sovereignBaseUrl.replace(/\/$/, "")}/images/generations`
+          : "https://ai.gateway.lovable.dev/v1/images/generations";
+        const imageModel = sovereignBaseUrl
+          ? (process.env.MANOVIK_AI_IMAGE_MODEL ?? "gpt-image-1")
+          : "google/gemini-3-pro-image";
+        const upstream = await fetch(imageUrl, {
           method: "POST",
-          headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+          headers: {
+            Authorization: `Bearer ${sovereignBaseUrl ? (sovereignKey ?? "manovik") : apiKey}`,
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
-            model: "google/gemini-3-pro-image",
+            model: imageModel,
             messages: [{ role: "user", content: enriched }],
             modalities: ["image", "text"],
             stream: true,

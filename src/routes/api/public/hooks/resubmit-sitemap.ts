@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { submitSitemapInternal } from "@/lib/seo.functions";
+import { isAuthorizedHook } from "@/lib/hook-auth";
 
 export const Route = createFileRoute("/api/public/hooks/resubmit-sitemap")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY;
-        const token = request.headers.get("Authorization")?.slice("Bearer ".length);
-        if (!apiKey || token !== apiKey) {
+        if (!isAuthorizedHook(request)) {
           return Response.json({ error: "Forbidden" }, { status: 403 });
         }
         try {

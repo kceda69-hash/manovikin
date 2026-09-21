@@ -66,8 +66,38 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
+function getWorkerEnv(request: Request, env: unknown): Record<string, unknown> | undefined {
+  // 1. Direct param (when the runtime calls the entry directly)
+  if (env && typeof env === "object") return env as Record<string, unknown>;
+  // 2. Nitro's Cloudflare preset stashes env on globalThis in its fetch handler
+  //    (its lazy service loader only forwards `req`, dropping `env`/`ctx`)
+  const g = globalThis as Record<string, unknown>;
+  if (g.__env__ && typeof g.__env__ === "object") {
+    return g.__env__ as Record<string, unknown>;
+  }
+  // 3. Nitro's augmentReq attaches { env, context } to request.runtime.cloudflare
+  const runtime = (request as unknown as Record<string, unknown> | undefined)?.runtime;
+  const cf = (runtime as Record<string, unknown> | undefined)?.cloudflare;
+  const envFromReq = (cf as Record<string, unknown> | undefined)?.env;
+  if (envFromReq && typeof envFromReq === "object") {
+    return envFromReq as Record<string, unknown>;
+  }
+  return undefined;
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    // Cloudflare Workers don't populate process.env with secrets, but the app
+    // reads process.env.* everywhere (Supabase keys, AI keys, etc.).
+    // Mirror the worker's vars/secrets into process.env per request.
+    const workerEnv = getWorkerEnv(request, env);
+    if (workerEnv) {
+      for (const [key, value] of Object.entries(workerEnv)) {
+        if (typeof value === "string") {
+          process.env[key] = value;
+        }
+      }
+    }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);

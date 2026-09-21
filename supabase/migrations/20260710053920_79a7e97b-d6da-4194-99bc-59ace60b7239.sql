@@ -22,6 +22,12 @@ DECLARE
   ];
 BEGIN
   FOREACH fn IN ARRAY fns LOOP
+    -- Skip functions that were never created (e.g. provisioned out-of-band on
+    -- older projects). REVOKE on a missing function raises 42883 and aborts.
+    IF to_regprocedure(fn) IS NULL THEN
+      RAISE NOTICE 'Skipping missing function %', fn;
+      CONTINUE;
+    END IF;
     EXECUTE format('REVOKE ALL ON FUNCTION %s FROM PUBLIC', fn);
     EXECUTE format('REVOKE ALL ON FUNCTION %s FROM anon', fn);
     EXECUTE format('REVOKE ALL ON FUNCTION %s FROM authenticated', fn);
