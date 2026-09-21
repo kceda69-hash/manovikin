@@ -5,7 +5,9 @@
   "auth": {
     "type": "oauth",
     "issuer": "https://nfodxstknmrnbnzjuzws.supabase.co/auth/v1",
-    "accepted_audiences": ["authenticated"]
+    "accepted_audiences": [
+      "authenticated"
+    ]
   },
   "mcp": {
     "server": {
@@ -36,7 +38,11 @@
             "depth": {
               "description": "Inference depth. Omit to let MANO decide.",
               "type": "string",
-              "enum": ["lite", "standard", "deep"]
+              "enum": [
+                "lite",
+                "standard",
+                "deep"
+              ]
             },
             "system": {
               "description": "Extra operator instruction.",
@@ -44,7 +50,9 @@
               "maxLength": 4000
             }
           },
-          "required": ["prompt"]
+          "required": [
+            "prompt"
+          ]
         },
         "outputSchema": null
       },
@@ -87,7 +95,13 @@
               "default": "auto",
               "description": "Response style: auto, deep reasoning, research report, plain explanation, or execution plan.",
               "type": "string",
-              "enum": ["auto", "think", "research", "explain", "plan"]
+              "enum": [
+                "auto",
+                "think",
+                "research",
+                "explain",
+                "plan"
+              ]
             },
             "language": {
               "description": "Reply language, e.g. 'English', 'Hindi'. Defaults to the language of the prompt.",
@@ -95,7 +109,9 @@
               "maxLength": 40
             }
           },
-          "required": ["prompt"]
+          "required": [
+            "prompt"
+          ]
         },
         "outputSchema": null
       },
@@ -149,7 +165,9 @@
               "maxLength": 4000
             }
           },
-          "required": ["task"]
+          "required": [
+            "task"
+          ]
         },
         "outputSchema": null
       },
@@ -181,7 +199,12 @@
               "default": "requirements",
               "description": "What artifact to produce.",
               "type": "string",
-              "enum": ["requirements", "architecture", "clone_plan", "reimplementation"]
+              "enum": [
+                "requirements",
+                "architecture",
+                "clone_plan",
+                "reimplementation"
+              ]
             },
             "stack": {
               "description": "Target stack for a reimplementation, e.g. 'TypeScript, zero dependencies'.",
@@ -189,7 +212,9 @@
               "maxLength": 60
             }
           },
-          "required": ["target"]
+          "required": [
+            "target"
+          ]
         },
         "outputSchema": null
       },
@@ -216,7 +241,15 @@
               "default": "article",
               "description": "Kind of content to produce.",
               "type": "string",
-              "enum": ["article", "blog", "landing", "email", "social", "docs", "outline"]
+              "enum": [
+                "article",
+                "blog",
+                "landing",
+                "email",
+                "social",
+                "docs",
+                "outline"
+              ]
             },
             "tone": {
               "description": "Desired tone, e.g. 'confident, technical, no hype'.",
@@ -248,7 +281,9 @@
               "maxLength": 40
             }
           },
-          "required": ["topic"]
+          "required": [
+            "topic"
+          ]
         },
         "outputSchema": null
       },
@@ -286,7 +321,13 @@
               "default": "neutral",
               "description": "Tone/register of the translation.",
               "type": "string",
-              "enum": ["neutral", "formal", "informal", "marketing", "technical"]
+              "enum": [
+                "neutral",
+                "formal",
+                "informal",
+                "marketing",
+                "technical"
+              ]
             },
             "keep_terms": {
               "description": "Terms that must remain untranslated, e.g. brand names.",
@@ -297,7 +338,10 @@
               }
             }
           },
-          "required": ["text", "to"]
+          "required": [
+            "text",
+            "to"
+          ]
         },
         "outputSchema": null
       },
@@ -330,7 +374,13 @@
               "default": "extract",
               "description": "Kind of structured analysis to run.",
               "type": "string",
-              "enum": ["extract", "classify", "entities", "sentiment", "summarize"]
+              "enum": [
+                "extract",
+                "classify",
+                "entities",
+                "sentiment",
+                "summarize"
+              ]
             },
             "strict": {
               "default": true,
@@ -338,7 +388,10 @@
               "type": "boolean"
             }
           },
-          "required": ["text", "fields"]
+          "required": [
+            "text",
+            "fields"
+          ]
         },
         "outputSchema": null
       },
@@ -365,7 +418,13 @@
               "default": "chat",
               "description": "What the prompt will be used for.",
               "type": "string",
-              "enum": ["chat", "coding", "image", "agent", "search"]
+              "enum": [
+                "chat",
+                "coding",
+                "image",
+                "agent",
+                "search"
+              ]
             },
             "goal": {
               "description": "What a perfect result would look like.",
@@ -373,7 +432,9 @@
               "maxLength": 1000
             }
           },
-          "required": ["prompt"]
+          "required": [
+            "prompt"
+          ]
         },
         "outputSchema": null
       },
@@ -431,7 +492,9 @@
               }
             }
           },
-          "required": ["package_json"]
+          "required": [
+            "package_json"
+          ]
         },
         "outputSchema": null
       },
@@ -521,7 +584,9 @@
               "maximum": 20
             }
           },
-          "required": ["query"]
+          "required": [
+            "query"
+          ]
         },
         "outputSchema": null
       },
