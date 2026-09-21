@@ -2,29 +2,134 @@
 # Run on your own server with:  docker compose up -d
 #
 # This bundle includes:
-#   - manovik     : the MANOVIK AI web app (TanStack Start)
-#   - postgres    : your own Postgres for threads / messages / audit logs
-#   - ollama      : your own LLM server (OpenAI-compatible at /v1)
+#   - manovik  : the MANOVIK AI web app (TanStack Start)
+#   - postgres : Supabase-flavoured Postgres (roles + extensions the app needs)
+#   - auth     : GoTrue — Supabase Auth (sign-up/in, JWTs)
+#   - rest     : PostgREST — auto-generated REST API over your tables
+#   - kong     : API gateway — the single Supabase-compatible URL the app talks to
+#   - ollama   : your own LLM server (OpenAI-compatible at /v1)
 #
-# Replace any service with your preferred provider by editing the env vars
-# in .env (see .env.example).
+# Skipped on purpose (the app doesn't use them): realtime, storage, studio,
+# imgproxy, analytics. Every service here is required by actual app code:
+# supabase-js Auth + PostgREST table queries.
+#
+# First run:
+#   cp .env.example .env            # then set POSTGRES_PASSWORD in .env
+#   ./scripts/gen-supabase-keys.sh >> .env
+#   docker compose up -d postgres auth   # auth creates the auth schema on boot
+#   # apply supabase/migrations/*.sql to the DB (see SELFHOSTING.md)
+#   docker compose up -d
+#   docker compose exec ollama ollama pull llama3.1
+#
+# Every Supabase URL/key below has a ${...} override so you can still point
+# the app at Supabase Cloud instead — see .env.example and SELFHOSTING.md.
 
 services:
   postgres:
-    image: postgres:16-alpine
+    # Official Supabase Postgres image (NOT stock postgres): it creates the
+    # roles the stack needs (anon, authenticated, service_role,
+    # authenticator, supabase_auth_admin) and ships the extensions the
+    # migrations use (pg_cron, pg_net, pgmq, supabase_vault, vector, pgjwt).
+    # NOTE: if you ran an older version of this file with postgres:16-alpine,
+    # the manovik_pg volume is incompatible — `docker compose down -v`
+    # (destroys DB data) before the first start with this image.
+    image: supabase/postgres:15.8.1.085
     restart: unless-stopped
     environment:
       POSTGRES_USER: manovik
       # No default: startup fails loudly if POSTGRES_PASSWORD is unset.
-      # Set a strong value in .env before `docker compose up`.
+      # Use URL-safe characters only — it is embedded in database URLs.
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env (use a strong, unique value)}
       POSTGRES_DB: manovik
     volumes:
       - manovik_pg:/var/lib/postgresql/data
     ports:
-      # Bind to localhost only — DB is reachable from other containers via
-      # the Docker network, never exposed to the public internet.
+      # Bind to localhost only — the DB is reachable from other containers
+      # via the Docker network, never exposed to the public internet.
       - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U manovik -d manovik"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  auth:
+    # GoTrue — Supabase Auth. Issues the JWTs that PostgREST trusts.
+    image: supabase/gotrue:v2.164.0
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      # Public base URL of the Supabase API (used in auth email links).
+      API_EXTERNAL_URL: ${SUPABASE_PUBLIC_URL:-http://localhost:8000}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@postgres:5432/manovik
+      GOTRUE_SITE_URL: ${APP_PUBLIC_URL:-http://localhost:3000}
+      GOTRUE_URI_ALLOW_LIST: ""
+      GOTRUE_DISABLE_SIGNUP: ${GOTRUE_DISABLE_SIGNUP:-false}
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env (run ./scripts/gen-supabase-keys.sh)}
+      # Email sign-ups work with no SMTP server: new users are auto-confirmed.
+      # For production set GOTRUE_MAILER_AUTOCONFIRM=false and configure SMTP.
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: true
+      GOTRUE_MAILER_AUTOCONFIRM: ${GOTRUE_MAILER_AUTOCONFIRM:-true}
+      GOTRUE_SMTP_HOST: ${GOTRUE_SMTP_HOST:-}
+      GOTRUE_SMTP_PORT: ${GOTRUE_SMTP_PORT:-587}
+      GOTRUE_SMTP_USER: ${GOTRUE_SMTP_USER:-}
+      GOTRUE_SMTP_PASS: ${GOTRUE_SMTP_PASS:-}
+      GOTRUE_SMTP_ADMIN_EMAIL: ${GOTRUE_SMTP_ADMIN_EMAIL:-}
+      GOTRUE_SMTP_SENDER_NAME: ${GOTRUE_SMTP_SENDER_NAME:-MANOVIK}
+      # Google OAuth (the login page offers Google sign-in). Disabled by
+      # default; set the three vars below to enable.
+      GOTRUE_EXTERNAL_GOOGLE_ENABLED: ${GOTRUE_EXTERNAL_GOOGLE_ENABLED:-false}
+      GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID: ${GOTRUE_EXTERNAL_GOOGLE_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_GOOGLE_SECRET: ${GOTRUE_EXTERNAL_GOOGLE_SECRET:-}
+      GOTRUE_EXTERNAL_PHONE_ENABLED: false
+      GOTRUE_SMS_AUTOCONFIRM: false
+
+  rest:
+    # PostgREST — the /rest/v1 API behind every supabase.from() call.
+    image: postgrest/postgrest:v12.2.3
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@postgres:5432/manovik
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set in .env (run ./scripts/gen-supabase-keys.sh)}
+      PGRST_JWT_AUD: authenticated
+    # Not published — only reachable via Kong and the Docker network.
+
+  kong:
+    # API gateway: the single Supabase-compatible URL for app + browser.
+    image: kong:2.8.1
+    restart: unless-stopped
+    depends_on:
+      - auth
+      - rest
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
+      # Key-auth consumers interpolated into docker/kong.yml.
+      ANON_KEY: ${SUPABASE_PUBLISHABLE_KEY:?SUPABASE_PUBLISHABLE_KEY must be set in .env (run ./scripts/gen-supabase-keys.sh)}
+      SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?SUPABASE_SERVICE_ROLE_KEY must be set in .env (run ./scripts/gen-supabase-keys.sh)}
+    volumes:
+      - ./docker/kong.yml:/var/kong/kong.yml:ro
+    ports:
+      # The anon key is public by design (it ships in the JS bundle); every
+      # route still requires a valid key. Put a TLS reverse proxy in front
+      # for internet exposure.
+      - "8000:8000"
 
   ollama:
     image: ollama/ollama:latest
@@ -44,25 +149,34 @@ services:
     #           capabilities: [gpu]
 
   manovik:
-    build: .
+    build:
+      context: .
+      args:
+        # VITE_* vars are baked into the client JS bundle at build time, so
+        # they must be build args (runtime `environment` cannot change them).
+        # After changing these, rebuild: docker compose up -d --build manovik
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-http://localhost:8000}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
     restart: unless-stopped
     depends_on:
       - postgres
       - ollama
+      - kong
     environment:
       # --- Sovereign AI provider (OpenAI-compatible) ---
       MANOVIK_AI_BASE_URL: ${MANOVIK_AI_BASE_URL:-http://ollama:11434/v1}
       MANOVIK_AI_API_KEY: ${MANOVIK_AI_API_KEY:-ollama}
       MANOVIK_AI_MODEL: ${MANOVIK_AI_MODEL:-llama3.1}
 
-      # --- Self-hosted Supabase / Postgres backend ---
-      # Point these at your own Supabase instance (self-hosted via
-      # https://supabase.com/docs/guides/self-hosting) backed by the
-      # postgres service above.
-      SUPABASE_URL: ${SUPABASE_URL}
+      # --- Supabase backend ---
+      # Server-side code talks to Kong over the internal Docker network.
+      # Override with your Supabase Cloud URL to use managed Supabase instead.
+      SUPABASE_URL: ${SUPABASE_URL:-http://kong:8000}
       SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      VITE_SUPABASE_URL: ${SUPABASE_URL}
+      # Browser-side: must be reachable from the user's browser, hence
+      # localhost (not the internal kong hostname) by default.
+      VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-http://localhost:8000}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY}
 
       NODE_ENV: production

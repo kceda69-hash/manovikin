@@ -7,6 +7,12 @@
 # and a Postgres-backed Supabase instance you control.
 
 FROM oven/bun:1.1 AS builder
+# Public Supabase config baked into the client JS bundle at build time.
+# Supplied via docker-compose build.args (see docker-compose.yml); plain
+# `docker build` can pass --build-arg instead. (Deployment config only —
+# no app source is touched.)
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_PUBLISHABLE_KEY
 WORKDIR /app
 
 COPY package.json bun.lockb* ./
