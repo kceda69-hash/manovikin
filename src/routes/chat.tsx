@@ -115,6 +115,19 @@ export const Route = createFileRoute("/chat")({
 
 type Thread = { id: string; title: string; updated_at: string };
 
+/** Reject if a promise takes longer than ms — the chat bootstrap must never hang forever. */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
+const BOOTSTRAP_TIMEOUT_MS = 25_000;
+
 function ChatPage() {
   const { user, loading } = useAuth();
   const rootQueryClient = useQueryClient();
@@ -125,6 +138,7 @@ function ChatPage() {
   const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
   const [threadKey, setThreadKey] = useState(0);
   const [bootstrapping, setBootstrapping] = useState(true);
+  const [bootstrapError, setBootstrapError] = useState<string | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
@@ -174,23 +188,36 @@ function ChatPage() {
     }
   }, []);
 
-  // Bootstrap: load thread list, ensure one exists, select most recent
+  // Bootstrap: load thread list, ensure one exists, select most recent.
+  // Never spins forever: server calls are bounded by a timeout and any
+  // failure surfaces a visible error with a retry instead of an endless skeleton.
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
       try {
-        const list = await refreshThreads();
+        const list = await withTimeout(
+          refreshThreads(),
+          BOOTSTRAP_TIMEOUT_MS,
+          "Loading conversations",
+        );
         if (cancelled) return;
         let pick = list[0];
         if (!pick) {
-          const { thread } = await createThread();
+          const { thread } = await withTimeout(
+            createThread(),
+            BOOTSTRAP_TIMEOUT_MS,
+            "Creating conversation",
+          );
           pick = thread as Thread;
-          await refreshThreads();
+          await withTimeout(refreshThreads(), BOOTSTRAP_TIMEOUT_MS, "Loading conversations");
         }
         if (pick) setActiveId(pick.id);
       } catch (e) {
         console.error("Chat bootstrap failed:", e);
+        if (!cancelled) {
+          setBootstrapError(e instanceof Error ? e.message : "Couldn't load your conversations.");
+        }
       } finally {
         if (!cancelled) setBootstrapping(false);
       }
@@ -246,6 +273,10 @@ function ChatPage() {
     await signOutEverywhere(rootQueryClient);
     navigate({ to: "/", replace: true });
   };
+
+  if (bootstrapError) {
+    return <BootstrapErrorPanel message={bootstrapError} />;
+  }
 
   if (loading || !user || bootstrapping || !activeId) {
     return <FullPageChatSkeleton />;
@@ -1155,6 +1186,20 @@ function ChatHistorySkeleton() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function BootstrapErrorPanel({ message }: { message: string }) {
+  return (
+    <div className="flex h-[100dvh] items-center justify-center bg-background px-4">
+      <div className="surface-card w-full max-w-md rounded-2xl p-6 text-center">
+        <h2 className="text-lg font-semibold">Couldn't load your conversations</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{message}</p>
+        <Button onClick={() => window.location.reload()} className="mt-5 w-full">
+          Try again
+        </Button>
+      </div>
     </div>
   );
 }

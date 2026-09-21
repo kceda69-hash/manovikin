@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { stashServerEnv } from "./lib/server-env";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -89,9 +90,12 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     // Cloudflare Workers don't populate process.env with secrets, but the app
     // reads process.env.* everywhere (Supabase keys, AI keys, etc.).
-    // Mirror the worker's vars/secrets into process.env per request.
+    // Mirror the worker's vars/secrets into process.env per request, and also
+    // stash them on globalThis so server code can resolve them even if the
+    // process.env mirror is unavailable (see src/lib/server-env.ts).
     const workerEnv = getWorkerEnv(request, env);
     if (workerEnv) {
+      stashServerEnv(workerEnv);
       for (const [key, value] of Object.entries(workerEnv)) {
         if (typeof value === "string") {
           process.env[key] = value;
