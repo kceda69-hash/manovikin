@@ -11,7 +11,10 @@ const SITEMAP_URL = "https://manovik.in/sitemap.xml";
 function authHeaders() {
   const lk = process.env.LOVABLE_API_KEY;
   const gk = process.env.GOOGLE_SEARCH_CONSOLE_API_KEY;
-  if (!lk) throw new Error("LOVABLE_API_KEY missing");
+  if (!lk)
+    throw new Error(
+      "SEO console unavailable: LOVABLE_API_KEY not configured (sovereign mode uses no Lovable connector gateway)",
+    );
   if (!gk) throw new Error("GOOGLE_SEARCH_CONSOLE_API_KEY missing");
   return {
     Authorization: `Bearer ${lk}`,

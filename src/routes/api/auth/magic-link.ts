@@ -13,6 +13,8 @@ const ALLOWED_REDIRECT_HOSTS = new Set([
   "www.manovik.in",
   "manovikin.lovable.app",
   "id-preview--9e140ba8-6acc-42f5-8e24-1a6609f849b5.lovable.app",
+  // Sovereign: allow the configured APP_ORIGIN hostname dynamically
+  ...(process.env.APP_ORIGIN ? [new URL(process.env.APP_ORIGIN).hostname] : []),
 ]);
 
 function getClientIp(request: Request): string {

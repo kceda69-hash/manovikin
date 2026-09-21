@@ -9,7 +9,7 @@ import { TEMPLATES } from "@/lib/email-templates/registry";
 const SITE_NAME = "MANOVIK AI";
 const SENDER_DOMAIN = "notify.manovik.in";
 const FROM_DOMAIN = "manovik.in";
-const APP_ORIGIN = process.env.APP_ORIGIN || "https://manovikin.lovable.app";
+const APP_ORIGIN = process.env.APP_ORIGIN || "https://manovik.in";
 
 const PLAN_LABEL: Record<string, string> = {
   pro: "MANOVIK Pro (monthly)",

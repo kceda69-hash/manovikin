@@ -71,6 +71,27 @@ export type MonitorResult = {
 
 /** Run one monitoring cycle. Safe to call repeatedly (cron). */
 export async function runSeoMonitor(): Promise<MonitorResult> {
+  // Sovereign mode: the Lovable connector gateway (Google Search Console)
+  // is a Lovable-platform service and is not available when self-hosting.
+  // Return an empty (non-error) result instead of throwing, so scheduled
+  // runs degrade gracefully.
+  if (!process.env.LOVABLE_API_KEY) {
+    log.info("[seo-monitor] skipped: LOVABLE_API_KEY not configured (sovereign mode)");
+    return {
+      ok: true,
+      snapshotId: null,
+      alerts: [],
+      metrics: {
+        sitemapErrors: 0,
+        sitemapWarnings: 0,
+        indexedUrls: null,
+        clicks: 0,
+        impressions: 0,
+        avgPosition: null,
+      },
+    };
+  }
+
   const sitemaps = await gsc(`/webmasters/v3/sites/${enc(SITE_URL)}/sitemaps`);
   const end = new Date().toISOString().slice(0, 10);
   const startDate = new Date(Date.now() - 7 * 86400_000).toISOString().slice(0, 10);
