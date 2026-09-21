@@ -1,11 +1,9 @@
 // Server-side environment resolution that works on Cloudflare Workers.
 //
 // Cloudflare does not populate process.env with bindings the way Node does.
-// src/server.ts mirrors worker vars/secrets into process.env (and a globalThis
-// stash) per request, Nitro stashes them on globalThis.__env__, and Nitro's
-// augmentReq attaches them to request.runtime.cloudflare.env. This helper
-// checks every source so server functions never silently lose their config.
-import { getRequest } from "@tanstack/react-start/server";
+// src/server.ts mirrors worker vars/secrets into process.env (and a
+// globalThis stash) per request. This helper checks both sources so server
+// functions never silently lose their config.
 
 const STASH_KEY = "__manovik_env__";
 
@@ -33,21 +31,6 @@ export function getServerEnv(name: string): string | undefined {
   // 2. Our bridge's globalThis stash (set before the server entry runs).
   const stash = g[STASH_KEY] as Record<string, unknown> | undefined;
   if (stash && typeof stash[name] === "string") return stash[name] as string;
-
-  // 3. Nitro's own stash of the Cloudflare bindings.
-  const nitro = g.__env__ as Record<string, unknown> | undefined;
-  if (nitro && typeof nitro[name] === "string") return nitro[name] as string;
-
-  // 4. Nitro's request-attached Cloudflare env.
-  try {
-    const req = getRequest() as unknown as Record<string, unknown> | undefined;
-    const runtime = req?.runtime as Record<string, unknown> | undefined;
-    const cf = runtime?.cloudflare as Record<string, unknown> | undefined;
-    const env = cf?.env as Record<string, unknown> | undefined;
-    if (env && typeof env[name] === "string") return env[name] as string;
-  } catch {
-    // getRequest() throws outside a request scope — ignore.
-  }
 
   return undefined;
 }
