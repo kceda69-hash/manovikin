@@ -314,6 +314,12 @@ Output style: clean markdown, fenced code blocks with language tags, tables wher
  * draft substrate first, then progressively cheaper/faster substitutes.
  */
 export function manoStreamChain(prompt: string, hasAttachments = false): string[] {
+  // Sovereign override wins: when the deployment points at its own
+  // OpenAI-compatible endpoint, gateway-style substrate names won't resolve
+  // there, so pin the whole chain to the configured model.
+  const forced =
+    process.env.MANOVIK_AI_MODEL_ID?.trim() || process.env.MANOVIK_AI_MODEL?.trim();
+  if (forced) return [forced];
   const depth = classifyMano(prompt, hasAttachments);
   const primary = routeMano(depth, classifyDomain(prompt, hasAttachments)).draft;
   const chain = [primary, MANO_SUBSTRATE_LITE.draft, "google/gemini-3.5-flash"];
