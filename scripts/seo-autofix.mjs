@@ -105,11 +105,13 @@ if (missingDisallow.length) {
 }
 
 // ---------- fix 4: sitemap BASE_URL drift ----------
-const baseMatch = sitemapSrc.match(/(BASE_URL\s*=\s*)["'`]([^"'`]+)["'`]/);
+// BASE_URL lives in the real builder (src/lib/sitemap.ts), not the route file.
+const SITEMAP_TS = join(ROOT, "src", "lib", "sitemap.ts");
+const sitemapTsSrc = read(SITEMAP_TS) ?? "";
+const baseMatch = sitemapTsSrc.match(/(BASE_URL\s*=\s*)["'`]([^"'`]+)["'`]/);
 if (baseMatch && baseMatch[2] !== CANONICAL_HOST) {
-  const currentSrc = read(SITEMAP_FILE) ?? "";
-  const next = currentSrc.replace(/(BASE_URL\s*=\s*)["'`][^"'`]+["'`]/, `$1"${CANONICAL_HOST}"`);
-  edit(SITEMAP_FILE, currentSrc, next, `Reset BASE_URL → ${CANONICAL_HOST}`);
+  const next = sitemapTsSrc.replace(/(BASE_URL\s*=\s*)["'`][^"'`]+["'`]/, `$1"${CANONICAL_HOST}"`);
+  edit(SITEMAP_TS, sitemapTsSrc, next, `Reset BASE_URL → ${CANONICAL_HOST}`);
 }
 
 // ---------- report ----------

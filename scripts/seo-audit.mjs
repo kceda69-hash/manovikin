@@ -43,35 +43,31 @@ function lineOf(src, re) {
 }
 
 // ---------- sitemap ----------
+// Entries come from the real builder (src/lib/sitemap.ts) — the single source
+// of truth. (The route file used to carry a legacy inline `entries` array;
+// static regex parsing of it is intentionally not used anymore.)
 const sitemapSrc = read(SITEMAP_FILE);
 if (!sitemapSrc) {
   err(SITEMAP_FILE, 1, "Sitemap missing", `Missing sitemap route at ${rel(SITEMAP_FILE)}`);
 }
 
-const baseUrlMatch = sitemapSrc?.match(/BASE_URL\s*=\s*["'`]([^"'`]+)["'`]/);
-const baseUrl = baseUrlMatch?.[1];
-if (sitemapSrc && baseUrl !== CANONICAL_HOST) {
-  const ln = lineOf(sitemapSrc, /BASE_URL\s*=/);
+const sitemapEntries = getSitemapEntries();
+if (BUILDER_BASE_URL !== CANONICAL_HOST) {
   err(
     SITEMAP_FILE,
-    ln,
+    1,
     "Sitemap BASE_URL mismatch",
-    `BASE_URL is "${baseUrl}", expected "${CANONICAL_HOST}"`,
+    `BASE_URL is "${BUILDER_BASE_URL}", expected "${CANONICAL_HOST}"`,
   );
 }
 
-/** path -> line in sitemap source */
+/** path -> line (builder entries have no source line; point at the route file) */
 const sitemapPaths = new Map();
-if (sitemapSrc) {
-  const re = /\bpath:\s*["'`]([^"'`]+)["'`]/g;
-  let m;
-  while ((m = re.exec(sitemapSrc))) {
-    const ln = sitemapSrc.slice(0, m.index).split(/\r?\n/).length;
-    if (!sitemapPaths.has(m[1])) sitemapPaths.set(m[1], ln);
-  }
-  if (sitemapPaths.size === 0) {
-    err(SITEMAP_FILE, 1, "Sitemap empty", "Sitemap contains no entries");
-  }
+for (const e of sitemapEntries) {
+  if (!sitemapPaths.has(e.path)) sitemapPaths.set(e.path, 1);
+}
+if (sitemapPaths.size === 0) {
+  err(SITEMAP_FILE, 1, "Sitemap empty", "Sitemap contains no entries");
 }
 
 // ---------- robots ----------
@@ -241,11 +237,17 @@ for (const [p, ln] of sitemapPaths) {
 // per-line diff attached, so PR reviewers see intentional indexability
 // changes explicitly. Regenerate with `bun run seo:snapshot`.
 import { existsSync } from "node:fs";
-import { SNAPSHOT_DIR, parseSitemapEntries, renderSitemap, simpleDiff } from "./seo-lib.mjs";
+import {
+  SNAPSHOT_DIR,
+  getSitemapEntries,
+  BUILDER_BASE_URL,
+  renderSitemap,
+  simpleDiff,
+} from "./seo-lib.mjs";
 
 const snapshotRobots = read(join(SNAPSHOT_DIR, "robots.txt"));
 const snapshotSitemap = read(join(SNAPSHOT_DIR, "sitemap.xml"));
-const liveSitemap = sitemapSrc ? renderSitemap(parseSitemapEntries(sitemapSrc)) : "";
+const liveSitemap = renderSitemap(getSitemapEntries());
 
 if (!existsSync(SNAPSHOT_DIR)) {
   warn(

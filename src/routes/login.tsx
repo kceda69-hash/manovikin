@@ -38,6 +38,7 @@ export const Route = createFileRoute("/login")({
       },
       { property: "og:url", content: "https://manovik.in/login" },
       { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex" },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/login" }],
   }),

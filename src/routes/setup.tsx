@@ -26,6 +26,7 @@ export const Route = createFileRoute("/setup")({
           "Run MANOVIK on your own infrastructure with Docker, your AI provider, and your database. Step-by-step guide.",
       },
       { property: "og:url", content: "https://manovik.in/setup" },
+      { name: "robots", content: "noindex" },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/setup" }],
   }),

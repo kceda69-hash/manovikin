@@ -22,5 +22,8 @@ Disallow: /auth/
 Disallow: /email/
 Disallow: /.mcp/
 Disallow: /.well-known/
+Disallow: /connect
+Disallow: /login
+Disallow: /setup
 
 Sitemap: https://manovik.in/sitemap.xml

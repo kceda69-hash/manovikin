@@ -20,6 +20,7 @@ export const Route = createFileRoute("/connect")({
         content: "Step-by-step instructions to connect ChatGPT or Claude to MANOVIK via MCP.",
       },
       { property: "og:url", content: "https://manovik.in/connect" },
+      { name: "robots", content: "noindex" },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/connect" }],
   }),

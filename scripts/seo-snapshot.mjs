@@ -8,20 +8,12 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import {
-  ROBOTS_FILE,
-  SITEMAP_FILE,
-  SNAPSHOT_DIR,
-  read,
-  parseSitemapEntries,
-  renderSitemap,
-} from "./seo-lib.mjs";
+import { ROBOTS_FILE, SNAPSHOT_DIR, read, getSitemapEntries, renderSitemap } from "./seo-lib.mjs";
 
 mkdirSync(SNAPSHOT_DIR, { recursive: true });
 
 const robots = read(ROBOTS_FILE) ?? "";
-const sitemapSrc = read(SITEMAP_FILE) ?? "";
-const entries = parseSitemapEntries(sitemapSrc);
+const entries = getSitemapEntries();
 const sitemap = renderSitemap(entries);
 
 writeFileSync(join(SNAPSHOT_DIR, "robots.txt"), robots);

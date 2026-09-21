@@ -6,6 +6,14 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// The sitemap's single source of truth. Node ≥22.18 strips types on import and
+// this module is erasable-syntax-only (no enums / namespaces / parameter
+// properties), so the scripts can import it directly.
+import {
+  BASE_URL as BUILDER_BASE_URL,
+  buildSitemapEntriesFromRouteFiles,
+} from "../src/lib/sitemap.ts";
+
 export const ROOT = join(fileURLToPath(import.meta.url), "..", "..");
 export const ROUTES_DIR = join(ROOT, "src", "routes");
 export const SITEMAP_FILE = join(ROUTES_DIR, "sitemap[.]xml.ts");
@@ -146,6 +154,17 @@ export function inspectRoutes() {
   }
   return inspected;
 }
+
+/** Sitemap entries straight from the real builder (src/lib/sitemap.ts) — the
+ *  single source of truth. Prefer this over parseSitemapEntries, which only
+ *  understands the legacy inline `entries` array the sitemap route no longer
+ *  carries. */
+export function getSitemapEntries() {
+  const files = listRouteFiles().map((f) => rel(f));
+  return buildSitemapEntriesFromRouteFiles(files);
+}
+
+export { BUILDER_BASE_URL };
 
 /** Unified-ish diff for two strings. Not a real patch — enough for CI logs. */
 export function simpleDiff(a, b) {

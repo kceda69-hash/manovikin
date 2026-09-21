@@ -37,6 +37,9 @@ const EXCLUDED_PATHS = new Set([
   "/dashboard",
   "/playground",
   "/missions",
+  "/login",
+  "/setup",
+  "/connect",
 ]);
 
 const EXCLUDED_PREFIXES = [

@@ -8,11 +8,22 @@ Disallow: /seo
 Disallow: /unsubscribe
 Disallow: /devices
 Disallow: /admin
+Disallow: /memory
+Disallow: /agents
+Disallow: /keys
+Disallow: /team
+Disallow: /account
+Disallow: /dashboard
+Disallow: /playground
+Disallow: /missions
 Disallow: /receipt/
 Disallow: /api/
 Disallow: /auth/
 Disallow: /email/
 Disallow: /.mcp/
 Disallow: /.well-known/
+Disallow: /connect
+Disallow: /login
+Disallow: /setup
 
 Sitemap: https://manovik.in/sitemap.xml
