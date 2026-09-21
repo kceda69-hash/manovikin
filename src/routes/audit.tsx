@@ -10,7 +10,11 @@ export const Route = createFileRoute("/audit")({
   head: () => ({
     meta: [
       { title: "MANOVIK AI — Audit log" },
-      { name: "description", content: "Review the security audit log for your MANOVIK AI account — sign-ins, key actions, and access events." },
+      {
+        name: "description",
+        content:
+          "Review the security audit log for your MANOVIK AI account — sign-ins, key actions, and access events.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "MANOVIK AI — Audit log" },
       { property: "og:description", content: "Security audit log for your MANOVIK AI account." },
@@ -74,9 +78,7 @@ function AuditPage() {
                     {new Date(l.created_at).toLocaleString()}
                   </time>
                 </div>
-                {l.summary && (
-                  <p className="mt-2 text-sm break-words">{l.summary}</p>
-                )}
+                {l.summary && <p className="mt-2 text-sm break-words">{l.summary}</p>}
                 <div className="mt-1 text-xs text-muted-foreground">
                   {l.ip ? `IP ${l.ip}` : "IP unknown"}
                   {l.user_agent ? ` • ${l.user_agent.slice(0, 80)}` : ""}

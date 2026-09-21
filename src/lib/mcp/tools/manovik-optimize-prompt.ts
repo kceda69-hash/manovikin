@@ -32,7 +32,10 @@ export default defineTool({
         .join("\n");
 
       const { text, model, tier } = await askManovik({ prompt, system, maxTokens: 3000 });
-      return { content: [{ type: "text", text }], structuredContent: { result: text, target, model, tier } };
+      return {
+        content: [{ type: "text", text }],
+        structuredContent: { result: text, target, model, tier },
+      };
     } catch (err) {
       return toolError(err);
     }

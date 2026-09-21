@@ -3,6 +3,7 @@
 // crawl (sitemap) or indexing errors increase. Server-only.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { log } from "@/lib/logger";
+import type { Json } from "@/integrations/supabase/types";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
 const SITE_URL = "https://manovik.in/";
@@ -36,7 +37,7 @@ async function gsc(path: string, init: RequestInit = {}) {
   } catch {
     /* keep raw text */
   }
-  return { ok: res.ok, status: res.status, body: body as any };
+  return { ok: res.ok, status: res.status, body: body as GscBody };
 }
 
 type SitemapRow = {
@@ -44,6 +45,12 @@ type SitemapRow = {
   errors?: string | number;
   warnings?: string | number;
   contents?: Array<{ submitted?: string | number; indexed?: string | number }>;
+};
+
+/** Typed view of the Search Console JSON payloads this monitor reads. */
+type GscBody = Record<string, unknown> & {
+  sitemap?: SitemapRow[];
+  rows?: Array<Record<string, unknown>>;
 };
 
 const num = (v: unknown) => (v == null ? 0 : Number(v) || 0);
@@ -122,7 +129,7 @@ export async function runSeoMonitor(): Promise<MonitorResult> {
     .select("id")
     .maybeSingle();
 
-  const alerts: Array<{ kind: string; severity: string; message: string; details: any }> = [];
+  const alerts: Array<{ kind: string; severity: string; message: string; details: Json }> = [];
 
   if (!reachable) {
     alerts.push({
@@ -292,7 +299,8 @@ async function notifyAdmins(alertId: string, severity: string, message: string, 
 }
 
 function escapeHtml(s: string) {
-  return s.replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string,
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string,
   );
 }

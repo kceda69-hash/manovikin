@@ -16,8 +16,11 @@ export const CANONICAL_HOST = "https://manovik.in";
 export const rel = (p) => relative(ROOT, p).split("\\").join("/");
 
 export function read(path) {
-  try { return readFileSync(path, "utf8"); }
-  catch { return null; }
+  try {
+    return readFileSync(path, "utf8");
+  } catch {
+    return null;
+  }
 }
 
 /** Extract sitemap entries { path, changefreq?, priority?, lastmod? } from the
@@ -54,7 +57,9 @@ export function renderSitemap(entries, baseUrl = CANONICAL_HOST) {
       e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
       e.priority ? `    <priority>${e.priority}</priority>` : null,
       `  </url>`,
-    ].filter(Boolean).join("\n"),
+    ]
+      .filter(Boolean)
+      .join("\n"),
   );
   return [
     `<?xml version="1.0" encoding="UTF-8"?>`,
@@ -95,7 +100,10 @@ export function listRouteFiles(dir = ROUTES_DIR) {
   const out = [];
   for (const name of readdirSync(dir)) {
     const full = join(dir, name);
-    if (statSync(full).isDirectory()) { out.push(...listRouteFiles(full)); continue; }
+    if (statSync(full).isDirectory()) {
+      out.push(...listRouteFiles(full));
+      continue;
+    }
     if (!/\.(tsx?|jsx?)$/.test(name)) continue;
     out.push(full);
   }

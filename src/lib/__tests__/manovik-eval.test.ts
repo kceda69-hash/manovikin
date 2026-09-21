@@ -34,7 +34,8 @@ describe("EVAL_CASES catalog", () => {
     for (const c of EVAL_CASES) {
       if (!c.expectTier) continue;
       const r = routeModel(c.prompt);
-      if (r.tier !== c.expectTier) misses.push(`${c.id}: expected ${c.expectTier}, got ${r.tier} (${r.reason})`);
+      if (r.tier !== c.expectTier)
+        misses.push(`${c.id}: expected ${c.expectTier}, got ${r.tier} (${r.reason})`);
     }
     // Allow up to 10% router miss — heuristics aren't perfect, but flag hard regressions.
     const total = EVAL_CASES.filter((c) => c.expectTier).length;

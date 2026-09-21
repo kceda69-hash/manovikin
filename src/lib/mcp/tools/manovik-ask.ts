@@ -10,8 +10,7 @@ const MODE_PROMPT: Record<string, string> = {
     "Answer as a domain researcher: structure the answer with headings, cover competing positions, and clearly separate established fact from inference.",
   explain:
     "Explain clearly for a smart non-expert: concrete analogies, short paragraphs, and a one-line summary at the end.",
-  plan:
-    "Produce an execution plan: numbered milestones, owner-less concrete tasks, dependencies, risks, and a definition of done.",
+  plan: "Produce an execution plan: numbered milestones, owner-less concrete tasks, dependencies, risks, and a definition of done.",
 };
 
 export default defineTool({
@@ -24,7 +23,9 @@ export default defineTool({
     mode: z
       .enum(["auto", "think", "research", "explain", "plan"])
       .default("auto")
-      .describe("Response style: auto, deep reasoning, research report, plain explanation, or execution plan."),
+      .describe(
+        "Response style: auto, deep reasoning, research report, plain explanation, or execution plan.",
+      ),
     language: z
       .string()
       .trim()

@@ -1,7 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { ForceMode, ForceRun, ForceStep, AgentResult } from "@/lib/force/types";
+import type { Database, Json } from "@/integrations/supabase/types";
+
+type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
 const RUNS = "manovik_force_runs";
 const AGENTS = "manovik_force_agents";
@@ -29,7 +33,7 @@ export const startForceRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => startInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context as Ctx;
 
     const { data: run, error } = await supabase
       .from(RUNS)
@@ -50,18 +54,23 @@ export const startForceRun = createServerFn({ method: "POST" })
 
     try {
       const { runForce } = await import("@/lib/force/engine.server");
-      const outcome = await runForce(data.objective, data.mode as ForceMode, data.agents, async (phase, label, payload) => {
-        const { error: stepError } = await supabase.from(STEPS).insert({
-          run_id: runId,
-          user_id: userId,
-          idx: idx++,
-          phase,
-          label,
-          payload: payload as Record<string, unknown>,
-        });
-        // A dropped step silently breaks the rewind timeline — surface it.
-        if (stepError) fail("saveStep", stepError);
-      });
+      const outcome = await runForce(
+        data.objective,
+        data.mode as ForceMode,
+        data.agents,
+        async (phase, label, payload) => {
+          const { error: stepError } = await supabase.from(STEPS).insert({
+            run_id: runId,
+            user_id: userId,
+            idx: idx++,
+            phase,
+            label,
+            payload: payload as Json,
+          });
+          // A dropped step silently breaks the rewind timeline — surface it.
+          if (stepError) fail("saveStep", stepError);
+        },
+      );
 
       const { error: agentsError } = await supabase.from(AGENTS).insert(
         outcome.agents.map((a) => ({
@@ -106,7 +115,7 @@ export const startForceRun = createServerFn({ method: "POST" })
 export const listForceRuns = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context as Ctx;
     const { data, error } = await supabase
       .from(RUNS)
       .select("id,objective,mode,status,score,created_at,parent_run_id")
@@ -114,14 +123,19 @@ export const listForceRuns = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(30);
     if (error) fail("listRuns", error);
-    return (data ?? []) as Array<Pick<ForceRun, "id" | "objective" | "mode" | "status" | "score" | "created_at" | "parent_run_id">>;
+    return (data ?? []) as Array<
+      Pick<
+        ForceRun,
+        "id" | "objective" | "mode" | "status" | "score" | "created_at" | "parent_run_id"
+      >
+    >;
   });
 
 export const getForceRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context as Ctx;
 
     const { data: run, error } = await supabase
       .from(RUNS)
@@ -146,7 +160,7 @@ export const getForceRun = createServerFn({ method: "POST" })
     ]);
 
     return {
-      run: run as ForceRun,
+      run: run as unknown as ForceRun,
       agents: (agents ?? []) as AgentResult[],
       steps: (steps ?? []) as ForceStep[],
     };
@@ -156,7 +170,7 @@ export const deleteForceRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context as Ctx;
     const { error } = await supabase.from(RUNS).delete().eq("id", data.id).eq("user_id", userId);
     if (error) fail("deleteRun", error);
     return { ok: true };

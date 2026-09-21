@@ -289,7 +289,8 @@ export const Route = createFileRoute("/api/public/demo-chat")({
                   ? "verify"
                   : "plan";
         const dnaMode: DnaMode =
-          typeof body.dnaMode === "string" && (DNA_MODES as readonly string[]).includes(body.dnaMode)
+          typeof body.dnaMode === "string" &&
+          (DNA_MODES as readonly string[]).includes(body.dnaMode)
             ? (body.dnaMode as DnaMode)
             : "build";
         const connected = body.connected === true;
@@ -414,9 +415,7 @@ Rules: never invent files that weren't provided. If evidence is ambiguous, mark 
             prompt,
             // OpenAI substrates only accept the default temperature; gpt-5.6
             // additionally needs reasoning switched off on the chat path.
-            ...(isOpenAiSubstrate
-              ? {}
-              : { temperature: mode === "plan" ? 0.5 : 0.3 }),
+            ...(isOpenAiSubstrate ? {} : { temperature: mode === "plan" ? 0.5 : 0.3 }),
             ...(substrate.startsWith("openai/gpt-5.6")
               ? { providerOptions: { lovable: { reasoningEffort: "none" } } }
               : {}),
@@ -428,7 +427,6 @@ Rules: never invent files that weren't provided. If evidence is ambiguous, mark 
               "X-Manovik-Mode": mode,
             },
           });
-
         } catch (err) {
           const msg = String((err as Error)?.message ?? err);
           const status = /402|credit/i.test(msg) ? 402 : /429|rate/i.test(msg) ? 429 : 500;

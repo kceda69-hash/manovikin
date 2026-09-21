@@ -8,9 +8,24 @@ export default defineTool({
   description:
     "Translate or localize text between any languages while preserving markdown, code blocks, placeholders ({name}, %s, {{var}}) and formatting. Supports formal/informal register and glossary terms that must stay untranslated.",
   inputSchema: {
-    text: z.string().trim().min(1).max(20000).describe("Text to translate. Markdown and code are preserved."),
-    to: z.string().trim().min(2).max(40).describe("Target language, e.g. 'Hindi', 'Japanese', 'pt-BR'."),
-    from: z.string().trim().max(40).optional().describe("Source language. Auto-detected when omitted."),
+    text: z
+      .string()
+      .trim()
+      .min(1)
+      .max(20000)
+      .describe("Text to translate. Markdown and code are preserved."),
+    to: z
+      .string()
+      .trim()
+      .min(2)
+      .max(40)
+      .describe("Target language, e.g. 'Hindi', 'Japanese', 'pt-BR'."),
+    from: z
+      .string()
+      .trim()
+      .max(40)
+      .optional()
+      .describe("Source language. Auto-detected when omitted."),
     register: z
       .enum(["neutral", "formal", "informal", "marketing", "technical"])
       .default("neutral")
@@ -31,7 +46,11 @@ export default defineTool({
       ];
       if (keep_terms?.length) rules.push(`Do not translate these terms: ${keep_terms.join(", ")}.`);
 
-      const { text: out, model, tier } = await askManovik({
+      const {
+        text: out,
+        model,
+        tier,
+      } = await askManovik({
         prompt: text,
         system: rules.join("\n"),
         maxTokens: 6000,

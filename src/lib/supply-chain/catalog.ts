@@ -2,16 +2,10 @@
 // Pure data — no runtime deps, safe to import from tests and the browser.
 
 /** Registries we consider trustworthy for resolved package tarballs. */
-export const TRUSTED_REGISTRY_HOSTS = [
-  "registry.npmjs.org",
-  "registry.yarnpkg.com",
-];
+export const TRUSTED_REGISTRY_HOSTS = ["registry.npmjs.org", "registry.yarnpkg.com"];
 
 /** Hosts allowed to receive model/inference traffic. */
-export const TRUSTED_AI_HOSTS = [
-  "ai.gateway.lovable.dev",
-  "connector-gateway.lovable.dev",
-];
+export const TRUSTED_AI_HOSTS = ["ai.gateway.lovable.dev", "connector-gateway.lovable.dev"];
 
 /**
  * Model ids MANOVIK is allowed to call. Anything outside this list is
@@ -68,7 +62,6 @@ export const APPROVED_MODEL_IDS = [
   "openai/gpt-4o-mini-transcribe",
 ];
 
-
 /** Models that support the OpenAI priority ("fast mode") serving tier. */
 export const PRIORITY_CAPABLE_MODELS = [
   "openai/gpt-5",
@@ -94,8 +87,8 @@ export const KNOWN_COMPROMISED_PACKAGES: Record<string, string> = {
   "flatmap-stream": "Malicious by design — remove entirely.",
   "node-ipc": "9.2.2/11.0.0 shipped destructive protestware payloads.",
   "ua-parser-js": "0.7.29 / 0.8.0 / 1.0.0 were hijacked with a coin miner.",
-  "coa": "2.0.3+ patch releases were hijacked.",
-  "rc": "1.2.9 / 1.3.9 / 2.3.9 were hijacked.",
+  coa: "2.0.3+ patch releases were hijacked.",
+  rc: "1.2.9 / 1.3.9 / 2.3.9 were hijacked.",
   colors: "1.4.44-liberty-2 was sabotaged with an infinite loop.",
   faker: "6.6.6 was sabotaged by the maintainer.",
   "@lottiefiles/lottie-player": "2.0.5-2.0.7 shipped a wallet-drainer.",

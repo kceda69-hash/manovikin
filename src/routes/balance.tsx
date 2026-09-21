@@ -8,15 +8,25 @@ export const Route = createFileRoute("/balance")({
   head: () => ({
     meta: [
       { title: "Manovik AI Balance" },
-      { name: "description", content: "View your MANOVIK AI native credit balance and recent activity ledger — independent of any external provider, 1 credit per chat message." },
+      {
+        name: "description",
+        content:
+          "View your MANOVIK AI native credit balance and recent activity ledger — independent of any external provider, 1 credit per chat message.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Manovik AI Balance" },
-      { property: "og:description", content: "Your MANOVIK AI native credit balance and recent activity ledger." },
+      {
+        property: "og:description",
+        content: "Your MANOVIK AI native credit balance and recent activity ledger.",
+      },
       { property: "og:url", content: "https://manovik.in/balance" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Manovik AI Balance" },
-      { name: "twitter:description", content: "Your MANOVIK AI native credit balance and recent activity ledger." },
+      {
+        name: "twitter:description",
+        content: "Your MANOVIK AI native credit balance and recent activity ledger.",
+      },
     ],
   }),
 });
@@ -53,7 +63,7 @@ function BalancePage() {
             {data.ledger.length === 0 && (
               <li className="p-4 text-sm text-muted-foreground">No activity yet.</li>
             )}
-            {data.ledger.map((row: any, i: number) => (
+            {data.ledger.map((row, i: number) => (
               <li key={i} className="flex justify-between p-4 text-sm">
                 <span>
                   <span className={row.delta < 0 ? "text-destructive" : "text-emerald-500"}>

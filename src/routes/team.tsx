@@ -17,6 +17,18 @@ const TITLE = "MANOVIK Team Workspaces";
 const DESC =
   "Create shared MANOVIK workspaces, invite teammates by email and control who can view or edit your projects.";
 
+/**
+ * Runtime shape of a listWorkspaces row: the DB row (id, name, slug, …) plus
+ * the caller's membership role. The server function annotates the row as
+ * `{ id: string }`, which drops name/slug from the inferred type.
+ */
+interface WorkspaceListItem {
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
+}
+
 export const Route = createFileRoute("/team")({
   component: TeamPage,
   head: () => ({
@@ -78,7 +90,10 @@ function TeamPage() {
   });
 
   const inviteMut = useMutation({
-    mutationFn: () => invite({ data: { workspaceId: selected!, email, role: role as any } }),
+    mutationFn: () =>
+      invite({
+        data: { workspaceId: selected!, email, role: role as "admin" | "editor" | "viewer" },
+      }),
     onSuccess: () => {
       setEmail("");
       toast.success("Invite created");
@@ -100,7 +115,10 @@ function TeamPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <Button onClick={() => createMut.mutate()} disabled={createMut.isPending || name.trim().length < 2}>
+          <Button
+            onClick={() => createMut.mutate()}
+            disabled={createMut.isPending || name.trim().length < 2}
+          >
             Create
           </Button>
         </div>
@@ -113,7 +131,7 @@ function TeamPage() {
           <p className="text-sm text-muted-foreground">No workspaces yet.</p>
         )}
         <ul className="divide-y">
-          {ws.data?.workspaces.map((w: any) => (
+          {((ws.data?.workspaces ?? []) as unknown as WorkspaceListItem[]).map((w) => (
             <li key={w.id} className="flex items-center justify-between py-3">
               <div>
                 <div className="font-medium">{w.name}</div>
@@ -155,14 +173,17 @@ function TeamPage() {
                 </option>
               ))}
             </select>
-            <Button onClick={() => inviteMut.mutate()} disabled={inviteMut.isPending || !email.includes("@")}>
+            <Button
+              onClick={() => inviteMut.mutate()}
+              disabled={inviteMut.isPending || !email.includes("@")}
+            >
               Invite
             </Button>
           </div>
 
           <h3 className="text-sm font-medium mb-2">Members</h3>
           <ul className="mb-5 text-sm">
-            {detail.data?.members.map((m: any) => (
+            {detail.data?.members.map((m) => (
               <li key={m.id} className="py-1 text-muted-foreground">
                 {m.user_id.slice(0, 8)}… — {m.role}
               </li>
@@ -171,12 +192,12 @@ function TeamPage() {
 
           <h3 className="text-sm font-medium mb-2">Pending invites</h3>
           <ul className="text-sm">
-            {detail.data?.invites.filter((i: any) => !i.accepted_at).length === 0 && (
+            {detail.data?.invites.filter((i) => !i.accepted_at).length === 0 && (
               <li className="text-muted-foreground">None.</li>
             )}
             {detail.data?.invites
-              .filter((i: any) => !i.accepted_at)
-              .map((i: any) => (
+              .filter((i) => !i.accepted_at)
+              .map((i) => (
                 <li key={i.id} className="py-1 text-muted-foreground">
                   {i.email} — {i.role}
                 </li>

@@ -95,7 +95,9 @@ function detectLocale(): FooterLocale {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY) as FooterLocale | null;
     if (saved && dict[saved]) return saved;
-  } catch {}
+  } catch {
+    // localStorage may be unavailable (SSR, private mode); fall through to browser language.
+  }
   const nav = (typeof navigator !== "undefined" ? navigator.language : "en").toLowerCase();
   const short = nav.split("-")[0] as FooterLocale;
   return dict[short] ? short : "en";
@@ -127,12 +129,15 @@ export function useFooterI18n() {
     setLocaleState(next);
     try {
       window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {}
+    } catch {
+      // localStorage write can throw in private mode; locale still applies in-memory.
+    }
     try {
       window.dispatchEvent(new CustomEvent(LOCALE_EVENT, { detail: next }));
-    } catch {}
+    } catch {
+      // dispatchEvent should not fail here; keep the empty handler for safety.
+    }
   }, []);
 
   return { locale, setLocale, t: dict[locale] };
 }
-

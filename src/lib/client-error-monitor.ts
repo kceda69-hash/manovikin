@@ -9,10 +9,18 @@ const DEDUPE_MS = 2000;
 
 function key(e: unknown): string {
   if (e instanceof Error) return `${e.name}:${e.message}`;
-  try { return String(e).slice(0, 200); } catch { return "unknown"; }
+  try {
+    return String(e).slice(0, 200);
+  } catch {
+    return "unknown";
+  }
 }
 
-function report(kind: "error" | "unhandledrejection", err: unknown, extra?: Record<string, unknown>) {
+function report(
+  kind: "error" | "unhandledrejection",
+  err: unknown,
+  extra?: Record<string, unknown>,
+) {
   const k = `${kind}|${key(err)}`;
   const now = Date.now();
   const last = recent.get(k) ?? 0;
@@ -35,7 +43,11 @@ export function initClientErrorMonitor() {
   if (installed || typeof window === "undefined") return;
   installed = true;
   window.addEventListener("error", (e) => {
-    report("error", e.error ?? e.message, { filename: e.filename, lineno: e.lineno, colno: e.colno });
+    report("error", e.error ?? e.message, {
+      filename: e.filename,
+      lineno: e.lineno,
+      colno: e.colno,
+    });
   });
   window.addEventListener("unhandledrejection", (e) => {
     report("unhandledrejection", e.reason);

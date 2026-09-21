@@ -141,9 +141,9 @@ function CaseStudiesPage() {
             Real missions MANOVIK has run, and what they shipped
           </h1>
           <p className="max-w-2xl text-lg text-muted-foreground">
-            These are features of this product, built by MANOVIK itself — a parallel agent
-            swarm, a full-stack app build, and a scheduled agent that monitors search health.
-            The walkthroughs below show the interfaces and the concrete output of each run.
+            These are features of this product, built by MANOVIK itself — a parallel agent swarm, a
+            full-stack app build, and a scheduled agent that monitors search health. The
+            walkthroughs below show the interfaces and the concrete output of each run.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Link
@@ -211,19 +211,17 @@ function CaseStudiesPage() {
               &quot;done&quot; looks like.
             </li>
             <li>
-              MANOVIK runs recon, then splits the work across specialist agents working in
-              parallel.
+              MANOVIK runs recon, then splits the work across specialist agents working in parallel.
             </li>
             <li>
-              An adversary pass reviews and scores each agent&apos;s output and discards weak
-              work.
+              An adversary pass reviews and scores each agent&apos;s output and discards weak work.
             </li>
             <li>
               Synthesis merges what survived into one deliverable with its reasoning attached.
             </li>
             <li>
-              You keep iterating in chat, and you keep the code — including on your own server
-              with the lifetime plan.
+              You keep iterating in chat, and you keep the code — including on your own server with
+              the lifetime plan.
             </li>
           </ol>
         </section>
@@ -231,8 +229,8 @@ function CaseStudiesPage() {
         <section className="rounded-xl border border-border/60 bg-card/40 p-6">
           <h2 className="text-xl font-semibold">Run your own mission</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Free to start, no card needed. Pro is ₹699/month and the one-time ₹4999 lifetime
-            plan includes self-hosting.
+            Free to start, no card needed. Pro is ₹699/month and the one-time ₹4999 lifetime plan
+            includes self-hosting.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link

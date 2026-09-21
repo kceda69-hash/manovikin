@@ -1,13 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  buildSitemapEntriesFromRouteFiles,
-  routeFilePathToPublicPath,
-} from "@/lib/sitemap";
+import { buildSitemapEntriesFromRouteFiles, routeFilePathToPublicPath } from "@/lib/sitemap";
 
-const actualRouteFiles = Object.keys(
-  import.meta.glob("../../routes/**/*.{ts,tsx}"),
-).map((filePath) => filePath.replace("../../routes/", "./"));
+const actualRouteFiles = Object.keys(import.meta.glob("../../routes/**/*.{ts,tsx}")).map(
+  (filePath) => filePath.replace("../../routes/", "./"),
+);
 
 describe("sitemap route discovery", () => {
   it("converts TanStack route filenames into public paths", () => {
@@ -15,26 +12,17 @@ describe("sitemap route discovery", () => {
     expect(routeFilePathToPublicPath("./blog.ai-coding-agent-benchmark.tsx")).toBe(
       "/blog/ai-coding-agent-benchmark",
     );
-    expect(routeFilePathToPublicPath("./[.mcp]/list-tools.ts")).toBe(
-      "/.mcp/list-tools",
+    expect(routeFilePathToPublicPath("./[.mcp]/list-tools.ts")).toBe("/.mcp/list-tools");
+    expect(routeFilePathToPublicPath("./[.well-known]/oauth-protected-resource.ts")).toBe(
+      "/.well-known/oauth-protected-resource",
     );
-    expect(
-      routeFilePathToPublicPath("./[.well-known]/oauth-protected-resource.ts"),
-    ).toBe("/.well-known/oauth-protected-resource");
     expect(routeFilePathToPublicPath("./receipt.$id.tsx")).toBeNull();
   });
 
   it("keeps every static crawler-visible route in the sitemap automatically", () => {
-    const paths = buildSitemapEntriesFromRouteFiles(actualRouteFiles).map(
-      (entry) => entry.path,
-    );
+    const paths = buildSitemapEntriesFromRouteFiles(actualRouteFiles).map((entry) => entry.path);
 
-    expect(paths).toEqual(
-      expect.arrayContaining([
-        "/vs-devin",
-        "/blog/mcp-guide",
-      ]),
-    );
+    expect(paths).toEqual(expect.arrayContaining(["/vs-devin", "/blog/mcp-guide"]));
     // Internal / Disallow'd pages must stay out — enforced by
     // sitemap-robots.test.ts as well.
     expect(paths).not.toContain("/seo");
@@ -44,9 +32,7 @@ describe("sitemap route discovery", () => {
   });
 
   it("keeps internal endpoints, callback routes, and dynamic placeholders out", () => {
-    const paths = buildSitemapEntriesFromRouteFiles(actualRouteFiles).map(
-      (entry) => entry.path,
-    );
+    const paths = buildSitemapEntriesFromRouteFiles(actualRouteFiles).map((entry) => entry.path);
 
     expect(paths).not.toContain("/api/chat");
     expect(paths).not.toContain("/auth/callback");

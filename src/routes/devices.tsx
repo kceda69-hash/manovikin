@@ -125,7 +125,10 @@ function DevicesPage() {
             placeholder="My MacBook"
             aria-label="Device name"
           />
-          <Button disabled={!name.trim() || create.isPending} onClick={() => create.mutate(name.trim())}>
+          <Button
+            disabled={!name.trim() || create.isPending}
+            onClick={() => create.mutate(name.trim())}
+          >
             Create
           </Button>
         </CardContent>
@@ -141,7 +144,9 @@ function DevicesPage() {
                   {d.paired_at ? (
                     <>
                       Paired · {d.platform} ·{" "}
-                      {d.last_seen_at ? `last seen ${new Date(d.last_seen_at).toLocaleTimeString()}` : "never polled"}
+                      {d.last_seen_at
+                        ? `last seen ${new Date(d.last_seen_at).toLocaleTimeString()}`
+                        : "never polled"}
                     </>
                   ) : (
                     <>
@@ -186,7 +191,10 @@ function DevicesPage() {
                       if (e.key === "Enter" && command.trim()) send.mutate();
                     }}
                   />
-                  <Button disabled={!command.trim() || send.isPending} onClick={() => send.mutate()}>
+                  <Button
+                    disabled={!command.trim() || send.isPending}
+                    onClick={() => send.mutate()}
+                  >
                     <Send className="mr-2 h-4 w-4" /> Run
                   </Button>
                   <Button

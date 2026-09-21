@@ -1,8 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 
-type Ctx = { supabase: any; userId: string; claims?: { email?: string } | null };
+type Ctx = {
+  supabase: SupabaseClient<Database>;
+  userId: string;
+  claims?: { email?: string } | null;
+};
 
 const ROLES = ["admin", "editor", "viewer"] as const;
 
@@ -37,7 +43,9 @@ export const listWorkspaces = createServerFn({ method: "GET" })
     return {
       workspaces: (rows ?? []).map((w: { id: string }) => ({
         ...w,
-        role: (memberships ?? []).find((m: { workspace_id: string }) => m.workspace_id === w.id)?.role ?? "viewer",
+        role:
+          (memberships ?? []).find((m: { workspace_id: string }) => m.workspace_id === w.id)
+            ?.role ?? "viewer",
       })),
     };
   });

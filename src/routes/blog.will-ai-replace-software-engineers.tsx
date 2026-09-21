@@ -27,7 +27,9 @@ export const Route = createFileRoute("/blog/will-ai-replace-software-engineers")
           "Autonomous AI agents are reshaping software engineering, not erasing it. Here's what changes — and what doesn't.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://manovik.in/blog/will-ai-replace-software-engineers" }],
+    links: [
+      { rel: "canonical", href: "https://manovik.in/blog/will-ai-replace-software-engineers" },
+    ],
     scripts: [
       {
         type: "application/ld+json",
@@ -38,7 +40,12 @@ export const Route = createFileRoute("/blog/will-ai-replace-software-engineers")
           description:
             "A balanced look at whether AI will replace software engineers, how autonomous AI agents like MANOVIK AI change the job, and what skills stay valuable.",
           author: { "@type": "Organization", name: "MANOVIK AI", url: "https://manovik.in" },
-          publisher: { "@type": "Organization", name: "MANOVIK AI", url: "https://manovik.in", logo: { "@type": "ImageObject", url: "https://manovik.in/favicon.ico" } },
+          publisher: {
+            "@type": "Organization",
+            name: "MANOVIK AI",
+            url: "https://manovik.in",
+            logo: { "@type": "ImageObject", url: "https://manovik.in/favicon.ico" },
+          },
           mainEntityOfPage: "https://manovik.in/blog/will-ai-replace-software-engineers",
         }),
       },
@@ -91,7 +98,10 @@ function WillAiReplaceEngineersPage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/60 px-4 py-3">
-        <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="size-4" /> Back to home
         </Link>
       </header>

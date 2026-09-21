@@ -262,7 +262,9 @@ function detectLocale(): Locale {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY) as Locale | null;
     if (saved && DICTS[saved]) return saved;
-  } catch {}
+  } catch {
+    // localStorage may be unavailable (SSR, private mode); fall through to browser language.
+  }
   const nav = (typeof navigator !== "undefined" ? navigator.language : "en").toLowerCase();
   const short = nav.split("-")[0] as Locale;
   return DICTS[short] ? short : "en";
@@ -307,10 +309,14 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     setLocaleState(next);
     try {
       window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {}
+    } catch {
+      // localStorage write can throw in private mode; locale still applies in-memory.
+    }
     try {
       window.dispatchEvent(new CustomEvent(LOCALE_EVENT, { detail: next }));
-    } catch {}
+    } catch {
+      // dispatchEvent should not fail here; keep the empty handler for safety.
+    }
   }, []);
 
   const value = useMemo<I18nContextValue>(() => {
@@ -346,7 +352,9 @@ export function LanguageSwitcher({
 }) {
   const { locale, setLocale, t } = useI18n();
   return (
-    <label className={`inline-flex items-center gap-1.5 text-xs text-muted-foreground ${className}`}>
+    <label
+      className={`inline-flex items-center gap-1.5 text-xs text-muted-foreground ${className}`}
+    >
       <span className="sr-only">{ariaLabel ?? t("nav.language")}</span>
       <select
         value={locale}

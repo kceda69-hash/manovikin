@@ -81,13 +81,13 @@ function evalArithmetic(input: string): number {
       return v;
     }
     const start = pos;
-    while (pos < src.length && /[\d.eE+\-]/.test(src[pos])) {
+    while (pos < src.length && /[\d.eE+-]/.test(src[pos])) {
       // only consume +/- if part of exponent
       if ((src[pos] === "+" || src[pos] === "-") && !/[eE]/.test(src[pos - 1])) break;
       pos++;
     }
     const numStr = src.slice(start, pos);
-    if (!/^\d+(\.\d+)?([eE][+\-]?\d+)?$|^\.\d+([eE][+\-]?\d+)?$/.test(numStr)) {
+    if (!/^\d+(\.\d+)?([eE][+-]?\d+)?$|^\.\d+([eE][+-]?\d+)?$/.test(numStr)) {
       throw new Error("Invalid number literal");
     }
     return Number(numStr);
@@ -190,7 +190,8 @@ sandbox.register({
 // 5. Date/time arithmetic — add/subtract days, diff, weekday, ISO week.
 sandbox.register({
   name: "datetime.calc",
-  description: "Date arithmetic: add/subtract days from a date (op=add), diff between two dates (op=diff), or weekday/ISO-week info (op=info). Dates as YYYY-MM-DD.",
+  description:
+    "Date arithmetic: add/subtract days from a date (op=add), diff between two dates (op=diff), or weekday/ISO-week info (op=info). Dates as YYYY-MM-DD.",
   schema: z.object({
     op: z.enum(["add", "diff", "info"]),
     date: z.string().max(40),
@@ -218,7 +219,11 @@ sandbox.register({
       if (!other) throw new Error("other is required for op=diff");
       const ms = parse(other).getTime() - parse(date).getTime();
       const totalDays = Math.trunc(ms / 86_400_000);
-      return { days: totalDays, weeks: Math.trunc(totalDays / 7), hours: Math.trunc(ms / 3_600_000) };
+      return {
+        days: totalDays,
+        weeks: Math.trunc(totalDays / 7),
+        hours: Math.trunc(ms / 3_600_000),
+      };
     }
     const d = parse(date);
     // ISO-8601 week number: shift to the Thursday of this week, then count
@@ -239,12 +244,15 @@ sandbox.register({
 
 // 6. Text statistics — counts, reading time, top keywords.
 const STOP_WORDS = new Set(
-  "the,a,an,and,or,but,if,then,of,to,in,on,for,with,as,at,by,from,is,are,was,were,be,been,it,its,this,that,these,those,i,you,he,she,we,they,not,no,do,does,did,will,would,can,could,should,have,has,had,so,than,too,very,just,into,over,after,before,between,about,up,out,all,any,each,other,some,such,only,own,same,my,your,his,her,our,their".split(","),
+  "the,a,an,and,or,but,if,then,of,to,in,on,for,with,as,at,by,from,is,are,was,were,be,been,it,its,this,that,these,those,i,you,he,she,we,they,not,no,do,does,did,will,would,can,could,should,have,has,had,so,than,too,very,just,into,over,after,before,between,about,up,out,all,any,each,other,some,such,only,own,same,my,your,his,her,our,their".split(
+    ",",
+  ),
 );
 
 sandbox.register({
   name: "text.stats",
-  description: "Text statistics: characters, words, sentences, paragraphs, reading time, top keywords.",
+  description:
+    "Text statistics: characters, words, sentences, paragraphs, reading time, top keywords.",
   schema: z.object({
     input: z.string().max(50_000),
     topK: z.number().int().min(1).max(20).default(8),
@@ -279,7 +287,8 @@ sandbox.register({
 // 7. Data conversion — JSON pretty/minify/validate, JSON array <-> CSV.
 sandbox.register({
   name: "data.convert",
-  description: "Convert/validate data: pretty-print, minify or validate JSON; convert a JSON array of objects to CSV or CSV back to JSON.",
+  description:
+    "Convert/validate data: pretty-print, minify or validate JSON; convert a JSON array of objects to CSV or CSV back to JSON.",
   schema: z.object({
     op: z.enum(["json_pretty", "json_minify", "json_validate", "json_to_csv", "csv_to_json"]),
     input: z.string().max(100_000),
@@ -300,7 +309,12 @@ sandbox.register({
     if (op === "json_minify") return { result: JSON.stringify(JSON.parse(input)) };
     if (op === "json_to_csv") {
       const arr = JSON.parse(input);
-      if (!Array.isArray(arr) || arr.length === 0 || typeof arr[0] !== "object" || arr[0] === null) {
+      if (
+        !Array.isArray(arr) ||
+        arr.length === 0 ||
+        typeof arr[0] !== "object" ||
+        arr[0] === null
+      ) {
         throw new Error("Input must be a non-empty JSON array of objects");
       }
       const headers = [...new Set(arr.flatMap((o) => Object.keys(o)))];
@@ -325,11 +339,16 @@ sandbox.register({
         const c = line[i];
         if (inQuotes) {
           if (c === '"') {
-            if (line[i + 1] === '"') { cur += '"'; i++; } else inQuotes = false;
+            if (line[i + 1] === '"') {
+              cur += '"';
+              i++;
+            } else inQuotes = false;
           } else cur += c;
         } else if (c === '"') inQuotes = true;
-        else if (c === ",") { out.push(cur); cur = ""; }
-        else cur += c;
+        else if (c === ",") {
+          out.push(cur);
+          cur = "";
+        } else cur += c;
       }
       out.push(cur);
       return out;
@@ -346,7 +365,8 @@ sandbox.register({
 // 8. Cryptographic utilities — hashes, UUIDs, secure random values (WebCrypto).
 sandbox.register({
   name: "crypto.utils",
-  description: "Cryptographic utilities: SHA-256/SHA-1 hash of text, UUID v4, secure random hex or URL-safe token.",
+  description:
+    "Cryptographic utilities: SHA-256/SHA-1 hash of text, UUID v4, secure random hex or URL-safe token.",
   schema: z.object({
     op: z.enum(["sha256", "sha1", "uuid", "random_hex", "random_token"]),
     input: z.string().max(50_000).optional(),
@@ -385,7 +405,8 @@ sandbox.register({
 // 9. Web search — DuckDuckGo Instant Answers (no key needed).
 sandbox.register({
   name: "web.search",
-  description: "Web search via DuckDuckGo Instant Answers: definitions, facts, docs. Returns an abstract, direct answer and related topics with URLs.",
+  description:
+    "Web search via DuckDuckGo Instant Answers: definitions, facts, docs. Returns an abstract, direct answer and related topics with URLs.",
   schema: z.object({ query: z.string().min(2).max(200) }),
   timeoutMs: 6_000,
   maxOutputBytes: 8_000,
@@ -397,8 +418,21 @@ sandbox.register({
       headers: { "User-Agent": "MANOVIK AI-Sandbox/1.0" },
     });
     if (!res.ok) throw new Error(`Search failed: HTTP ${res.status}`);
-    const data = (await res.json()) as Record<string, any>;
-    const topics = ((data.RelatedTopics ?? []) as any[])
+    interface DuckDuckGoTopic {
+      Text?: string;
+      FirstURL?: string;
+      Topics?: DuckDuckGoTopic[];
+    }
+    interface DuckDuckGoResult {
+      RelatedTopics?: DuckDuckGoTopic[];
+      Heading?: string;
+      AbstractText?: string;
+      AbstractSource?: string;
+      AbstractURL?: string;
+      Answer?: string;
+    }
+    const data = (await res.json()) as DuckDuckGoResult;
+    const topics = (data.RelatedTopics ?? [])
       .flatMap((t) => t.Topics ?? [t])
       .slice(0, 8)
       .map((t) => ({ text: String(t.Text ?? "").slice(0, 300), url: t.FirstURL ?? "" }))
@@ -418,7 +452,8 @@ sandbox.register({
 // 10. Color conversion — HEX/RGB/HSL + WCAG contrast ratio.
 sandbox.register({
   name: "color.convert",
-  description: "Convert colors between HEX, RGB and HSL; or compute the WCAG contrast ratio between two colors (op=contrast needs other).",
+  description:
+    "Convert colors between HEX, RGB and HSL; or compute the WCAG contrast ratio between two colors (op=contrast needs other).",
   schema: z.object({
     op: z.enum(["convert", "contrast"]),
     color: z.string().max(40),
@@ -459,7 +494,9 @@ sandbox.register({
     const toHex = ([r, g, b]: RGB) =>
       `#${[r, g, b].map((v) => clamp(v).toString(16).padStart(2, "0")).join("")}`;
     const toHsl = ([r, g, b]: RGB): RGB => {
-      r /= 255; g /= 255; b /= 255;
+      r /= 255;
+      g /= 255;
+      b /= 255;
       const max = Math.max(r, g, b);
       const min = Math.min(r, g, b);
       let h = 0;

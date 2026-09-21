@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 
-type Ctx = { supabase: any; userId: string };
+type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
 const MAX_DOC_CHARS = 200_000;
 
@@ -64,7 +66,9 @@ export const addMemoryDoc = createServerFn({ method: "POST" })
         embedding: JSON.stringify(vectors[i] ?? []),
       }));
       for (let i = 0; i < rows.length; i += 100) {
-        const { error: insErr } = await supabase.from("manovik_memory_chunks").insert(rows.slice(i, i + 100));
+        const { error: insErr } = await supabase
+          .from("manovik_memory_chunks")
+          .insert(rows.slice(i, i + 100));
         if (insErr) throw new Error(insErr.message);
       }
       await supabase.from("manovik_memory_docs").update({ status: "ready" }).eq("id", doc.id);
@@ -93,7 +97,12 @@ export const deleteMemoryDoc = createServerFn({ method: "POST" })
 export const searchMemory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({ query: z.string().trim().min(1).max(2000), limit: z.number().int().min(1).max(12).default(6) }).parse(d),
+    z
+      .object({
+        query: z.string().trim().min(1).max(2000),
+        limit: z.number().int().min(1).max(12).default(6),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { userId } = context as Ctx;
@@ -102,11 +111,22 @@ export const searchMemory = createServerFn({ method: "POST" })
     if (!vector) return { matches: [] };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin.rpc("manovik_match_memory" as never, {
-      _user_id: userId,
-      query_embedding: JSON.stringify(vector),
-      match_count: data.limit,
-    } as never);
+    const { data: rows, error } = await supabaseAdmin.rpc(
+      "manovik_match_memory" as never,
+      {
+        _user_id: userId,
+        query_embedding: JSON.stringify(vector),
+        match_count: data.limit,
+      } as never,
+    );
     if (error) throw new Error(error.message);
-    return { matches: (rows ?? []) as Array<{ id: string; doc_id: string; title: string; content: string; similarity: number }> };
+    return {
+      matches: (rows ?? []) as Array<{
+        id: string;
+        doc_id: string;
+        title: string;
+        content: string;
+        similarity: number;
+      }>,
+    };
   });

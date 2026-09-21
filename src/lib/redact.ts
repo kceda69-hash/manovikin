@@ -10,7 +10,10 @@ const PATTERNS: Array<{ re: RegExp; label: string }> = [
   { re: /AIza[0-9A-Za-z_-]{30,}/g, label: "GOOGLE_API_KEY" },
   { re: /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g, label: "JWT" },
   { re: /(?:postgres|postgresql|mysql|mongodb(?:\+srv)?|redis):\/\/[^\s"']+/gi, label: "DB_URL" },
-  { re: /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g, label: "PRIVATE_KEY" },
+  {
+    re: /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g,
+    label: "PRIVATE_KEY",
+  },
   { re: /\b\d{13,19}\b/g, label: "CARD_NUMBER" },
 ];
 

@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 
-type Ctx = { supabase: any; userId: string };
+type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
 const SCOPES = ["ask", "code", "memory"] as const;
 
@@ -12,7 +14,9 @@ export const listApiKeys = createServerFn({ method: "GET" })
     const { supabase, userId } = context as Ctx;
     const { data, error } = await supabase
       .from("manovik_api_keys")
-      .select("id, label, key_prefix, scopes, revoked_at, expires_at, last_used_at, use_count, created_at")
+      .select(
+        "id, label, key_prefix, scopes, revoked_at, expires_at, last_used_at, use_count, created_at",
+      )
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(100);

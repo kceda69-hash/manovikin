@@ -31,7 +31,9 @@ function fmtINR(amountPaise: number, currency: string) {
 function genToken(): string {
   const b = new Uint8Array(32);
   crypto.getRandomValues(b);
-  return Array.from(b).map((x) => x.toString(16).padStart(2, "0")).join("");
+  return Array.from(b)
+    .map((x) => x.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 export async function sendReceiptEmailForPurchase(purchaseId: string) {
@@ -53,7 +55,7 @@ export async function sendReceiptEmailForPurchase(purchaseId: string) {
     .select("id")
     .eq("template_name", "payment-receipt")
     .eq("recipient_email", recipient)
-    .contains("metadata", { idempotency_key: idemKey } as any)
+    .contains("metadata", { idempotency_key: idemKey })
     .maybeSingle();
   if (existing) return { ok: true, skipped: true };
 
@@ -78,7 +80,10 @@ export async function sendReceiptEmailForPurchase(purchaseId: string) {
     unsubscribeToken = genToken();
     await supabaseAdmin
       .from("email_unsubscribe_tokens")
-      .upsert({ token: unsubscribeToken, email: recipient }, { onConflict: "email", ignoreDuplicates: true });
+      .upsert(
+        { token: unsubscribeToken, email: recipient },
+        { onConflict: "email", ignoreDuplicates: true },
+      );
     const { data: stored } = await supabaseAdmin
       .from("email_unsubscribe_tokens")
       .select("token")
@@ -92,7 +97,7 @@ export async function sendReceiptEmailForPurchase(purchaseId: string) {
   const entry = TEMPLATES["payment-receipt"];
   if (!entry) return { ok: false, reason: "template_missing" };
 
-  const data = {
+  const data: Record<string, unknown> = {
     name: purchase.name ?? undefined,
     planLabel: PLAN_LABEL[purchase.plan] ?? purchase.plan,
     amountFormatted: fmtINR(purchase.amount, purchase.currency),

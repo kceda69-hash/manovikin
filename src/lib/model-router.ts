@@ -24,26 +24,30 @@ export type Route = {
 // Catalog-verified ids. Change here to swap tiers globally.
 export const TIER_MODEL: Record<Tier, { model: string; priority: boolean }> = {
   // Cheapest + fastest Gemini; great for classification, small extraction, greetings.
-  trivial:  { model: "google/gemini-3.1-flash-lite",   priority: false },
+  trivial: { model: "google/gemini-3.1-flash-lite", priority: false },
   // Default all-rounder. Cheap, fast, multimodal.
-  standard: { model: "google/gemini-3.7-flash",        priority: false },
+  standard: { model: "google/gemini-3.7-flash", priority: false },
   // Complex/quantum-grade coding: latest frontier model with OpenAI priority tier.
-  hard:     { model: "openai/gpt-5.6-terra",           priority: true  },
+  hard: { model: "openai/gpt-5.6-terra", priority: true },
   // Multimodal + long-context; vision-heavy prompts land here.
-  vision:   { model: "google/gemini-3.1-pro-preview",  priority: false },
+  vision: { model: "google/gemini-3.1-pro-preview", priority: false },
 };
 
 // "Very hard" escalation: if the prompt looks explicitly like a hard research /
 // architecture / proof / algorithm task, jump straight to the deepest model.
 const VERY_HARD_MODEL = { model: "openai/gpt-5.6-sol", priority: true } as const;
 
-
 // Keyword banks — kept short and precise. Order matters: vision > very-hard > hard > trivial > standard.
-const VISION_HINTS   = /\b(image|photo|picture|screenshot|diagram|chart|ocr|caption|attached (image|file))\b/i;
-const CODE_HINTS     = /\b(code|function|class|component|typescript|javascript|python|rust|go\b|refactor|debug|stack ?trace|regex|sql query|migration|dockerfile|kubernetes|algorithm|complexity|big-?o)\b/i;
-const REASON_HINTS   = /\b(prove|derivation|theorem|why does|explain step by step|design (a|an) (system|architecture|schema)|plan (out|the))\b/i;
-const VERY_HARD_HINTS = /\b(architect(ure)?|distributed|consensus|proof of|formal(ly)? verify|research paper|literature review|end-to-end (system|design)|derive from first principles)\b/i;
-const TRIVIAL_HINTS  = /^(hi|hello|hey|thanks|thank you|yo|sup|gm|good morning|good night|bye|ok|okay|cool|nice|lol|👍|🙏)\b/i;
+const VISION_HINTS =
+  /\b(image|photo|picture|screenshot|diagram|chart|ocr|caption|attached (image|file))\b/i;
+const CODE_HINTS =
+  /\b(code|function|class|component|typescript|javascript|python|rust|go\b|refactor|debug|stack ?trace|regex|sql query|migration|dockerfile|kubernetes|algorithm|complexity|big-?o)\b/i;
+const REASON_HINTS =
+  /\b(prove|derivation|theorem|why does|explain step by step|design (a|an) (system|architecture|schema)|plan (out|the))\b/i;
+const VERY_HARD_HINTS =
+  /\b(architect(ure)?|distributed|consensus|proof of|formal(ly)? verify|research paper|literature review|end-to-end (system|design)|derive from first principles)\b/i;
+const TRIVIAL_HINTS =
+  /^(hi|hello|hey|thanks|thank you|yo|sup|gm|good morning|good night|bye|ok|okay|cool|nice|lol|👍|🙏)\b/i;
 
 /**
  * Route a prompt to a tier. Pure function — safe to unit-test.

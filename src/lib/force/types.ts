@@ -19,7 +19,11 @@ export type AgentResult = {
   score: number;
 };
 
-export type ProofItem = { check: string; how: string; status: "verified" | "unverified" | "failed" };
+export type ProofItem = {
+  check: string;
+  how: string;
+  status: "verified" | "unverified" | "failed";
+};
 
 export type ProposedAction = {
   label: string;
@@ -54,8 +58,16 @@ export type ForceRun = {
 
 export const FORCE_MODES: Array<{ id: ForceMode; label: string; blurb: string }> = [
   { id: "build", label: "Build", blurb: "Architect + implement + test + harden, in one pass." },
-  { id: "research", label: "Research", blurb: "Analyst, contrarian, quant and synthesiser argue it out." },
-  { id: "operate", label: "Operate", blurb: "Turn daily work into an approved, automatable runbook." },
+  {
+    id: "research",
+    label: "Research",
+    blurb: "Analyst, contrarian, quant and synthesiser argue it out.",
+  },
+  {
+    id: "operate",
+    label: "Operate",
+    blurb: "Turn daily work into an approved, automatable runbook.",
+  },
   { id: "clone", label: "Clone", blurb: "Clean-room reimplementation with a fidelity audit." },
 ];
 

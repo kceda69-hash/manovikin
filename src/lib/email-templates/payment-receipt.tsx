@@ -60,12 +60,15 @@ const PaymentReceiptEmail = ({
 }: ReceiptProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your {SITE_NAME} payment receipt — {amountFormatted}</Preview>
+    <Preview>
+      Your {SITE_NAME} payment receipt — {amountFormatted}
+    </Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Payment received</Heading>
         <Text style={text}>
-          {name ? `Hi ${name}, ` : "Hi, "}thanks for your purchase. This email confirms your payment to {SITE_NAME}.
+          {name ? `Hi ${name}, ` : "Hi, "}thanks for your purchase. This email confirms your payment
+          to {SITE_NAME}.
         </Text>
 
         <Section style={card}>
@@ -85,7 +88,8 @@ const PaymentReceiptEmail = ({
 
         <Hr style={hr} />
         <Text style={footer}>
-          This is a tax invoice for your records. If you have any questions, just reply to this email.
+          This is a tax invoice for your records. If you have any questions, just reply to this
+          email.
           <br />— The {SITE_NAME} team
         </Text>
       </Container>
@@ -108,7 +112,7 @@ function Row({ label, value }: { label: string; value: string }) {
 
 export const template = {
   component: PaymentReceiptEmail,
-  subject: (d: Record<string, any>) =>
+  subject: (d: Record<string, unknown>) =>
     `Your ${SITE_NAME} receipt — ${d?.amountFormatted ?? ""}`.trim(),
   displayName: "Payment receipt",
   dataSchema,
@@ -126,12 +130,21 @@ export const template = {
 
 const main: React.CSSProperties = {
   backgroundColor: "#ffffff",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
 };
 const container: React.CSSProperties = { padding: "28px 24px", maxWidth: 560, margin: "0 auto" };
-const h1: React.CSSProperties = { fontSize: 22, fontWeight: 700, color: "#0b0b0f", margin: "0 0 16px" };
-const text: React.CSSProperties = { fontSize: 14, color: "#3a3a44", lineHeight: 1.6, margin: "0 0 16px" };
+const h1: React.CSSProperties = {
+  fontSize: 22,
+  fontWeight: 700,
+  color: "#0b0b0f",
+  margin: "0 0 16px",
+};
+const text: React.CSSProperties = {
+  fontSize: 14,
+  color: "#3a3a44",
+  lineHeight: 1.6,
+  margin: "0 0 16px",
+};
 const card: React.CSSProperties = {
   border: "1px solid #ececf2",
   borderRadius: 10,
@@ -139,8 +152,19 @@ const card: React.CSSProperties = {
   margin: "16px 0",
   backgroundColor: "#fafafd",
 };
-const rowLabel: React.CSSProperties = { fontSize: 12, color: "#6b6b78", padding: "8px 0", width: "40%" };
-const rowValue: React.CSSProperties = { fontSize: 13, color: "#0b0b0f", padding: "8px 0", textAlign: "right", fontWeight: 600 };
+const rowLabel: React.CSSProperties = {
+  fontSize: 12,
+  color: "#6b6b78",
+  padding: "8px 0",
+  width: "40%",
+};
+const rowValue: React.CSSProperties = {
+  fontSize: 13,
+  color: "#0b0b0f",
+  padding: "8px 0",
+  textAlign: "right",
+  fontWeight: 600,
+};
 const button: React.CSSProperties = {
   backgroundColor: BRAND,
   color: "#ffffff",

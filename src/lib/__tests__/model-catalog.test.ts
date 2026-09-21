@@ -9,12 +9,13 @@ function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
     const p = join(dir, entry);
     if (statSync(p).isDirectory()) walk(p, out);
-    else if (/\.(ts|tsx)$/.test(p) && !p.includes("__tests__") && !p.endsWith("routeTree.gen.ts")) out.push(p);
+    else if (/\.(ts|tsx)$/.test(p) && !p.includes("__tests__") && !p.endsWith("routeTree.gen.ts"))
+      out.push(p);
   }
   return out;
 }
 
-const MODEL_RE = /"(google|openai|anthropic)\/[a-z0-9.\-]+"/g;
+const MODEL_RE = /"(google|openai|anthropic)\/[a-z0-9.-]+"/g;
 
 describe("model catalog", () => {
   it("only references approved model ids", () => {

@@ -20,7 +20,8 @@ export const Route = createFileRoute("/api/generate-image")({
         if (!apiKey) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
 
         const authHeader = request.headers.get("authorization");
-        if (!authHeader?.startsWith("Bearer ")) return new Response("Unauthorized", { status: 401 });
+        if (!authHeader?.startsWith("Bearer "))
+          return new Response("Unauthorized", { status: 401 });
         const token = authHeader.slice(7);
 
         const supabase = createClient(
@@ -46,18 +47,19 @@ export const Route = createFileRoute("/api/generate-image")({
         const quality = body.quality === "8k" || body.quality === "4k" ? body.quality : "standard";
         const aspect = typeof body.aspect === "string" ? body.aspect.slice(0, 12) : "1:1";
 
-        const { data: isAdminData } = await (supabaseAdmin.rpc as never as (
-          f: string,
-          a: Record<string, unknown>,
-        ) => Promise<{ data: boolean | null }>)("has_role", { _user_id: userId, _role: "admin" });
-        if (!isAdminData) {
-          const { data: spend, error: spendErr } = await (supabaseAdmin.rpc as never as (
+        const { data: isAdminData } = await (
+          supabaseAdmin.rpc as never as (
             f: string,
             a: Record<string, unknown>,
-          ) => Promise<{ data: number | null; error: { message: string } | null }>)(
-            "manovik_spend_credit",
-            { _user_id: userId, _amount: 2, _reason: "image.generate" },
-          );
+          ) => Promise<{ data: boolean | null }>
+        )("has_role", { _user_id: userId, _role: "admin" });
+        if (!isAdminData) {
+          const { data: spend, error: spendErr } = await (
+            supabaseAdmin.rpc as never as (
+              f: string,
+              a: Record<string, unknown>,
+            ) => Promise<{ data: number | null; error: { message: string } | null }>
+          )("manovik_spend_credit", { _user_id: userId, _amount: 2, _reason: "image.generate" });
           if (spendErr) return new Response("Credit service unavailable", { status: 500 });
           if (typeof spend === "number" && spend < 0) {
             return new Response(

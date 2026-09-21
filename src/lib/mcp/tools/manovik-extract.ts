@@ -14,7 +14,9 @@ export default defineTool({
       .trim()
       .min(1)
       .max(4000)
-      .describe("Fields to extract — plain description or a JSON shape, e.g. '{ name, total, due_date }'."),
+      .describe(
+        "Fields to extract — plain description or a JSON shape, e.g. '{ name, total, due_date }'.",
+      ),
     mode: z
       .enum(["extract", "classify", "entities", "sentiment", "summarize"])
       .default("extract")
@@ -36,8 +38,15 @@ export default defineTool({
         "Respond with a single JSON object only — no markdown fences, no commentary.",
       ].join("\n");
 
-      const { text: raw, model, tier } = await askManovik({ prompt: text, system, maxTokens: 4000 });
-      const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
+      const {
+        text: raw,
+        model,
+        tier,
+      } = await askManovik({ prompt: text, system, maxTokens: 4000 });
+      const cleaned = raw
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/```\s*$/, "")
+        .trim();
 
       let data: unknown = null;
       try {

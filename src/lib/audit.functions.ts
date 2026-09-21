@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 
 export type AuditEntry = {
   id: string;
@@ -15,7 +17,7 @@ export type AuditEntry = {
 export const listAuditLogs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase } = context as unknown as { supabase: any };
+    const { supabase } = context as unknown as { supabase: SupabaseClient<Database> };
     const { data, error } = await supabase
       .from("audit_logs")
       .select("id,thread_id,event_type,summary,ip,user_agent,metadata,created_at")

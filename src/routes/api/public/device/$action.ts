@@ -21,7 +21,7 @@ async function sha256(input: string) {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
-const db = () => supabaseAdmin as unknown as any;
+const db = () => supabaseAdmin;
 
 async function authDevice(request: Request) {
   const header = request.headers.get("authorization");
@@ -62,7 +62,8 @@ export const Route = createFileRoute("/api/public/device/$action")({
           ) {
             return json({ error: "Pairing code expired" }, 410);
           }
-          const deviceToken = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+          const deviceToken =
+            crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
           const { error } = await db()
             .from("manovik_devices")
             .update({
@@ -95,10 +96,7 @@ export const Route = createFileRoute("/api/public/device/$action")({
             .limit(10);
           const ids = (commands ?? []).map((c: { id: string }) => c.id);
           if (ids.length) {
-            await db()
-              .from("manovik_device_commands")
-              .update({ status: "running" })
-              .in("id", ids);
+            await db().from("manovik_device_commands").update({ status: "running" }).in("id", ids);
           }
           return json({ commands: commands ?? [] });
         }

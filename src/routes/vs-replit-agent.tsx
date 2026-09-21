@@ -27,7 +27,8 @@ export const Route = createFileRoute("/vs-replit-agent")({
       { name: "twitter:title", content: "MANOVIK AI vs Replit Agent" },
       {
         name: "twitter:description",
-        content: "Sovereign, lifetime-licensed alternative to Replit Agent for building full-stack apps.",
+        content:
+          "Sovereign, lifetime-licensed alternative to Replit Agent for building full-stack apps.",
       },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/vs-replit-agent" }],
@@ -71,19 +72,50 @@ export const Route = createFileRoute("/vs-replit-agent")({
 
 function VsReplitAgentPage() {
   const rows: Array<{ feature: string; manovik: string; replit: string }> = [
-    { feature: "Pricing model", manovik: "Lifetime — one-time payment", replit: "Monthly subscription + effort-based Agent usage" },
-    { feature: "Sovereign / self-hosted deployment", manovik: "Yes — full self-host on your infra", replit: "No — cloud-only on Replit" },
-    { feature: "Local model support", manovik: "Yes (Ollama, vLLM, OpenAI-compatible)", replit: "Cloud models only" },
-    { feature: "Code privacy", manovik: "Your repo never leaves your network in sovereign mode", replit: "Code and prompts run in Replit's cloud" },
-    { feature: "Agentic app building", manovik: "Full multi-step agent with tool calling", replit: "Replit Agent (cloud)" },
-    { feature: "Vendor lock-in", manovik: "Open — swap models and hosting anytime", replit: "Tied to Replit's runtime and hosting" },
-    { feature: "Compliance posture", manovik: "SOC2, HIPAA, GDPR, DPDP friendly via on-prem", replit: "Depends on Replit's cloud certifications" },
+    {
+      feature: "Pricing model",
+      manovik: "Lifetime — one-time payment",
+      replit: "Monthly subscription + effort-based Agent usage",
+    },
+    {
+      feature: "Sovereign / self-hosted deployment",
+      manovik: "Yes — full self-host on your infra",
+      replit: "No — cloud-only on Replit",
+    },
+    {
+      feature: "Local model support",
+      manovik: "Yes (Ollama, vLLM, OpenAI-compatible)",
+      replit: "Cloud models only",
+    },
+    {
+      feature: "Code privacy",
+      manovik: "Your repo never leaves your network in sovereign mode",
+      replit: "Code and prompts run in Replit's cloud",
+    },
+    {
+      feature: "Agentic app building",
+      manovik: "Full multi-step agent with tool calling",
+      replit: "Replit Agent (cloud)",
+    },
+    {
+      feature: "Vendor lock-in",
+      manovik: "Open — swap models and hosting anytime",
+      replit: "Tied to Replit's runtime and hosting",
+    },
+    {
+      feature: "Compliance posture",
+      manovik: "SOC2, HIPAA, GDPR, DPDP friendly via on-prem",
+      replit: "Depends on Replit's cloud certifications",
+    },
   ];
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-16 text-foreground">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:underline">Home</Link> / <span>vs Replit Agent</span>
+        <Link to="/" className="hover:underline">
+          Home
+        </Link>{" "}
+        / <span>vs Replit Agent</span>
       </nav>
 
       <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
@@ -91,8 +123,8 @@ function VsReplitAgentPage() {
       </h1>
       <p className="text-lg text-muted-foreground mb-10">
         Evaluating <strong>Replit Agent</strong> to build full-stack apps? Here's the honest
-        comparison against MANOVIK AI — a <strong>sovereign, lifetime-licensed</strong>{" "}
-        alternative for teams who need privacy, portability, and predictable cost.
+        comparison against MANOVIK AI — a <strong>sovereign, lifetime-licensed</strong> alternative
+        for teams who need privacy, portability, and predictable cost.
       </p>
 
       <section className="mb-12">
@@ -133,10 +165,22 @@ function VsReplitAgentPage() {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Why teams switch from Replit Agent</h2>
         <ul className="space-y-3 list-disc pl-6">
-          <li><strong>Sovereignty:</strong> code, prompts, and generated projects stay inside your network.</li>
-          <li><strong>Predictable cost:</strong> a lifetime license replaces stacked subscription + effort-based Agent fees.</li>
-          <li><strong>Model choice:</strong> run Claude, Gemini, GPT, or local Llama/Qwen instead of Replit's fixed cloud stack.</li>
-          <li><strong>Portability:</strong> deploy the apps you build anywhere — no lock-in to Replit's runtime or hosting.</li>
+          <li>
+            <strong>Sovereignty:</strong> code, prompts, and generated projects stay inside your
+            network.
+          </li>
+          <li>
+            <strong>Predictable cost:</strong> a lifetime license replaces stacked subscription +
+            effort-based Agent fees.
+          </li>
+          <li>
+            <strong>Model choice:</strong> run Claude, Gemini, GPT, or local Llama/Qwen instead of
+            Replit's fixed cloud stack.
+          </li>
+          <li>
+            <strong>Portability:</strong> deploy the apps you build anywhere — no lock-in to
+            Replit's runtime or hosting.
+          </li>
         </ul>
       </section>
 
@@ -145,22 +189,33 @@ function VsReplitAgentPage() {
         <div className="space-y-4">
           <div>
             <h3 className="font-semibold">Is MANOVIK really self-hostable?</h3>
-            <p className="text-muted-foreground">Yes — sovereign mode runs the full agent, tool calling, and inference on your own hardware.</p>
+            <p className="text-muted-foreground">
+              Yes — sovereign mode runs the full agent, tool calling, and inference on your own
+              hardware.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">Does MANOVIK work offline?</h3>
-            <p className="text-muted-foreground">With a local model endpoint (Ollama, vLLM, llama.cpp) MANOVIK operates entirely offline — Replit Agent requires Replit's cloud.</p>
+            <p className="text-muted-foreground">
+              With a local model endpoint (Ollama, vLLM, llama.cpp) MANOVIK operates entirely
+              offline — Replit Agent requires Replit's cloud.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">How does the lifetime price compare to Replit?</h3>
-            <p className="text-muted-foreground">Replit stacks a monthly Core subscription with effort-based Agent usage. MANOVIK's lifetime plan is a single payment — most builders break even inside 12 months.</p>
+            <p className="text-muted-foreground">
+              Replit stacks a monthly Core subscription with effort-based Agent usage. MANOVIK's
+              lifetime plan is a single payment — most builders break even inside 12 months.
+            </p>
           </div>
         </div>
       </section>
 
       <section className="rounded-2xl border bg-card p-8 text-center">
         <h2 className="text-2xl font-bold mb-2">Try the sovereign Replit Agent alternative</h2>
-        <p className="text-muted-foreground mb-6">One payment. Unlimited use. Your code stays yours.</p>
+        <p className="text-muted-foreground mb-6">
+          One payment. Unlimited use. Your code stays yours.
+        </p>
         <Link
           to="/"
           className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90"

@@ -26,13 +26,11 @@ import { BASE_URL, buildSitemapEntriesFromRouteFiles } from "@/lib/sitemap";
 const ROOT = join(fileURLToPath(import.meta.url), "..", "..", "..", "..");
 const ROBOTS_PATH = join(ROOT, "public", "robots.txt");
 
-const routeFiles = Object.keys(
-  import.meta.glob("../../routes/**/*.{ts,tsx}"),
-).map((filePath) => filePath.replace("../../routes/", "./"));
-
-const sitemapPaths = buildSitemapEntriesFromRouteFiles(routeFiles).map(
-  (entry) => entry.path,
+const routeFiles = Object.keys(import.meta.glob("../../routes/**/*.{ts,tsx}")).map((filePath) =>
+  filePath.replace("../../routes/", "./"),
 );
+
+const sitemapPaths = buildSitemapEntriesFromRouteFiles(routeFiles).map((entry) => entry.path);
 
 const robotsSrc = readFileSync(ROBOTS_PATH, "utf8");
 
@@ -93,7 +91,9 @@ describe("sitemap ↔ robots.txt consistency", () => {
       conflicts,
       `Sitemap advertises URLs blocked by robots.txt:\n${conflicts
         .map((c) => `  - ${c.path}  (matches Disallow: ${c.rule})`)
-        .join("\n")}\nFix: either remove the Disallow rule or exclude the path from src/lib/sitemap.ts.`,
+        .join(
+          "\n",
+        )}\nFix: either remove the Disallow rule or exclude the path from src/lib/sitemap.ts.`,
     ).toEqual([]);
   });
 

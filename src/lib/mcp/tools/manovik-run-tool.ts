@@ -18,7 +18,7 @@ export default defineTool({
     args: z
       .record(z.string(), z.unknown())
       .default({})
-      .describe("JSON arguments for the tool, e.g. { \"expression\": \"2 ** 10\" }."),
+      .describe('JSON arguments for the tool, e.g. { "expression": "2 ** 10" }.'),
   },
   annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: true },
   handler: async ({ name, args }) => {

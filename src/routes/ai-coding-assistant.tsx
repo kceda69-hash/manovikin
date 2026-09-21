@@ -77,7 +77,10 @@ function AiCodingAssistantPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/40">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4" /> Back to home
           </Link>
           <Link to="/login" className="text-sm font-semibold underline">
@@ -88,13 +91,16 @@ function AiCodingAssistantPage() {
 
       <main className="mx-auto max-w-4xl px-4 py-12 space-y-12">
         <section className="space-y-4">
-          <p className="text-sm uppercase tracking-wider text-muted-foreground">AI Coding Assistant · 2026</p>
+          <p className="text-sm uppercase tracking-wider text-muted-foreground">
+            AI Coding Assistant · 2026
+          </p>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
             The AI coding assistant built for shipping, not chatting
           </h1>
           <p className="text-lg text-muted-foreground">
-            MANOVIK AI is the AI coding assistant that plans, edits, and ships — with autonomous loops, sovereign
-            hosting, and a one-time lifetime plan. No per-seat tax, no vendor cloud lock-in.
+            MANOVIK AI is the AI coding assistant that plans, edits, and ships — with autonomous
+            loops, sovereign hosting, and a one-time lifetime plan. No per-seat tax, no vendor cloud
+            lock-in.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Link
@@ -114,10 +120,26 @@ function AiCodingAssistantPage() {
 
         <section className="grid gap-4 md:grid-cols-2">
           {[
-            { icon: Sparkles, title: "Chat + agent in one", body: "Switch between interactive chat and autonomous task loops without leaving the page." },
-            { icon: Terminal, title: "Real tool use", body: "Reads files, runs commands, edits diffs, and verifies its own output." },
-            { icon: GitBranch, title: "Repo-aware", body: "Understands your codebase, conventions, and dependencies before suggesting changes." },
-            { icon: Code2, title: "Web + API", body: "Use it from the browser or wire it into CI, scripts, and internal tools." },
+            {
+              icon: Sparkles,
+              title: "Chat + agent in one",
+              body: "Switch between interactive chat and autonomous task loops without leaving the page.",
+            },
+            {
+              icon: Terminal,
+              title: "Real tool use",
+              body: "Reads files, runs commands, edits diffs, and verifies its own output.",
+            },
+            {
+              icon: GitBranch,
+              title: "Repo-aware",
+              body: "Understands your codebase, conventions, and dependencies before suggesting changes.",
+            },
+            {
+              icon: Code2,
+              title: "Web + API",
+              body: "Use it from the browser or wire it into CI, scripts, and internal tools.",
+            },
           ].map(({ icon: Icon, title, body }) => (
             <div key={title} className="rounded-xl border border-border/60 bg-card/40 p-5">
               <Icon className="h-5 w-5 text-primary" />
@@ -130,10 +152,22 @@ function AiCodingAssistantPage() {
         <section className="space-y-3">
           <h2 className="text-2xl font-semibold">What MANOVIK AI does as your coding assistant</h2>
           <ul className="space-y-2">
-            <li className="flex gap-2"><Check className="h-5 w-5 text-primary shrink-0" /> Writes new features from a single prompt — across multiple files.</li>
-            <li className="flex gap-2"><Check className="h-5 w-5 text-primary shrink-0" /> Refactors safely with test-driven loops.</li>
-            <li className="flex gap-2"><Check className="h-5 w-5 text-primary shrink-0" /> Explains unfamiliar code, error traces, and SQL plans.</li>
-            <li className="flex gap-2"><Check className="h-5 w-5 text-primary shrink-0" /> Generates diagrams and docs alongside the implementation.</li>
+            <li className="flex gap-2">
+              <Check className="h-5 w-5 text-primary shrink-0" /> Writes new features from a single
+              prompt — across multiple files.
+            </li>
+            <li className="flex gap-2">
+              <Check className="h-5 w-5 text-primary shrink-0" /> Refactors safely with test-driven
+              loops.
+            </li>
+            <li className="flex gap-2">
+              <Check className="h-5 w-5 text-primary shrink-0" /> Explains unfamiliar code, error
+              traces, and SQL plans.
+            </li>
+            <li className="flex gap-2">
+              <Check className="h-5 w-5 text-primary shrink-0" /> Generates diagrams and docs
+              alongside the implementation.
+            </li>
           </ul>
         </section>
 
@@ -153,7 +187,9 @@ function AiCodingAssistantPage() {
           <div className="font-semibold">Try MANOVIK AI as your coding assistant</div>
           <p className="mt-1 text-sm text-muted-foreground">
             Lifetime plan, sovereign hosting, autonomous loops.{" "}
-            <Link to="/" className="underline">See pricing →</Link>
+            <Link to="/" className="underline">
+              See pricing →
+            </Link>
           </p>
         </section>
       </main>

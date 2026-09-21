@@ -15,13 +15,7 @@
 // engine. Every prompt carries the privacy shield below.
 
 import { routeModel } from "@/lib/model-router";
-import type {
-  AgentResult,
-  ForceMode,
-  ProofItem,
-  ProposedAction,
-  Recon,
-} from "@/lib/force/types";
+import type { AgentResult, ForceMode, ProofItem, ProposedAction, Recon } from "@/lib/force/types";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
@@ -36,32 +30,84 @@ export type SpecialistSpec = { role: string; brief: string };
 
 const SPECIALISTS: Record<ForceMode, SpecialistSpec[]> = {
   build: [
-    { role: "Architect", brief: "Design the system: modules, data flow, contracts, failure modes. Then give the key code." },
-    { role: "Implementer", brief: "Write complete, production-grade code. No placeholders, no TODOs. Include imports, types, error handling." },
-    { role: "Test Engineer", brief: "Produce the verification layer: unit/integration tests, edge cases, and the exact commands to run them." },
-    { role: "Security & Privacy Auditor", brief: "Find the vulnerabilities, data-leak paths and abuse cases in this task, and give the hardened fix." },
+    {
+      role: "Architect",
+      brief:
+        "Design the system: modules, data flow, contracts, failure modes. Then give the key code.",
+    },
+    {
+      role: "Implementer",
+      brief:
+        "Write complete, production-grade code. No placeholders, no TODOs. Include imports, types, error handling.",
+    },
+    {
+      role: "Test Engineer",
+      brief:
+        "Produce the verification layer: unit/integration tests, edge cases, and the exact commands to run them.",
+    },
+    {
+      role: "Security & Privacy Auditor",
+      brief:
+        "Find the vulnerabilities, data-leak paths and abuse cases in this task, and give the hardened fix.",
+    },
   ],
   research: [
-    { role: "Primary Analyst", brief: "Answer the question directly and completely, separating established fact from inference." },
-    { role: "Contrarian", brief: "Argue the strongest opposing case and list what would falsify the primary answer." },
-    { role: "Quant", brief: "Supply numbers, benchmarks, orders of magnitude and the arithmetic behind them." },
-    { role: "Synthesiser", brief: "Map the decision space: options, trade-offs, and a recommendation with conditions." },
+    {
+      role: "Primary Analyst",
+      brief:
+        "Answer the question directly and completely, separating established fact from inference.",
+    },
+    {
+      role: "Contrarian",
+      brief: "Argue the strongest opposing case and list what would falsify the primary answer.",
+    },
+    {
+      role: "Quant",
+      brief: "Supply numbers, benchmarks, orders of magnitude and the arithmetic behind them.",
+    },
+    {
+      role: "Synthesiser",
+      brief: "Map the decision space: options, trade-offs, and a recommendation with conditions.",
+    },
   ],
   operate: [
-    { role: "Task Planner", brief: "Decompose the daily-work objective into an ordered, automatable runbook." },
-    { role: "Automation Engineer", brief: "Give concrete, official-API-first automation for each step (scripts, endpoints, schedulers)." },
-    { role: "Risk Officer", brief: "Flag every step that touches personal data, money, or another person, and gate it behind human approval." },
-    { role: "Reliability Engineer", brief: "Define retries, idempotency, monitoring and the rollback for each step." },
+    {
+      role: "Task Planner",
+      brief: "Decompose the daily-work objective into an ordered, automatable runbook.",
+    },
+    {
+      role: "Automation Engineer",
+      brief:
+        "Give concrete, official-API-first automation for each step (scripts, endpoints, schedulers).",
+    },
+    {
+      role: "Risk Officer",
+      brief:
+        "Flag every step that touches personal data, money, or another person, and gate it behind human approval.",
+    },
+    {
+      role: "Reliability Engineer",
+      brief: "Define retries, idempotency, monitoring and the rollback for each step.",
+    },
   ],
   clone: [
-    { role: "Reverse Engineer", brief: "Infer the observable requirements: screens, flows, states, data model, edge behaviour." },
-    { role: "Clean-room Architect", brief: "Design an independent implementation that matches behaviour without copying protected assets." },
+    {
+      role: "Reverse Engineer",
+      brief:
+        "Infer the observable requirements: screens, flows, states, data model, edge behaviour.",
+    },
+    {
+      role: "Clean-room Architect",
+      brief:
+        "Design an independent implementation that matches behaviour without copying protected assets.",
+    },
     { role: "Implementer", brief: "Write the complete clean-room code for the core of it." },
-    { role: "Fidelity Auditor", brief: "Score behavioural fidelity vs the original and list every remaining gap." },
+    {
+      role: "Fidelity Auditor",
+      brief: "Score behavioural fidelity vs the original and list every remaining gap.",
+    },
   ],
 };
-
-
 
 export type ForceOutcome = {
   recon: Recon;
@@ -112,7 +158,8 @@ async function callModel(opts: {
 
   if (!res.ok) {
     const detail = await res.text();
-    if (res.status === 429) throw new Error("MANOVIK FORCE hit the model rate limit. Retry shortly.");
+    if (res.status === 429)
+      throw new Error("MANOVIK FORCE hit the model rate limit. Retry shortly.");
     if (res.status === 402) throw new Error("AI credits exhausted for this workspace.");
     throw new Error(`Model request failed [${res.status}]: ${detail.slice(0, 400)}`);
   }
@@ -165,7 +212,10 @@ Return JSON:
   const parsed = extractJson<Partial<Recon>>(text, {});
   const arr = (v: unknown) => (Array.isArray(v) ? v.map(String).slice(0, 8) : []);
   return {
-    restated: typeof parsed.restated === "string" && parsed.restated ? parsed.restated : objective.slice(0, 240),
+    restated:
+      typeof parsed.restated === "string" && parsed.restated
+        ? parsed.restated
+        : objective.slice(0, 240),
     assumptions: arr(parsed.assumptions),
     constraints: arr(parsed.constraints),
     subtasks: arr(parsed.subtasks),
@@ -225,12 +275,17 @@ Return JSON:
 {"reviews":[{"role":"<exact role name>","critique":"the specific defects and what to keep","score":0-100}]}`,
   });
 
-  const parsed = extractJson<{ reviews?: Array<{ role?: string; critique?: string; score?: number }> }>(text, {});
+  const parsed = extractJson<{
+    reviews?: Array<{ role?: string; critique?: string; score?: number }>;
+  }>(text, {});
   return drafts.map((d) => {
-    const match = parsed.reviews?.find((x) => String(x.role ?? "").toLowerCase() === d.role.toLowerCase());
+    const match = parsed.reviews?.find(
+      (x) => String(x.role ?? "").toLowerCase() === d.role.toLowerCase(),
+    );
     return {
       role: d.role,
-      critique: typeof match?.critique === "string" ? match.critique : "No specific defects reported.",
+      critique:
+        typeof match?.critique === "string" ? match.critique : "No specific defects reported.",
       score: match ? clampScore(match.score) : 70,
     };
   });
@@ -270,7 +325,11 @@ ${agents
   .join("\n\n")}`,
   });
 
-  const meta = extractJson<{ proof?: ProofItem[]; actions?: ProposedAction[]; confidence?: number }>(text, {});
+  const meta = extractJson<{
+    proof?: ProofItem[];
+    actions?: ProposedAction[];
+    confidence?: number;
+  }>(text, {});
   const answer = text.replace(/```json[\s\S]*?```\s*$/i, "").trim() || text;
 
   const proof: ProofItem[] = Array.isArray(meta.proof)
@@ -295,7 +354,9 @@ ${agents
   const swarmAvg = agents.length ? agents.reduce((s, a) => s + a.score, 0) / agents.length : 0;
   const stated = clampScore(meta.confidence ?? swarmAvg);
   // Confidence is capped by verification: unproven work cannot claim certainty.
-  const verifiedRatio = proof.length ? proof.filter((p) => p.status === "verified").length / proof.length : 0;
+  const verifiedRatio = proof.length
+    ? proof.filter((p) => p.status === "verified").length / proof.length
+    : 0;
   const score = clampScore(Math.min(stated, 60 + 40 * verifiedRatio, swarmAvg + 10));
 
   return { answer, proof, actions, score };
@@ -341,4 +402,3 @@ export async function runForce(
 
   return { recon: r, agents, ...final };
 }
-

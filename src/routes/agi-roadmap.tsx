@@ -116,13 +116,16 @@ function RoadmapPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-14">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       <h1 className="text-4xl font-semibold tracking-tight">MANO 1.1 AGI roadmap</h1>
       <p className="mt-4 text-lg text-muted-foreground">
         MANO 1.1 is not general intelligence and we will not claim it is. This page tracks the
-        capabilities that separate a chat model from a genuinely autonomous agent, and exactly how far
-        MANO has come on each one.
+        capabilities that separate a chat model from a genuinely autonomous agent, and exactly how
+        far MANO has come on each one.
       </p>
 
       <div className="mt-8 rounded-xl border border-border bg-card p-5">
@@ -167,9 +170,9 @@ function RoadmapPage() {
       <section className="mt-10 rounded-xl border border-border bg-card p-5">
         <h2 className="text-xl font-semibold">How progress is measured</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          A milestone counts as shipped only when it runs in production for real users, is bounded by
-          safety limits, and leaves a record we can inspect. Anything self-reported by a model without
-          a stored trace is treated as unproven.
+          A milestone counts as shipped only when it runs in production for real users, is bounded
+          by safety limits, and leaves a record we can inspect. Anything self-reported by a model
+          without a stored trace is treated as unproven.
         </p>
         <div className="mt-4 flex flex-wrap gap-3 text-sm">
           <Link to="/case-studies" className="underline">

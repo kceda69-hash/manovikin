@@ -99,18 +99,19 @@ export const createRazorpayOrder = createServerFn({ method: "POST" })
 
 export const verifyRazorpayPayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: {
-    razorpay_order_id: string;
-    razorpay_payment_id: string;
-    razorpay_signature: string;
-  }) =>
-    z
-      .object({
-        razorpay_order_id: z.string().min(1).max(128),
-        razorpay_payment_id: z.string().min(1).max(128),
-        razorpay_signature: z.string().min(1).max(256),
-      })
-      .parse(data),
+  .inputValidator(
+    (data: {
+      razorpay_order_id: string;
+      razorpay_payment_id: string;
+      razorpay_signature: string;
+    }) =>
+      z
+        .object({
+          razorpay_order_id: z.string().min(1).max(128),
+          razorpay_payment_id: z.string().min(1).max(128),
+          razorpay_signature: z.string().min(1).max(256),
+        })
+        .parse(data),
   )
   .handler(async ({ data, context }) => {
     const secret = process.env.RAZORPAY_KEY_SECRET;
@@ -154,9 +155,7 @@ export const verifyRazorpayPayment = createServerFn({ method: "POST" })
 
 export const cancelRenewal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { autoRenew: boolean }) =>
-    z.object({ autoRenew: z.boolean() }).parse(d),
-  )
+  .inputValidator((d: { autoRenew: boolean }) => z.object({ autoRenew: z.boolean() }).parse(d))
   .handler(async ({ data, context }) => {
     const { data: row } = await supabaseAdmin
       .from("purchases")
@@ -168,7 +167,10 @@ export const cancelRenewal = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
     if (!row) return { ok: false as const, error: "No active Pro subscription" };
-    const meta = { ...(row.metadata as Record<string, unknown> | null ?? {}), auto_renew: data.autoRenew };
+    const meta = {
+      ...((row.metadata as Record<string, unknown> | null) ?? {}),
+      auto_renew: data.autoRenew,
+    };
     await supabaseAdmin.from("purchases").update({ metadata: meta }).eq("id", row.id);
     return { ok: true as const, autoRenew: data.autoRenew };
   });
@@ -178,7 +180,9 @@ export const listMyPurchases = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await supabaseAdmin
       .from("purchases")
-      .select("id, plan, amount, currency, status, razorpay_payment_id, razorpay_order_id, receipt_no, email, created_at, metadata")
+      .select(
+        "id, plan, amount, currency, status, razorpay_payment_id, razorpay_order_id, receipt_no, email, created_at, metadata",
+      )
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
       .limit(100);

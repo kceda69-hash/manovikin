@@ -70,7 +70,10 @@ function AutonomousEngineerPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/40">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4" aria-hidden /> Back to home
           </Link>
           <Link to="/login" className="text-sm font-semibold underline">
@@ -99,7 +102,10 @@ function AutonomousEngineerPage() {
             >
               Start free
             </Link>
-            <Link to="/vs-devin" className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold">
+            <Link
+              to="/vs-devin"
+              className="rounded-lg border border-border px-5 py-2.5 text-sm font-semibold"
+            >
               Compare with Devin →
             </Link>
           </div>
@@ -109,13 +115,14 @@ function AutonomousEngineerPage() {
           <h2 className="text-2xl font-semibold">How the agent works, step by step</h2>
           <ol className="space-y-3 text-muted-foreground">
             <li>
-              <span className="font-medium text-foreground">1. Recon.</span> It restates the objective
-              as a mission brief with explicit constraints and success criteria before touching code.
+              <span className="font-medium text-foreground">1. Recon.</span> It restates the
+              objective as a mission brief with explicit constraints and success criteria before
+              touching code.
             </li>
             <li>
-              <span className="font-medium text-foreground">2. Parallel swarm.</span> Specialist agents
-              — architect, implementer, test engineer, security auditor — attack the same objective at
-              once instead of a single linear pass.
+              <span className="font-medium text-foreground">2. Parallel swarm.</span> Specialist
+              agents — architect, implementer, test engineer, security auditor — attack the same
+              objective at once instead of a single linear pass.
             </li>
             <li>
               <span className="font-medium text-foreground">3. Adversarial review.</span> A hostile
@@ -123,8 +130,8 @@ function AutonomousEngineerPage() {
             </li>
             <li>
               <span className="font-medium text-foreground">4. Proof-carrying delivery.</span> The
-              merged deliverable ships with the checks that back it, and every phase is snapshotted so
-              you can rewind and fork any decision.
+              merged deliverable ships with the checks that back it, and every phase is snapshotted
+              so you can rewind and fork any decision.
             </li>
           </ol>
         </section>
@@ -168,12 +175,12 @@ function AutonomousEngineerPage() {
               leaves infrastructure you control.
             </li>
             <li className="flex gap-2">
-              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> One-time cost instead of
-              a recurring per-seat autonomy tax.
+              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> One-time cost instead
+              of a recurring per-seat autonomy tax.
             </li>
             <li className="flex gap-2">
-              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> Knowledge Memory indexes
-              your own docs so plans follow your conventions.
+              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> Knowledge Memory
+              indexes your own docs so plans follow your conventions.
             </li>
             <li className="flex gap-2">
               <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> Scheduled agents run

@@ -25,14 +25,7 @@ const CONFIRM_URL = "https://manovik.in/auth/callback?code=abc123";
 describe("auth template variable schemas", () => {
   it("registers a schema for every auth template action_type", () => {
     expect(Object.keys(AUTH_TEMPLATE_SCHEMAS).sort()).toEqual(
-      [
-        "email_change",
-        "invite",
-        "magiclink",
-        "recovery",
-        "reauthentication",
-        "signup",
-      ].sort(),
+      ["email_change", "invite", "magiclink", "recovery", "reauthentication", "signup"].sort(),
     );
   });
 
@@ -145,9 +138,7 @@ describe("auth templates render with validated variables", () => {
   it("reauthentication email surfaces the OTP token", async () => {
     const props = { siteName: SITE, token: "123456" };
     ReauthenticationSchema.parse(props);
-    const html = await render(
-      React.createElement(ReauthenticationEmail, props),
-    );
+    const html = await render(React.createElement(ReauthenticationEmail, props));
     expect(html).toContain("123456");
   });
 

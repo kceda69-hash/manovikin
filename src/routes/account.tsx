@@ -65,9 +65,7 @@ function AccountPage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not link Google.";
       toast.error(
-        /already/i.test(msg)
-          ? "That Google account is already linked to a MANOVIK account."
-          : msg,
+        /already/i.test(msg) ? "That Google account is already linked to a MANOVIK account." : msg,
       );
       setBusy(false);
     }

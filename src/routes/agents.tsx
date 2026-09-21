@@ -53,7 +53,15 @@ function AgentsPage() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["schedules"] });
 
   const createMut = useMutation({
-    mutationFn: () => create({ data: { name, objective, mode: mode as any, cadence: cadence as any } }),
+    mutationFn: () =>
+      create({
+        data: {
+          name,
+          objective,
+          mode: mode as "build" | "research" | "operate" | "clone",
+          cadence: cadence as "hourly" | "daily" | "weekly",
+        },
+      }),
     onSuccess: () => {
       toast.success("Agent scheduled");
       setName("");
@@ -133,7 +141,7 @@ function AgentsPage() {
           <p className="text-sm text-muted-foreground">No scheduled agents yet.</p>
         )}
         <ul className="divide-y">
-          {q.data?.schedules.map((s: any) => (
+          {q.data?.schedules.map((s) => (
             <li key={s.id} className="py-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
@@ -183,7 +191,7 @@ function AgentsPage() {
         <h2 className="font-semibold mb-4">Recent runs</h2>
         {q.data?.runs.length === 0 && <p className="text-sm text-muted-foreground">No runs yet.</p>}
         <ul className="space-y-3">
-          {q.data?.runs.map((r: any) => (
+          {q.data?.runs.map((r) => (
             <li key={r.id} className="rounded-lg border p-4">
               <div className="flex justify-between text-xs text-muted-foreground mb-1">
                 <span>{r.status}</span>

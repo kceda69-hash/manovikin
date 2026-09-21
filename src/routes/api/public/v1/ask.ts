@@ -22,9 +22,16 @@ export const Route = createFileRoute("/api/public/v1/ask")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS }),
       POST: async ({ request }) => {
-        const presented = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "").trim() ?? "";
+        const presented =
+          request.headers
+            .get("Authorization")
+            ?.replace(/^Bearer\s+/i, "")
+            .trim() ?? "";
         if (!presented.startsWith("mnvk_")) {
-          return Response.json({ error: "Missing or malformed API key" }, { status: 401, headers: CORS });
+          return Response.json(
+            { error: "Missing or malformed API key" },
+            { status: 401, headers: CORS },
+          );
         }
 
         const { createHash } = await import("node:crypto");
@@ -41,7 +48,10 @@ export const Route = createFileRoute("/api/public/v1/ask")({
           return Response.json({ error: "Invalid API key" }, { status: 401, headers: CORS });
         }
         if (!(key.scopes as string[]).includes("ask")) {
-          return Response.json({ error: "Key lacks the 'ask' scope" }, { status: 403, headers: CORS });
+          return Response.json(
+            { error: "Key lacks the 'ask' scope" },
+            { status: 403, headers: CORS },
+          );
         }
 
         let body: z.infer<typeof Body>;

@@ -10,13 +10,13 @@ This guide explains how to deploy the full stack on your own server.
 
 ## What you control end-to-end
 
-| Layer        | Default (sovereign)            | Swap to                                  |
-| ------------ | ------------------------------ | ---------------------------------------- |
-| Web app      | This repo, Dockerized          | Your own host (bare metal, k8s, VPS)     |
-| AI inference | Ollama (`llama3.1`)            | vLLM, llama.cpp, OpenAI, OpenRouter, ... |
-| Database     | Self-hosted Supabase + Postgres| Any Postgres + Supabase self-host        |
-| Auth         | Supabase Auth (self-hosted)    | —                                        |
-| Audit logs   | Your Postgres                  | —                                        |
+| Layer        | Default (sovereign)             | Swap to                                  |
+| ------------ | ------------------------------- | ---------------------------------------- |
+| Web app      | This repo, Dockerized           | Your own host (bare metal, k8s, VPS)     |
+| AI inference | Ollama (`llama3.1`)             | vLLM, llama.cpp, OpenAI, OpenRouter, ... |
+| Database     | Self-hosted Supabase + Postgres | Any Postgres + Supabase self-host        |
+| Auth         | Supabase Auth (self-hosted)     | —                                        |
+| Audit logs   | Your Postgres                   | —                                        |
 
 No data leaves your network unless **you** point `MANOVIK_AI_BASE_URL` at a
 remote provider.
@@ -49,20 +49,20 @@ set. In sovereign mode `LOVABLE_API_KEY` is **not required**.
 
 ### AI provider (OpenAI-compatible)
 
-| Var                   | Purpose                                       |
-| --------------------- | --------------------------------------------- |
-| `MANOVIK_AI_BASE_URL` | Base URL of any OpenAI-compatible `/v1` API   |
-| `MANOVIK_AI_API_KEY`  | Bearer token for that endpoint                |
-| `MANOVIK_AI_MODEL`    | Model name passed to the provider             |
+| Var                   | Purpose                                     |
+| --------------------- | ------------------------------------------- |
+| `MANOVIK_AI_BASE_URL` | Base URL of any OpenAI-compatible `/v1` API |
+| `MANOVIK_AI_API_KEY`  | Bearer token for that endpoint              |
+| `MANOVIK_AI_MODEL`    | Model name passed to the provider           |
 
 ### Database / auth (your Supabase)
 
-| Var                          | Purpose                          |
-| ---------------------------- | -------------------------------- |
-| `SUPABASE_URL`               | URL of your self-hosted Supabase |
-| `SUPABASE_PUBLISHABLE_KEY`   | Anon/publishable key             |
-| `SUPABASE_SERVICE_ROLE_KEY`  | Service role (server-only)       |
-| `VITE_SUPABASE_URL`          | Same URL, exposed to the client  |
+| Var                             | Purpose                          |
+| ------------------------------- | -------------------------------- |
+| `SUPABASE_URL`                  | URL of your self-hosted Supabase |
+| `SUPABASE_PUBLISHABLE_KEY`      | Anon/publishable key             |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Service role (server-only)       |
+| `VITE_SUPABASE_URL`             | Same URL, exposed to the client  |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Same anon key, exposed to client |
 
 ---

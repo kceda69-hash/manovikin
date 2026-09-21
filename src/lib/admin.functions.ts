@@ -1,9 +1,22 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAdmin } from "@/lib/admin-guard";
+import type { Database } from "@/integrations/supabase/types";
 
-async function audit(userId: string, event: string, summary: string, metadata: Record<string, unknown> = {}) {
+type Ctx = {
+  supabase: SupabaseClient<Database>;
+  userId: string;
+  claims?: { email?: string; aal?: string } | null;
+};
+
+async function audit(
+  userId: string,
+  event: string,
+  summary: string,
+  metadata: Record<string, unknown> = {},
+) {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("audit_logs").insert({
@@ -22,16 +35,16 @@ async function audit(userId: string, event: string, summary: string, metadata: R
 export const adminWhoami = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId, claims } = context as any;
+    const { supabase, userId, claims } = context as Ctx;
     const { data: isAdmin } = await supabase.rpc("has_role", {
       _user_id: userId,
       _role: "admin",
     });
     return {
       userId,
-      email: (claims?.email as string | undefined) ?? null,
+      email: claims?.email ?? null,
       isAdmin: !!isAdmin,
-      aal: (claims?.aal as string | undefined) ?? "aal1",
+      aal: claims?.aal ?? "aal1",
     };
   });
 
@@ -53,10 +66,8 @@ export const adminSearchUsers = createServerFn({ method: "POST" })
     });
     if (error) throw new Response(error.message, { status: 500 });
     const users = (page?.users ?? [])
-      .filter((u) =>
-        !q ||
-        (u.email ?? "").toLowerCase().includes(q) ||
-        u.id.toLowerCase().includes(q),
+      .filter(
+        (u) => !q || (u.email ?? "").toLowerCase().includes(q) || u.id.toLowerCase().includes(q),
       )
       .slice(0, 100)
       .map((u) => ({
@@ -74,38 +85,38 @@ export const adminSearchUsers = createServerFn({ method: "POST" })
 
 export const adminGetUserDetail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { userId: string }) =>
-    z.object({ userId: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d: { userId: string }) => z.object({ userId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const [{ data: userRes }, { data: purchases }, { data: balance }, { data: ledger }, { data: roles }] =
-      await Promise.all([
-        supabaseAdmin.auth.admin.getUserById(data.userId),
-        supabaseAdmin
-          .from("purchases")
-          .select("*")
-          .eq("user_id", data.userId)
-          .order("created_at", { ascending: false })
-          .limit(50),
-        supabaseAdmin
-          .from("ai_balance")
-          .select("credits, updated_at")
-          .eq("user_id", data.userId)
-          .maybeSingle(),
-        supabaseAdmin
-          .from("ai_balance_ledger")
-          .select("delta, reason, created_at")
-          .eq("user_id", data.userId)
-          .order("created_at", { ascending: false })
-          .limit(50),
-        supabaseAdmin
-          .from("user_roles")
-          .select("role, created_at")
-          .eq("user_id", data.userId),
-      ]);
+    const [
+      { data: userRes },
+      { data: purchases },
+      { data: balance },
+      { data: ledger },
+      { data: roles },
+    ] = await Promise.all([
+      supabaseAdmin.auth.admin.getUserById(data.userId),
+      supabaseAdmin
+        .from("purchases")
+        .select("*")
+        .eq("user_id", data.userId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabaseAdmin
+        .from("ai_balance")
+        .select("credits, updated_at")
+        .eq("user_id", data.userId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("ai_balance_ledger")
+        .select("delta, reason, created_at")
+        .eq("user_id", data.userId)
+        .order("created_at", { ascending: false })
+        .limit(50),
+      supabaseAdmin.from("user_roles").select("role, created_at").eq("user_id", data.userId),
+    ]);
 
     return {
       user: userRes?.user
@@ -143,7 +154,12 @@ export const adminCancelSubscription = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!row) throw new Response("Purchase not found", { status: 404 });
 
-    const meta = { ...(row.metadata as Record<string, unknown> | null ?? {}), auto_renew: false, cancelled_by_admin: userId, cancelled_at: new Date().toISOString() };
+    const meta = {
+      ...((row.metadata as Record<string, unknown> | null) ?? {}),
+      auto_renew: false,
+      cancelled_by_admin: userId,
+      cancelled_at: new Date().toISOString(),
+    };
     await supabaseAdmin.from("purchases").update({ metadata: meta }).eq("id", row.id);
 
     await audit(userId, "cancel_subscription", `Cancelled ${row.plan} for user ${row.user_id}`, {
@@ -179,17 +195,21 @@ export const adminRefundPayment = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!row) throw new Response("Purchase not found", { status: 404 });
     if (!row.razorpay_payment_id) throw new Response("No payment id on record", { status: 400 });
-    if (row.status !== "paid") throw new Response(`Cannot refund status=${row.status}`, { status: 400 });
+    if (row.status !== "paid")
+      throw new Response(`Cannot refund status=${row.status}`, { status: 400 });
 
     const auth = btoa(`${keyId}:${keySecret}`);
     const body: Record<string, unknown> = {};
     if (data.amount) body.amount = data.amount;
 
-    const res = await fetch(`https://api.razorpay.com/v1/payments/${row.razorpay_payment_id}/refund`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
-      body: JSON.stringify(body),
-    });
+    const res = await fetch(
+      `https://api.razorpay.com/v1/payments/${row.razorpay_payment_id}/refund`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Basic ${auth}` },
+        body: JSON.stringify(body),
+      },
+    );
     if (!res.ok) {
       const text = await res.text();
       console.error("Razorpay refund failed", res.status, text);
@@ -211,11 +231,16 @@ export const adminRefundPayment = createServerFn({ method: "POST" })
       })
       .eq("id", row.id);
 
-    await audit(userId, "refund_payment", `Refunded ${refund.amount / 100} ${row.currency} on ${row.plan}`, {
-      purchase_id: row.id,
-      target_user_id: row.user_id,
-      refund_id: refund.id,
-    });
+    await audit(
+      userId,
+      "refund_payment",
+      `Refunded ${refund.amount / 100} ${row.currency} on ${row.plan}`,
+      {
+        purchase_id: row.id,
+        target_user_id: row.user_id,
+        refund_id: refund.id,
+      },
+    );
     return { ok: true as const, refund };
   });
 
@@ -227,7 +252,13 @@ export const adminAdjustCredits = createServerFn({ method: "POST" })
     z
       .object({
         userId: z.string().uuid(),
-        delta: z.number().int().refine((n) => n !== 0 && Math.abs(n) <= 1_000_000, "delta must be non-zero and <= 1,000,000"),
+        delta: z
+          .number()
+          .int()
+          .refine(
+            (n) => n !== 0 && Math.abs(n) <= 1_000_000,
+            "delta must be non-zero and <= 1,000,000",
+          ),
         reason: z.string().trim().min(1).max(200),
       })
       .parse(d),
@@ -243,7 +274,11 @@ export const adminAdjustCredits = createServerFn({ method: "POST" })
         _reason: reason,
       });
       if (error) throw new Response(error.message, { status: 500 });
-      await audit(adminId, "credit_topup", `+${data.delta} credits`, { target_user_id: data.userId, delta: data.delta, reason: data.reason });
+      await audit(adminId, "credit_topup", `+${data.delta} credits`, {
+        target_user_id: data.userId,
+        delta: data.delta,
+        reason: data.reason,
+      });
       return { ok: true as const, remaining: r };
     }
     const { data: r, error } = await supabaseAdmin.rpc("manovik_spend_credit", {
@@ -253,7 +288,11 @@ export const adminAdjustCredits = createServerFn({ method: "POST" })
     });
     if (error) throw new Response(error.message, { status: 500 });
     if (r === -1) throw new Response("Insufficient credits", { status: 400 });
-    await audit(adminId, "credit_spend", `${data.delta} credits`, { target_user_id: data.userId, delta: data.delta, reason: data.reason });
+    await audit(adminId, "credit_spend", `${data.delta} credits`, {
+      target_user_id: data.userId,
+      delta: data.delta,
+      reason: data.reason,
+    });
     return { ok: true as const, remaining: r };
   });
 
@@ -343,7 +382,9 @@ export const adminListPurchases = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin
       .from("purchases")
-      .select("id, user_id, plan, amount, currency, status, razorpay_payment_id, receipt_no, email, created_at")
+      .select(
+        "id, user_id, plan, amount, currency, status, razorpay_payment_id, receipt_no, email, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 100);
     if (data.status) q = q.eq("status", data.status);

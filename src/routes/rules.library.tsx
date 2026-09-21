@@ -209,7 +209,9 @@ function RulesLibrary() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-16">
       <nav className="mb-8 text-sm text-muted-foreground">
-        <Link to="/" className="hover:text-foreground">Home</Link>
+        <Link to="/" className="hover:text-foreground">
+          Home
+        </Link>
         <span className="mx-2">/</span>
         <span>Rules Library</span>
       </nav>
@@ -219,12 +221,15 @@ function RulesLibrary() {
           MANOVIK Rules Library
         </span>
         <h1 className="mt-4 text-4xl font-bold tracking-tight md:text-5xl">
-          Ready-to-use <code className="rounded bg-muted px-2 py-1 text-3xl md:text-4xl">.manovikrules</code> templates
+          Ready-to-use{" "}
+          <code className="rounded bg-muted px-2 py-1 text-3xl md:text-4xl">.manovikrules</code>{" "}
+          templates
         </h1>
         <p className="mt-4 max-w-3xl text-lg text-muted-foreground">
           Steer the MANOVIK autonomous agent with proven system rules. Copy any template into a
           <code className="mx-1 rounded bg-muted px-1.5 py-0.5">.manovikrules</code>
-          file at your project root — MANOVIK will follow them on every prompt. A sovereign alternative to
+          file at your project root — MANOVIK will follow them on every prompt. A sovereign
+          alternative to
           <code className="mx-1 rounded bg-muted px-1.5 py-0.5">.cursorrules</code>
           libraries.
         </p>
@@ -239,8 +244,9 @@ function RulesLibrary() {
       <section className="mt-16 rounded-xl border border-border/60 bg-muted/30 p-6">
         <h2 className="text-xl font-semibold">How MANOVIK uses your rules</h2>
         <p className="mt-2 text-muted-foreground">
-          Drop a <code>.manovikrules</code> file at the root of your project. MANOVIK reads it before every
-          reasoning cycle and treats each rule as a hard constraint — the same way Cursor honors
+          Drop a <code>.manovikrules</code> file at the root of your project. MANOVIK reads it
+          before every reasoning cycle and treats each rule as a hard constraint — the same way
+          Cursor honors
           <code className="mx-1">.cursorrules</code>. Combine templates freely; MANOVIK deduplicates
           overlapping guidance.
         </p>

@@ -18,7 +18,7 @@ import manovikSupplyChainScanTool from "./tools/manovik-supply-chain-scan";
 // The OAuth issuer must be the direct Supabase host: on publish SUPABASE_URL is
 // rewritten to a proxy host that fails RFC 8414 issuer matching. The project ref
 // is inlined at build time by Vite.
-const projectRef = import.meta.env['VITE_SUPABASE_PROJECT_ID'] ?? "project-ref-unset";
+const projectRef = import.meta.env["VITE_SUPABASE_PROJECT_ID"] ?? "project-ref-unset";
 
 export default defineMcp({
   name: "manovik-mcp",
@@ -48,4 +48,3 @@ export default defineMcp({
     getPricingTool,
   ],
 });
-

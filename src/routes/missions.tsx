@@ -5,7 +5,13 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { forgetLesson, getDoctrine, listMissions, runMission, trainMano } from "@/lib/mano/agi.functions";
+import {
+  forgetLesson,
+  getDoctrine,
+  listMissions,
+  runMission,
+  trainMano,
+} from "@/lib/mano/agi.functions";
 
 const TITLE = "MANO Missions — Autonomous Agent | MANOVIK";
 const DESC =
@@ -29,6 +35,26 @@ export const Route = createFileRoute("/missions")({
 });
 
 type MissionResult = Awaited<ReturnType<typeof runMission>>;
+
+/** Shape of the compiled doctrine row returned by getDoctrine. */
+interface ManoDoctrine {
+  doctrine: string;
+  runs_used: number;
+  lessons_used: number;
+}
+
+/** Shapes of the rows returned by listMissions. */
+interface MissionRun {
+  id: string;
+  goal: string;
+  score: number | null;
+}
+
+interface MissionLesson {
+  id: string;
+  topic: string;
+  lesson: string;
+}
 
 function MissionsPage() {
   const start = useServerFn(runMission);
@@ -73,8 +99,8 @@ function MissionsPage() {
     <main className="mx-auto max-w-5xl px-4 py-10">
       <h1 className="text-3xl font-semibold tracking-tight">MANO Missions</h1>
       <p className="mt-2 max-w-2xl text-muted-foreground">
-        Give MANO a goal. It plans, chooses its own tools, works step by step, reviews its own result,
-        and stores what it learned so the next mission starts smarter.
+        Give MANO a goal. It plans, chooses its own tools, works step by step, reviews its own
+        result, and stores what it learned so the next mission starts smarter.
       </p>
 
       <section className="mt-8 rounded-xl border border-border bg-card p-5">
@@ -110,9 +136,15 @@ function MissionsPage() {
       {result ? (
         <section className="mt-8 space-y-4">
           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-            <span className="rounded-full border border-border px-3 py-1">Status: {result.status}</span>
-            <span className="rounded-full border border-border px-3 py-1">Self-score: {result.score}/100</span>
-            <span className="rounded-full border border-border px-3 py-1">Steps: {result.steps.length}</span>
+            <span className="rounded-full border border-border px-3 py-1">
+              Status: {result.status}
+            </span>
+            <span className="rounded-full border border-border px-3 py-1">
+              Self-score: {result.score}/100
+            </span>
+            <span className="rounded-full border border-border px-3 py-1">
+              Steps: {result.steps.length}
+            </span>
           </div>
 
           <div className="rounded-xl border border-border bg-card p-5">
@@ -134,7 +166,9 @@ function MissionsPage() {
 
           <div className="rounded-xl border border-border bg-card p-5">
             <h2 className="text-lg font-semibold">Result</h2>
-            <pre className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed">{result.answer}</pre>
+            <pre className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed">
+              {result.answer}
+            </pre>
           </div>
         </section>
       ) : null}
@@ -149,11 +183,12 @@ function MissionsPage() {
         {doctrine.data?.doctrine ? (
           <>
             <p className="mt-2 text-sm text-muted-foreground">
-              Compiled from {(doctrine.data.doctrine as any).runs_used} missions and{" "}
-              {(doctrine.data.doctrine as any).lessons_used} lessons. Loaded into every new mission.
+              Compiled from {(doctrine.data.doctrine as unknown as ManoDoctrine).runs_used} missions
+              and {(doctrine.data.doctrine as unknown as ManoDoctrine).lessons_used} lessons. Loaded
+              into every new mission.
             </p>
             <pre className="mt-3 whitespace-pre-wrap break-words text-sm leading-relaxed">
-              {(doctrine.data.doctrine as any).doctrine}
+              {(doctrine.data.doctrine as unknown as ManoDoctrine).doctrine}
             </pre>
           </>
         ) : (
@@ -168,8 +203,11 @@ function MissionsPage() {
         <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="text-lg font-semibold">Recent missions</h2>
           <ul className="mt-3 space-y-2 text-sm">
-            {(history.data?.runs ?? []).map((r: any) => (
-              <li key={r.id} className="flex items-start justify-between gap-3 border-b border-border/60 pb-2">
+            {((history.data?.runs ?? []) as unknown as MissionRun[]).map((r) => (
+              <li
+                key={r.id}
+                className="flex items-start justify-between gap-3 border-b border-border/60 pb-2"
+              >
                 <span className="line-clamp-2">{r.goal}</span>
                 <span className="shrink-0 text-muted-foreground">{r.score ?? "–"}</span>
               </li>
@@ -183,8 +221,11 @@ function MissionsPage() {
         <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="text-lg font-semibold">What MANO has learned</h2>
           <ul className="mt-3 space-y-2 text-sm">
-            {(history.data?.lessons ?? []).map((l: any) => (
-              <li key={l.id} className="flex items-start justify-between gap-3 border-b border-border/60 pb-2">
+            {((history.data?.lessons ?? []) as unknown as MissionLesson[]).map((l) => (
+              <li
+                key={l.id}
+                className="flex items-start justify-between gap-3 border-b border-border/60 pb-2"
+              >
                 <span>
                   <span className="font-medium">{l.topic}</span> — {l.lesson}
                 </span>

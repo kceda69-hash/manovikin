@@ -37,8 +37,6 @@ const EXCLUDED_PATHS = new Set([
   "/dashboard",
   "/playground",
   "/missions",
-
-
 ]);
 
 const EXCLUDED_PREFIXES = [
@@ -61,29 +59,27 @@ export function routeFilePathToPublicPath(filePath: string): string | null {
     return null;
   }
 
-  const pathParts = normalized
-    .split("/")
-    .flatMap((segment, index, allSegments) => {
-      const isLeaf = index === allSegments.length - 1;
-      if (segment === "__root" || (isLeaf && segment === "index")) {
-        return [];
-      }
+  const pathParts = normalized.split("/").flatMap((segment, index, allSegments) => {
+    const isLeaf = index === allSegments.length - 1;
+    if (segment === "__root" || (isLeaf && segment === "index")) {
+      return [];
+    }
 
-      const escapedWholeSegment = segment.match(/^\[(\..+)]$/);
-      if (escapedWholeSegment) {
-        return [escapedWholeSegment[1]];
-      }
+    const escapedWholeSegment = segment.match(/^\[(\..+)]$/);
+    if (escapedWholeSegment) {
+      return [escapedWholeSegment[1]];
+    }
 
-      return segment
-        .replace(/\[\.\]/g, DOT_TOKEN)
-        .split(".")
-        .filter(Boolean)
-        .map((part) => part.replace(new RegExp(DOT_TOKEN, "g"), "."))
-        .map((part) => {
-          const escapedSegment = part.match(/^\[(.+)]$/);
-          return escapedSegment ? escapedSegment[1] : part;
-        });
-    });
+    return segment
+      .replace(/\[\.\]/g, DOT_TOKEN)
+      .split(".")
+      .filter(Boolean)
+      .map((part) => part.replace(new RegExp(DOT_TOKEN, "g"), "."))
+      .map((part) => {
+        const escapedSegment = part.match(/^\[(.+)]$/);
+        return escapedSegment ? escapedSegment[1] : part;
+      });
+  });
 
   if (pathParts.some((part) => part.includes("$") || part.includes("*"))) {
     return null;
@@ -97,9 +93,7 @@ export function shouldIncludeInSitemap(path: string): boolean {
     return false;
   }
 
-  return !EXCLUDED_PREFIXES.some(
-    (prefix) => path === prefix || path.startsWith(`${prefix}/`),
-  );
+  return !EXCLUDED_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
 
 export function sitemapMetadataForPath(path: string): Omit<SitemapEntry, "path"> {
@@ -123,7 +117,6 @@ export function sitemapMetadataForPath(path: string): Omit<SitemapEntry, "path">
     return { changefreq: "monthly", priority: "0.8" };
   }
 
-
   if (path.startsWith("/blog/")) {
     return { changefreq: "monthly", priority: "0.7" };
   }
@@ -143,9 +136,7 @@ export function sitemapMetadataForPath(path: string): Omit<SitemapEntry, "path">
   return { changefreq: "monthly", priority: "0.5" };
 }
 
-export function buildSitemapEntriesFromRouteFiles(
-  routeFiles: Iterable<string>,
-): SitemapEntry[] {
+export function buildSitemapEntriesFromRouteFiles(routeFiles: Iterable<string>): SitemapEntry[] {
   const paths = new Set<string>();
 
   for (const filePath of routeFiles) {

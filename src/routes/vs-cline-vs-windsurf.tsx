@@ -71,28 +71,71 @@ export const Route = createFileRoute("/vs-cline-vs-windsurf")({
 
 function ClineVsWindsurfPage() {
   const rows: Array<{ feature: string; cline: string; windsurf: string; manovik: string }> = [
-    { feature: "Pricing", cline: "Free tool + BYO per-token API bills", windsurf: "Per-seat monthly subscription + usage credits", manovik: "One-time lifetime payment" },
-    { feature: "Sovereign / self-hosted", cline: "Manual — you configure everything", windsurf: "No managed sovereign option", manovik: "Yes — managed sovereign mode" },
-    { feature: "Local model support", cline: "Yes (Ollama, vLLM, OpenRouter, any endpoint)", windsurf: "Limited — cloud-first", manovik: "Yes (Ollama, vLLM, custom OpenAI-compatible)" },
-    { feature: "Agent autonomy", cline: "High — ACT mode, full tool visibility", windsurf: "High — Cascade, more UI-polished", manovik: "High — visible agent loop, sovereign-safe" },
-    { feature: "IDE experience", cline: "VS Code extension", windsurf: "Custom Cursor-style IDE", manovik: "Hosted UI + editor integrations" },
-    { feature: "Code privacy", cline: "Depends on chosen model provider", windsurf: "Sent to Windsurf / model providers", manovik: "Repo never leaves your network in sovereign mode" },
-    { feature: "Cost predictability", cline: "Variable — scales with token usage", windsurf: "Subscription + variable credits", manovik: "Flat lifetime + included credits" },
-    { feature: "Out-of-the-box product", cline: "Extension only; you wire billing/auth", windsurf: "Full IDE, hosted account", manovik: "Hosted UI, auth, billing, audit trail" },
+    {
+      feature: "Pricing",
+      cline: "Free tool + BYO per-token API bills",
+      windsurf: "Per-seat monthly subscription + usage credits",
+      manovik: "One-time lifetime payment",
+    },
+    {
+      feature: "Sovereign / self-hosted",
+      cline: "Manual — you configure everything",
+      windsurf: "No managed sovereign option",
+      manovik: "Yes — managed sovereign mode",
+    },
+    {
+      feature: "Local model support",
+      cline: "Yes (Ollama, vLLM, OpenRouter, any endpoint)",
+      windsurf: "Limited — cloud-first",
+      manovik: "Yes (Ollama, vLLM, custom OpenAI-compatible)",
+    },
+    {
+      feature: "Agent autonomy",
+      cline: "High — ACT mode, full tool visibility",
+      windsurf: "High — Cascade, more UI-polished",
+      manovik: "High — visible agent loop, sovereign-safe",
+    },
+    {
+      feature: "IDE experience",
+      cline: "VS Code extension",
+      windsurf: "Custom Cursor-style IDE",
+      manovik: "Hosted UI + editor integrations",
+    },
+    {
+      feature: "Code privacy",
+      cline: "Depends on chosen model provider",
+      windsurf: "Sent to Windsurf / model providers",
+      manovik: "Repo never leaves your network in sovereign mode",
+    },
+    {
+      feature: "Cost predictability",
+      cline: "Variable — scales with token usage",
+      windsurf: "Subscription + variable credits",
+      manovik: "Flat lifetime + included credits",
+    },
+    {
+      feature: "Out-of-the-box product",
+      cline: "Extension only; you wire billing/auth",
+      windsurf: "Full IDE, hosted account",
+      manovik: "Hosted UI, auth, billing, audit trail",
+    },
   ];
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-16 text-foreground">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:underline">Home</Link> / <span>Cline vs Windsurf</span>
+        <Link to="/" className="hover:underline">
+          Home
+        </Link>{" "}
+        / <span>Cline vs Windsurf</span>
       </nav>
 
       <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
         Cline vs Windsurf (2026)
       </h1>
       <p className="text-lg text-muted-foreground mb-10">
-        The two most-hyped agentic coding tools of the year, compared honestly — plus a
-        sovereign, lifetime-priced alternative that beats both on privacy and cost.
+        The two most-hyped agentic coding tools of the year, compared honestly — plus a sovereign,
+        lifetime-priced alternative that beats both on privacy and cost.
       </p>
 
       <section className="mb-12">
@@ -101,10 +144,13 @@ function ClineVsWindsurfPage() {
           <strong>Cline</strong> is open-source, transparent, and BYO-model — best when you want
           maximum control and don't mind wiring up API keys and paying per token.
           <strong> Windsurf</strong> is a polished managed IDE with the Cascade agent — best when
-          you want a Cursor-style experience out of the box and don't mind a subscription plus
-          usage credits. Neither ships a <strong>managed sovereign deployment</strong>, which is
-          exactly where <Link to="/" className="underline">MANOVIK AI</Link> wins: the same agentic
-          loop, on your infrastructure, for a one-time lifetime price.
+          you want a Cursor-style experience out of the box and don't mind a subscription plus usage
+          credits. Neither ships a <strong>managed sovereign deployment</strong>, which is exactly
+          where{" "}
+          <Link to="/" className="underline">
+            MANOVIK AI
+          </Link>{" "}
+          wins: the same agentic loop, on your infrastructure, for a one-time lifetime price.
         </p>
       </section>
 
@@ -138,7 +184,9 @@ function ClineVsWindsurfPage() {
         <h2 className="text-2xl font-semibold mb-4">When Cline wins</h2>
         <ul className="space-y-2 list-disc pl-6 text-muted-foreground">
           <li>You want a fully open-source, auditable agent loop.</li>
-          <li>You already have model API keys and want fine-grained control over tools and prompts.</li>
+          <li>
+            You already have model API keys and want fine-grained control over tools and prompts.
+          </li>
           <li>You live in VS Code and don't want a separate IDE.</li>
         </ul>
       </section>
@@ -155,10 +203,22 @@ function ClineVsWindsurfPage() {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">When MANOVIK beats both</h2>
         <ul className="space-y-3 list-disc pl-6">
-          <li><strong>Sovereignty:</strong> managed self-hosted mode against Ollama/vLLM — code never leaves your network.</li>
-          <li><strong>Lifetime pricing:</strong> one payment instead of forever-subscriptions or per-token bills.</li>
-          <li><strong>Compliance:</strong> straightforward path to SOC2, HIPAA, GDPR, and India's DPDP.</li>
-          <li><strong>Full product:</strong> hosted UI, auth, billing, audit trail, agent tools, and MCP endpoint out of the box.</li>
+          <li>
+            <strong>Sovereignty:</strong> managed self-hosted mode against Ollama/vLLM — code never
+            leaves your network.
+          </li>
+          <li>
+            <strong>Lifetime pricing:</strong> one payment instead of forever-subscriptions or
+            per-token bills.
+          </li>
+          <li>
+            <strong>Compliance:</strong> straightforward path to SOC2, HIPAA, GDPR, and India's
+            DPDP.
+          </li>
+          <li>
+            <strong>Full product:</strong> hosted UI, auth, billing, audit trail, agent tools, and
+            MCP endpoint out of the box.
+          </li>
         </ul>
       </section>
 
@@ -167,22 +227,35 @@ function ClineVsWindsurfPage() {
         <div className="space-y-4">
           <div>
             <h3 className="font-semibold">Cline vs Windsurf — which should I pick?</h3>
-            <p className="text-muted-foreground">Pick Cline for transparency and BYO control; pick Windsurf for a polished managed IDE. Pick MANOVIK if you want sovereignty and lifetime pricing on top.</p>
+            <p className="text-muted-foreground">
+              Pick Cline for transparency and BYO control; pick Windsurf for a polished managed IDE.
+              Pick MANOVIK if you want sovereignty and lifetime pricing on top.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">Is Windsurf more autonomous than Cline?</h3>
-            <p className="text-muted-foreground">Comparable. Cline exposes more of the loop; Windsurf hides more behind polish. Different taste, similar capability.</p>
+            <p className="text-muted-foreground">
+              Comparable. Cline exposes more of the loop; Windsurf hides more behind polish.
+              Different taste, similar capability.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">Can I self-host any of these?</h3>
-            <p className="text-muted-foreground">Cline can be pointed at local models manually. Windsurf is cloud-first. MANOVIK ships a managed sovereign mode.</p>
+            <p className="text-muted-foreground">
+              Cline can be pointed at local models manually. Windsurf is cloud-first. MANOVIK ships
+              a managed sovereign mode.
+            </p>
           </div>
         </div>
       </section>
 
       <section className="rounded-2xl border bg-card p-8 text-center">
-        <h2 className="text-2xl font-bold mb-2">Get the sovereign alternative to Cline and Windsurf</h2>
-        <p className="text-muted-foreground mb-6">One payment. Unlimited use. Your code stays yours.</p>
+        <h2 className="text-2xl font-bold mb-2">
+          Get the sovereign alternative to Cline and Windsurf
+        </h2>
+        <p className="text-muted-foreground mb-6">
+          One payment. Unlimited use. Your code stays yours.
+        </p>
         <Link
           to="/"
           className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90"

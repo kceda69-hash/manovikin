@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAdmin } from "@/lib/admin-guard";
-
+import type { Json } from "@/integrations/supabase/types";
 
 const GATEWAY = "https://connector-gateway.lovable.dev/google_search_console";
 const SITE_URL = "https://manovik.in/";
@@ -20,28 +20,34 @@ function authHeaders() {
   };
 }
 
-async function gsc(path: string, init: RequestInit = {}): Promise<{ ok: boolean; status: number; body: any; raw: string }> {
+async function gsc(
+  path: string,
+  init: RequestInit = {},
+): Promise<{ ok: boolean; status: number; body: Json; raw: string }> {
   const res = await fetch(`${GATEWAY}${path}`, {
     ...init,
     headers: { ...authHeaders(), ...(init.headers as Record<string, string> | undefined) },
   });
   const text = await res.text();
-  const body = text ? safeJson(text) : null;
+  const body: Json = text ? safeJson(text) : null;
   return { ok: res.ok, status: res.status, body, raw: text };
 }
 
-function safeJson(s: string): any {
-  try { return JSON.parse(s); } catch { return s; }
+function safeJson(s: string): Json {
+  try {
+    return JSON.parse(s);
+  } catch {
+    return s;
+  }
 }
 
 const enc = (u: string) => encodeURIComponent(u);
 
 // Internal helper for trusted callers (cron webhook). Not exported as a serverFn.
 export async function submitSitemapInternal() {
-  const r = await gsc(
-    `/webmasters/v3/sites/${enc(SITE_URL)}/sitemaps/${enc(SITEMAP_URL)}`,
-    { method: "PUT" },
-  );
+  const r = await gsc(`/webmasters/v3/sites/${enc(SITE_URL)}/sitemaps/${enc(SITEMAP_URL)}`, {
+    method: "PUT",
+  });
   return { ok: r.ok, status: r.status, body: r.body };
 }
 
@@ -82,34 +88,22 @@ export const getSeoHealth = createServerFn({ method: "GET" })
     const end = today.toISOString().slice(0, 10);
     const startDate = new Date(today.getTime() - 28 * 86400_000).toISOString().slice(0, 10);
 
-    const totals = await gsc(
-      `/webmasters/v3/sites/${enc(SITE_URL)}/searchAnalytics/query`,
-      {
-        method: "POST",
-        body: JSON.stringify({ startDate, endDate: end, dimensions: [] }),
-      },
-    );
-    const byDate = await gsc(
-      `/webmasters/v3/sites/${enc(SITE_URL)}/searchAnalytics/query`,
-      {
-        method: "POST",
-        body: JSON.stringify({ startDate, endDate: end, dimensions: ["date"], rowLimit: 30 }),
-      },
-    );
-    const topQueries = await gsc(
-      `/webmasters/v3/sites/${enc(SITE_URL)}/searchAnalytics/query`,
-      {
-        method: "POST",
-        body: JSON.stringify({ startDate, endDate: end, dimensions: ["query"], rowLimit: 10 }),
-      },
-    );
-    const topPages = await gsc(
-      `/webmasters/v3/sites/${enc(SITE_URL)}/searchAnalytics/query`,
-      {
-        method: "POST",
-        body: JSON.stringify({ startDate, endDate: end, dimensions: ["page"], rowLimit: 10 }),
-      },
-    );
+    const totals = await gsc(`/webmasters/v3/sites/${enc(SITE_URL)}/searchAnalytics/query`, {
+      method: "POST",
+      body: JSON.stringify({ startDate, endDate: end, dimensions: [] }),
+    });
+    const byDate = await gsc(`/webmasters/v3/sites/${enc(SITE_URL)}/searchAnalytics/query`, {
+      method: "POST",
+      body: JSON.stringify({ startDate, endDate: end, dimensions: ["date"], rowLimit: 30 }),
+    });
+    const topQueries = await gsc(`/webmasters/v3/sites/${enc(SITE_URL)}/searchAnalytics/query`, {
+      method: "POST",
+      body: JSON.stringify({ startDate, endDate: end, dimensions: ["query"], rowLimit: 10 }),
+    });
+    const topPages = await gsc(`/webmasters/v3/sites/${enc(SITE_URL)}/searchAnalytics/query`, {
+      method: "POST",
+      body: JSON.stringify({ startDate, endDate: end, dimensions: ["page"], rowLimit: 10 }),
+    });
 
     return {
       site: SITE_URL,
@@ -152,7 +146,9 @@ export const getSeoMonitor = createServerFn({ method: "GET" })
         .limit(25),
       supabase
         .from("seo_monitor_snapshots")
-        .select("id, captured_at, sitemap_errors, sitemap_warnings, indexed_urls, clicks, impressions, ok")
+        .select(
+          "id, captured_at, sitemap_errors, sitemap_warnings, indexed_urls, clicks, impressions, ok",
+        )
         .order("captured_at", { ascending: false })
         .limit(14),
     ]);

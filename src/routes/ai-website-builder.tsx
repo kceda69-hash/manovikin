@@ -70,7 +70,10 @@ function AiWebsiteBuilderPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/40">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4" aria-hidden /> Back to home
           </Link>
           <Link to="/login" className="text-sm font-semibold underline">
@@ -81,13 +84,16 @@ function AiWebsiteBuilderPage() {
 
       <main className="mx-auto max-w-4xl space-y-12 px-4 py-12">
         <section className="space-y-4">
-          <p className="text-sm uppercase tracking-wider text-muted-foreground">AI website builder</p>
+          <p className="text-sm uppercase tracking-wider text-muted-foreground">
+            AI website builder
+          </p>
           <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
             Build a real website by describing it
           </h1>
           <p className="text-lg text-muted-foreground">
             MANOVIK is an AI website builder that turns one prompt into a working site — pages,
-            database, login, payments and all. You keep chatting to change it, and you keep the code.
+            database, login, payments and all. You keep chatting to change it, and you keep the
+            code.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Link
@@ -143,20 +149,20 @@ function AiWebsiteBuilderPage() {
           <h2 className="text-2xl font-semibold">How it differs from a drag-and-drop builder</h2>
           <ul className="space-y-2">
             <li className="flex gap-2">
-              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> It writes real React and
-              TypeScript you can export, not a proprietary page format.
+              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> It writes real React
+              and TypeScript you can export, not a proprietary page format.
             </li>
             <li className="flex gap-2">
-              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> It builds the database and
-              server logic, so logged-in dashboards and payments are possible.
+              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> It builds the database
+              and server logic, so logged-in dashboards and payments are possible.
             </li>
             <li className="flex gap-2">
-              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> It runs and checks its own
-              work before handing the result back.
+              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> It runs and checks its
+              own work before handing the result back.
             </li>
             <li className="flex gap-2">
-              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> On the lifetime plan you can
-              host the builder itself on your own server.
+              <Check className="h-5 w-5 shrink-0 text-primary" aria-hidden /> On the lifetime plan
+              you can host the builder itself on your own server.
             </li>
           </ul>
         </section>
@@ -184,7 +190,6 @@ function AiWebsiteBuilderPage() {
               Compare MANOVIK with other AI builders →
             </Link>
           </p>
-
         </section>
       </main>
     </div>

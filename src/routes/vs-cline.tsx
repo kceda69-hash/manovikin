@@ -10,11 +10,16 @@ export const Route = createFileRoute("/vs-cline")({
         content:
           "Cline alternative: MANOVIK offers sovereign hosting, local model support, and lifetime pricing for autonomous AI coding agents.",
       },
-      { name: "keywords", content: "Cline alternative, Cline AI, autonomous coding agent, sovereign AI, MANOVIK vs Cline" },
+      {
+        name: "keywords",
+        content:
+          "Cline alternative, Cline AI, autonomous coding agent, sovereign AI, MANOVIK vs Cline",
+      },
       { property: "og:title", content: "MANOVIK AI vs Cline — The Sovereign Alternative" },
       {
         property: "og:description",
-        content: "Head-to-head: autonomy, privacy, hosting, and pricing. Why teams pick MANOVIK over Cline.",
+        content:
+          "Head-to-head: autonomy, privacy, hosting, and pricing. Why teams pick MANOVIK over Cline.",
       },
       { property: "og:url", content: "https://manovik.in/vs-cline" },
       { property: "og:type", content: "article" },
@@ -63,24 +68,53 @@ export const Route = createFileRoute("/vs-cline")({
 
 function VsClinePage() {
   const rows: Array<{ feature: string; manovik: string; cline: string }> = [
-    { feature: "Pricing model", manovik: "Lifetime — one-time payment", cline: "Free tool + per-token API bills" },
-    { feature: "Sovereign / self-hosted deployment", manovik: "Yes — managed sovereign mode", cline: "BYO setup, no managed sovereign offering" },
-    { feature: "Local model support", manovik: "Yes (Ollama / vLLM / custom endpoints)", cline: "Yes, via manual configuration" },
-    { feature: "Code privacy", manovik: "Repo never leaves your network in sovereign mode", cline: "Depends on chosen model provider" },
-    { feature: "Multi-language fluency", manovik: "100+ languages with per-language memory", cline: "Depends on backing model" },
-    { feature: "Out-of-the-box experience", manovik: "Hosted UI, auth, billing, audit trail", cline: "VS Code extension; you wire the rest" },
-    { feature: "Token cost predictability", manovik: "Flat lifetime + included credits", cline: "Variable — scales with usage" },
+    {
+      feature: "Pricing model",
+      manovik: "Lifetime — one-time payment",
+      cline: "Free tool + per-token API bills",
+    },
+    {
+      feature: "Sovereign / self-hosted deployment",
+      manovik: "Yes — managed sovereign mode",
+      cline: "BYO setup, no managed sovereign offering",
+    },
+    {
+      feature: "Local model support",
+      manovik: "Yes (Ollama / vLLM / custom endpoints)",
+      cline: "Yes, via manual configuration",
+    },
+    {
+      feature: "Code privacy",
+      manovik: "Repo never leaves your network in sovereign mode",
+      cline: "Depends on chosen model provider",
+    },
+    {
+      feature: "Multi-language fluency",
+      manovik: "100+ languages with per-language memory",
+      cline: "Depends on backing model",
+    },
+    {
+      feature: "Out-of-the-box experience",
+      manovik: "Hosted UI, auth, billing, audit trail",
+      cline: "VS Code extension; you wire the rest",
+    },
+    {
+      feature: "Token cost predictability",
+      manovik: "Flat lifetime + included credits",
+      cline: "Variable — scales with usage",
+    },
   ];
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-16 text-foreground">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:underline">Home</Link> / <span>vs Cline</span>
+        <Link to="/" className="hover:underline">
+          Home
+        </Link>{" "}
+        / <span>vs Cline</span>
       </nav>
 
-      <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-        MANOVIK AI vs Cline
-      </h1>
+      <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">MANOVIK AI vs Cline</h1>
       <p className="text-lg text-muted-foreground mb-10">
         Looking for a <strong>Cline alternative</strong> with sovereign hosting, predictable
         pricing, and a fully managed experience? Here's the honest head-to-head.
@@ -89,11 +123,10 @@ function VsClinePage() {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">The 30-second summary</h2>
         <p className="leading-relaxed">
-          Cline is a great open-source autonomous coding extension, but you still bring your
-          own model keys and pay per-token forever. MANOVIK AI gives you the same agentic
-          loop with <strong>managed sovereign hosting</strong>, <strong>local model
-          support</strong>, and <strong>lifetime pricing</strong> — no per-token surprises and
-          no manual plumbing.
+          Cline is a great open-source autonomous coding extension, but you still bring your own
+          model keys and pay per-token forever. MANOVIK AI gives you the same agentic loop with{" "}
+          <strong>managed sovereign hosting</strong>, <strong>local model support</strong>, and{" "}
+          <strong>lifetime pricing</strong> — no per-token surprises and no manual plumbing.
         </p>
       </section>
 
@@ -124,10 +157,21 @@ function VsClinePage() {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Why developers switch from Cline</h2>
         <ul className="space-y-3 list-disc pl-6">
-          <li><strong>Predictable cost:</strong> a single lifetime payment replaces unbounded per-token API bills.</li>
-          <li><strong>Sovereign hosting:</strong> managed on-prem mode, not a DIY project.</li>
-          <li><strong>Full product:</strong> hosted chat UI, auth, billing, and audit trail out of the box.</li>
-          <li><strong>Compliance:</strong> easier path to SOC2, HIPAA, GDPR, and India's DPDP when inference stays on-prem.</li>
+          <li>
+            <strong>Predictable cost:</strong> a single lifetime payment replaces unbounded
+            per-token API bills.
+          </li>
+          <li>
+            <strong>Sovereign hosting:</strong> managed on-prem mode, not a DIY project.
+          </li>
+          <li>
+            <strong>Full product:</strong> hosted chat UI, auth, billing, and audit trail out of the
+            box.
+          </li>
+          <li>
+            <strong>Compliance:</strong> easier path to SOC2, HIPAA, GDPR, and India's DPDP when
+            inference stays on-prem.
+          </li>
         </ul>
       </section>
 
@@ -136,22 +180,33 @@ function VsClinePage() {
         <div className="space-y-4">
           <div>
             <h3 className="font-semibold">Is MANOVIK AI a good Cline alternative?</h3>
-            <p className="text-muted-foreground">Yes — especially if you want sovereign hosting, predictable pricing, or a fully managed product instead of a DIY setup.</p>
+            <p className="text-muted-foreground">
+              Yes — especially if you want sovereign hosting, predictable pricing, or a fully
+              managed product instead of a DIY setup.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">Can I run MANOVIK AI fully offline?</h3>
-            <p className="text-muted-foreground">Yes, with a self-hosted model endpoint (Ollama, vLLM, llama.cpp) the agent works without external API calls.</p>
+            <p className="text-muted-foreground">
+              Yes, with a self-hosted model endpoint (Ollama, vLLM, llama.cpp) the agent works
+              without external API calls.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">How does pricing compare?</h3>
-            <p className="text-muted-foreground">Cline is free but you pay per-token to whichever provider you wire in. MANOVIK is one lifetime payment with included credits.</p>
+            <p className="text-muted-foreground">
+              Cline is free but you pay per-token to whichever provider you wire in. MANOVIK is one
+              lifetime payment with included credits.
+            </p>
           </div>
         </div>
       </section>
 
       <section className="rounded-2xl border bg-card p-8 text-center">
         <h2 className="text-2xl font-bold mb-2">Try the sovereign Cline alternative</h2>
-        <p className="text-muted-foreground mb-6">One payment. Unlimited use. Your code stays yours.</p>
+        <p className="text-muted-foreground mb-6">
+          One payment. Unlimited use. Your code stays yours.
+        </p>
         <Link
           to="/"
           className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90"

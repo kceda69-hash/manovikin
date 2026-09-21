@@ -3,7 +3,17 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Search, CheckCircle2, AlertCircle, RefreshCw, UploadCloud, BellRing, ShieldCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader2,
+  Search,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+  UploadCloud,
+  BellRing,
+  ShieldCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   getSeoHealth,
@@ -19,7 +29,11 @@ export const Route = createFileRoute("/seo")({
   head: () => ({
     meta: [
       { title: "MANOVIK AI — SEO health" },
-      { name: "description", content: "Monitor Google Search Console health for manovik.in: indexing, sitemaps, clicks, and impressions." },
+      {
+        name: "description",
+        content:
+          "Monitor Google Search Console health for manovik.in: indexing, sitemaps, clicks, and impressions.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -79,7 +93,6 @@ function SeoPage() {
     }
   };
 
-
   useEffect(() => {
     if (user) load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -90,7 +103,8 @@ function SeoPage() {
     try {
       const r = await verifySite();
       if (r.verified) toast.success("Site verified with Google");
-      else toast.error("Verification failed", { description: JSON.stringify(r.error).slice(0, 200) });
+      else
+        toast.error("Verification failed", { description: JSON.stringify(r.error).slice(0, 200) });
       await load();
     } finally {
       setActing(null);
@@ -109,10 +123,35 @@ function SeoPage() {
     }
   };
 
-  const totalsRow = (data?.totals as { rows?: Array<{ clicks: number; impressions: number; ctr: number; position: number }> } | null)?.rows?.[0];
-  const sitemaps = (data?.sitemaps as { sitemap?: Array<{ path: string; lastSubmitted?: string; isPending?: boolean; errors?: number; warnings?: number }> } | null)?.sitemap ?? [];
-  const topQueries = (data?.topQueries as { rows?: Array<{ keys: string[]; clicks: number; impressions: number; position: number }> } | null)?.rows ?? [];
-  const topPages = (data?.topPages as { rows?: Array<{ keys: string[]; clicks: number; impressions: number; position: number }> } | null)?.rows ?? [];
+  const totalsRow = (
+    data?.totals as {
+      rows?: Array<{ clicks: number; impressions: number; ctr: number; position: number }>;
+    } | null
+  )?.rows?.[0];
+  const sitemaps =
+    (
+      data?.sitemaps as {
+        sitemap?: Array<{
+          path: string;
+          lastSubmitted?: string;
+          isPending?: boolean;
+          errors?: number;
+          warnings?: number;
+        }>;
+      } | null
+    )?.sitemap ?? [];
+  const topQueries =
+    (
+      data?.topQueries as {
+        rows?: Array<{ keys: string[]; clicks: number; impressions: number; position: number }>;
+      } | null
+    )?.rows ?? [];
+  const topPages =
+    (
+      data?.topPages as {
+        rows?: Array<{ keys: string[]; clicks: number; impressions: number; position: number }>;
+      } | null
+    )?.rows ?? [];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -131,16 +170,28 @@ function SeoPage() {
             <RefreshCw className={`size-4 mr-1 ${busy ? "animate-spin" : ""}`} /> Refresh
           </Button>
           <Button size="sm" variant="outline" onClick={onRunMonitor} disabled={!!acting}>
-            {acting === "monitor" ? <Loader2 className="size-4 mr-1 animate-spin" /> : <BellRing className="size-4 mr-1" />}
+            {acting === "monitor" ? (
+              <Loader2 className="size-4 mr-1 animate-spin" />
+            ) : (
+              <BellRing className="size-4 mr-1" />
+            )}
             Run check
           </Button>
 
           <Button size="sm" variant="outline" onClick={onVerify} disabled={!!acting}>
-            {acting === "verify" ? <Loader2 className="size-4 mr-1 animate-spin" /> : <CheckCircle2 className="size-4 mr-1" />}
+            {acting === "verify" ? (
+              <Loader2 className="size-4 mr-1 animate-spin" />
+            ) : (
+              <CheckCircle2 className="size-4 mr-1" />
+            )}
             Verify
           </Button>
           <Button size="sm" onClick={onResubmit} disabled={!!acting}>
-            {acting === "submit" ? <Loader2 className="size-4 mr-1 animate-spin" /> : <UploadCloud className="size-4 mr-1" />}
+            {acting === "submit" ? (
+              <Loader2 className="size-4 mr-1 animate-spin" />
+            ) : (
+              <UploadCloud className="size-4 mr-1" />
+            )}
             Submit sitemap
           </Button>
         </div>
@@ -161,9 +212,14 @@ function SeoPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   {data.verified ? (
-                    <><CheckCircle2 className="size-4 text-primary" /> Verified — {data.site}</>
+                    <>
+                      <CheckCircle2 className="size-4 text-primary" /> Verified — {data.site}
+                    </>
                   ) : (
-                    <><AlertCircle className="size-4 text-destructive" /> Not yet verified — {data.site}</>
+                    <>
+                      <AlertCircle className="size-4 text-destructive" /> Not yet verified —{" "}
+                      {data.site}
+                    </>
                   )}
                 </CardTitle>
                 <CardDescription>
@@ -173,18 +229,28 @@ function SeoPage() {
               <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <Metric label="Clicks" value={totalsRow?.clicks ?? 0} />
                 <Metric label="Impressions" value={totalsRow?.impressions ?? 0} />
-                <Metric label="CTR" value={totalsRow ? `${(totalsRow.ctr * 100).toFixed(2)}%` : "—"} />
-                <Metric label="Avg position" value={totalsRow ? totalsRow.position.toFixed(1) : "—"} />
+                <Metric
+                  label="CTR"
+                  value={totalsRow ? `${(totalsRow.ctr * 100).toFixed(2)}%` : "—"}
+                />
+                <Metric
+                  label="Avg position"
+                  value={totalsRow ? totalsRow.position.toFixed(1) : "—"}
+                />
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base"><h2>Sitemaps</h2></CardTitle>
+                <CardTitle className="text-base">
+                  <h2>Sitemaps</h2>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {sitemaps.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No sitemaps submitted yet. Click "Submit sitemap".</p>
+                  <p className="text-sm text-muted-foreground">
+                    No sitemaps submitted yet. Click "Submit sitemap".
+                  </p>
                 ) : (
                   <ul className="divide-y divide-border/60 text-sm">
                     {sitemaps.map((s) => (
@@ -204,13 +270,21 @@ function SeoPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <Card>
-                <CardHeader><CardTitle className="text-base"><h2>Top queries</h2></CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="text-base">
+                    <h2>Top queries</h2>
+                  </CardTitle>
+                </CardHeader>
                 <CardContent>
                   <Table rows={topQueries} />
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader><CardTitle className="text-base"><h2>Top pages</h2></CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="text-base">
+                    <h2>Top pages</h2>
+                  </CardTitle>
+                </CardHeader>
                 <CardContent>
                   <Table rows={topPages} />
                 </CardContent>
@@ -232,7 +306,11 @@ function Metric({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-function Table({ rows }: { rows: Array<{ keys: string[]; clicks: number; impressions: number; position: number }> }) {
+function Table({
+  rows,
+}: {
+  rows: Array<{ keys: string[]; clicks: number; impressions: number; position: number }>;
+}) {
   if (!rows.length) return <p className="text-sm text-muted-foreground">No data yet.</p>;
   return (
     <ul className="divide-y divide-border/60 text-sm">
@@ -248,13 +326,7 @@ function Table({ rows }: { rows: Array<{ keys: string[]; clicks: number; impress
   );
 }
 
-function AlertsCard({
-  monitor,
-  onAck,
-}: {
-  monitor: Monitor | null;
-  onAck: (id: string) => void;
-}) {
+function AlertsCard({ monitor, onAck }: { monitor: Monitor | null; onAck: (id: string) => void }) {
   const alerts = monitor?.alerts ?? [];
   const open = alerts.filter((a) => !a.acknowledged_at);
   const last = monitor?.snapshots?.[0];

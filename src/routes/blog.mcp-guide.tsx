@@ -53,8 +53,10 @@ function MCPGuidePost() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 text-foreground">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:underline">Home</Link> / <span>Blog</span> /{" "}
-        <span>MCP guide</span>
+        <Link to="/" className="hover:underline">
+          Home
+        </Link>{" "}
+        / <span>Blog</span> / <span>MCP guide</span>
       </nav>
 
       <article className="prose prose-invert max-w-none">
@@ -63,8 +65,8 @@ function MCPGuidePost() {
         </h1>
         <p className="text-muted-foreground text-lg mb-8">
           Model Context Protocol (MCP) is the open standard that lets AI agents talk to tools,
-          files, and APIs on your machine. Paired with a sovereign MANOVIK deployment, MCP gives
-          you an extendable AI agent that never leaks context to a third party.
+          files, and APIs on your machine. Paired with a sovereign MANOVIK deployment, MCP gives you
+          an extendable AI agent that never leaks context to a third party.
         </p>
 
         <h2>What is the Model Context Protocol?</h2>
@@ -90,14 +92,15 @@ function MCPGuidePost() {
             no gatekeeper.
           </li>
           <li>
-            <strong>Composable.</strong> Mix community MCP servers (git, postgres, filesystem)
-            with internal ones you write in an afternoon.
+            <strong>Composable.</strong> Mix community MCP servers (git, postgres, filesystem) with
+            internal ones you write in an afternoon.
           </li>
         </ul>
 
         <h2>Connecting an MCP server to MANOVIK</h2>
         <p>The basic shape of a MANOVIK MCP config entry:</p>
-        <pre><code>{`{
+        <pre>
+          <code>{`{
   "mcpServers": {
     "filesystem": {
       "command": "npx",
@@ -108,20 +111,31 @@ function MCPGuidePost() {
       "args": ["-y", "@modelcontextprotocol/server-postgres", "postgres://localhost/mydb"]
     }
   }
-}`}</code></pre>
+}`}</code>
+        </pre>
         <p>
-          On startup MANOVIK spawns each server as a child process, reads its advertised tools,
-          and exposes them to the agent. Tool calls stay on your machine — the model sees only the
-          tool schema and results you allow.
+          On startup MANOVIK spawns each server as a child process, reads its advertised tools, and
+          exposes them to the agent. Tool calls stay on your machine — the model sees only the tool
+          schema and results you allow.
         </p>
 
         <h2>MCP servers worth adding on day one</h2>
         <ul>
-          <li><strong>filesystem</strong> — scoped read/write over a project directory.</li>
-          <li><strong>git</strong> — diff, blame, log, branch operations.</li>
-          <li><strong>postgres / sqlite</strong> — schema-aware query execution.</li>
-          <li><strong>fetch</strong> — HTTP with allowlists for internal APIs.</li>
-          <li><strong>puppeteer / playwright</strong> — browser automation for scraping and QA.</li>
+          <li>
+            <strong>filesystem</strong> — scoped read/write over a project directory.
+          </li>
+          <li>
+            <strong>git</strong> — diff, blame, log, branch operations.
+          </li>
+          <li>
+            <strong>postgres / sqlite</strong> — schema-aware query execution.
+          </li>
+          <li>
+            <strong>fetch</strong> — HTTP with allowlists for internal APIs.
+          </li>
+          <li>
+            <strong>puppeteer / playwright</strong> — browser automation for scraping and QA.
+          </li>
         </ul>
 
         <h2>Writing your own MCP server</h2>
@@ -144,8 +158,7 @@ function MCPGuidePost() {
         <h2>Next steps</h2>
         <p>
           Read the <Link to="/setup">setup guide</Link> to install MANOVIK, then pick your first
-          three tools from the curated{" "}
-          <Link to="/mcp-servers-list">MCP servers list</Link>.
+          three tools from the curated <Link to="/mcp-servers-list">MCP servers list</Link>.
         </p>
       </article>
     </main>

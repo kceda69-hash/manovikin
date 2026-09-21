@@ -125,7 +125,6 @@ function MemoryPage() {
         </div>
       </section>
 
-
       <section className="rounded-2xl border bg-card p-6 mb-8">
         <h2 className="font-semibold mb-4">Semantic search</h2>
         <div className="flex gap-2 mb-4">
@@ -135,7 +134,10 @@ function MemoryPage() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && query.trim() && searchMut.mutate()}
           />
-          <Button onClick={() => searchMut.mutate()} disabled={searchMut.isPending || !query.trim()}>
+          <Button
+            onClick={() => searchMut.mutate()}
+            disabled={searchMut.isPending || !query.trim()}
+          >
             Search
           </Button>
         </div>
@@ -162,7 +164,7 @@ function MemoryPage() {
           <p className="text-sm text-muted-foreground">Nothing stored yet.</p>
         )}
         <ul className="divide-y">
-          {docs.data?.docs.map((d: any) => (
+          {docs.data?.docs.map((d) => (
             <li key={d.id} className="flex items-center justify-between py-3">
               <div>
                 <div className="font-medium">{d.title}</div>

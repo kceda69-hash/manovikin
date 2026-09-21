@@ -27,12 +27,7 @@ import {
   type ProofItem,
   type ProposedAction,
 } from "@/lib/force/types";
-import {
-  startForceRun,
-  listForceRuns,
-  getForceRun,
-  deleteForceRun,
-} from "@/lib/force.functions";
+import { startForceRun, listForceRuns, getForceRun, deleteForceRun } from "@/lib/force.functions";
 import { listDevices, sendDeviceCommand } from "@/lib/devices.functions";
 
 export const Route = createFileRoute("/force")({
@@ -99,7 +94,11 @@ function ForcePage() {
   const devices = useQuery({ queryKey: ["devices"], queryFn: () => fetchDevices({}) });
 
   const start = useMutation({
-    mutationFn: (vars: { objective: string; parentRunId?: string | null; forkFromStep?: number | null }) =>
+    mutationFn: (vars: {
+      objective: string;
+      parentRunId?: string | null;
+      forkFromStep?: number | null;
+    }) =>
       launch({
         data: {
           objective: vars.objective,
@@ -300,7 +299,9 @@ function ForcePage() {
                   </Badge>
                 </div>
                 <CardTitle className="mt-2 text-lg">{run.objective}</CardTitle>
-                {run.error && <CardDescription className="text-destructive">{run.error}</CardDescription>}
+                {run.error && (
+                  <CardDescription className="text-destructive">{run.error}</CardDescription>
+                )}
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="answer">
@@ -326,7 +327,9 @@ function ForcePage() {
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-sm font-semibold text-foreground">{a.role}</h3>
                           <Badge variant="secondary">{a.score}/100</Badge>
-                          <span className="font-mono text-[10px] text-muted-foreground">{a.model}</span>
+                          <span className="font-mono text-[10px] text-muted-foreground">
+                            {a.model}
+                          </span>
                         </div>
                         <p className="mt-2 text-xs text-muted-foreground">
                           <strong className="text-foreground">Adversary:</strong> {a.critique}
@@ -351,7 +354,9 @@ function ForcePage() {
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-sm text-muted-foreground">No proof attached to this run.</p>
+                      <p className="text-sm text-muted-foreground">
+                        No proof attached to this run.
+                      </p>
                     )}
                   </TabsContent>
 

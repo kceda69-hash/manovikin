@@ -30,14 +30,28 @@ export const Route = createFileRoute("/api/public/razorpay-webhook")({
         if (!sig || !(await verifySig(secret, body, sig))) {
           return new Response("Invalid signature", { status: 401 });
         }
-        let evt: { event?: string; payload?: { payment?: { entity?: { order_id?: string; id?: string; email?: string; status?: string } } } };
-        try { evt = JSON.parse(body); } catch { return new Response("Bad JSON", { status: 400 }); }
+        let evt: {
+          event?: string;
+          payload?: {
+            payment?: {
+              entity?: { order_id?: string; id?: string; email?: string; status?: string };
+            };
+          };
+        };
+        try {
+          evt = JSON.parse(body);
+        } catch {
+          return new Response("Bad JSON", { status: 400 });
+        }
         const entity = evt.payload?.payment?.entity;
         if (!entity?.order_id) return new Response("ok");
 
         const status =
-          evt.event === "payment.captured" || entity.status === "captured" ? "paid" :
-          evt.event === "payment.failed" ? "failed" : "pending";
+          evt.event === "payment.captured" || entity.status === "captured"
+            ? "paid"
+            : evt.event === "payment.failed"
+              ? "failed"
+              : "pending";
 
         const { data: updated } = await supabaseAdmin
           .from("purchases")

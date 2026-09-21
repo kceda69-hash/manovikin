@@ -53,8 +53,10 @@ function AIPricingComparisonPost() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 text-foreground">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:underline">Home</Link> / <span>Blog</span> /{" "}
-        <span>AI pricing comparison</span>
+        <Link to="/" className="hover:underline">
+          Home
+        </Link>{" "}
+        / <span>Blog</span> / <span>AI pricing comparison</span>
       </nav>
 
       <article className="prose prose-invert max-w-none">
@@ -71,8 +73,8 @@ function AIPricingComparisonPost() {
         <p>
           A $20/month coding agent looks harmless — until you multiply. Over five years, that's
           $1,200 per seat. Add usage overages, premium model tiers, and team seats, and most
-          developers pay closer to $2,000–$4,000 per seat over the same window. If you're
-          searching for a <em>Cursor AI alternative</em> or trying to pin down the true{" "}
+          developers pay closer to $2,000–$4,000 per seat over the same window. If you're searching
+          for a <em>Cursor AI alternative</em> or trying to pin down the true{" "}
           <em>AI coding agent cost</em>, TCO is the number that matters.
         </p>
 

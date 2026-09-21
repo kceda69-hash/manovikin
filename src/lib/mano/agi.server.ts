@@ -33,14 +33,37 @@ export type AgiResult = {
   lesson: { topic: string; lesson: string } | null;
 };
 
-type SupabaseLike = {
-  from: (t: string) => any;
+/** Minimal structural stand-in for the supabase client's chained query builder. */
+type SupabaseQuery = {
+  select: (columns: string) => SupabaseQuery;
+  eq: (column: string, value: string | number | boolean) => SupabaseQuery;
+  order: (column: string, opts: { ascending: boolean }) => SupabaseQuery;
+  limit: (n: number) => Promise<{ data: unknown[] | null }>;
+  update: (values: Record<string, unknown>) => SupabaseQuery;
+  insert: (row: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
 };
+
+type SupabaseLike = {
+  from: (t: string) => SupabaseQuery;
+};
+
+/**
+ * Replace ASCII control characters (U+0000-U+001F, U+007F) with a space.
+ * Written as a code-point loop instead of /[\u0000-\u001f\u007f]/g: those
+ * escapes trip no-control-regex, and the match set here is identical.
+ */
+function stripControlChars(text: string): string {
+  let out = "";
+  for (const ch of text) {
+    const code = ch.codePointAt(0) ?? 0; // ch from for..of is never empty
+    out += code < 0x20 || code === 0x7f ? " " : ch;
+  }
+  return out;
+}
 
 /** Strip control chars and obvious injection phrasing from tool output. */
 function inert(text: string, max = 4000): string {
-  return text
-    .replace(/[\u0000-\u001f\u007f]/g, " ")
+  return stripControlChars(text)
     .replace(
       /\b(ignore (all |previous |above )?(prior |earlier )?(instructions|prompts?|rules)|disregard (the )?(system|above|previous)|you are now|system prompt)\b/gi,
       "[redacted]",
@@ -67,11 +90,19 @@ function parseAction(raw: string): { thought: string; tool: AgiTool; input: stri
     }
   }
   // Unparseable control output → treat the text as the reasoning step.
-  return { thought: "recovered from unstructured control output", tool: "reason", input: raw.slice(0, 2000) };
+  return {
+    thought: "recovered from unstructured control output",
+    tool: "reason",
+    input: raw.slice(0, 2000),
+  };
 }
 
 /** Lessons this user's past missions produced, as a compact briefing block. */
-export async function loadLessons(supabase: SupabaseLike, userId: string, limit = 8): Promise<string> {
+export async function loadLessons(
+  supabase: SupabaseLike,
+  userId: string,
+  limit = 8,
+): Promise<string> {
   try {
     const { data } = await supabase
       .from("manovik_agi_lessons")
@@ -154,7 +185,10 @@ export async function runAgiMission(args: {
   for (let i = 0; i < maxSteps; i += 1) {
     const started = Date.now();
     const transcript = steps
-      .map((s) => `#${s.idx} ${s.tool}(${s.input.slice(0, 200)})\nOBSERVATION: ${s.observation.slice(0, 1200)}`)
+      .map(
+        (s) =>
+          `#${s.idx} ${s.tool}(${s.input.slice(0, 200)})\nOBSERVATION: ${s.observation.slice(0, 1200)}`,
+      )
       .join("\n\n");
 
     const raw = await manoComplete(
@@ -226,7 +260,10 @@ export async function runAgiMission(args: {
       const obj = JSON.parse(m[0]) as { score?: number; topic?: string; lesson?: string };
       score = Math.max(0, Math.min(100, Math.round(Number(obj.score) || 0)));
       if (obj.topic && obj.lesson) {
-        lesson = { topic: String(obj.topic).slice(0, 60), lesson: String(obj.lesson).slice(0, 500) };
+        lesson = {
+          topic: String(obj.topic).slice(0, 60),
+          lesson: String(obj.lesson).slice(0, 500),
+        };
       }
     }
   } catch {

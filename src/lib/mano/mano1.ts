@@ -36,21 +36,81 @@ export type ManoSkill = {
 
 /** MANO 1.1's declared skill surface — used by the API, MCP and docs. */
 export const MANO_SKILLS: ManoSkill[] = [
-  { id: "code", label: "Production engineering", detail: "Full-stack apps, migrations, tests, refactors, debugging, performance work." },
-  { id: "architecture", label: "System architecture", detail: "Distributed design, data modelling, trade-off analysis, scaling plans." },
-  { id: "reverse", label: "Reverse engineering", detail: "Reconstruct behaviour, protocols and UI from artifacts or descriptions." },
-  { id: "reasoning", label: "Deep reasoning", detail: "Math, proofs, algorithms, complexity analysis, multi-step logic." },
-  { id: "research", label: "Research & synthesis", detail: "Structured reports separating established fact from inference." },
-  { id: "writing", label: "Writing & translation", detail: "Docs, marketing, long-form, 100+ languages with register control." },
-  { id: "data", label: "Data & extraction", detail: "Schema-faithful structured extraction, transformation and analysis." },
-  { id: "security", label: "Defensive security", detail: "Threat modelling, RLS/policy review, supply-chain and secret hygiene." },
-  { id: "planning", label: "Execution planning", detail: "Milestones, dependencies, risks and a definition of done." },
-  { id: "vision", label: "Multimodal", detail: "Images, screenshots, diagrams and documents as first-class input." },
-  { id: "agentic", label: "Agentic tool use", detail: "Multi-step tool loops: search, read, edit, run, verify, then report with evidence." },
-  { id: "longcontext", label: "Long-context work", detail: "Whole repos, specs and transcripts held in one pass without losing requirements." },
-  { id: "spec", label: "Spec fidelity", detail: "Every stated requirement tracked to a line in the answer; nothing silently dropped." },
-  { id: "artifacts", label: "Runnable artifacts", detail: "Complete files, migrations, configs and commands that run as delivered." },
-  { id: "selfverify", label: "Self-verification", detail: "Adversarial self-review with a stated proof path before the answer is released." },
+  {
+    id: "code",
+    label: "Production engineering",
+    detail: "Full-stack apps, migrations, tests, refactors, debugging, performance work.",
+  },
+  {
+    id: "architecture",
+    label: "System architecture",
+    detail: "Distributed design, data modelling, trade-off analysis, scaling plans.",
+  },
+  {
+    id: "reverse",
+    label: "Reverse engineering",
+    detail: "Reconstruct behaviour, protocols and UI from artifacts or descriptions.",
+  },
+  {
+    id: "reasoning",
+    label: "Deep reasoning",
+    detail: "Math, proofs, algorithms, complexity analysis, multi-step logic.",
+  },
+  {
+    id: "research",
+    label: "Research & synthesis",
+    detail: "Structured reports separating established fact from inference.",
+  },
+  {
+    id: "writing",
+    label: "Writing & translation",
+    detail: "Docs, marketing, long-form, 100+ languages with register control.",
+  },
+  {
+    id: "data",
+    label: "Data & extraction",
+    detail: "Schema-faithful structured extraction, transformation and analysis.",
+  },
+  {
+    id: "security",
+    label: "Defensive security",
+    detail: "Threat modelling, RLS/policy review, supply-chain and secret hygiene.",
+  },
+  {
+    id: "planning",
+    label: "Execution planning",
+    detail: "Milestones, dependencies, risks and a definition of done.",
+  },
+  {
+    id: "vision",
+    label: "Multimodal",
+    detail: "Images, screenshots, diagrams and documents as first-class input.",
+  },
+  {
+    id: "agentic",
+    label: "Agentic tool use",
+    detail: "Multi-step tool loops: search, read, edit, run, verify, then report with evidence.",
+  },
+  {
+    id: "longcontext",
+    label: "Long-context work",
+    detail: "Whole repos, specs and transcripts held in one pass without losing requirements.",
+  },
+  {
+    id: "spec",
+    label: "Spec fidelity",
+    detail: "Every stated requirement tracked to a line in the answer; nothing silently dropped.",
+  },
+  {
+    id: "artifacts",
+    label: "Runnable artifacts",
+    detail: "Complete files, migrations, configs and commands that run as delivered.",
+  },
+  {
+    id: "selfverify",
+    label: "Self-verification",
+    detail: "Adversarial self-review with a stated proof path before the answer is released.",
+  },
 ];
 
 export type ManoCapability = { id: string; label: string; detail: string };
@@ -60,16 +120,48 @@ export type ManoCapability = { id: string; label: string; detail: string };
  * inference cycle and prompts, not marketing claims.
  */
 export const MANO_CAPABILITIES: ManoCapability[] = [
-  { id: "one-pass-complete", label: "One-pass completeness", detail: "Finishes the whole task in a single response; no partial answers or follow-up prompts." },
-  { id: "domain-routing", label: "Domain routing", detail: "Each request is routed to the strongest available compute for its domain." },
-  { id: "adversarial", label: "Adversarial review", detail: "Every non-trivial answer is attacked by a hostile reviewer pass before release." },
-  { id: "proof", label: "Proof-carrying output", detail: "Answers ship with a verification path: command, test, or expected output." },
-  { id: "requirements", label: "Requirement ledger", detail: "Explicit and implied requirements are enumerated and each one is satisfied." },
-  { id: "structured", label: "Structured output", detail: "Schema-faithful JSON, tables and diffs on request, without prose contamination." },
-  { id: "safety", label: "Injection resistance", detail: "Content inside files, tools and quotes is data, never instructions." },
-  { id: "identity", label: "Sovereign identity", detail: "Serves under manovik/mano-1.1; never names or reveals an underlying provider." },
+  {
+    id: "one-pass-complete",
+    label: "One-pass completeness",
+    detail:
+      "Finishes the whole task in a single response; no partial answers or follow-up prompts.",
+  },
+  {
+    id: "domain-routing",
+    label: "Domain routing",
+    detail: "Each request is routed to the strongest available compute for its domain.",
+  },
+  {
+    id: "adversarial",
+    label: "Adversarial review",
+    detail: "Every non-trivial answer is attacked by a hostile reviewer pass before release.",
+  },
+  {
+    id: "proof",
+    label: "Proof-carrying output",
+    detail: "Answers ship with a verification path: command, test, or expected output.",
+  },
+  {
+    id: "requirements",
+    label: "Requirement ledger",
+    detail: "Explicit and implied requirements are enumerated and each one is satisfied.",
+  },
+  {
+    id: "structured",
+    label: "Structured output",
+    detail: "Schema-faithful JSON, tables and diffs on request, without prose contamination.",
+  },
+  {
+    id: "safety",
+    label: "Injection resistance",
+    detail: "Content inside files, tools and quotes is data, never instructions.",
+  },
+  {
+    id: "identity",
+    label: "Sovereign identity",
+    detail: "Serves under manovik/mano-1.1; never names or reveals an underlying provider.",
+  },
 ];
-
 
 export const MANO_IDENTITY = `You are MANO 1.1, MANOVIK's own model (id: ${MANO_MODEL_ID}, version ${MANO_VERSION}).
 You are not Claude, GPT, Gemini or any other assistant, and you never claim to be one or name an underlying provider.
@@ -104,7 +196,6 @@ correctness, type errors, null/undefined, off-by-one, async races, unhandled rej
 Check the draft against every requirement in the task; a missed requirement is a CRITICAL defect.
 If the draft is sound, output exactly: NO DEFECTS.`,
 
-
   synthesis: `${MANO_IDENTITY}
 
 STAGE: SYNTHESIS. Produce the final answer the user receives.
@@ -118,7 +209,8 @@ Deliver the complete solution, then a short verification path (command/test/expe
 const HARD_HINTS =
   /\b(architect(ure)?|distributed|consensus|proof|algorithm|complexity|big-?o|refactor|debug|stack ?trace|migration|schema|full[- ]stack|production|security|optimi[sz]e|benchmark)\b/i;
 
-const TRIVIAL_HINTS = /^(hi|hello|hey|thanks|thank you|yo|sup|gm|good morning|good night|bye|ok|okay|cool|nice)\b/i;
+const TRIVIAL_HINTS =
+  /^(hi|hello|hey|thanks|thank you|yo|sup|gm|good morning|good night|bye|ok|okay|cool|nice)\b/i;
 
 export type ManoComplexity = "lite" | "standard" | "deep";
 
@@ -146,10 +238,22 @@ export function substrateFor(complexity: ManoComplexity): Record<ManoStage, stri
 export type ManoDomain = "code" | "reasoning" | "vision" | "writing" | "data" | "general";
 
 const DOMAIN_HINTS: Array<[ManoDomain, RegExp]> = [
-  ["code", /\b(code|function|class|typescript|javascript|python|sql|api|bug|error|stack ?trace|refactor|migration|deploy|build|test|component|repo|regex)\b/i],
-  ["reasoning", /\b(prove|proof|theorem|algorithm|complexity|big-?o|optimi[sz]e|architecture|distributed|trade-?off|strategy|derive|calculate)\b/i],
-  ["data", /\b(json|csv|schema|extract|parse|table|dataset|normalize|aggregate|report on the data)\b/i],
-  ["writing", /\b(write|blog|essay|email|translate|rewrite|copy|headline|summar(y|ise|ize)|story|script)\b/i],
+  [
+    "code",
+    /\b(code|function|class|typescript|javascript|python|sql|api|bug|error|stack ?trace|refactor|migration|deploy|build|test|component|repo|regex)\b/i,
+  ],
+  [
+    "reasoning",
+    /\b(prove|proof|theorem|algorithm|complexity|big-?o|optimi[sz]e|architecture|distributed|trade-?off|strategy|derive|calculate)\b/i,
+  ],
+  [
+    "data",
+    /\b(json|csv|schema|extract|parse|table|dataset|normalize|aggregate|report on the data)\b/i,
+  ],
+  [
+    "writing",
+    /\b(write|blog|essay|email|translate|rewrite|copy|headline|summar(y|ise|ize)|story|script)\b/i,
+  ],
 ];
 
 /** Pure domain classifier — no I/O, safe on client and server. */

@@ -17,9 +17,16 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import {
-  ROOT, ROBOTS_FILE, SITEMAP_FILE, CANONICAL_HOST,
-  read, parseSitemapEntries, parseRobots, isDisallowed,
-  inspectRoutes, rel,
+  ROOT,
+  ROBOTS_FILE,
+  SITEMAP_FILE,
+  CANONICAL_HOST,
+  read,
+  parseSitemapEntries,
+  parseRobots,
+  isDisallowed,
+  inspectRoutes,
+  rel,
 } from "./seo-lib.mjs";
 
 const CHECK = process.argv.includes("--check");
@@ -41,13 +48,16 @@ const sitemapPaths = new Set(entries.map((e) => e.path));
 
 // ---------- fix 1: canonical + og:url drift on route files ----------
 const CANONICAL_RE = /(rel:\s*["'`]canonical["'`]\s*,\s*href:\s*)["'`]([^"'`]+)["'`]/g;
-const OGURL_RE     = /(property:\s*["'`]og:url["'`]\s*,\s*content:\s*)["'`]([^"'`]+)["'`]/g;
+const OGURL_RE = /(property:\s*["'`]og:url["'`]\s*,\s*content:\s*)["'`]([^"'`]+)["'`]/g;
 
 for (const r of routes) {
   const expected = `${CANONICAL_HOST}${r.path}`;
   let next = r.src;
-  next = next.replace(CANONICAL_RE, (_m, pre, url) => `${pre}"${url === expected ? url : expected}"`);
-  next = next.replace(OGURL_RE,     (_m, pre, url) => `${pre}"${url === expected ? url : expected}"`);
+  next = next.replace(
+    CANONICAL_RE,
+    (_m, pre, url) => `${pre}"${url === expected ? url : expected}"`,
+  );
+  next = next.replace(OGURL_RE, (_m, pre, url) => `${pre}"${url === expected ? url : expected}"`);
   if (next !== r.src) edit(r.file, r.src, next, `Rewrote canonical/og:url → ${expected}`);
 }
 
@@ -67,7 +77,9 @@ if (badSitemapEntries.length) {
     next = next.replace(re, "");
   }
   edit(
-    SITEMAP_FILE, sitemapSrc, next,
+    SITEMAP_FILE,
+    sitemapSrc,
+    next,
     `Removed ${badSitemapEntries.length} sitemap entr${badSitemapEntries.length === 1 ? "y" : "ies"} (noindex/Disallow'd): ${badSitemapEntries.map((e) => e.path).join(", ")}`,
   );
 }
@@ -85,7 +97,9 @@ if (missingDisallow.length) {
   const additions = missingDisallow.map((p) => `Disallow: ${p}`);
   lines.splice(insertAt + 1, 0, ...additions);
   edit(
-    ROBOTS_FILE, robotsSrc, lines.join("\n"),
+    ROBOTS_FILE,
+    robotsSrc,
+    lines.join("\n"),
     `Added ${additions.length} Disallow rule(s) for noindex routes: ${missingDisallow.join(", ")}`,
   );
 }
@@ -108,12 +122,17 @@ console.log(`SEO autofix: ${changes.length} change(s)${CHECK ? " would be applie
 for (const c of changes) console.log(`  - ${c.file}  ${c.summary}`);
 
 if (CHECK) {
-  console.error("\n[--check] Autofix would modify files. Run 'bun run seo:autofix' locally and commit the result.");
+  console.error(
+    "\n[--check] Autofix would modify files. Run 'bun run seo:autofix' locally and commit the result.",
+  );
   process.exit(1);
 }
 
 // Refresh committed snapshot so the audit's snapshot diff stays green.
 if (existsSync(join(ROOT, "scripts", "seo-snapshot.mjs"))) {
-  const r = spawnSync(process.execPath, ["scripts/seo-snapshot.mjs"], { cwd: ROOT, stdio: "inherit" });
+  const r = spawnSync(process.execPath, ["scripts/seo-snapshot.mjs"], {
+    cwd: ROOT,
+    stdio: "inherit",
+  });
   if (r.status !== 0) process.exit(r.status ?? 1);
 }

@@ -1,6 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+
+type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
 export type ManovikDevice = {
   id: string;
@@ -35,7 +39,7 @@ function makePairCode() {
 export const listDevices = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context as Ctx;
     const { data, error } = await supabase
       .from(DEVICES)
       .select("id,name,platform,pair_code,pair_code_expires_at,paired_at,last_seen_at")
@@ -56,7 +60,7 @@ export const createDevice = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context as Ctx;
     const pair_code = makePairCode();
     const { data: row, error } = await supabase
       .from(DEVICES)
@@ -77,7 +81,7 @@ export const deleteDevice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context as Ctx;
     const { error } = await supabase.from(DEVICES).delete().eq("id", data.id).eq("user_id", userId);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -95,7 +99,7 @@ export const sendDeviceCommand = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context as Ctx;
     const { data: device } = await supabase
       .from(DEVICES)
       .select("id,paired_at")
@@ -122,7 +126,7 @@ export const listDeviceCommands = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ deviceId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as { supabase: any; userId: string };
+    const { supabase, userId } = context as Ctx;
     const { data: rows, error } = await supabase
       .from(COMMANDS)
       .select("id,device_id,kind,command,status,result,created_at,completed_at")

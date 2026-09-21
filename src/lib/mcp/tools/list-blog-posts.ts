@@ -27,7 +27,8 @@ const POSTS = [
     slug: "ai-pricing-comparison",
     title: "AI Pricing Comparison",
     url: "https://manovik.in/blog/ai-pricing-comparison",
-    summary: "Side-by-side pricing of major AI coding assistants including MANOVIK's lifetime plan.",
+    summary:
+      "Side-by-side pricing of major AI coding assistants including MANOVIK's lifetime plan.",
   },
   {
     slug: "will-ai-replace-software-engineers",

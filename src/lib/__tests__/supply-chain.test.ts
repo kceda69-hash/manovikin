@@ -4,7 +4,7 @@ import { scanSupplyChain, type ScanInput } from "@/lib/supply-chain/analyzer";
 const base: ScanInput = {
   manifest: { dependencies: { react: "^19.2.0" }, devDependencies: { vitest: "^4.1.7" } },
   lockfileName: "bun.lock",
-  lockfileText: 'https://registry.npmjs.org/react/-/react-19.2.0.tgz',
+  lockfileText: "https://registry.npmjs.org/react/-/react-19.2.0.tgz",
   envNames: ["LOVABLE_API_KEY", "VITE_SUPABASE_PUBLISHABLE_KEY"],
   aiHosts: ["ai.gateway.lovable.dev"],
   models: [{ surface: "chat:standard", model: "google/gemini-3.7-flash" }],
@@ -31,19 +31,28 @@ describe("supply-chain scanner", () => {
   });
 
   it("flags known-compromised packages as critical", () => {
-    const report = scanSupplyChain({ ...base, manifest: { dependencies: { "event-stream": "^3.3.6" } } });
+    const report = scanSupplyChain({
+      ...base,
+      manifest: { dependencies: { "event-stream": "^3.3.6" } },
+    });
     expect(report.findings[0]?.id).toBe("dep.compromised.event-stream");
     expect(report.findings[0]?.severity).toBe("critical");
   });
 
   it("detects typosquats one edit away from popular packages", () => {
-    expect(ids({ ...base, manifest: { dependencies: { raect: "^1.0.0" } } })).toContain("dep.typosquat.raect");
-    expect(ids({ ...base, manifest: { dependencies: { react: "^19.2.0" } } })).not.toContain("dep.typosquat.react");
+    expect(ids({ ...base, manifest: { dependencies: { raect: "^1.0.0" } } })).toContain(
+      "dep.typosquat.raect",
+    );
+    expect(ids({ ...base, manifest: { dependencies: { react: "^19.2.0" } } })).not.toContain(
+      "dep.typosquat.react",
+    );
   });
 
   it("flags a missing lockfile and untrusted registries", () => {
     expect(ids({ ...base, lockfileName: null, lockfileText: null })).toContain("lock.missing");
-    expect(ids({ ...base, lockfileText: "https://npm.shady.example/x.tgz" })).toContain("lock.untrusted-registry");
+    expect(ids({ ...base, lockfileText: "https://npm.shady.example/x.tgz" })).toContain(
+      "lock.untrusted-registry",
+    );
   });
 
   it("flags unreviewed inference hosts but allows local sovereign endpoints", () => {
@@ -54,7 +63,10 @@ describe("supply-chain scanner", () => {
   });
 
   it("flags direct provider keys and browser-exposed secrets", () => {
-    const found = ids({ ...base, envNames: [...base.envNames, "OPENAI_API_KEY", "VITE_RAZORPAY_SECRET"] });
+    const found = ids({
+      ...base,
+      envNames: [...base.envNames, "OPENAI_API_KEY", "VITE_RAZORPAY_SECRET"],
+    });
     expect(found).toContain("ai.direct-provider-keys");
     expect(found).toContain("ai.client-exposed.VITE_RAZORPAY_SECRET");
   });
@@ -74,7 +86,10 @@ describe("supply-chain scanner", () => {
   });
 
   it("lowers the score as severity accumulates", () => {
-    const report = scanSupplyChain({ ...base, manifest: { dependencies: { "event-stream": "*" } } });
+    const report = scanSupplyChain({
+      ...base,
+      manifest: { dependencies: { "event-stream": "*" } },
+    });
     expect(report.score).toBeLessThan(60);
     expect(report.counts.critical).toBe(1);
   });

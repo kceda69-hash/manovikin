@@ -492,7 +492,11 @@ function Landing() {
           <br />
           that builds{" "}
           <span className="relative inline-block align-baseline">
-            <span key={wordIdx} className="inline-block text-gradient animate-word-swap" aria-hidden="true">
+            <span
+              key={wordIdx}
+              className="inline-block text-gradient animate-word-swap"
+              aria-hidden="true"
+            >
               {ROTATING_WORDS[wordIdx]}
             </span>
             <span className="sr-only">websites, apps, APIs and automations</span>
@@ -722,7 +726,6 @@ function Landing() {
             </a>
           </div>
         </section>
-
 
         {/* How it works */}
         <h2 className="mt-24 text-3xl md:text-4xl font-bold text-center">How it works</h2>
@@ -1335,9 +1338,7 @@ function PromptComposer() {
         <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card/40 px-3 py-1 text-xs font-medium text-primary backdrop-blur">
           <Sparkles className="h-3.5 w-3.5" /> Start with a prompt
         </div>
-        <h2 className="mt-4 text-3xl md:text-4xl font-bold">
-          Start building with MANOVIK.
-        </h2>
+        <h2 className="mt-4 text-3xl md:text-4xl font-bold">Start building with MANOVIK.</h2>
         <p className="mt-2 text-muted-foreground max-w-2xl mx-auto">
           Type an idea, pick a target and a model. We stream a live build plan — sign in to run it.
         </p>

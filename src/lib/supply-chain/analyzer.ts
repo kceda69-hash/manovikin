@@ -168,8 +168,10 @@ export function analyzeLockfile(input: ScanInput): Finding[] {
       category: "provenance",
       severity: "high",
       title: "No lockfile found",
-      detail: "Without a lockfile, every build resolves transitive dependencies afresh, so builds are not reproducible and a compromised transitive release can enter silently.",
-      remediation: "Commit bun.lock (or package-lock.json) and install with a frozen lockfile in CI.",
+      detail:
+        "Without a lockfile, every build resolves transitive dependencies afresh, so builds are not reproducible and a compromised transitive release can enter silently.",
+      remediation:
+        "Commit bun.lock (or package-lock.json) and install with a frozen lockfile in CI.",
     });
     return findings;
   }
@@ -180,7 +182,8 @@ export function analyzeLockfile(input: ScanInput): Finding[] {
       category: "provenance",
       severity: "medium",
       title: "Binary lockfile cannot be audited",
-      detail: "bun.lockb is binary, so dependency scanners and code review cannot read resolved versions or registry hosts.",
+      detail:
+        "bun.lockb is binary, so dependency scanners and code review cannot read resolved versions or registry hosts.",
       remediation: "Run `bun install --save-text-lockfile` to convert it to a reviewable bun.lock.",
     });
   }
@@ -198,7 +201,8 @@ export function analyzeLockfile(input: ScanInput): Finding[] {
       severity: "medium",
       title: "Packages resolved from non-default registries",
       detail: `The lockfile resolves tarballs from hosts outside the public npm registry: ${untrusted.slice(0, 8).join(", ")}.`,
-      remediation: "Confirm each host is an intentional private/workspace registry and that its credentials are workspace build secrets.",
+      remediation:
+        "Confirm each host is an intentional private/workspace registry and that its credentials are workspace build secrets.",
       evidence: untrusted.slice(0, 8).join(", "),
     });
   }
@@ -212,7 +216,11 @@ export function analyzeAiServices(input: ScanInput): Finding[] {
   const findings: Finding[] = [];
 
   for (const host of input.aiHosts) {
-    const clean = host.replace(/^https?:\/\//, "").split("/")[0]?.toLowerCase() ?? "";
+    const clean =
+      host
+        .replace(/^https?:\/\//, "")
+        .split("/")[0]
+        ?.toLowerCase() ?? "";
     if (!clean) continue;
     const isLocal = /^(localhost|127\.0\.0\.1|\[::1\]|[a-z0-9-]+:\d+)$/i.test(clean);
     if (TRUSTED_AI_HOSTS.includes(clean) || isLocal) continue;
@@ -221,8 +229,10 @@ export function analyzeAiServices(input: ScanInput): Finding[] {
       category: "ai-service",
       severity: "high",
       title: `Inference traffic to unreviewed host: ${clean}`,
-      detail: "Prompts, user content, and generated code are sent to a third-party AI endpoint that is not on the approved list.",
-      remediation: "Route the call through the Lovable AI Gateway, or add the host to the approved list after a data-processing review.",
+      detail:
+        "Prompts, user content, and generated code are sent to a third-party AI endpoint that is not on the approved list.",
+      remediation:
+        "Route the call through the Lovable AI Gateway, or add the host to the approved list after a data-processing review.",
       evidence: clean,
     });
   }
@@ -236,13 +246,17 @@ export function analyzeAiServices(input: ScanInput): Finding[] {
       severity: "medium",
       title: "Direct AI provider credentials configured",
       detail: `${direct.join(", ")} are set, so some code path can reach a provider directly, outside gateway logging, quotas, and model allowlisting.`,
-      remediation: "Remove the keys if unused, or document the sovereign/self-hosted path that requires them.",
+      remediation:
+        "Remove the keys if unused, or document the sovereign/self-hosted path that requires them.",
       evidence: direct.join(", "),
     });
   }
 
   const leaked = [...names].filter(
-    (n) => n.startsWith("VITE_") && /(SECRET|SERVICE_ROLE|PRIVATE|_TOKEN|API_KEY)$/i.test(n) && !/PUBLISHABLE/i.test(n),
+    (n) =>
+      n.startsWith("VITE_") &&
+      /(SECRET|SERVICE_ROLE|PRIVATE|_TOKEN|API_KEY)$/i.test(n) &&
+      !/PUBLISHABLE/i.test(n),
   );
   for (const n of leaked) {
     findings.push({
@@ -250,7 +264,8 @@ export function analyzeAiServices(input: ScanInput): Finding[] {
       category: "ai-service",
       severity: "critical",
       title: `Secret-shaped variable exposed to the browser: ${n}`,
-      detail: "Any VITE_-prefixed variable is inlined into the client bundle and is readable by every visitor.",
+      detail:
+        "Any VITE_-prefixed variable is inlined into the client bundle and is readable by every visitor.",
       remediation: `Rename ${n} without the VITE_ prefix and read it only inside server functions.`,
       evidence: n,
     });
@@ -262,7 +277,8 @@ export function analyzeAiServices(input: ScanInput): Finding[] {
       category: "ai-service",
       severity: "medium",
       title: "No AI gateway credential configured",
-      detail: "Neither LOVABLE_API_KEY nor a sovereign MANOVIK_AI_BASE_URL is present, so model calls will fail at runtime.",
+      detail:
+        "Neither LOVABLE_API_KEY nor a sovereign MANOVIK_AI_BASE_URL is present, so model calls will fail at runtime.",
       remediation: "Provision LOVABLE_API_KEY, or configure the self-hosted endpoint.",
     });
   }
@@ -283,7 +299,8 @@ export function analyzeModelConfig(input: ScanInput): Finding[] {
         severity: "high",
         title: `Unverified model id: ${usage.model}`,
         detail: `${usage.surface} calls a model id that is not in the approved catalog. The gateway rejects unknown ids with a 400, so this path fails in production.`,
-        remediation: "Replace it with a catalog id, or add the model to the approved list once its provenance is reviewed.",
+        remediation:
+          "Replace it with a catalog id, or add the model to the approved list once its provenance is reviewed.",
         evidence: `${usage.surface} → ${usage.model}`,
       });
       continue;
@@ -308,7 +325,8 @@ export function analyzeModelConfig(input: ScanInput): Finding[] {
         severity: "high",
         title: `Missing reasoning_effort: "none" on ${usage.model}`,
         detail: `${usage.surface} calls a GPT-5.6 model without reasoning_effort: "none". Requests carrying tools are rejected with a 400.`,
-        remediation: 'Set reasoning_effort (or providerOptions.lovable.reasoningEffort) to "none" for this call.',
+        remediation:
+          'Set reasoning_effort (or providerOptions.lovable.reasoningEffort) to "none" for this call.',
         evidence: `${usage.surface} → ${usage.model}`,
       });
     }
@@ -335,7 +353,9 @@ export function scanSupplyChain(input: ScanInput): ScanReport {
   }
 
   const order: Severity[] = ["critical", "high", "medium", "low", "info"];
-  findings.sort((a, b) => order.indexOf(a.severity) - order.indexOf(b.severity) || a.id.localeCompare(b.id));
+  findings.sort(
+    (a, b) => order.indexOf(a.severity) - order.indexOf(b.severity) || a.id.localeCompare(b.id),
+  );
 
   return {
     generatedAt: new Date().toISOString(),

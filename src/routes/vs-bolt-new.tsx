@@ -25,7 +25,10 @@ export const Route = createFileRoute("/vs-bolt-new")({
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "MANOVIK AI vs Bolt.new" },
-      { name: "twitter:description", content: "The sovereign, lifetime-priced Bolt.new alternative." },
+      {
+        name: "twitter:description",
+        content: "The sovereign, lifetime-priced Bolt.new alternative.",
+      },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/vs-bolt-new" }],
     scripts: [
@@ -76,25 +79,54 @@ export const Route = createFileRoute("/vs-bolt-new")({
 
 function VsBoltNewPage() {
   const rows: Array<{ feature: string; manovik: string; bolt: string }> = [
-    { feature: "Delivery model", manovik: "Managed hosted product + sovereign option", bolt: "Browser-only WebContainer" },
-    { feature: "Pricing model", manovik: "Lifetime — one-time payment + included credits", bolt: "Monthly subscription tied to token usage" },
-    { feature: "Cost predictability", manovik: "Flat lifetime; overage priced up front", bolt: "Variable — scales with prompts + tokens" },
-    { feature: "Sovereign / on-prem hosting", manovik: "Managed sovereign mode", bolt: "Not available — SaaS only" },
-    { feature: "Stack coverage", manovik: "Node, Python, Go, mobile, edge, more", bolt: "JS/TS only (WebContainer sandbox)" },
+    {
+      feature: "Delivery model",
+      manovik: "Managed hosted product + sovereign option",
+      bolt: "Browser-only WebContainer",
+    },
+    {
+      feature: "Pricing model",
+      manovik: "Lifetime — one-time payment + included credits",
+      bolt: "Monthly subscription tied to token usage",
+    },
+    {
+      feature: "Cost predictability",
+      manovik: "Flat lifetime; overage priced up front",
+      bolt: "Variable — scales with prompts + tokens",
+    },
+    {
+      feature: "Sovereign / on-prem hosting",
+      manovik: "Managed sovereign mode",
+      bolt: "Not available — SaaS only",
+    },
+    {
+      feature: "Stack coverage",
+      manovik: "Node, Python, Go, mobile, edge, more",
+      bolt: "JS/TS only (WebContainer sandbox)",
+    },
     { feature: "Ship targets", manovik: "Play Store, App Store, Web", bolt: "Web (Netlify) only" },
-    { feature: "Local model support", manovik: "Yes (Ollama / vLLM / OpenAI-compatible)", bolt: "No — managed provider only" },
-    { feature: "Data residency", manovik: "Configurable — India / EU / on-prem", bolt: "Vendor-controlled" },
+    {
+      feature: "Local model support",
+      manovik: "Yes (Ollama / vLLM / OpenAI-compatible)",
+      bolt: "No — managed provider only",
+    },
+    {
+      feature: "Data residency",
+      manovik: "Configurable — India / EU / on-prem",
+      bolt: "Vendor-controlled",
+    },
   ];
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-16 text-foreground">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:underline">Home</Link> / <span>vs Bolt.new</span>
+        <Link to="/" className="hover:underline">
+          Home
+        </Link>{" "}
+        / <span>vs Bolt.new</span>
       </nav>
 
-      <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-        MANOVIK AI vs Bolt.new
-      </h1>
+      <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">MANOVIK AI vs Bolt.new</h1>
       <p className="text-lg text-muted-foreground mb-10">
         Looking for a <strong>Bolt.new alternative</strong> that ships beyond the browser sandbox,
         supports sovereign hosting, and charges once instead of monthly? Here's the honest
@@ -178,15 +210,15 @@ function VsBoltNewPage() {
           <div>
             <h3 className="font-semibold">Is MANOVIK AI a good Bolt.new alternative?</h3>
             <p className="text-muted-foreground">
-              Yes — especially if you need mobile output, sovereign hosting, or predictable
-              lifetime pricing instead of a monthly SaaS bill.
+              Yes — especially if you need mobile output, sovereign hosting, or predictable lifetime
+              pricing instead of a monthly SaaS bill.
             </p>
           </div>
           <div>
             <h3 className="font-semibold">Can MANOVIK AI ship mobile apps?</h3>
             <p className="text-muted-foreground">
-              Yes. The Ship-to-Stores flow packages Play Store, App Store, and Web deliverables
-              from a single prompt.
+              Yes. The Ship-to-Stores flow packages Play Store, App Store, and Web deliverables from
+              a single prompt.
             </p>
           </div>
           <div>

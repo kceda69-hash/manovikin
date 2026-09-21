@@ -35,7 +35,10 @@ export const Route = createFileRoute("/api/public/hooks/run-schedules")({
           const { runDueSchedules } = await import("@/lib/schedules/runner.server");
           return Response.json({ ok: true, ...(await runDueSchedules()) });
         } catch (err) {
-          return Response.json({ ok: false, error: String((err as Error)?.message ?? err) }, { status: 500 });
+          return Response.json(
+            { ok: false, error: String((err as Error)?.message ?? err) },
+            { status: 500 },
+          );
         }
       },
     },

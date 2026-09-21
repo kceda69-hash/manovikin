@@ -35,7 +35,9 @@ export async function executeSchedule(row: ScheduleRow) {
     .single();
 
   try {
-    const mode = (["build", "research", "operate", "clone"].includes(row.mode) ? row.mode : "research") as ForceMode;
+    const mode = (
+      ["build", "research", "operate", "clone"].includes(row.mode) ? row.mode : "research"
+    ) as ForceMode;
     const outcome = await runForce(row.objective, mode, 3, async () => {});
     await supabaseAdmin
       .from("manovik_schedule_runs")

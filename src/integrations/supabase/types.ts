@@ -1,1612 +1,1604 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
+    PostgrestVersion: "14.5";
+  };
   public: {
     Tables: {
       ai_balance: {
         Row: {
-          created_at: string
-          credits: number
-          updated_at: string
-          user_id: string
-        }
+          created_at: string;
+          credits: number;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          credits?: number
-          updated_at?: string
-          user_id: string
-        }
+          created_at?: string;
+          credits?: number;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          credits?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          credits?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       ai_balance_ledger: {
         Row: {
-          created_at: string
-          delta: number
-          id: string
-          metadata: Json
-          reason: string
-          user_id: string
-        }
+          created_at: string;
+          delta: number;
+          id: string;
+          metadata: Json;
+          reason: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          delta: number
-          id?: string
-          metadata?: Json
-          reason: string
-          user_id: string
-        }
+          created_at?: string;
+          delta: number;
+          id?: string;
+          metadata?: Json;
+          reason: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          delta?: number
-          id?: string
-          metadata?: Json
-          reason?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          delta?: number;
+          id?: string;
+          metadata?: Json;
+          reason?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       audit_logs: {
         Row: {
-          created_at: string
-          event_type: string
-          id: string
-          ip: string | null
-          metadata: Json
-          summary: string | null
-          thread_id: string | null
-          user_agent: string | null
-          user_id: string
-        }
+          created_at: string;
+          event_type: string;
+          id: string;
+          ip: string | null;
+          metadata: Json;
+          summary: string | null;
+          thread_id: string | null;
+          user_agent: string | null;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          event_type: string
-          id?: string
-          ip?: string | null
-          metadata?: Json
-          summary?: string | null
-          thread_id?: string | null
-          user_agent?: string | null
-          user_id: string
-        }
+          created_at?: string;
+          event_type: string;
+          id?: string;
+          ip?: string | null;
+          metadata?: Json;
+          summary?: string | null;
+          thread_id?: string | null;
+          user_agent?: string | null;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          event_type?: string
-          id?: string
-          ip?: string | null
-          metadata?: Json
-          summary?: string | null
-          thread_id?: string | null
-          user_agent?: string | null
-          user_id?: string
-        }
+          created_at?: string;
+          event_type?: string;
+          id?: string;
+          ip?: string | null;
+          metadata?: Json;
+          summary?: string | null;
+          thread_id?: string | null;
+          user_agent?: string | null;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "audit_logs_thread_id_fkey"
-            columns: ["thread_id"]
-            isOneToOne: false
-            referencedRelation: "threads"
-            referencedColumns: ["id"]
+            foreignKeyName: "audit_logs_thread_id_fkey";
+            columns: ["thread_id"];
+            isOneToOne: false;
+            referencedRelation: "threads";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       email_send_log: {
         Row: {
-          created_at: string
-          error_message: string | null
-          id: string
-          message_id: string | null
-          metadata: Json | null
-          recipient_email: string
-          status: string
-          template_name: string
-        }
+          created_at: string;
+          error_message: string | null;
+          id: string;
+          message_id: string | null;
+          metadata: Json | null;
+          recipient_email: string;
+          status: string;
+          template_name: string;
+        };
         Insert: {
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          message_id?: string | null
-          metadata?: Json | null
-          recipient_email: string
-          status: string
-          template_name: string
-        }
+          created_at?: string;
+          error_message?: string | null;
+          id?: string;
+          message_id?: string | null;
+          metadata?: Json | null;
+          recipient_email: string;
+          status: string;
+          template_name: string;
+        };
         Update: {
-          created_at?: string
-          error_message?: string | null
-          id?: string
-          message_id?: string | null
-          metadata?: Json | null
-          recipient_email?: string
-          status?: string
-          template_name?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          error_message?: string | null;
+          id?: string;
+          message_id?: string | null;
+          metadata?: Json | null;
+          recipient_email?: string;
+          status?: string;
+          template_name?: string;
+        };
+        Relationships: [];
+      };
       email_send_state: {
         Row: {
-          auth_email_ttl_minutes: number
-          batch_size: number
-          id: number
-          retry_after_until: string | null
-          send_delay_ms: number
-          transactional_email_ttl_minutes: number
-          updated_at: string
-        }
+          auth_email_ttl_minutes: number;
+          batch_size: number;
+          id: number;
+          retry_after_until: string | null;
+          send_delay_ms: number;
+          transactional_email_ttl_minutes: number;
+          updated_at: string;
+        };
         Insert: {
-          auth_email_ttl_minutes?: number
-          batch_size?: number
-          id?: number
-          retry_after_until?: string | null
-          send_delay_ms?: number
-          transactional_email_ttl_minutes?: number
-          updated_at?: string
-        }
+          auth_email_ttl_minutes?: number;
+          batch_size?: number;
+          id?: number;
+          retry_after_until?: string | null;
+          send_delay_ms?: number;
+          transactional_email_ttl_minutes?: number;
+          updated_at?: string;
+        };
         Update: {
-          auth_email_ttl_minutes?: number
-          batch_size?: number
-          id?: number
-          retry_after_until?: string | null
-          send_delay_ms?: number
-          transactional_email_ttl_minutes?: number
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          auth_email_ttl_minutes?: number;
+          batch_size?: number;
+          id?: number;
+          retry_after_until?: string | null;
+          send_delay_ms?: number;
+          transactional_email_ttl_minutes?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       email_unsubscribe_tokens: {
         Row: {
-          created_at: string
-          email: string
-          id: string
-          token: string
-          used_at: string | null
-        }
+          created_at: string;
+          email: string;
+          id: string;
+          token: string;
+          used_at: string | null;
+        };
         Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          token: string
-          used_at?: string | null
-        }
+          created_at?: string;
+          email: string;
+          id?: string;
+          token: string;
+          used_at?: string | null;
+        };
         Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          token?: string
-          used_at?: string | null
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          email?: string;
+          id?: string;
+          token?: string;
+          used_at?: string | null;
+        };
+        Relationships: [];
+      };
       language_memory: {
         Row: {
-          created_at: string
-          id: string
-          language_code: string
-          notes: string | null
-          terminology: Json
-          updated_at: string
-          user_id: string
-        }
+          created_at: string;
+          id: string;
+          language_code: string;
+          notes: string | null;
+          terminology: Json;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          language_code: string
-          notes?: string | null
-          terminology?: Json
-          updated_at?: string
-          user_id: string
-        }
+          created_at?: string;
+          id?: string;
+          language_code: string;
+          notes?: string | null;
+          terminology?: Json;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          language_code?: string
-          notes?: string | null
-          terminology?: Json
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          language_code?: string;
+          notes?: string | null;
+          terminology?: Json;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       magic_link_requests: {
         Row: {
-          created_at: string
-          email: string
-          id: number
-          ip: string
-        }
+          created_at: string;
+          email: string;
+          id: number;
+          ip: string;
+        };
         Insert: {
-          created_at?: string
-          email: string
-          id?: number
-          ip: string
-        }
+          created_at?: string;
+          email: string;
+          id?: number;
+          ip: string;
+        };
         Update: {
-          created_at?: string
-          email?: string
-          id?: number
-          ip?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          email?: string;
+          id?: number;
+          ip?: string;
+        };
+        Relationships: [];
+      };
       manovik_api_keys: {
         Row: {
-          created_at: string
-          expires_at: string | null
-          id: string
-          key_hash: string
-          key_prefix: string
-          label: string
-          last_used_at: string | null
-          revoked_at: string | null
-          scopes: string[]
-          use_count: number
-          user_id: string
-        }
+          created_at: string;
+          expires_at: string | null;
+          id: string;
+          key_hash: string;
+          key_prefix: string;
+          label: string;
+          last_used_at: string | null;
+          revoked_at: string | null;
+          scopes: string[];
+          use_count: number;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          key_hash: string
-          key_prefix: string
-          label: string
-          last_used_at?: string | null
-          revoked_at?: string | null
-          scopes?: string[]
-          use_count?: number
-          user_id: string
-        }
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          key_hash: string;
+          key_prefix: string;
+          label: string;
+          last_used_at?: string | null;
+          revoked_at?: string | null;
+          scopes?: string[];
+          use_count?: number;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          expires_at?: string | null
-          id?: string
-          key_hash?: string
-          key_prefix?: string
-          label?: string
-          last_used_at?: string | null
-          revoked_at?: string | null
-          scopes?: string[]
-          use_count?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          expires_at?: string | null;
+          id?: string;
+          key_hash?: string;
+          key_prefix?: string;
+          label?: string;
+          last_used_at?: string | null;
+          revoked_at?: string | null;
+          scopes?: string[];
+          use_count?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       manovik_brain_updates: {
         Row: {
-          created_at: string
-          id: string
-          metadata: Json
-          notes: string | null
-          version: string
-        }
+          created_at: string;
+          id: string;
+          metadata: Json;
+          notes: string | null;
+          version: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          metadata?: Json
-          notes?: string | null
-          version: string
-        }
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          notes?: string | null;
+          version: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          metadata?: Json
-          notes?: string | null
-          version?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          notes?: string | null;
+          version?: string;
+        };
+        Relationships: [];
+      };
       manovik_builds: {
         Row: {
-          command: string
-          created_at: string
-          duration_ms: number | null
-          exit_code: number | null
-          finished_at: string | null
-          id: string
-          logs: string
-          metadata: Json
-          project_id: string
-          status: Database["public"]["Enums"]["build_status"]
-          user_id: string
-        }
+          command: string;
+          created_at: string;
+          duration_ms: number | null;
+          exit_code: number | null;
+          finished_at: string | null;
+          id: string;
+          logs: string;
+          metadata: Json;
+          project_id: string;
+          status: Database["public"]["Enums"]["build_status"];
+          user_id: string;
+        };
         Insert: {
-          command?: string
-          created_at?: string
-          duration_ms?: number | null
-          exit_code?: number | null
-          finished_at?: string | null
-          id?: string
-          logs?: string
-          metadata?: Json
-          project_id: string
-          status?: Database["public"]["Enums"]["build_status"]
-          user_id: string
-        }
+          command?: string;
+          created_at?: string;
+          duration_ms?: number | null;
+          exit_code?: number | null;
+          finished_at?: string | null;
+          id?: string;
+          logs?: string;
+          metadata?: Json;
+          project_id: string;
+          status?: Database["public"]["Enums"]["build_status"];
+          user_id: string;
+        };
         Update: {
-          command?: string
-          created_at?: string
-          duration_ms?: number | null
-          exit_code?: number | null
-          finished_at?: string | null
-          id?: string
-          logs?: string
-          metadata?: Json
-          project_id?: string
-          status?: Database["public"]["Enums"]["build_status"]
-          user_id?: string
-        }
+          command?: string;
+          created_at?: string;
+          duration_ms?: number | null;
+          exit_code?: number | null;
+          finished_at?: string | null;
+          id?: string;
+          logs?: string;
+          metadata?: Json;
+          project_id?: string;
+          status?: Database["public"]["Enums"]["build_status"];
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_builds_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_projects"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_builds_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_projects";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_device_commands: {
         Row: {
-          command: string
-          completed_at: string | null
-          created_at: string
-          device_id: string
-          id: string
-          kind: string
-          result: string | null
-          status: string
-          user_id: string
-        }
+          command: string;
+          completed_at: string | null;
+          created_at: string;
+          device_id: string;
+          id: string;
+          kind: string;
+          result: string | null;
+          status: string;
+          user_id: string;
+        };
         Insert: {
-          command: string
-          completed_at?: string | null
-          created_at?: string
-          device_id: string
-          id?: string
-          kind?: string
-          result?: string | null
-          status?: string
-          user_id: string
-        }
+          command: string;
+          completed_at?: string | null;
+          created_at?: string;
+          device_id: string;
+          id?: string;
+          kind?: string;
+          result?: string | null;
+          status?: string;
+          user_id: string;
+        };
         Update: {
-          command?: string
-          completed_at?: string | null
-          created_at?: string
-          device_id?: string
-          id?: string
-          kind?: string
-          result?: string | null
-          status?: string
-          user_id?: string
-        }
+          command?: string;
+          completed_at?: string | null;
+          created_at?: string;
+          device_id?: string;
+          id?: string;
+          kind?: string;
+          result?: string | null;
+          status?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_device_commands_device_id_fkey"
-            columns: ["device_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_devices"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_device_commands_device_id_fkey";
+            columns: ["device_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_devices";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_devices: {
         Row: {
-          capabilities: Json
-          created_at: string
-          id: string
-          last_seen_at: string | null
-          name: string
-          pair_code: string | null
-          pair_code_expires_at: string | null
-          paired_at: string | null
-          platform: string
-          token_hash: string | null
-          user_id: string
-        }
+          capabilities: Json;
+          created_at: string;
+          id: string;
+          last_seen_at: string | null;
+          name: string;
+          pair_code: string | null;
+          pair_code_expires_at: string | null;
+          paired_at: string | null;
+          platform: string;
+          token_hash: string | null;
+          user_id: string;
+        };
         Insert: {
-          capabilities?: Json
-          created_at?: string
-          id?: string
-          last_seen_at?: string | null
-          name: string
-          pair_code?: string | null
-          pair_code_expires_at?: string | null
-          paired_at?: string | null
-          platform?: string
-          token_hash?: string | null
-          user_id: string
-        }
+          capabilities?: Json;
+          created_at?: string;
+          id?: string;
+          last_seen_at?: string | null;
+          name: string;
+          pair_code?: string | null;
+          pair_code_expires_at?: string | null;
+          paired_at?: string | null;
+          platform?: string;
+          token_hash?: string | null;
+          user_id: string;
+        };
         Update: {
-          capabilities?: Json
-          created_at?: string
-          id?: string
-          last_seen_at?: string | null
-          name?: string
-          pair_code?: string | null
-          pair_code_expires_at?: string | null
-          paired_at?: string | null
-          platform?: string
-          token_hash?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
+          capabilities?: Json;
+          created_at?: string;
+          id?: string;
+          last_seen_at?: string | null;
+          name?: string;
+          pair_code?: string | null;
+          pair_code_expires_at?: string | null;
+          paired_at?: string | null;
+          platform?: string;
+          token_hash?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       manovik_force_agents: {
         Row: {
-          created_at: string
-          critique: string | null
-          id: string
-          model: string
-          output: string
-          role: string
-          run_id: string
-          score: number | null
-          user_id: string
-        }
+          created_at: string;
+          critique: string | null;
+          id: string;
+          model: string;
+          output: string;
+          role: string;
+          run_id: string;
+          score: number | null;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          critique?: string | null
-          id?: string
-          model: string
-          output?: string
-          role: string
-          run_id: string
-          score?: number | null
-          user_id: string
-        }
+          created_at?: string;
+          critique?: string | null;
+          id?: string;
+          model: string;
+          output?: string;
+          role: string;
+          run_id: string;
+          score?: number | null;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          critique?: string | null
-          id?: string
-          model?: string
-          output?: string
-          role?: string
-          run_id?: string
-          score?: number | null
-          user_id?: string
-        }
+          created_at?: string;
+          critique?: string | null;
+          id?: string;
+          model?: string;
+          output?: string;
+          role?: string;
+          run_id?: string;
+          score?: number | null;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_force_agents_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_force_runs"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_force_agents_run_id_fkey";
+            columns: ["run_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_force_runs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_force_runs: {
         Row: {
-          actions: Json
-          answer: string | null
-          completed_at: string | null
-          created_at: string
-          error: string | null
-          fork_from_step: number | null
-          id: string
-          mode: string
-          objective: string
-          parent_run_id: string | null
-          proof: Json
-          score: number | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
+          actions: Json;
+          answer: string | null;
+          completed_at: string | null;
+          created_at: string;
+          error: string | null;
+          fork_from_step: number | null;
+          id: string;
+          mode: string;
+          objective: string;
+          parent_run_id: string | null;
+          proof: Json;
+          score: number | null;
+          status: string;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          actions?: Json
-          answer?: string | null
-          completed_at?: string | null
-          created_at?: string
-          error?: string | null
-          fork_from_step?: number | null
-          id?: string
-          mode?: string
-          objective: string
-          parent_run_id?: string | null
-          proof?: Json
-          score?: number | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
+          actions?: Json;
+          answer?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          error?: string | null;
+          fork_from_step?: number | null;
+          id?: string;
+          mode?: string;
+          objective: string;
+          parent_run_id?: string | null;
+          proof?: Json;
+          score?: number | null;
+          status?: string;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          actions?: Json
-          answer?: string | null
-          completed_at?: string | null
-          created_at?: string
-          error?: string | null
-          fork_from_step?: number | null
-          id?: string
-          mode?: string
-          objective?: string
-          parent_run_id?: string | null
-          proof?: Json
-          score?: number | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
+          actions?: Json;
+          answer?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+          error?: string | null;
+          fork_from_step?: number | null;
+          id?: string;
+          mode?: string;
+          objective?: string;
+          parent_run_id?: string | null;
+          proof?: Json;
+          score?: number | null;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_force_runs_parent_run_id_fkey"
-            columns: ["parent_run_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_force_runs"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_force_runs_parent_run_id_fkey";
+            columns: ["parent_run_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_force_runs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_force_steps: {
         Row: {
-          created_at: string
-          id: string
-          idx: number
-          label: string
-          payload: Json
-          phase: string
-          run_id: string
-          user_id: string
-        }
+          created_at: string;
+          id: string;
+          idx: number;
+          label: string;
+          payload: Json;
+          phase: string;
+          run_id: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          idx: number
-          label: string
-          payload?: Json
-          phase: string
-          run_id: string
-          user_id: string
-        }
+          created_at?: string;
+          id?: string;
+          idx: number;
+          label: string;
+          payload?: Json;
+          phase: string;
+          run_id: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          idx?: number
-          label?: string
-          payload?: Json
-          phase?: string
-          run_id?: string
-          user_id?: string
-        }
+          created_at?: string;
+          id?: string;
+          idx?: number;
+          label?: string;
+          payload?: Json;
+          phase?: string;
+          run_id?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_force_steps_run_id_fkey"
-            columns: ["run_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_force_runs"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_force_steps_run_id_fkey";
+            columns: ["run_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_force_runs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_memory_chunks: {
         Row: {
-          chunk_index: number
-          content: string
-          created_at: string
-          doc_id: string
-          embedding: string | null
-          id: string
-          user_id: string
-        }
+          chunk_index: number;
+          content: string;
+          created_at: string;
+          doc_id: string;
+          embedding: string | null;
+          id: string;
+          user_id: string;
+        };
         Insert: {
-          chunk_index: number
-          content: string
-          created_at?: string
-          doc_id: string
-          embedding?: string | null
-          id?: string
-          user_id: string
-        }
+          chunk_index: number;
+          content: string;
+          created_at?: string;
+          doc_id: string;
+          embedding?: string | null;
+          id?: string;
+          user_id: string;
+        };
         Update: {
-          chunk_index?: number
-          content?: string
-          created_at?: string
-          doc_id?: string
-          embedding?: string | null
-          id?: string
-          user_id?: string
-        }
+          chunk_index?: number;
+          content?: string;
+          created_at?: string;
+          doc_id?: string;
+          embedding?: string | null;
+          id?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_memory_chunks_doc_id_fkey"
-            columns: ["doc_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_memory_docs"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_memory_chunks_doc_id_fkey";
+            columns: ["doc_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_memory_docs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_memory_docs: {
         Row: {
-          chars: number
-          created_at: string
-          id: string
-          metadata: Json
-          source: string
-          status: string
-          title: string
-          updated_at: string
-          user_id: string
-          workspace_id: string | null
-        }
+          chars: number;
+          created_at: string;
+          id: string;
+          metadata: Json;
+          source: string;
+          status: string;
+          title: string;
+          updated_at: string;
+          user_id: string;
+          workspace_id: string | null;
+        };
         Insert: {
-          chars?: number
-          created_at?: string
-          id?: string
-          metadata?: Json
-          source?: string
-          status?: string
-          title: string
-          updated_at?: string
-          user_id: string
-          workspace_id?: string | null
-        }
+          chars?: number;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          source?: string;
+          status?: string;
+          title: string;
+          updated_at?: string;
+          user_id: string;
+          workspace_id?: string | null;
+        };
         Update: {
-          chars?: number
-          created_at?: string
-          id?: string
-          metadata?: Json
-          source?: string
-          status?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-          workspace_id?: string | null
-        }
+          chars?: number;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          source?: string;
+          status?: string;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+          workspace_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_memory_docs_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_workspaces"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_memory_docs_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_workspaces";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_project_files: {
         Row: {
-          content: string
-          created_at: string
-          id: string
-          language: string | null
-          path: string
-          project_id: string
-          size_bytes: number
-          updated_at: string
-        }
+          content: string;
+          created_at: string;
+          id: string;
+          language: string | null;
+          path: string;
+          project_id: string;
+          size_bytes: number;
+          updated_at: string;
+        };
         Insert: {
-          content?: string
-          created_at?: string
-          id?: string
-          language?: string | null
-          path: string
-          project_id: string
-          size_bytes?: number
-          updated_at?: string
-        }
+          content?: string;
+          created_at?: string;
+          id?: string;
+          language?: string | null;
+          path: string;
+          project_id: string;
+          size_bytes?: number;
+          updated_at?: string;
+        };
         Update: {
-          content?: string
-          created_at?: string
-          id?: string
-          language?: string | null
-          path?: string
-          project_id?: string
-          size_bytes?: number
-          updated_at?: string
-        }
+          content?: string;
+          created_at?: string;
+          id?: string;
+          language?: string | null;
+          path?: string;
+          project_id?: string;
+          size_bytes?: number;
+          updated_at?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_project_files_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_projects"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_project_files_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_projects";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_project_versions: {
         Row: {
-          created_at: string
-          created_by: string | null
-          id: string
-          label: string | null
-          project_id: string
-          snapshot: Json
-          version: number
-        }
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          label: string | null;
+          project_id: string;
+          snapshot: Json;
+          version: number;
+        };
         Insert: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          label?: string | null
-          project_id: string
-          snapshot?: Json
-          version: number
-        }
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          label?: string | null;
+          project_id: string;
+          snapshot?: Json;
+          version: number;
+        };
         Update: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          label?: string | null
-          project_id?: string
-          snapshot?: Json
-          version?: number
-        }
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          label?: string | null;
+          project_id?: string;
+          snapshot?: Json;
+          version?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_project_versions_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_projects"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_project_versions_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_projects";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_projects: {
         Row: {
-          archived: boolean
-          created_at: string
-          description: string | null
-          entry_path: string
-          framework: string
-          id: string
-          name: string
-          owner_id: string
-          share_token: string
-          updated_at: string
-          visibility: Database["public"]["Enums"]["project_visibility"]
-          workspace_id: string | null
-        }
+          archived: boolean;
+          created_at: string;
+          description: string | null;
+          entry_path: string;
+          framework: string;
+          id: string;
+          name: string;
+          owner_id: string;
+          share_token: string;
+          updated_at: string;
+          visibility: Database["public"]["Enums"]["project_visibility"];
+          workspace_id: string | null;
+        };
         Insert: {
-          archived?: boolean
-          created_at?: string
-          description?: string | null
-          entry_path?: string
-          framework?: string
-          id?: string
-          name: string
-          owner_id: string
-          share_token?: string
-          updated_at?: string
-          visibility?: Database["public"]["Enums"]["project_visibility"]
-          workspace_id?: string | null
-        }
+          archived?: boolean;
+          created_at?: string;
+          description?: string | null;
+          entry_path?: string;
+          framework?: string;
+          id?: string;
+          name: string;
+          owner_id: string;
+          share_token?: string;
+          updated_at?: string;
+          visibility?: Database["public"]["Enums"]["project_visibility"];
+          workspace_id?: string | null;
+        };
         Update: {
-          archived?: boolean
-          created_at?: string
-          description?: string | null
-          entry_path?: string
-          framework?: string
-          id?: string
-          name?: string
-          owner_id?: string
-          share_token?: string
-          updated_at?: string
-          visibility?: Database["public"]["Enums"]["project_visibility"]
-          workspace_id?: string | null
-        }
+          archived?: boolean;
+          created_at?: string;
+          description?: string | null;
+          entry_path?: string;
+          framework?: string;
+          id?: string;
+          name?: string;
+          owner_id?: string;
+          share_token?: string;
+          updated_at?: string;
+          visibility?: Database["public"]["Enums"]["project_visibility"];
+          workspace_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_projects_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_workspaces"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_projects_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_workspaces";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_schedule_runs: {
         Row: {
-          created_at: string
-          duration_ms: number | null
-          error: string | null
-          id: string
-          result: string | null
-          schedule_id: string
-          status: string
-          user_id: string
-        }
+          created_at: string;
+          duration_ms: number | null;
+          error: string | null;
+          id: string;
+          result: string | null;
+          schedule_id: string;
+          status: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          duration_ms?: number | null
-          error?: string | null
-          id?: string
-          result?: string | null
-          schedule_id: string
-          status?: string
-          user_id: string
-        }
+          created_at?: string;
+          duration_ms?: number | null;
+          error?: string | null;
+          id?: string;
+          result?: string | null;
+          schedule_id: string;
+          status?: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          duration_ms?: number | null
-          error?: string | null
-          id?: string
-          result?: string | null
-          schedule_id?: string
-          status?: string
-          user_id?: string
-        }
+          created_at?: string;
+          duration_ms?: number | null;
+          error?: string | null;
+          id?: string;
+          result?: string | null;
+          schedule_id?: string;
+          status?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_schedule_runs_schedule_id_fkey"
-            columns: ["schedule_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_schedules"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_schedule_runs_schedule_id_fkey";
+            columns: ["schedule_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_schedules";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_schedules: {
         Row: {
-          cadence: string
-          created_at: string
-          enabled: boolean
-          id: string
-          last_run_at: string | null
-          mode: string
-          name: string
-          next_run_at: string
-          objective: string
-          run_count: number
-          updated_at: string
-          user_id: string
-        }
+          cadence: string;
+          created_at: string;
+          enabled: boolean;
+          id: string;
+          last_run_at: string | null;
+          mode: string;
+          name: string;
+          next_run_at: string;
+          objective: string;
+          run_count: number;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          cadence?: string
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          last_run_at?: string | null
-          mode?: string
-          name: string
-          next_run_at?: string
-          objective: string
-          run_count?: number
-          updated_at?: string
-          user_id: string
-        }
+          cadence?: string;
+          created_at?: string;
+          enabled?: boolean;
+          id?: string;
+          last_run_at?: string | null;
+          mode?: string;
+          name: string;
+          next_run_at?: string;
+          objective: string;
+          run_count?: number;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          cadence?: string
-          created_at?: string
-          enabled?: boolean
-          id?: string
-          last_run_at?: string | null
-          mode?: string
-          name?: string
-          next_run_at?: string
-          objective?: string
-          run_count?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          cadence?: string;
+          created_at?: string;
+          enabled?: boolean;
+          id?: string;
+          last_run_at?: string | null;
+          mode?: string;
+          name?: string;
+          next_run_at?: string;
+          objective?: string;
+          run_count?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       manovik_subscriptions: {
         Row: {
-          cancelled_at: string | null
-          created_at: string
-          metadata: Json
-          monthly_credit_limit: number
-          period_start: string
-          plan: string
-          renews_at: string | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
+          cancelled_at: string | null;
+          created_at: string;
+          metadata: Json;
+          monthly_credit_limit: number;
+          period_start: string;
+          plan: string;
+          renews_at: string | null;
+          status: string;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          cancelled_at?: string | null
-          created_at?: string
-          metadata?: Json
-          monthly_credit_limit?: number
-          period_start?: string
-          plan?: string
-          renews_at?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
+          cancelled_at?: string | null;
+          created_at?: string;
+          metadata?: Json;
+          monthly_credit_limit?: number;
+          period_start?: string;
+          plan?: string;
+          renews_at?: string | null;
+          status?: string;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          cancelled_at?: string | null
-          created_at?: string
-          metadata?: Json
-          monthly_credit_limit?: number
-          period_start?: string
-          plan?: string
-          renews_at?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          cancelled_at?: string | null;
+          created_at?: string;
+          metadata?: Json;
+          monthly_credit_limit?: number;
+          period_start?: string;
+          plan?: string;
+          renews_at?: string | null;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       manovik_usage_events: {
         Row: {
-          cost_micros: number
-          created_at: string
-          credits: number
-          id: string
-          input_tokens: number
-          kind: string
-          metadata: Json
-          model: string | null
-          output_tokens: number
-          project_id: string | null
-          user_id: string
-        }
+          cost_micros: number;
+          created_at: string;
+          credits: number;
+          id: string;
+          input_tokens: number;
+          kind: string;
+          metadata: Json;
+          model: string | null;
+          output_tokens: number;
+          project_id: string | null;
+          user_id: string;
+        };
         Insert: {
-          cost_micros?: number
-          created_at?: string
-          credits?: number
-          id?: string
-          input_tokens?: number
-          kind: string
-          metadata?: Json
-          model?: string | null
-          output_tokens?: number
-          project_id?: string | null
-          user_id: string
-        }
+          cost_micros?: number;
+          created_at?: string;
+          credits?: number;
+          id?: string;
+          input_tokens?: number;
+          kind: string;
+          metadata?: Json;
+          model?: string | null;
+          output_tokens?: number;
+          project_id?: string | null;
+          user_id: string;
+        };
         Update: {
-          cost_micros?: number
-          created_at?: string
-          credits?: number
-          id?: string
-          input_tokens?: number
-          kind?: string
-          metadata?: Json
-          model?: string | null
-          output_tokens?: number
-          project_id?: string | null
-          user_id?: string
-        }
+          cost_micros?: number;
+          created_at?: string;
+          credits?: number;
+          id?: string;
+          input_tokens?: number;
+          kind?: string;
+          metadata?: Json;
+          model?: string | null;
+          output_tokens?: number;
+          project_id?: string | null;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_usage_events_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_projects"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_usage_events_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_projects";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_workspace_invites: {
         Row: {
-          accepted_at: string | null
-          created_at: string
-          email: string
-          expires_at: string
-          id: string
-          invited_by: string
-          role: Database["public"]["Enums"]["workspace_role"]
-          token: string
-          workspace_id: string
-        }
+          accepted_at: string | null;
+          created_at: string;
+          email: string;
+          expires_at: string;
+          id: string;
+          invited_by: string;
+          role: Database["public"]["Enums"]["workspace_role"];
+          token: string;
+          workspace_id: string;
+        };
         Insert: {
-          accepted_at?: string | null
-          created_at?: string
-          email: string
-          expires_at?: string
-          id?: string
-          invited_by: string
-          role?: Database["public"]["Enums"]["workspace_role"]
-          token?: string
-          workspace_id: string
-        }
+          accepted_at?: string | null;
+          created_at?: string;
+          email: string;
+          expires_at?: string;
+          id?: string;
+          invited_by: string;
+          role?: Database["public"]["Enums"]["workspace_role"];
+          token?: string;
+          workspace_id: string;
+        };
         Update: {
-          accepted_at?: string | null
-          created_at?: string
-          email?: string
-          expires_at?: string
-          id?: string
-          invited_by?: string
-          role?: Database["public"]["Enums"]["workspace_role"]
-          token?: string
-          workspace_id?: string
-        }
+          accepted_at?: string | null;
+          created_at?: string;
+          email?: string;
+          expires_at?: string;
+          id?: string;
+          invited_by?: string;
+          role?: Database["public"]["Enums"]["workspace_role"];
+          token?: string;
+          workspace_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_workspace_invites_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_workspaces"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_workspace_invites_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_workspaces";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_workspace_members: {
         Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["workspace_role"]
-          user_id: string
-          workspace_id: string
-        }
+          created_at: string;
+          id: string;
+          role: Database["public"]["Enums"]["workspace_role"];
+          user_id: string;
+          workspace_id: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["workspace_role"]
-          user_id: string
-          workspace_id: string
-        }
+          created_at?: string;
+          id?: string;
+          role?: Database["public"]["Enums"]["workspace_role"];
+          user_id: string;
+          workspace_id: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["workspace_role"]
-          user_id?: string
-          workspace_id?: string
-        }
+          created_at?: string;
+          id?: string;
+          role?: Database["public"]["Enums"]["workspace_role"];
+          user_id?: string;
+          workspace_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "manovik_workspace_members_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "manovik_workspaces"
-            referencedColumns: ["id"]
+            foreignKeyName: "manovik_workspace_members_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "manovik_workspaces";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       manovik_workspaces: {
         Row: {
-          created_at: string
-          id: string
-          name: string
-          owner_id: string
-          slug: string
-          updated_at: string
-        }
+          created_at: string;
+          id: string;
+          name: string;
+          owner_id: string;
+          slug: string;
+          updated_at: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          owner_id: string
-          slug: string
-          updated_at?: string
-        }
+          created_at?: string;
+          id?: string;
+          name: string;
+          owner_id: string;
+          slug: string;
+          updated_at?: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          owner_id?: string
-          slug?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          name?: string;
+          owner_id?: string;
+          slug?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       messages: {
         Row: {
-          created_at: string
-          id: string
-          message: Json
-          role: string
-          thread_id: string
-          user_id: string
-        }
+          created_at: string;
+          id: string;
+          message: Json;
+          role: string;
+          thread_id: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          message: Json
-          role: string
-          thread_id: string
-          user_id: string
-        }
+          created_at?: string;
+          id?: string;
+          message: Json;
+          role: string;
+          thread_id: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          message?: Json
-          role?: string
-          thread_id?: string
-          user_id?: string
-        }
+          created_at?: string;
+          id?: string;
+          message?: Json;
+          role?: string;
+          thread_id?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "messages_thread_id_fkey"
-            columns: ["thread_id"]
-            isOneToOne: false
-            referencedRelation: "threads"
-            referencedColumns: ["id"]
+            foreignKeyName: "messages_thread_id_fkey";
+            columns: ["thread_id"];
+            isOneToOne: false;
+            referencedRelation: "threads";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       profiles: {
         Row: {
-          created_at: string
-          display_name: string | null
-          id: string
-          ui_prefs: Json
-        }
+          created_at: string;
+          display_name: string | null;
+          id: string;
+          ui_prefs: Json;
+        };
         Insert: {
-          created_at?: string
-          display_name?: string | null
-          id: string
-          ui_prefs?: Json
-        }
+          created_at?: string;
+          display_name?: string | null;
+          id: string;
+          ui_prefs?: Json;
+        };
         Update: {
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          ui_prefs?: Json
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          display_name?: string | null;
+          id?: string;
+          ui_prefs?: Json;
+        };
+        Relationships: [];
+      };
       purchases: {
         Row: {
-          amount: number
-          created_at: string
-          currency: string
-          email: string | null
-          id: string
-          metadata: Json
-          name: string | null
-          plan: string
-          razorpay_order_id: string | null
-          razorpay_payment_id: string | null
-          receipt_no: string | null
-          status: string
-          updated_at: string
-          user_id: string
-        }
+          amount: number;
+          created_at: string;
+          currency: string;
+          email: string | null;
+          id: string;
+          metadata: Json;
+          name: string | null;
+          plan: string;
+          razorpay_order_id: string | null;
+          razorpay_payment_id: string | null;
+          receipt_no: string | null;
+          status: string;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          amount: number
-          created_at?: string
-          currency?: string
-          email?: string | null
-          id?: string
-          metadata?: Json
-          name?: string | null
-          plan: string
-          razorpay_order_id?: string | null
-          razorpay_payment_id?: string | null
-          receipt_no?: string | null
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
+          amount: number;
+          created_at?: string;
+          currency?: string;
+          email?: string | null;
+          id?: string;
+          metadata?: Json;
+          name?: string | null;
+          plan: string;
+          razorpay_order_id?: string | null;
+          razorpay_payment_id?: string | null;
+          receipt_no?: string | null;
+          status?: string;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          amount?: number
-          created_at?: string
-          currency?: string
-          email?: string | null
-          id?: string
-          metadata?: Json
-          name?: string | null
-          plan?: string
-          razorpay_order_id?: string | null
-          razorpay_payment_id?: string | null
-          receipt_no?: string | null
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          amount?: number;
+          created_at?: string;
+          currency?: string;
+          email?: string | null;
+          id?: string;
+          metadata?: Json;
+          name?: string | null;
+          plan?: string;
+          razorpay_order_id?: string | null;
+          razorpay_payment_id?: string | null;
+          receipt_no?: string | null;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       security_self_checks: {
         Row: {
-          auto_fix_applied: boolean
-          check_name: string
-          details: Json
-          id: string
-          ran_at: string
-          run_id: string
-          status: string
-        }
+          auto_fix_applied: boolean;
+          check_name: string;
+          details: Json;
+          id: string;
+          ran_at: string;
+          run_id: string;
+          status: string;
+        };
         Insert: {
-          auto_fix_applied?: boolean
-          check_name: string
-          details?: Json
-          id?: string
-          ran_at?: string
-          run_id: string
-          status: string
-        }
+          auto_fix_applied?: boolean;
+          check_name: string;
+          details?: Json;
+          id?: string;
+          ran_at?: string;
+          run_id: string;
+          status: string;
+        };
         Update: {
-          auto_fix_applied?: boolean
-          check_name?: string
-          details?: Json
-          id?: string
-          ran_at?: string
-          run_id?: string
-          status?: string
-        }
-        Relationships: []
-      }
+          auto_fix_applied?: boolean;
+          check_name?: string;
+          details?: Json;
+          id?: string;
+          ran_at?: string;
+          run_id?: string;
+          status?: string;
+        };
+        Relationships: [];
+      };
       seo_monitor_alerts: {
         Row: {
-          acknowledged_at: string | null
-          acknowledged_by: string | null
-          created_at: string
-          details: Json
-          id: string
-          kind: string
-          message: string
-          notified_at: string | null
-          severity: string
-          snapshot_id: string | null
-        }
+          acknowledged_at: string | null;
+          acknowledged_by: string | null;
+          created_at: string;
+          details: Json;
+          id: string;
+          kind: string;
+          message: string;
+          notified_at: string | null;
+          severity: string;
+          snapshot_id: string | null;
+        };
         Insert: {
-          acknowledged_at?: string | null
-          acknowledged_by?: string | null
-          created_at?: string
-          details?: Json
-          id?: string
-          kind: string
-          message: string
-          notified_at?: string | null
-          severity?: string
-          snapshot_id?: string | null
-        }
+          acknowledged_at?: string | null;
+          acknowledged_by?: string | null;
+          created_at?: string;
+          details?: Json;
+          id?: string;
+          kind: string;
+          message: string;
+          notified_at?: string | null;
+          severity?: string;
+          snapshot_id?: string | null;
+        };
         Update: {
-          acknowledged_at?: string | null
-          acknowledged_by?: string | null
-          created_at?: string
-          details?: Json
-          id?: string
-          kind?: string
-          message?: string
-          notified_at?: string | null
-          severity?: string
-          snapshot_id?: string | null
-        }
+          acknowledged_at?: string | null;
+          acknowledged_by?: string | null;
+          created_at?: string;
+          details?: Json;
+          id?: string;
+          kind?: string;
+          message?: string;
+          notified_at?: string | null;
+          severity?: string;
+          snapshot_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "seo_monitor_alerts_snapshot_id_fkey"
-            columns: ["snapshot_id"]
-            isOneToOne: false
-            referencedRelation: "seo_monitor_snapshots"
-            referencedColumns: ["id"]
+            foreignKeyName: "seo_monitor_alerts_snapshot_id_fkey";
+            columns: ["snapshot_id"];
+            isOneToOne: false;
+            referencedRelation: "seo_monitor_snapshots";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       seo_monitor_snapshots: {
         Row: {
-          avg_position: number | null
-          captured_at: string
-          clicks: number
-          id: string
-          impressions: number
-          indexed_urls: number | null
-          ok: boolean
-          raw: Json
-          site_url: string
-          sitemap_errors: number
-          sitemap_warnings: number
-        }
+          avg_position: number | null;
+          captured_at: string;
+          clicks: number;
+          id: string;
+          impressions: number;
+          indexed_urls: number | null;
+          ok: boolean;
+          raw: Json;
+          site_url: string;
+          sitemap_errors: number;
+          sitemap_warnings: number;
+        };
         Insert: {
-          avg_position?: number | null
-          captured_at?: string
-          clicks?: number
-          id?: string
-          impressions?: number
-          indexed_urls?: number | null
-          ok?: boolean
-          raw?: Json
-          site_url: string
-          sitemap_errors?: number
-          sitemap_warnings?: number
-        }
+          avg_position?: number | null;
+          captured_at?: string;
+          clicks?: number;
+          id?: string;
+          impressions?: number;
+          indexed_urls?: number | null;
+          ok?: boolean;
+          raw?: Json;
+          site_url: string;
+          sitemap_errors?: number;
+          sitemap_warnings?: number;
+        };
         Update: {
-          avg_position?: number | null
-          captured_at?: string
-          clicks?: number
-          id?: string
-          impressions?: number
-          indexed_urls?: number | null
-          ok?: boolean
-          raw?: Json
-          site_url?: string
-          sitemap_errors?: number
-          sitemap_warnings?: number
-        }
-        Relationships: []
-      }
+          avg_position?: number | null;
+          captured_at?: string;
+          clicks?: number;
+          id?: string;
+          impressions?: number;
+          indexed_urls?: number | null;
+          ok?: boolean;
+          raw?: Json;
+          site_url?: string;
+          sitemap_errors?: number;
+          sitemap_warnings?: number;
+        };
+        Relationships: [];
+      };
       suppressed_emails: {
         Row: {
-          created_at: string
-          email: string
-          id: string
-          metadata: Json | null
-          reason: string
-        }
+          created_at: string;
+          email: string;
+          id: string;
+          metadata: Json | null;
+          reason: string;
+        };
         Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          metadata?: Json | null
-          reason: string
-        }
+          created_at?: string;
+          email: string;
+          id?: string;
+          metadata?: Json | null;
+          reason: string;
+        };
         Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          metadata?: Json | null
-          reason?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          email?: string;
+          id?: string;
+          metadata?: Json | null;
+          reason?: string;
+        };
+        Relationships: [];
+      };
       threads: {
         Row: {
-          created_at: string
-          id: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
+          created_at: string;
+          id: string;
+          title: string;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          title?: string
-          updated_at?: string
-          user_id: string
-        }
+          created_at?: string;
+          id?: string;
+          title?: string;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          title?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       user_roles: {
         Row: {
-          created_at: string
-          id: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
+          created_at: string;
+          id: string;
+          role: Database["public"]["Enums"]["app_role"];
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        }
+          created_at?: string;
+          id?: string;
+          role: Database["public"]["Enums"]["app_role"];
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          user_id?: string
-        }
-        Relationships: []
-      }
-    }
+          created_at?: string;
+          id?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
       can_read_project: {
-        Args: { _project_id: string; _user_id: string }
-        Returns: boolean
-      }
+        Args: { _project_id: string; _user_id: string };
+        Returns: boolean;
+      };
       can_write_project: {
-        Args: { _project_id: string; _user_id: string }
-        Returns: boolean
-      }
+        Args: { _project_id: string; _user_id: string };
+        Returns: boolean;
+      };
       can_write_workspace: {
-        Args: { _user_id: string; _workspace_id: string }
-        Returns: boolean
-      }
+        Args: { _user_id: string; _workspace_id: string };
+        Returns: boolean;
+      };
       delete_email: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
-      email_queue_dispatch: { Args: never; Returns: undefined }
+        Args: { message_id: number; queue_name: string };
+        Returns: boolean;
+      };
+      email_queue_dispatch: { Args: never; Returns: undefined };
       enqueue_email: {
-        Args: { payload: Json; queue_name: string }
-        Returns: number
-      }
-      get_schedules_run_token: { Args: never; Returns: string }
-      get_security_scan_token: { Args: never; Returns: string }
-      get_seo_monitor_token: { Args: never; Returns: string }
+        Args: { payload: Json; queue_name: string };
+        Returns: number;
+      };
+      get_schedules_run_token: { Args: never; Returns: string };
+      get_security_scan_token: { Args: never; Returns: string };
+      get_seo_monitor_token: { Args: never; Returns: string };
       has_role: {
         Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+          _role: Database["public"]["Enums"]["app_role"];
+          _user_id: string;
+        };
+        Returns: boolean;
+      };
       is_workspace_member: {
-        Args: { _user_id: string; _workspace_id: string }
-        Returns: boolean
-      }
+        Args: { _user_id: string; _workspace_id: string };
+        Returns: boolean;
+      };
       magic_link_check_and_record: {
-        Args: { _email: string; _ip: string }
-        Returns: Json
-      }
+        Args: { _email: string; _ip: string };
+        Returns: Json;
+      };
       manovik_match_memory: {
         Args: {
-          _user_id: string
-          match_count?: number
-          query_embedding: string
-        }
+          _user_id: string;
+          match_count?: number;
+          query_embedding: string;
+        };
         Returns: {
-          content: string
-          doc_id: string
-          id: string
-          similarity: number
-          title: string
-        }[]
-      }
+          content: string;
+          doc_id: string;
+          id: string;
+          similarity: number;
+          title: string;
+        }[];
+      };
       manovik_spend_credit: {
-        Args: { _amount: number; _reason: string; _user_id: string }
-        Returns: number
-      }
+        Args: { _amount: number; _reason: string; _user_id: string };
+        Returns: number;
+      };
       manovik_topup_credit: {
-        Args: { _amount: number; _reason: string; _user_id: string }
-        Returns: number
-      }
+        Args: { _amount: number; _reason: string; _user_id: string };
+        Returns: number;
+      };
       move_to_dlq: {
         Args: {
-          dlq_name: string
-          message_id: number
-          payload: Json
-          source_queue: string
-        }
-        Returns: number
-      }
+          dlq_name: string;
+          message_id: number;
+          payload: Json;
+          source_queue: string;
+        };
+        Returns: number;
+      };
       read_email_batch: {
-        Args: { batch_size: number; queue_name: string; vt: number }
+        Args: { batch_size: number; queue_name: string; vt: number };
         Returns: {
-          message: Json
-          msg_id: number
-          read_ct: number
-        }[]
-      }
+          message: Json;
+          msg_id: number;
+          read_ct: number;
+        }[];
+      };
       security_scan_new_findings: {
-        Args: { _run_id: string }
+        Args: { _run_id: string };
         Returns: {
-          check_name: string
-          details: Json
-          status: string
-        }[]
-      }
+          check_name: string;
+          details: Json;
+          status: string;
+        }[];
+      };
       workspace_role_of: {
-        Args: { _user_id: string; _workspace_id: string }
-        Returns: Database["public"]["Enums"]["workspace_role"]
-      }
-    }
+        Args: { _user_id: string; _workspace_id: string };
+        Returns: Database["public"]["Enums"]["workspace_role"];
+      };
+    };
     Enums: {
-      app_role: "admin" | "moderator" | "user"
-      build_status: "queued" | "running" | "success" | "failed" | "cancelled"
-      project_visibility: "private" | "link" | "public"
-      workspace_role: "owner" | "admin" | "editor" | "viewer"
-    }
+      app_role: "admin" | "moderator" | "user";
+      build_status: "queued" | "running" | "success" | "failed" | "cancelled";
+      project_visibility: "private" | "link" | "public";
+      workspace_role: "owner" | "admin" | "editor" | "viewer";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
@@ -1617,4 +1609,4 @@ export const Constants = {
       workspace_role: ["owner", "admin", "editor", "viewer"],
     },
   },
-} as const
+} as const;

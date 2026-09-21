@@ -105,7 +105,10 @@ async function callWithFallback(
   let last: unknown;
   for (const candidate of chain) {
     try {
-      return { text: await callSubstrate(candidate, system, user, maxTokens), substrate: candidate };
+      return {
+        text: await callSubstrate(candidate, system, user, maxTokens),
+        substrate: candidate,
+      };
     } catch (err) {
       last = err;
       if (!(err as { retryable?: boolean })?.retryable) throw err;
@@ -129,8 +132,6 @@ export async function manoComplete(
   const { text } = await callWithFallback(target, system, user, maxTokens);
   return text;
 }
-
-
 
 /**
  * Run MANO 1.1 end to end.
@@ -165,11 +166,13 @@ export async function runMano(input: ManoRunInput): Promise<ManoRunResult> {
 
     let user: string;
     if (stage === "plan") user = `TASK:\n${prompt}`;
-    else if (stage === "draft") user = plan ? `TASK:\n${prompt}\n\nEXECUTION PLAN:\n${plan}` : `TASK:\n${prompt}`;
+    else if (stage === "draft")
+      user = plan ? `TASK:\n${prompt}\n\nEXECUTION PLAN:\n${plan}` : `TASK:\n${prompt}`;
     else if (stage === "adversary") user = `TASK:\n${prompt}\n\nDRAFT UNDER REVIEW:\n${draft}`;
     else user = `TASK:\n${prompt}\n\nDRAFT:\n${draft}\n\nREVIEW FINDINGS:\n${critique}`;
 
-    const tokens = stage === "plan" || stage === "adversary" ? Math.min(maxTokens, 1500) : maxTokens;
+    const tokens =
+      stage === "plan" || stage === "adversary" ? Math.min(maxTokens, 1500) : maxTokens;
     // When MANOVIK's own trained weights are deployed, MANOVIK_AI_MODEL_ID
     // pins every stage to them behind the same mano-1.1 id; otherwise the
     // stage runs on its assigned interchangeable substrate.

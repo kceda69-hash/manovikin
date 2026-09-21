@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import {
-  deleteThreadInput,
-  getThreadMessagesInput,
-} from "@/lib/chat.functions";
+import { deleteThreadInput, getThreadMessagesInput } from "@/lib/chat.functions";
 
 const VALID_UUID = "11111111-1111-4111-8111-111111111111";
 
@@ -45,9 +42,7 @@ describe("deleteThread UUID validation", () => {
 
 describe("getThreadMessages UUID validation", () => {
   it("accepts a valid threadId", () => {
-    expect(() =>
-      getThreadMessagesInput.parse({ threadId: VALID_UUID }),
-    ).not.toThrow();
+    expect(() => getThreadMessagesInput.parse({ threadId: VALID_UUID })).not.toThrow();
   });
 
   it.each(BAD_INPUTS)("rejects bad threadId: %p", (bad) => {
@@ -55,9 +50,7 @@ describe("getThreadMessages UUID validation", () => {
   });
 
   it("rejects swapped field name (id instead of threadId)", () => {
-    expect(() =>
-      getThreadMessagesInput.parse({ id: VALID_UUID }),
-    ).toThrow();
+    expect(() => getThreadMessagesInput.parse({ id: VALID_UUID })).toThrow();
   });
 });
 
@@ -68,10 +61,7 @@ describe("getThreadMessages UUID validation", () => {
  * the validator with a pass-through, these tests fail loudly.
  */
 describe("chat.functions.ts wiring", () => {
-  const source = readFileSync(
-    resolve(process.cwd(), "src/lib/chat.functions.ts"),
-    "utf8",
-  );
+  const source = readFileSync(resolve(process.cwd(), "src/lib/chat.functions.ts"), "utf8");
 
   it("imports requireSupabaseAuth", () => {
     expect(source).toMatch(
@@ -80,18 +70,14 @@ describe("chat.functions.ts wiring", () => {
   });
 
   it("guards deleteThread with requireSupabaseAuth", () => {
-    const block = source.match(
-      /export const deleteThread =[\s\S]*?\}\);/,
-    )?.[0];
+    const block = source.match(/export const deleteThread =[\s\S]*?\}\);/)?.[0];
     expect(block, "deleteThread block not found").toBeTruthy();
     expect(block!).toContain(".middleware([requireSupabaseAuth])");
     expect(block!).toMatch(/deleteThreadInput\.parse/);
   });
 
   it("guards getThreadMessages with requireSupabaseAuth", () => {
-    const block = source.match(
-      /export const getThreadMessages =[\s\S]*?\}\);/,
-    )?.[0];
+    const block = source.match(/export const getThreadMessages =[\s\S]*?\}\);/)?.[0];
     expect(block, "getThreadMessages block not found").toBeTruthy();
     expect(block!).toContain(".middleware([requireSupabaseAuth])");
     expect(block!).toMatch(/getThreadMessagesInput\.parse/);

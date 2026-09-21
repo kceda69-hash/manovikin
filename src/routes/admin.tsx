@@ -30,7 +30,27 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { SupplyChainTab } from "@/components/admin/SupplyChainTab";
-import { ArrowLeft, Shield, ShieldCheck, RefreshCw, Search, Ban, Coins, Trash2, UserPlus } from "lucide-react";
+import {
+  ArrowLeft,
+  Shield,
+  ShieldCheck,
+  RefreshCw,
+  Search,
+  Ban,
+  Coins,
+  Trash2,
+  UserPlus,
+} from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+
+// Precise row types derived from the admin server functions / DB schema.
+type UserDetail = Awaited<ReturnType<typeof adminGetUserDetail>>;
+type PurchaseRow = Awaited<ReturnType<typeof adminListPurchases>>["purchases"][number];
+type AuditLogRow = Awaited<ReturnType<typeof adminListAuditLogs>>["logs"][number];
+type BrainUpdateRow = Pick<
+  Database["public"]["Tables"]["manovik_brain_updates"]["Row"],
+  "id" | "version" | "notes" | "metadata" | "created_at"
+>;
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -38,9 +58,16 @@ export const Route = createFileRoute("/admin")({
     meta: [
       { title: "Admin — MANOVIK" },
       { name: "robots", content: "noindex, nofollow" },
-      { name: "description", content: "Internal MANOVIK admin console for managing users, roles, subscriptions, refunds, credits, and audit logs. Restricted to admins with 2FA." },
+      {
+        name: "description",
+        content:
+          "Internal MANOVIK admin console for managing users, roles, subscriptions, refunds, credits, and audit logs. Restricted to admins with 2FA.",
+      },
       { property: "og:title", content: "Admin — MANOVIK" },
-      { property: "og:description", content: "Restricted MANOVIK admin console for user, subscription, and refund management." },
+      {
+        property: "og:description",
+        content: "Restricted MANOVIK admin console for user, subscription, and refund management.",
+      },
     ],
   }),
 });
@@ -207,8 +234,8 @@ function MfaGate({ onVerified }: { onVerified: () => void }) {
           {phase === "enroll" && (
             <>
               <p className="mt-2 text-sm text-muted-foreground">
-                Set up an authenticator app (Google Authenticator, 1Password, Authy) to protect admin access.
-                Scan the QR code, or enter the secret manually.
+                Set up an authenticator app (Google Authenticator, 1Password, Authy) to protect
+                admin access. Scan the QR code, or enter the secret manually.
               </p>
               {qr && (
                 <div className="mt-4 flex justify-center rounded-md border bg-white p-4">
@@ -218,7 +245,9 @@ function MfaGate({ onVerified }: { onVerified: () => void }) {
               {secret && (
                 <div className="mt-3">
                   <p className="text-xs text-muted-foreground">Manual key</p>
-                  <code className="mt-1 block break-all rounded bg-muted p-2 text-xs">{secret}</code>
+                  <code className="mt-1 block break-all rounded bg-muted p-2 text-xs">
+                    {secret}
+                  </code>
                 </div>
               )}
             </>
@@ -274,7 +303,10 @@ function AdminConsole({ who }: { who: Whoami }) {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/40">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4" /> Back to site
           </Link>
           <div className="flex items-center gap-2 text-sm">
@@ -310,11 +342,21 @@ function AdminConsole({ who }: { who: Whoami }) {
             <TabsTrigger value="manovik">MANOVIK</TabsTrigger>
             <TabsTrigger value="supply-chain">Supply chain</TabsTrigger>
           </TabsList>
-          <TabsContent value="users" className="mt-4"><UsersTab currentAdminId={who.userId} /></TabsContent>
-          <TabsContent value="purchases" className="mt-4"><PurchasesTab /></TabsContent>
-          <TabsContent value="audit" className="mt-4"><AuditTab /></TabsContent>
-          <TabsContent value="manovik" className="mt-4"><ManovikTab /></TabsContent>
-          <TabsContent value="supply-chain" className="mt-4"><SupplyChainTab /></TabsContent>
+          <TabsContent value="users" className="mt-4">
+            <UsersTab currentAdminId={who.userId} />
+          </TabsContent>
+          <TabsContent value="purchases" className="mt-4">
+            <PurchasesTab />
+          </TabsContent>
+          <TabsContent value="audit" className="mt-4">
+            <AuditTab />
+          </TabsContent>
+          <TabsContent value="manovik" className="mt-4">
+            <ManovikTab />
+          </TabsContent>
+          <TabsContent value="supply-chain" className="mt-4">
+            <SupplyChainTab />
+          </TabsContent>
         </Tabs>
       </main>
     </div>
@@ -387,15 +429,24 @@ function UsersTab({ currentAdminId }: { currentAdminId: string }) {
             >
               <div className="col-span-5 truncate">
                 {u.email ?? <span className="text-muted-foreground">(no email)</span>}
-                {!u.confirmed && <Badge variant="outline" className="ml-2">unconfirmed</Badge>}
+                {!u.confirmed && (
+                  <Badge variant="outline" className="ml-2">
+                    unconfirmed
+                  </Badge>
+                )}
               </div>
-              <div className="col-span-3 text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</div>
+              <div className="col-span-3 text-muted-foreground">
+                {new Date(u.created_at).toLocaleDateString()}
+              </div>
               <div className="col-span-2 text-muted-foreground">
                 {u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString() : "—"}
               </div>
               <div className="col-span-2 text-right">
                 {u.factors > 0 ? (
-                  <Badge variant="secondary" className="gap-1"><ShieldCheck className="h-3 w-3" />on</Badge>
+                  <Badge variant="secondary" className="gap-1">
+                    <ShieldCheck className="h-3 w-3" />
+                    on
+                  </Badge>
                 ) : (
                   <span className="text-xs text-muted-foreground">off</span>
                 )}
@@ -428,7 +479,7 @@ function UserDetailDialog({
   onChanged: () => void;
   currentAdminId: string;
 }) {
-  const [detail, setDetail] = useState<any | null>(null);
+  const [detail, setDetail] = useState<UserDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [creditDelta, setCreditDelta] = useState("");
   const [creditReason, setCreditReason] = useState("");
@@ -463,8 +514,9 @@ function UserDetailDialog({
     }
   };
 
-  const refund = async (p: any) => {
-    if (!confirm(`Refund ${fmt(p.amount, p.currency)} for this payment? This cannot be undone.`)) return;
+  const refund = async (p: UserDetail["purchases"][number]) => {
+    if (!confirm(`Refund ${fmt(p.amount, p.currency)} for this payment? This cannot be undone.`))
+      return;
     try {
       await adminRefundPayment({ data: { purchaseId: p.id } });
       toast.success("Refund processed");
@@ -500,7 +552,10 @@ function UserDetailDialog({
         if (!confirm("Revoke admin role from this user?")) return;
         await adminRevokeRole({ data: { userId, role: "admin" } });
       } else {
-        if (!confirm("Grant admin role to this user? They must set up 2FA on their next admin login.")) return;
+        if (
+          !confirm("Grant admin role to this user? They must set up 2FA on their next admin login.")
+        )
+          return;
         await adminGrantRole({ data: { userId, role: "admin" } });
       }
       toast.success("Role updated");
@@ -527,15 +582,23 @@ function UserDetailDialog({
             <section>
               <h3 className="text-sm font-semibold">Roles</h3>
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                {(detail.roles as string[]).length === 0 && <span className="text-xs text-muted-foreground">user</span>}
+                {(detail.roles as string[]).length === 0 && (
+                  <span className="text-xs text-muted-foreground">user</span>
+                )}
                 {(detail.roles as string[]).map((r) => (
-                  <Badge key={r} variant="secondary">{r}</Badge>
+                  <Badge key={r} variant="secondary">
+                    {r}
+                  </Badge>
                 ))}
                 <Button size="sm" variant="outline" onClick={toggleAdmin}>
                   {(detail.roles as string[]).includes("admin") ? (
-                    <><Trash2 className="mr-1 h-3 w-3" /> Revoke admin</>
+                    <>
+                      <Trash2 className="mr-1 h-3 w-3" /> Revoke admin
+                    </>
                   ) : (
-                    <><UserPlus className="mr-1 h-3 w-3" /> Grant admin</>
+                    <>
+                      <UserPlus className="mr-1 h-3 w-3" /> Grant admin
+                    </>
                   )}
                 </Button>
               </div>
@@ -580,12 +643,19 @@ function UserDetailDialog({
                 {detail.purchases.length === 0 ? (
                   <div className="px-3 py-4 text-center text-xs text-muted-foreground">None</div>
                 ) : (
-                  detail.purchases.map((p: any) => (
-                    <div key={p.id} className="grid grid-cols-12 items-center gap-2 border-t border-border/40 px-3 py-2 text-sm">
-                      <div className="col-span-3 text-muted-foreground">{new Date(p.created_at).toLocaleDateString()}</div>
+                  detail.purchases.map((p) => (
+                    <div
+                      key={p.id}
+                      className="grid grid-cols-12 items-center gap-2 border-t border-border/40 px-3 py-2 text-sm"
+                    >
+                      <div className="col-span-3 text-muted-foreground">
+                        {new Date(p.created_at).toLocaleDateString()}
+                      </div>
                       <div className="col-span-2">{p.plan}</div>
                       <div className="col-span-2 font-medium">{fmt(p.amount, p.currency)}</div>
-                      <div className="col-span-2"><Badge variant="outline">{p.status}</Badge></div>
+                      <div className="col-span-2">
+                        <Badge variant="outline">{p.status}</Badge>
+                      </div>
                       <div className="col-span-3 flex flex-wrap justify-end gap-1">
                         {p.status === "paid" && p.plan === "pro" && (
                           <Button size="sm" variant="outline" onClick={() => cancel(p.id)}>
@@ -611,10 +681,17 @@ function UserDetailDialog({
                 {detail.ledger.length === 0 ? (
                   <div className="px-3 py-3 text-xs text-muted-foreground">No activity</div>
                 ) : (
-                  detail.ledger.map((l: any, i: number) => (
-                    <div key={i} className="flex justify-between border-t border-border/40 px-3 py-1 text-xs first:border-0">
-                      <span className="text-muted-foreground">{new Date(l.created_at).toLocaleString()}</span>
-                      <span className={l.delta < 0 ? "text-red-500" : "text-green-500"}>{l.delta > 0 ? `+${l.delta}` : l.delta}</span>
+                  detail.ledger.map((l, i: number) => (
+                    <div
+                      key={i}
+                      className="flex justify-between border-t border-border/40 px-3 py-1 text-xs first:border-0"
+                    >
+                      <span className="text-muted-foreground">
+                        {new Date(l.created_at).toLocaleString()}
+                      </span>
+                      <span className={l.delta < 0 ? "text-red-500" : "text-green-500"}>
+                        {l.delta > 0 ? `+${l.delta}` : l.delta}
+                      </span>
                       <span className="truncate text-muted-foreground">{l.reason}</span>
                     </div>
                   ))
@@ -625,7 +702,9 @@ function UserDetailDialog({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -636,7 +715,7 @@ function UserDetailDialog({
 
 function PurchasesTab() {
   const [status, setStatus] = useState("");
-  const [rows, setRows] = useState<any[]>([]);
+  const [rows, setRows] = useState<PurchaseRow[]>([]);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
@@ -651,7 +730,9 @@ function PurchasesTab() {
     }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [status]);
+  useEffect(() => {
+    load(); /* eslint-disable-next-line */
+  }, [status]);
 
   return (
     <Card className="p-4">
@@ -685,12 +766,19 @@ function PurchasesTab() {
           <div className="px-3 py-6 text-center text-sm text-muted-foreground">No purchases.</div>
         ) : (
           rows.map((p) => (
-            <div key={p.id} className="grid grid-cols-12 items-center gap-2 border-t border-border/40 px-3 py-2 text-sm">
-              <div className="col-span-3 text-muted-foreground">{new Date(p.created_at).toLocaleString()}</div>
+            <div
+              key={p.id}
+              className="grid grid-cols-12 items-center gap-2 border-t border-border/40 px-3 py-2 text-sm"
+            >
+              <div className="col-span-3 text-muted-foreground">
+                {new Date(p.created_at).toLocaleString()}
+              </div>
               <div className="col-span-3 truncate">{p.email ?? "—"}</div>
               <div className="col-span-2">{p.plan}</div>
               <div className="col-span-2 font-medium">{fmt(p.amount, p.currency)}</div>
-              <div className="col-span-2"><Badge variant="outline">{p.status}</Badge></div>
+              <div className="col-span-2">
+                <Badge variant="outline">{p.status}</Badge>
+              </div>
             </div>
           ))
         )}
@@ -702,7 +790,7 @@ function PurchasesTab() {
 // -------- Audit tab -------------------------------------------------
 
 function AuditTab() {
-  const [rows, setRows] = useState<any[]>([]);
+  const [rows, setRows] = useState<AuditLogRow[]>([]);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
@@ -717,7 +805,9 @@ function AuditTab() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   return (
     <Card className="p-4">
@@ -731,13 +821,17 @@ function AuditTab() {
         {loading ? (
           <div className="px-3 py-6 text-center text-sm text-muted-foreground">Loading…</div>
         ) : rows.length === 0 ? (
-          <div className="px-3 py-6 text-center text-sm text-muted-foreground">No admin actions yet.</div>
+          <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+            No admin actions yet.
+          </div>
         ) : (
           rows.map((r) => (
             <div key={r.id} className="border-t border-border/40 px-3 py-2 text-xs first:border-0">
               <div className="flex justify-between">
                 <span className="font-medium">{r.event_type.replace("admin.", "")}</span>
-                <span className="text-muted-foreground">{new Date(r.created_at).toLocaleString()}</span>
+                <span className="text-muted-foreground">
+                  {new Date(r.created_at).toLocaleString()}
+                </span>
               </div>
               <p className="text-muted-foreground">{r.summary}</p>
               {r.metadata && Object.keys(r.metadata).length > 0 && (
@@ -756,7 +850,7 @@ function AuditTab() {
 // -------- MANOVIK tab (updates + self-build console) ----------------
 
 function ManovikTab() {
-  const [updates, setUpdates] = useState<any[]>([]);
+  const [updates, setUpdates] = useState<BrainUpdateRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -764,12 +858,12 @@ function ManovikTab() {
   const loadUpdates = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("manovik_brain_updates" as any)
+      .from("manovik_brain_updates")
       .select("id, version, notes, metadata, created_at")
       .order("created_at", { ascending: false })
       .limit(50);
     if (error) toast.error(error.message);
-    else setUpdates((data ?? []) as any[]);
+    else setUpdates(data ?? []);
     setLoading(false);
   };
 
@@ -778,8 +872,8 @@ function ManovikTab() {
     setSaving(true);
     const version = `admin-${new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "")}`;
     const { error } = await supabase
-      .from("manovik_brain_updates" as any)
-      .insert({ version, notes: notes.trim(), metadata: { source: "admin" } as any });
+      .from("manovik_brain_updates")
+      .insert({ version, notes: notes.trim(), metadata: { source: "admin" } });
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success(`Published ${version}`);
@@ -787,14 +881,18 @@ function ManovikTab() {
     loadUpdates();
   };
 
-  useEffect(() => { loadUpdates(); }, []);
+  useEffect(() => {
+    loadUpdates();
+  }, []);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <Card className="p-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Publish MANOVIK update</h3>
-          <Badge variant="secondary" className="text-[10px]">admin · unlimited</Badge>
+          <Badge variant="secondary" className="text-[10px]">
+            admin · unlimited
+          </Badge>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
           Announces a new brain version. Admin chat calls skip credit metering server-side.
@@ -820,8 +918,8 @@ function ManovikTab() {
           </Button>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
-          Ask MANOVIK to draft features into the workspace. Generated code lands in the
-          landing-page workspace; admin reviews the diff and applies. No repo writes.
+          Ask MANOVIK to draft features into the workspace. Generated code lands in the landing-page
+          workspace; admin reviews the diff and applies. No repo writes.
         </p>
         <Button className="mt-3" variant="outline" asChild>
           <Link to="/">Open workspace →</Link>
@@ -834,13 +932,20 @@ function ManovikTab() {
           {loading ? (
             <div className="px-3 py-6 text-center text-sm text-muted-foreground">Loading…</div>
           ) : updates.length === 0 ? (
-            <div className="px-3 py-6 text-center text-sm text-muted-foreground">No brain updates yet.</div>
+            <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+              No brain updates yet.
+            </div>
           ) : (
             updates.map((u) => (
-              <div key={u.id} className="border-t border-border/40 px-3 py-2 text-xs first:border-0">
+              <div
+                key={u.id}
+                className="border-t border-border/40 px-3 py-2 text-xs first:border-0"
+              >
                 <div className="flex justify-between">
                   <span className="font-mono font-medium">{u.version}</span>
-                  <span className="text-muted-foreground">{new Date(u.created_at).toLocaleString()}</span>
+                  <span className="text-muted-foreground">
+                    {new Date(u.created_at).toLocaleString()}
+                  </span>
                 </div>
                 {u.notes && <p className="mt-1 text-muted-foreground">{u.notes}</p>}
               </div>

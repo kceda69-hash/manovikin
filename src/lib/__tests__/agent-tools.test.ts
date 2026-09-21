@@ -12,7 +12,11 @@ describe("datetime.calc", () => {
     expect(o.weekday).toBe("Thursday");
   });
   it("subtracts days", async () => {
-    const r = await sandbox.run("datetime.calc", { op: "add", date: "2026-09-21", days: -21 }, user);
+    const r = await sandbox.run(
+      "datetime.calc",
+      { op: "add", date: "2026-09-21", days: -21 },
+      user,
+    );
     expect(r.ok).toBe(true);
     expect((r.output as { result: string }).result).toBe("2026-08-31");
   });
@@ -43,7 +47,12 @@ describe("text.stats", () => {
   it("counts words, sentences and reading time", async () => {
     const r = await sandbox.run("text.stats", { input: "Hello world. This is a test." }, user);
     expect(r.ok).toBe(true);
-    const o = r.output as { words: number; sentences: number; characters: number; topKeywords: unknown[] };
+    const o = r.output as {
+      words: number;
+      sentences: number;
+      characters: number;
+      topKeywords: unknown[];
+    };
     expect(o.words).toBe(6);
     expect(o.sentences).toBe(2);
     expect(o.characters).toBe(28);
@@ -93,7 +102,9 @@ describe("data.convert", () => {
       user,
     );
     expect(r.ok).toBe(true);
-    expect((r.output as { result: Array<Record<string, string>> }).result[0]?.note).toBe('says "hi", ok');
+    expect((r.output as { result: Array<Record<string, string>> }).result[0]?.note).toBe(
+      'says "hi", ok',
+    );
   });
 });
 

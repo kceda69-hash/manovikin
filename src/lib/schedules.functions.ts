@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
 
-type Ctx = { supabase: any; userId: string };
+type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
 const CADENCES = ["hourly", "daily", "weekly"] as const;
 const MODES = ["build", "research", "operate", "clone"] as const;

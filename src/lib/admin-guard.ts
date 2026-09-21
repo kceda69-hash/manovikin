@@ -5,7 +5,10 @@
 
 type Ctx = {
   supabase: {
-    rpc: (name: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
+    rpc: (
+      name: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: unknown; error: unknown }>;
   };
   userId: string;
   claims?: { aal?: string; email?: string } | null;
@@ -17,7 +20,9 @@ function deny(reason: string, userId?: string): never {
   throw new Response("Not Found", { status: 404 });
 }
 
-export async function assertAdmin(context: unknown): Promise<{ userId: string; email: string | null }> {
+export async function assertAdmin(
+  context: unknown,
+): Promise<{ userId: string; email: string | null }> {
   const ctx = context as Ctx | undefined;
   if (!ctx || !ctx.userId) deny("no-context");
   const { supabase, userId, claims } = ctx!;

@@ -66,7 +66,8 @@ export const EVAL_CASES: readonly EvalCase[] = [
   {
     id: "code.debounce.py",
     kind: "coding",
-    prompt: "Write a Python decorator `debounce(wait_ms)` that debounces a function call. Return only code.",
+    prompt:
+      "Write a Python decorator `debounce(wait_ms)` that debounces a function call. Return only code.",
     expectIncludes: ["def debounce", "wait_ms"],
     expectTier: "hard",
     weight: 2,
@@ -153,7 +154,8 @@ export const EVAL_CASES: readonly EvalCase[] = [
   {
     id: "classify.sentiment.neg",
     kind: "classification",
-    prompt: "Sentiment (positive/negative/neutral) of 'Worst purchase ever, total waste' — one word.",
+    prompt:
+      "Sentiment (positive/negative/neutral) of 'Worst purchase ever, total waste' — one word.",
     expectIncludes: ["negative"],
     expectTier: "standard",
     weight: 1,
@@ -322,15 +324,16 @@ export function gradeCase(
   }
   if (c.expectTool) {
     if (!toolCalls.includes(c.expectTool)) {
-      return { passed: false, reason: `expected tool ${c.expectTool}, got [${toolCalls.join(",")}]` };
+      return {
+        passed: false,
+        reason: `expected tool ${c.expectTool}, got [${toolCalls.join(",")}]`,
+      };
     }
   }
   return { passed: true };
 }
 
-export type ModelFn = (
-  prompt: string,
-) => Promise<{ output: string; toolCalls?: string[] }>;
+export type ModelFn = (prompt: string) => Promise<{ output: string; toolCalls?: string[] }>;
 
 export async function runLiveEvals(
   call: ModelFn,

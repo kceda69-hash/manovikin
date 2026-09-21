@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 const STEPS = [
   {
     name: "Write down what the site must do",
-    text: "Before prompting, list the pages you need, who visits them, and the one action a visitor should take. A prompt like \"a bakery site with a menu, an order form and WhatsApp contact\" produces a far better first build than \"make me a website\".",
+    text: 'Before prompting, list the pages you need, who visits them, and the one action a visitor should take. A prompt like "a bakery site with a menu, an order form and WhatsApp contact" produces a far better first build than "make me a website".',
   },
   {
     name: "Describe it to the AI builder in one prompt",
@@ -78,7 +78,10 @@ function HowToPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/40">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4" aria-hidden /> Back to home
           </Link>
           <Link to="/login" className="text-sm font-semibold underline">
@@ -112,11 +115,19 @@ function HowToPage() {
         <section className="space-y-3">
           <h2 className="text-2xl font-semibold">Common mistakes to avoid</h2>
           <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
-            <li>Prompting for a "beautiful website" without saying what it sells or who it serves.</li>
-            <li>Rebuilding from scratch after every change instead of refining the same project.</li>
-            <li>Launching without page titles and descriptions, so search results show nothing useful.</li>
+            <li>
+              Prompting for a "beautiful website" without saying what it sells or who it serves.
+            </li>
+            <li>
+              Rebuilding from scratch after every change instead of refining the same project.
+            </li>
+            <li>
+              Launching without page titles and descriptions, so search results show nothing useful.
+            </li>
             <li>Skipping the mobile check when most of your visitors are on phones.</li>
-            <li>Choosing a builder that locks the output, leaving you unable to export or self-host.</li>
+            <li>
+              Choosing a builder that locks the output, leaving you unable to export or self-host.
+            </li>
           </ul>
         </section>
 

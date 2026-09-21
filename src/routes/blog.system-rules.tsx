@@ -46,8 +46,10 @@ function SystemRulesPost() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-16 text-foreground">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:underline">Home</Link> / <span>Blog</span> /{" "}
-        <span>System rules</span>
+        <Link to="/" className="hover:underline">
+          Home
+        </Link>{" "}
+        / <span>Blog</span> / <span>System rules</span>
       </nav>
 
       <article className="prose prose-invert max-w-none">
@@ -55,33 +57,38 @@ function SystemRulesPost() {
           MANOVIK System Rules: Steer Your AI Agent with a .manovikrules File
         </h1>
         <p className="text-muted-foreground text-lg mb-8">
-          The fastest way to make an autonomous coding agent feel like a senior teammate
-          is to hand it your team's playbook. In MANOVIK, that playbook is a
-          <code> .manovikrules</code> file — a plain-text list of standards, patterns, and
-          preferences the agent reads on every turn. Think of it as the sovereign,
-          self-hosted answer to <em>.cursorrules</em>.
+          The fastest way to make an autonomous coding agent feel like a senior teammate is to hand
+          it your team's playbook. In MANOVIK, that playbook is a<code> .manovikrules</code> file —
+          a plain-text list of standards, patterns, and preferences the agent reads on every turn.
+          Think of it as the sovereign, self-hosted answer to <em>.cursorrules</em>.
         </p>
 
         <h2>Why rules beat prompting</h2>
         <p>
-          You <em>could</em> repeat "use TypeScript strict mode, prefer server functions,
-          never import from <code>src/pages</code>" in every prompt. But rules encode the
-          intent once, apply it everywhere, and survive context resets. Teams that adopt
-          rules see three wins:
+          You <em>could</em> repeat "use TypeScript strict mode, prefer server functions, never
+          import from <code>src/pages</code>" in every prompt. But rules encode the intent once,
+          apply it everywhere, and survive context resets. Teams that adopt rules see three wins:
         </p>
         <ul>
-          <li><strong>Consistency</strong> — every generated file follows the same conventions.</li>
-          <li><strong>Efficiency</strong> — no re-explaining architecture on each task.</li>
-          <li><strong>Reviewability</strong> — the rules file is version-controlled and diff-able.</li>
+          <li>
+            <strong>Consistency</strong> — every generated file follows the same conventions.
+          </li>
+          <li>
+            <strong>Efficiency</strong> — no re-explaining architecture on each task.
+          </li>
+          <li>
+            <strong>Reviewability</strong> — the rules file is version-controlled and diff-able.
+          </li>
         </ul>
 
         <h2>Creating your first .manovikrules file</h2>
         <p>
-          Drop a <code>.manovikrules</code> file at the root of your repository. MANOVIK
-          loads it automatically before every agent turn. Keep it short — under 200 lines
-          is a good target — and phrase each rule as an imperative.
+          Drop a <code>.manovikrules</code> file at the root of your repository. MANOVIK loads it
+          automatically before every agent turn. Keep it short — under 200 lines is a good target —
+          and phrase each rule as an imperative.
         </p>
-        <pre><code>{`# .manovikrules
+        <pre>
+          <code>{`# .manovikrules
 
 ## Stack
 - TanStack Start + React 19, Tailwind v4, Supabase.
@@ -99,13 +106,14 @@ function SystemRulesPost() {
 ## Don't
 - Don't add src/pages/ — this is TanStack, routes go under src/routes/.
 - Don't touch src/routeTree.gen.ts (auto-generated).
-- Don't ship secrets to the client. process.env is server-only.`}</code></pre>
+- Don't ship secrets to the client. process.env is server-only.`}</code>
+        </pre>
 
         <h2>What to put in rules (and what not to)</h2>
         <p>
-          Rules shine for <strong>decisions the agent would otherwise re-litigate</strong>:
-          the stack, naming conventions, folder layout, forbidden patterns, preferred
-          libraries. Skip anything that changes per task — those belong in the prompt.
+          Rules shine for <strong>decisions the agent would otherwise re-litigate</strong>: the
+          stack, naming conventions, folder layout, forbidden patterns, preferred libraries. Skip
+          anything that changes per task — those belong in the prompt.
         </p>
         <ul>
           <li>✅ "Use zod for input validation."</li>
@@ -116,34 +124,41 @@ function SystemRulesPost() {
 
         <h2>Scoped rules for monorepos</h2>
         <p>
-          For large repos, place a <code>.manovikrules</code> at any subdirectory. MANOVIK
-          merges the closest rules file with the root — nearer files win on conflict.
-          This lets a <code>packages/api</code> workspace enforce different conventions
-          than <code>apps/web</code>.
+          For large repos, place a <code>.manovikrules</code> at any subdirectory. MANOVIK merges
+          the closest rules file with the root — nearer files win on conflict. This lets a{" "}
+          <code>packages/api</code> workspace enforce different conventions than{" "}
+          <code>apps/web</code>.
         </p>
 
         <h2>Rules vs. system prompt vs. memory</h2>
-        <p>
-          Three ways to steer MANOVIK, in order of persistence:
-        </p>
+        <p>Three ways to steer MANOVIK, in order of persistence:</p>
         <ol>
-          <li><strong>System prompt</strong> — one-off, per conversation.</li>
-          <li><strong>Memory</strong> — cross-session facts about you or the project.</li>
-          <li><strong>.manovikrules</strong> — version-controlled team standards.</li>
+          <li>
+            <strong>System prompt</strong> — one-off, per conversation.
+          </li>
+          <li>
+            <strong>Memory</strong> — cross-session facts about you or the project.
+          </li>
+          <li>
+            <strong>.manovikrules</strong> — version-controlled team standards.
+          </li>
         </ol>
 
         <h2>Migrating from .cursorrules</h2>
         <p>
-          Already have a <code>.cursorrules</code>? Copy it to <code>.manovikrules</code> and
-          delete anything Cursor-specific (IDE shortcuts, chat behavior). The vast majority
-          of coding conventions transfer directly.
+          Already have a <code>.cursorrules</code>? Copy it to <code>.manovikrules</code> and delete
+          anything Cursor-specific (IDE shortcuts, chat behavior). The vast majority of coding
+          conventions transfer directly.
         </p>
 
         <h2>Try it</h2>
         <p>
-          Open a project on <Link to="/" className="text-primary hover:underline">MANOVIK</Link>,
-          add a <code>.manovikrules</code> at the repo root, and watch the next agent turn
-          honor it — with no extra prompting.
+          Open a project on{" "}
+          <Link to="/" className="text-primary hover:underline">
+            MANOVIK
+          </Link>
+          , add a <code>.manovikrules</code> at the repo root, and watch the next agent turn honor
+          it — with no extra prompting.
         </p>
       </article>
     </main>

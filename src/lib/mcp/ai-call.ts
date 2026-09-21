@@ -90,7 +90,10 @@ export async function askManovik(opts: AskOptions): Promise<AskResult> {
   const body: Record<string, unknown> = {
     model: route.model,
     messages: [
-      { role: "system", content: opts.system ? `${MANOVIK_SYSTEM}\n\n${opts.system}` : MANOVIK_SYSTEM },
+      {
+        role: "system",
+        content: opts.system ? `${MANOVIK_SYSTEM}\n\n${opts.system}` : MANOVIK_SYSTEM,
+      },
       { role: "user", content: opts.prompt },
     ],
   };

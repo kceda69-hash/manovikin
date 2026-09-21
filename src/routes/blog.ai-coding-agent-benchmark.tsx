@@ -156,7 +156,10 @@ function BenchmarkPage() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/40">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4" /> Back to home
           </Link>
           <span className="text-sm font-semibold">Blog</span>
@@ -173,8 +176,8 @@ function BenchmarkPage() {
           </h1>
           <p className="text-muted-foreground">
             Which is the best AI for coding in 2026? We ran MANOVIK, Cursor, and Windsurf through
-            SWE-bench Verified plus 80 real-world development tasks from our internal harness.
-            Same models where possible, same hardware, same acceptance criteria.
+            SWE-bench Verified plus 80 real-world development tasks from our internal harness. Same
+            models where possible, same hardware, same acceptance criteria.
           </p>
         </div>
 
@@ -190,11 +193,12 @@ function BenchmarkPage() {
             >
               SWE-bench Verified
             </a>{" "}
-            500-issue split with default configuration and no manual intervention. The internal harness
-            adds 80 tasks drawn from real customer projects across three categories: small tasks (under
-            200 LOC), medium refactors (200-1000 LOC), and greenfield features with tests. Runs happened
-            in an identical dev container on an M2 Pro with a warm dependency cache. Cost figures use
-            each vendor's public API pricing on July 1, 2026 and exclude seat licenses.
+            500-issue split with default configuration and no manual intervention. The internal
+            harness adds 80 tasks drawn from real customer projects across three categories: small
+            tasks (under 200 LOC), medium refactors (200-1000 LOC), and greenfield features with
+            tests. Runs happened in an identical dev container on an M2 Pro with a warm dependency
+            cache. Cost figures use each vendor's public API pricing on July 1, 2026 and exclude
+            seat licenses.
           </p>
         </section>
 
@@ -214,15 +218,15 @@ function BenchmarkPage() {
             MANOVIK leads on every headline metric, but the gap on SWE-bench Verified is narrow — a
             single-digit percentage-point lead is well within the noise you see between agent runs.
             The larger, more decisive gap shows up on the internal harness, especially on first-pass
-            PR acceptance and test-suite pass rate. That mirrors what we see in production: SWE-bench
-            rewards patching a known bug, while shipping a feature requires the agent to make
-            architectural choices that survive human review.
+            PR acceptance and test-suite pass rate. That mirrors what we see in production:
+            SWE-bench rewards patching a known bug, while shipping a feature requires the agent to
+            make architectural choices that survive human review.
           </p>
           <p>
             Cost per resolved task is the other outlier. MANOVIK's planner batches tool calls and
             avoids redundant file reads, which cuts token spend roughly in half versus Windsurf on
-            medium tasks. On a team completing 500 tasks a month, that difference is $85 versus
-            $180 in API costs alone.
+            medium tasks. On a team completing 500 tasks a month, that difference is $85 versus $180
+            in API costs alone.
           </p>
         </section>
 

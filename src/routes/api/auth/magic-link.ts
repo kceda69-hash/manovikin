@@ -18,11 +18,7 @@ const ALLOWED_REDIRECT_HOSTS = new Set([
 function getClientIp(request: Request): string {
   const fwd = request.headers.get("x-forwarded-for");
   if (fwd) return fwd.split(",")[0]!.trim();
-  return (
-    request.headers.get("cf-connecting-ip") ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
+  return request.headers.get("cf-connecting-ip") || request.headers.get("x-real-ip") || "unknown";
 }
 
 function safeRedirect(input: string | undefined, origin: string): string {
@@ -68,10 +64,7 @@ export const Route = createFileRoute("/api/auth/magic-link")({
 
         if (rlErr) {
           console.error("[magic-link] rate-limit rpc failed", rlErr);
-          return Response.json(
-            { error: "Service unavailable" },
-            { status: 503 },
-          );
+          return Response.json({ error: "Service unavailable" }, { status: 503 });
         }
 
         const result = rl as {
@@ -100,18 +93,13 @@ export const Route = createFileRoute("/api/auth/magic-link")({
         // Use the publishable key client — signInWithOtp is meant to be called
         // client-side, but doing it server-side lets us apply the rate limit
         // before Supabase even accepts the request.
-        const supabaseUrl =
-          import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
         const publishableKey =
-          import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-          process.env.SUPABASE_PUBLISHABLE_KEY;
+          import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
 
         if (!supabaseUrl || !publishableKey) {
           console.error("[magic-link] missing supabase env");
-          return Response.json(
-            { error: "Server configuration error" },
-            { status: 500 },
-          );
+          return Response.json({ error: "Server configuration error" }, { status: 500 });
         }
 
         const client = createClient(supabaseUrl, publishableKey, {

@@ -45,7 +45,6 @@ import { getManovikDashboard, getUiPrefs, setUiPref } from "@/lib/manovik-balanc
 import { streamImage } from "@/lib/streamImage";
 import { useI18n } from "@/lib/i18n";
 
-
 import {
   listThreads,
   createThread,
@@ -54,15 +53,61 @@ import {
   parseMessages,
 } from "@/lib/chat.functions";
 
+/** Minimal Web Speech API typings for the voice-input feature (not in TS's DOM lib). */
+interface SpeechRecognitionAlternative {
+  readonly transcript: string;
+}
+
+interface SpeechRecognitionResult {
+  readonly length: number;
+  readonly [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionResultList {
+  readonly length: number;
+  readonly [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  readonly results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionInstance {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+}
+
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognitionInstance;
+}
+
+interface WindowWithSpeechRecognition {
+  readonly SpeechRecognition?: SpeechRecognitionConstructor;
+  readonly webkitSpeechRecognition?: SpeechRecognitionConstructor;
+}
+
 export const Route = createFileRoute("/chat")({
   component: ChatPage,
   head: () => ({
     meta: [
       { title: "MANOVIK AI Chat Console" },
-      { name: "description", content: "Chat console for MANOVIK AI — stream code, plans, and answers from your autonomous AI agent in real time." },
+      {
+        name: "description",
+        content:
+          "Chat console for MANOVIK AI — stream code, plans, and answers from your autonomous AI agent in real time.",
+      },
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "MANOVIK AI Chat Console" },
-      { property: "og:description", content: "Stream code, plans, and answers from your autonomous AI agent." },
+      {
+        property: "og:description",
+        content: "Stream code, plans, and answers from your autonomous AI agent.",
+      },
       { property: "og:url", content: "https://manovik.in/chat" },
     ],
   }),
@@ -113,7 +158,6 @@ function ChatPage() {
     if (!prefsHydrated.current || !user) return;
     persistUiPref({ data: { key: "dashboardOpen", value: desktopDashboardOpen } }).catch(() => {});
   }, [desktopDashboardOpen, user, persistUiPref]);
-
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -178,7 +222,6 @@ function ChatPage() {
     };
   }, [activeId]);
 
-
   const handleNew = async () => {
     const { thread } = await createThread();
     await refreshThreads();
@@ -207,9 +250,6 @@ function ChatPage() {
   if (loading || !user || bootstrapping || !activeId) {
     return <FullPageChatSkeleton />;
   }
-
-
-
 
   const handleSelect = (id: string) => {
     setActiveId(id);
@@ -260,7 +300,13 @@ function ChatPage() {
               </SheetContent>
             </Sheet>
             <Link to="/" className="flex min-w-0 flex-1 items-center gap-2">
-              <img src={logo} alt="MANOVIK AI" width={24} height={24} className="h-6 w-6 shrink-0" />
+              <img
+                src={logo}
+                alt="MANOVIK AI"
+                width={24}
+                height={24}
+                className="h-6 w-6 shrink-0"
+              />
               <span className="truncate text-sm font-bold tracking-wider text-gradient">
                 MANOVIK AI
               </span>
@@ -273,12 +319,7 @@ function ChatPage() {
             >
               <LayoutDashboard className="h-5 w-5" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t("aria.newChat")}
-              onClick={handleNew}
-            >
+            <Button variant="ghost" size="icon" aria-label={t("aria.newChat")} onClick={handleNew}>
               <MessageSquarePlus className="h-5 w-5" />
             </Button>
             <Sheet open={dashboardOpen} onOpenChange={setDashboardOpen}>
@@ -291,7 +332,12 @@ function ChatPage() {
             </Sheet>
           </header>
 
-          <ChatPanel key={threadKey} threadId={activeId} initialMessages={initialMessages} historyLoading={historyLoading} />
+          <ChatPanel
+            key={threadKey}
+            threadId={activeId}
+            initialMessages={initialMessages}
+            historyLoading={historyLoading}
+          />
         </div>
         <div
           aria-hidden={!desktopDashboardOpen}
@@ -318,7 +364,9 @@ function ChatPage() {
           aria-label={t("aria.showDashboard")}
           onClick={() => setDesktopDashboardOpen(true)}
           className={`fixed right-4 top-4 z-20 hidden h-9 w-9 shadow-md md:inline-flex transition-all duration-300 ease-out motion-reduce:transition-none ${
-            desktopDashboardOpen ? "pointer-events-none scale-90 opacity-0" : "scale-100 opacity-100"
+            desktopDashboardOpen
+              ? "pointer-events-none scale-90 opacity-0"
+              : "scale-100 opacity-100"
           }`}
         >
           <PanelRightOpen className="h-4 w-4" />
@@ -342,10 +390,18 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
   const credits = data?.balance.credits ?? 0;
   const used = data?.balance.monthUsed ?? 0;
   const capacity = Math.max(credits + used, 1);
-  const remainingPct = data?.user.isAdmin ? 100 : Math.max(0, Math.min(100, (credits / capacity) * 100));
+  const remainingPct = data?.user.isAdmin
+    ? 100
+    : Math.max(0, Math.min(100, (credits / capacity) * 100));
 
   return (
-    <aside className={mobile ? "h-full overflow-y-auto p-4" : "h-full w-72 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur"}>
+    <aside
+      className={
+        mobile
+          ? "h-full overflow-y-auto p-4"
+          : "h-full w-72 shrink-0 overflow-y-auto border-l border-border/40 bg-background/80 p-4 backdrop-blur"
+      }
+    >
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
@@ -376,31 +432,51 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
           <section className="surface-card rounded-xl p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("dashboard.remaining")}</p>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  {t("dashboard.remaining")}
+                </p>
                 <div className="mt-1 flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-gradient">{data.user.isAdmin ? "∞" : credits}</span>
-                  <span className="text-xs text-muted-foreground">{t("dashboard.creditsUnit")}</span>
+                  <span className="text-3xl font-bold text-gradient">
+                    {data.user.isAdmin ? "∞" : credits}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {t("dashboard.creditsUnit")}
+                  </span>
                 </div>
               </div>
               <Wallet className="h-5 w-5 text-primary" />
             </div>
             <Progress value={remainingPct} className="mt-4 h-2" />
             <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
-              <span>{data.user.isAdmin ? t("dashboard.adminBypass") : t("dashboard.usedMonth", { n: used })}</span>
+              <span>
+                {data.user.isAdmin
+                  ? t("dashboard.adminBypass")
+                  : t("dashboard.usedMonth", { n: used })}
+              </span>
               <span>{Math.round(remainingPct)}%</span>
             </div>
           </section>
 
           <div className="grid grid-cols-2 gap-3">
-            <MetricCard icon={BarChart3} label={t("dashboard.metric.messages")} value={data.usage.messages.toLocaleString()} />
-            <MetricCard icon={MessageSquarePlus} label={t("dashboard.metric.threads")} value={data.usage.threads.toLocaleString()} />
+            <MetricCard
+              icon={BarChart3}
+              label={t("dashboard.metric.messages")}
+              value={data.usage.messages.toLocaleString()}
+            />
+            <MetricCard
+              icon={MessageSquarePlus}
+              label={t("dashboard.metric.threads")}
+              value={data.usage.threads.toLocaleString()}
+            />
           </div>
 
           <section className="surface-card rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Crown className="h-4 w-4 text-primary" />
-                <span className="text-sm font-semibold">{data.plan} {t("dashboard.plan.suffix")}</span>
+                <span className="text-sm font-semibold">
+                  {data.plan} {t("dashboard.plan.suffix")}
+                </span>
               </div>
               <Button asChild size="sm" variant="outline" className="h-8 text-xs">
                 <Link to="/billing">
@@ -419,23 +495,37 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold">{t("dashboard.creditActivity")}</h3>
               <div className="flex items-center gap-3">
-                <Link to="/dashboard" className="text-xs text-muted-foreground hover:text-foreground">Dashboard</Link>
-                <Link to="/account" className="text-xs text-muted-foreground hover:text-foreground">Account</Link>
-                <Link to="/balance" className="text-xs text-primary hover:underline">{t("cta.open")}</Link>
+                <Link
+                  to="/dashboard"
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Dashboard
+                </Link>
+                <Link to="/account" className="text-xs text-muted-foreground hover:text-foreground">
+                  Account
+                </Link>
+                <Link to="/balance" className="text-xs text-primary hover:underline">
+                  {t("cta.open")}
+                </Link>
               </div>
             </div>
             <div className="space-y-2">
               {data.recentLedger.length === 0 ? (
                 <p className="text-xs text-muted-foreground">{t("dashboard.noCredits")}</p>
               ) : (
-                data.recentLedger.slice(0, 4).map((row: { delta: number; reason: string; created_at: string }, i: number) => (
-                  <div key={`${row.created_at}-${i}`} className="flex items-center justify-between gap-2 text-xs">
-                    <span className="truncate text-muted-foreground">{row.reason}</span>
-                    <span className={row.delta < 0 ? "text-destructive" : "text-primary"}>
-                      {row.delta > 0 ? `+${row.delta}` : row.delta}
-                    </span>
-                  </div>
-                ))
+                data.recentLedger
+                  .slice(0, 4)
+                  .map((row: { delta: number; reason: string; created_at: string }, i: number) => (
+                    <div
+                      key={`${row.created_at}-${i}`}
+                      className="flex items-center justify-between gap-2 text-xs"
+                    >
+                      <span className="truncate text-muted-foreground">{row.reason}</span>
+                      <span className={row.delta < 0 ? "text-destructive" : "text-primary"}>
+                        {row.delta > 0 ? `+${row.delta}` : row.delta}
+                      </span>
+                    </div>
+                  ))
               )}
             </div>
           </section>
@@ -443,18 +533,32 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
           <section className="surface-card rounded-xl p-4">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold">{t("dashboard.security")}</h3>
-              <Link to="/audit" className="text-xs text-primary hover:underline">{t("dashboard.auditLog")}</Link>
+              <Link to="/audit" className="text-xs text-primary hover:underline">
+                {t("dashboard.auditLog")}
+              </Link>
             </div>
             <div className="space-y-2">
               {data.recentAudit.length === 0 ? (
                 <p className="text-xs text-muted-foreground">{t("dashboard.noSecurity")}</p>
               ) : (
-                data.recentAudit.slice(0, 3).map((row: { event_type: string; summary: string | null; created_at: string }, i: number) => (
-                  <div key={`${row.created_at}-${i}`} className="rounded-lg border border-border/40 bg-background/40 p-2">
-                    <div className="text-[11px] font-medium">{row.event_type}</div>
-                    <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{row.summary ?? t("dashboard.recorded")}</div>
-                  </div>
-                ))
+                data.recentAudit
+                  .slice(0, 3)
+                  .map(
+                    (
+                      row: { event_type: string; summary: string | null; created_at: string },
+                      i: number,
+                    ) => (
+                      <div
+                        key={`${row.created_at}-${i}`}
+                        className="rounded-lg border border-border/40 bg-background/40 p-2"
+                      >
+                        <div className="text-[11px] font-medium">{row.event_type}</div>
+                        <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                          {row.summary ?? t("dashboard.recorded")}
+                        </div>
+                      </div>
+                    ),
+                  )
               )}
             </div>
           </section>
@@ -468,7 +572,15 @@ function DashboardPanel({ mobile = false }: { mobile?: boolean }) {
   );
 }
 
-function MetricCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}) {
   return (
     <section className="surface-card rounded-xl p-3">
       <Icon className="h-4 w-4 text-primary" />
@@ -501,7 +613,10 @@ function SidebarBody({
         <img src={logo} alt="MANOVIK AI" width={28} height={28} className="h-7 w-7" />
         <span className="text-base font-bold tracking-wider text-gradient">MANOVIK AI</span>
       </Link>
-      <Button onClick={onNew} className="mb-3 w-full bg-aurora text-primary-foreground hover:opacity-90">
+      <Button
+        onClick={onNew}
+        className="mb-3 w-full bg-aurora text-primary-foreground hover:opacity-90"
+      >
         <Plus className="h-4 w-4" /> New chat
       </Button>
       <div className="-mx-1 flex-1 space-y-1 overflow-y-auto px-1">
@@ -612,7 +727,7 @@ function ChatPanel({
   // --- JARVIS voice ---
   const [listening, setListening] = useState(false);
   const [speakOn, setSpeakOn] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const spokenRef = useRef<string | null>(null);
 
   const generateImage = useCallback(
@@ -645,8 +760,8 @@ function ChatPanel({
   );
 
   const toggleListening = useCallback(() => {
-    const SR =
-      (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition ?? null;
+    const speechWindow = window as unknown as WindowWithSpeechRecognition;
+    const SR = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
     if (!SR) {
       toast.error("Voice input isn't supported in this browser");
       return;
@@ -660,9 +775,9 @@ function ChatPanel({
     rec.continuous = false;
     rec.interimResults = true;
     rec.lang = navigator.language || "en-US";
-    rec.onresult = (e: any) => {
+    rec.onresult = (e) => {
       const transcript = Array.from(e.results)
-        .map((r: any) => r[0].transcript)
+        .map((r) => r[0].transcript)
         .join(" ");
       setInput(transcript);
     };
@@ -702,9 +817,14 @@ function ChatPanel({
     };
   }, []);
 
-
   useEffect(() => {
-    if (pendingPromptLoadedRef.current || messages.length > 0 || status === "submitted" || status === "streaming") return;
+    if (
+      pendingPromptLoadedRef.current ||
+      messages.length > 0 ||
+      status === "submitted" ||
+      status === "streaming"
+    )
+      return;
     pendingPromptLoadedRef.current = true;
     try {
       const raw = sessionStorage.getItem("manovik:pending-prompt");
@@ -713,7 +833,10 @@ function ChatPanel({
       const saved = JSON.parse(raw) as { prompt?: string; target?: string; model?: string };
       const prompt = saved.prompt?.trim();
       if (!prompt) return;
-      const context = [saved.target && `Target: ${saved.target}`, saved.model && `Model: ${saved.model}`]
+      const context = [
+        saved.target && `Target: ${saved.target}`,
+        saved.model && `Model: ${saved.model}`,
+      ]
         .filter(Boolean)
         .join(" · ");
       void sendMessage({ text: context ? `${prompt}\n\n${context}` : prompt });
@@ -738,7 +861,6 @@ function ChatPanel({
       behavior: justSent ? "auto" : "smooth",
     });
   }, [messages, status]);
-
 
   // Auto-grow textarea
   useEffect(() => {
@@ -768,8 +890,6 @@ function ChatPanel({
       bottomRef.current?.scrollIntoView({ block: "end" });
     });
   };
-
-
 
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -811,7 +931,8 @@ function ChatPanel({
                 How can I help today?
               </h2>
               <p className="mt-2 max-w-md px-2 text-sm text-muted-foreground">
-                Ask MANOVIK AI to write code, design a feature, debug a bug, draft an API, or anything else.
+                Ask MANOVIK AI to write code, design a feature, debug a bug, draft an API, or
+                anything else.
               </p>
               <div className="mt-6 grid w-full max-w-xl grid-cols-1 gap-2 sm:grid-cols-2">
                 {suggestions.map((s) => (
@@ -824,7 +945,9 @@ function ChatPanel({
                     }}
                     className="surface-card group flex items-start gap-2 rounded-xl px-3 py-3 text-left text-sm transition hover:ring-glow"
                   >
-                    <span className="text-base leading-none" aria-hidden>{s.icon}</span>
+                    <span className="text-base leading-none" aria-hidden>
+                      {s.icon}
+                    </span>
                     <span className="min-w-0 flex-1">{s.text}</span>
                   </button>
                 ))}
@@ -872,7 +995,6 @@ function ChatPanel({
           )}
           <div ref={bottomRef} aria-hidden className="h-px w-full" />
         </div>
-
       </div>
 
       <form
@@ -911,7 +1033,11 @@ function ChatPanel({
             onClick={toggleListening}
             className="h-8 rounded-full"
           >
-            {listening ? <Square className="mr-1.5 h-3.5 w-3.5" /> : <Mic className="mr-1.5 h-3.5 w-3.5" />}
+            {listening ? (
+              <Square className="mr-1.5 h-3.5 w-3.5" />
+            ) : (
+              <Mic className="mr-1.5 h-3.5 w-3.5" />
+            )}
             {listening ? "Listening…" : "Speak"}
           </Button>
           <Button
@@ -928,7 +1054,11 @@ function ChatPanel({
             }}
             className="h-8 rounded-full"
           >
-            {speakOn ? <Volume2 className="mr-1.5 h-3.5 w-3.5" /> : <VolumeX className="mr-1.5 h-3.5 w-3.5" />}
+            {speakOn ? (
+              <Volume2 className="mr-1.5 h-3.5 w-3.5" />
+            ) : (
+              <VolumeX className="mr-1.5 h-3.5 w-3.5" />
+            )}
             JARVIS voice
           </Button>
           <Button asChild type="button" size="sm" variant="outline" className="h-8 rounded-full">
@@ -944,7 +1074,9 @@ function ChatPanel({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKey}
             placeholder={
-              imageMode ? `Describe the ${imageQuality.toUpperCase()} image to render…` : "Message MANOVIK AI…"
+              imageMode
+                ? `Describe the ${imageQuality.toUpperCase()} image to render…`
+                : "Message MANOVIK AI…"
             }
             aria-label={imageMode ? "Describe the image to generate" : "Message MANOVIK AI"}
             rows={1}
@@ -972,7 +1104,6 @@ function ChatPanel({
           MANOVIK AI may make mistakes. Verify important information.
         </p>
       </form>
-
     </main>
   );
 }
@@ -996,7 +1127,9 @@ function MessageBubble({ message }: { message: UIMessage }) {
     <div className="flex gap-2 sm:gap-3">
       <img src={logo} alt="MANOVIK AI" width={28} height={28} className="mt-1 h-7 w-7 shrink-0" />
       <div className="prose prose-invert min-w-0 max-w-none flex-1 text-foreground prose-pre:my-2 prose-pre:rounded-lg prose-pre:bg-secondary prose-pre:p-3 prose-pre:text-xs prose-code:rounded prose-code:bg-secondary prose-code:px-1.5 prose-code:py-0.5 prose-code:text-[0.85em] prose-code:before:content-[''] prose-code:after:content-['']">
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ pre: PreBlock }}>{text}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ pre: PreBlock }}>
+          {text}
+        </ReactMarkdown>
       </div>
     </div>
   );
@@ -1050,4 +1183,3 @@ function FullPageChatSkeleton() {
     </div>
   );
 }
-

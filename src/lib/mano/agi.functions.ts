@@ -1,8 +1,26 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Json } from "@/integrations/supabase/types";
 
-type Ctx = { supabase: any; userId: string };
+/**
+ * Minimal structural stand-in for the supabase client's chained query builder,
+ * following the SupabaseLike pattern in agi.server.ts / training.server.ts.
+ * (The manovik_agi_* tables are not in the generated Database types, so the
+ * typed client cannot express them.)
+ */
+interface AgiQuery extends Promise<{ data: Json[] | null; error: { message: string } | null }> {
+  select: (columns: string) => AgiQuery;
+  insert: (row: Record<string, unknown>) => AgiQuery;
+  update: (values: Record<string, unknown>) => AgiQuery;
+  delete: () => AgiQuery;
+  eq: (column: string, value: string | number | boolean) => AgiQuery;
+  order: (column: string, opts: { ascending: boolean }) => AgiQuery;
+  limit: (n: number) => Promise<{ data: Json[] | null; error: { message: string } | null }>;
+  single: () => Promise<{ data: { id: string }; error: { message: string } | null }>;
+}
+
+type Ctx = { supabase: { from: (table: string) => AgiQuery }; userId: string };
 
 const missionInput = z.object({
   goal: z.string().trim().min(4).max(4000),
@@ -14,7 +32,7 @@ export const runMission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => missionInput.parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as Ctx;
+    const { supabase, userId } = context as unknown as Ctx;
     const { runAgiMission } = await import("./agi.server");
 
     const { data: run, error } = await supabase
@@ -71,7 +89,7 @@ export const runMission = createServerFn({ method: "POST" })
 export const listMissions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context as Ctx;
+    const { supabase, userId } = context as unknown as Ctx;
     const [runs, lessons] = await Promise.all([
       supabase
         .from("manovik_agi_runs")
@@ -93,7 +111,7 @@ export const listMissions = createServerFn({ method: "GET" })
 export const trainMano = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context as Ctx;
+    const { supabase, userId } = context as unknown as Ctx;
     const { trainDoctrine } = await import("./training.server");
     return await trainDoctrine(supabase, userId);
   });
@@ -102,7 +120,7 @@ export const trainMano = createServerFn({ method: "POST" })
 export const getDoctrine = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase, userId } = context as Ctx;
+    const { supabase, userId } = context as unknown as Ctx;
     const { data } = await supabase
       .from("manovik_agi_doctrine")
       .select("doctrine, runs_used, lessons_used, created_at")
@@ -118,7 +136,7 @@ export const forgetLesson = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase, userId } = context as Ctx;
+    const { supabase, userId } = context as unknown as Ctx;
     const { error } = await supabase
       .from("manovik_agi_lessons")
       .delete()

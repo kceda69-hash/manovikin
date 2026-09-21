@@ -79,19 +79,50 @@ export const Route = createFileRoute("/vs-github-copilot")({
 
 function VsCopilotPage() {
   const rows: Array<{ feature: string; manovik: string; copilot: string }> = [
-    { feature: "Pricing model", manovik: "Lifetime — one-time payment", copilot: "Per-seat monthly subscription" },
-    { feature: "Sovereign / self-hosted deployment", manovik: "Yes — managed sovereign mode", copilot: "No — SaaS only" },
-    { feature: "Local model support", manovik: "Yes (Ollama / vLLM / custom endpoints)", copilot: "No" },
-    { feature: "Code privacy", manovik: "Repo never leaves your network in sovereign mode", copilot: "Snippets sent to GitHub for inference" },
-    { feature: "Compliance posture", manovik: "On-prem path for SOC2 / HIPAA / GDPR / DPDP", copilot: "SaaS DPA only" },
-    { feature: "Model choice", manovik: "Bring any OpenAI-compatible model", copilot: "GitHub-selected models" },
-    { feature: "Total cost over 3 years (per dev)", manovik: "One-time lifetime fee", copilot: "~$684+ per seat" },
+    {
+      feature: "Pricing model",
+      manovik: "Lifetime — one-time payment",
+      copilot: "Per-seat monthly subscription",
+    },
+    {
+      feature: "Sovereign / self-hosted deployment",
+      manovik: "Yes — managed sovereign mode",
+      copilot: "No — SaaS only",
+    },
+    {
+      feature: "Local model support",
+      manovik: "Yes (Ollama / vLLM / custom endpoints)",
+      copilot: "No",
+    },
+    {
+      feature: "Code privacy",
+      manovik: "Repo never leaves your network in sovereign mode",
+      copilot: "Snippets sent to GitHub for inference",
+    },
+    {
+      feature: "Compliance posture",
+      manovik: "On-prem path for SOC2 / HIPAA / GDPR / DPDP",
+      copilot: "SaaS DPA only",
+    },
+    {
+      feature: "Model choice",
+      manovik: "Bring any OpenAI-compatible model",
+      copilot: "GitHub-selected models",
+    },
+    {
+      feature: "Total cost over 3 years (per dev)",
+      manovik: "One-time lifetime fee",
+      copilot: "~$684+ per seat",
+    },
   ];
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-16 text-foreground">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:underline">Home</Link> / <span>vs GitHub Copilot</span>
+        <Link to="/" className="hover:underline">
+          Home
+        </Link>{" "}
+        / <span>vs GitHub Copilot</span>
       </nav>
 
       <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
@@ -99,18 +130,17 @@ function VsCopilotPage() {
       </h1>
       <p className="text-lg text-muted-foreground mb-10">
         Looking for a <strong>GitHub Copilot alternative</strong> with sovereign hosting,
-        predictable lifetime pricing, and zero data leaving your network? Here's the
-        honest head-to-head.
+        predictable lifetime pricing, and zero data leaving your network? Here's the honest
+        head-to-head.
       </p>
 
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">The 30-second summary</h2>
         <p className="leading-relaxed">
-          GitHub Copilot is a polished SaaS coding assistant — but every prompt and code
-          snippet leaves your network, and you keep paying per developer every month.
-          MANOVIK AI delivers the same in-editor experience with <strong>managed
-          sovereign hosting</strong>, <strong>local model support</strong>, and a
-          <strong> one-time lifetime price</strong>.
+          GitHub Copilot is a polished SaaS coding assistant — but every prompt and code snippet
+          leaves your network, and you keep paying per developer every month. MANOVIK AI delivers
+          the same in-editor experience with <strong>managed sovereign hosting</strong>,{" "}
+          <strong>local model support</strong>, and a<strong> one-time lifetime price</strong>.
         </p>
       </section>
 
@@ -141,10 +171,20 @@ function VsCopilotPage() {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Why teams switch from GitHub Copilot</h2>
         <ul className="space-y-3 list-disc pl-6">
-          <li><strong>Data privacy:</strong> in sovereign mode your code never leaves your network.</li>
-          <li><strong>Predictable cost:</strong> one lifetime payment replaces a forever per-seat bill.</li>
-          <li><strong>Compliance:</strong> cleaner story for SOC2, HIPAA, GDPR, and India's DPDP.</li>
-          <li><strong>Model freedom:</strong> bring any OpenAI-compatible model — not just what GitHub picks.</li>
+          <li>
+            <strong>Data privacy:</strong> in sovereign mode your code never leaves your network.
+          </li>
+          <li>
+            <strong>Predictable cost:</strong> one lifetime payment replaces a forever per-seat
+            bill.
+          </li>
+          <li>
+            <strong>Compliance:</strong> cleaner story for SOC2, HIPAA, GDPR, and India's DPDP.
+          </li>
+          <li>
+            <strong>Model freedom:</strong> bring any OpenAI-compatible model — not just what GitHub
+            picks.
+          </li>
         </ul>
       </section>
 
@@ -153,22 +193,31 @@ function VsCopilotPage() {
         <div className="space-y-4">
           <div>
             <h3 className="font-semibold">Is MANOVIK AI a good GitHub Copilot alternative?</h3>
-            <p className="text-muted-foreground">Yes — especially when privacy, lifetime pricing, or on-prem hosting matter.</p>
+            <p className="text-muted-foreground">
+              Yes — especially when privacy, lifetime pricing, or on-prem hosting matter.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">Does code leave my network?</h3>
-            <p className="text-muted-foreground">Not in sovereign mode — inference happens against your own local model endpoint.</p>
+            <p className="text-muted-foreground">
+              Not in sovereign mode — inference happens against your own local model endpoint.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">How does total cost of ownership compare?</h3>
-            <p className="text-muted-foreground">Copilot Business is ~$19/dev/month forever. MANOVIK is one-time lifetime + optional self-hosting — usually far cheaper over 2–3 years.</p>
+            <p className="text-muted-foreground">
+              Copilot Business is ~$19/dev/month forever. MANOVIK is one-time lifetime + optional
+              self-hosting — usually far cheaper over 2–3 years.
+            </p>
           </div>
         </div>
       </section>
 
       <section className="rounded-2xl border bg-card p-8 text-center">
         <h2 className="text-2xl font-bold mb-2">Try the sovereign Copilot alternative</h2>
-        <p className="text-muted-foreground mb-6">One payment. Unlimited use. Your code stays yours.</p>
+        <p className="text-muted-foreground mb-6">
+          One payment. Unlimited use. Your code stays yours.
+        </p>
         <Link
           to="/"
           className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90"

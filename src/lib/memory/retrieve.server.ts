@@ -6,9 +6,22 @@ import { embedTexts } from "@/lib/memory/embed.server";
 
 const MAX_BLOCK_CHARS = 6000;
 
+/**
+ * Replace ASCII control characters (U+0000-U+001F, U+007F) with a space.
+ * Written as a code-point loop instead of /[\u0000-\u001f\u007f]/g: those
+ * escapes trip no-control-regex, and the match set here is identical.
+ */
+function stripControlChars(text: string): string {
+  let out = "";
+  for (const ch of text) {
+    const code = ch.codePointAt(0) ?? 0; // ch from for..of is never empty
+    out += code < 0x20 || code === 0x7f ? " " : ch;
+  }
+  return out;
+}
+
 function sanitize(s: string, max: number): string {
-  return s
-    .replace(/[\u0000-\u001f\u007f]/g, " ")
+  return stripControlChars(s)
     .replace(/<\/?[^>]{0,80}>/g, " ")
     .replace(
       /\b(ignore (all |previous |above )?(prior |earlier )?(instructions|prompts?|rules)|disregard (the )?(system|above|previous)|you are now|act as|jailbreak|developer mode|system prompt)\b/gi,
@@ -23,7 +36,11 @@ function sanitize(s: string, max: number): string {
  * Returns a `<user_knowledge_memory>` block, or "" when there is nothing
  * relevant (or memory is not configured). Never throws.
  */
-export async function buildMemoryContext(userId: string, query: string, limit = 5): Promise<string> {
+export async function buildMemoryContext(
+  userId: string,
+  query: string,
+  limit = 5,
+): Promise<string> {
   const q = query.trim();
   if (!userId || q.length < 4) return "";
 
@@ -41,11 +58,14 @@ export async function buildMemoryContext(userId: string, query: string, limit = 
     const [vector] = await embedTexts([q.slice(0, 2000)]);
     if (!vector) return "";
 
-    const { data, error } = await supabaseAdmin.rpc("manovik_match_memory" as never, {
-      _user_id: userId,
-      query_embedding: JSON.stringify(vector),
-      match_count: limit,
-    } as never);
+    const { data, error } = await supabaseAdmin.rpc(
+      "manovik_match_memory" as never,
+      {
+        _user_id: userId,
+        query_embedding: JSON.stringify(vector),
+        match_count: limit,
+      } as never,
+    );
     if (error) throw new Error(error.message);
 
     const rows = (data ?? []) as Array<{ title: string; content: string; similarity: number }>;

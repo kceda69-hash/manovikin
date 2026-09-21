@@ -34,9 +34,7 @@ export const Route = createFileRoute("/students")({
           "Learn to build apps, APIs, and automations with an autonomous AI coding agent. Education pricing and classroom tools coming soon.",
       },
     ],
-    links: [
-      { rel: "canonical", href: "https://manovik.in/students" },
-    ],
+    links: [{ rel: "canonical", href: "https://manovik.in/students" }],
     scripts: [
       {
         type: "application/ld+json",
@@ -140,7 +138,8 @@ function StudentsPage() {
           style={{ animationDelay: "120ms", animationFillMode: "both" }}
         >
           A self-hosted, privacy-first AI coding agent that helps students learn modern development
-          and helps educators teach at scale. Education pricing and classroom features are coming soon.
+          and helps educators teach at scale. Education pricing and classroom features are coming
+          soon.
         </p>
 
         <div
@@ -148,7 +147,10 @@ function StudentsPage() {
           style={{ animationDelay: "240ms", animationFillMode: "both" }}
         >
           <a href="mailto:edu@manovik.in">
-            <Button size="lg" className="group relative overflow-hidden bg-aurora text-primary-foreground glow hover:opacity-95">
+            <Button
+              size="lg"
+              className="group relative overflow-hidden bg-aurora text-primary-foreground glow hover:opacity-95"
+            >
               <span className="relative z-10 inline-flex items-center">
                 Get in touch
                 <Mail className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
@@ -157,7 +159,11 @@ function StudentsPage() {
             </Button>
           </a>
           <Link to="/">
-            <Button size="lg" variant="outline" className="border-primary/40 bg-card/40 backdrop-blur hover-scale">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-primary/40 bg-card/40 backdrop-blur hover-scale"
+            >
               Explore MANOVIK
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -184,9 +190,9 @@ function StudentsPage() {
             <span className="card-border-glow" aria-hidden="true" />
             <h2 className="text-2xl font-bold md:text-3xl">Program details</h2>
             <p className="mt-4 text-muted-foreground">
-              We are building a dedicated education plan with verified student discounts, institution
-              licensing, and curriculum-aligned project templates. If you are a student, teacher, or
-              school administrator, reach out — we would love to shape this with you.
+              We are building a dedicated education plan with verified student discounts,
+              institution licensing, and curriculum-aligned project templates. If you are a student,
+              teacher, or school administrator, reach out — we would love to shape this with you.
             </p>
             <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
               <li className="flex items-start gap-3">
@@ -230,7 +236,9 @@ function StudentsPage() {
                   <div
                     key={item.q}
                     className={`overflow-hidden rounded-xl border transition-colors ${
-                      open ? "border-primary/40 bg-card/60" : "border-border/40 bg-card/40 hover:bg-card/60"
+                      open
+                        ? "border-primary/40 bg-card/60"
+                        : "border-border/40 bg-card/40 hover:bg-card/60"
                     }`}
                   >
                     <dt>

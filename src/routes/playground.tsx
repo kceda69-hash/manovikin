@@ -62,8 +62,8 @@ function PlaygroundPage() {
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">MANO 1.1 Playground</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Direct access to MANOVIK&apos;s own model. Every request runs the full MANO cycle —
-          plan, draft, adversarial review, synthesis — and reports what each stage cost.
+          Direct access to MANOVIK&apos;s own model. Every request runs the full MANO cycle — plan,
+          draft, adversarial review, synthesis — and reports what each stage cost.
         </p>
       </header>
 

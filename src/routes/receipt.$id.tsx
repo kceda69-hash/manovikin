@@ -10,7 +10,11 @@ export const Route = createFileRoute("/receipt/$id")({
   head: () => ({
     meta: [
       { title: "Receipt — MANOVIK AI" },
-      { name: "description", content: "View and download your MANOVIK AI payment receipt and tax invoice for this transaction." },
+      {
+        name: "description",
+        content:
+          "View and download your MANOVIK AI payment receipt and tax invoice for this transaction.",
+      },
       { property: "og:title", content: "Your MANOVIK AI receipt" },
       { property: "og:description", content: "View and download your MANOVIK AI tax invoice." },
       { name: "robots", content: "noindex" },
@@ -63,14 +67,17 @@ function ReceiptPage() {
   if (err) return <div className="p-10 text-center text-sm text-muted-foreground">{err}</div>;
   if (!p) return <div className="p-10 text-center text-sm text-muted-foreground">Loading…</div>;
 
-  const tax = Math.round(p.amount * 0.18 / 1.18);
+  const tax = Math.round((p.amount * 0.18) / 1.18);
   const net = p.amount - tax;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-4 py-8 print:py-0">
         <div className="flex items-center justify-between print:hidden">
-          <Link to="/billing" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/billing"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="h-4 w-4" /> Back to billing
           </Link>
           <Button onClick={() => window.print()} size="sm">
@@ -85,22 +92,32 @@ function ReceiptPage() {
               <div className="text-xs text-muted-foreground">Powered by KC 🇮🇳</div>
             </div>
             <div className="text-right">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Tax Invoice</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                Tax Invoice
+              </div>
               <div className="font-mono text-sm">{p.receipt_no ?? p.id.slice(0, 12)}</div>
-              <div className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleString()}</div>
+              <div className="text-xs text-muted-foreground">
+                {new Date(p.created_at).toLocaleString()}
+              </div>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-6 py-6 text-sm">
             <div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Billed to</div>
-              <div className="mt-1 font-medium">{p.name ?? user?.user_metadata?.display_name ?? "Customer"}</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                Billed to
+              </div>
+              <div className="mt-1 font-medium">
+                {p.name ?? user?.user_metadata?.display_name ?? "Customer"}
+              </div>
               <div className="text-muted-foreground">{p.email ?? user?.email}</div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wider text-muted-foreground">Payment</div>
               <div className="mt-1 font-mono text-xs">{p.razorpay_payment_id ?? "—"}</div>
-              <div className="font-mono text-xs text-muted-foreground">Order: {p.razorpay_order_id ?? "—"}</div>
+              <div className="font-mono text-xs text-muted-foreground">
+                Order: {p.razorpay_order_id ?? "—"}
+              </div>
               <div className="mt-1 inline-flex rounded-full bg-green-500/15 px-2 py-0.5 text-xs font-medium text-green-500">
                 {p.status === "paid" ? "PAID" : p.status.toUpperCase()}
               </div>
@@ -125,14 +142,16 @@ function ReceiptPage() {
               </tr>
               <tr>
                 <td className="py-3 text-base font-semibold">Total paid</td>
-                <td className="py-3 text-right text-base font-semibold">{fmt(p.amount, p.currency)}</td>
+                <td className="py-3 text-right text-base font-semibold">
+                  {fmt(p.amount, p.currency)}
+                </td>
               </tr>
             </tbody>
           </table>
 
           <div className="mt-8 border-t border-border/40 pt-4 text-xs text-muted-foreground">
-            Thank you for supporting MANOVIK. This is a system-generated receipt and is valid without a signature.
-            For questions, reply to your payment confirmation email.
+            Thank you for supporting MANOVIK. This is a system-generated receipt and is valid
+            without a signature. For questions, reply to your payment confirmation email.
           </div>
         </div>
       </div>

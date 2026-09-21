@@ -10,11 +10,34 @@ import { manoComplete } from "./engine.server";
 
 const CONTROLLER_MODEL = "google/gemini-3.7-flash";
 
-type SupabaseLike = { from: (t: string) => any };
+/** Minimal structural stand-in for the supabase client's chained query builder. */
+type SupabaseQuery = {
+  select: (columns: string) => SupabaseQuery;
+  eq: (column: string, value: string | number | boolean) => SupabaseQuery;
+  order: (column: string, opts: { ascending: boolean }) => SupabaseQuery;
+  limit: (n: number) => Promise<{ data: unknown[] | null }>;
+  update: (values: Record<string, unknown>) => SupabaseQuery;
+  insert: (row: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+};
+
+type SupabaseLike = { from: (t: string) => SupabaseQuery };
+
+/**
+ * Replace ASCII control characters (U+0000-U+001F, U+007F) with a space.
+ * Written as a code-point loop instead of /[\u0000-\u001f\u007f]/g: those
+ * escapes trip no-control-regex, and the match set here is identical.
+ */
+function stripControlChars(text: string): string {
+  let out = "";
+  for (const ch of text) {
+    const code = ch.codePointAt(0) ?? 0; // ch from for..of is never empty
+    out += code < 0x20 || code === 0x7f ? " " : ch;
+  }
+  return out;
+}
 
 function inert(text: string, max = 600): string {
-  return text
-    .replace(/[\u0000-\u001f\u007f]/g, " ")
+  return stripControlChars(text)
     .replace(
       /\b(ignore (all |previous |above )?(prior |earlier )?(instructions|prompts?|rules)|disregard (the )?(system|above|previous)|you are now|system prompt)\b/gi,
       "[redacted]",
@@ -29,6 +52,17 @@ export type TrainingExample = {
   score: number | null;
   answer: string;
 };
+
+interface AgiRunRow {
+  goal: unknown;
+  status: unknown;
+  score: unknown;
+  answer: unknown;
+}
+interface AgiLessonRow {
+  topic: unknown;
+  lesson: unknown;
+}
 
 /** Collect graded missions + lessons as a training corpus for this user. */
 export async function collectTrainingData(
@@ -51,15 +85,16 @@ export async function collectTrainingData(
       .limit(limit),
   ]);
 
-  const examples = ((runs.data ?? []) as any[]).map((r) => ({
-    goal: inert(r.goal, 400),
+  const examples = ((runs.data ?? []) as AgiRunRow[]).map((r) => ({
+    goal: inert(typeof r.goal === "string" ? r.goal : "", 400),
     status: String(r.status ?? "unknown"),
     score: typeof r.score === "number" ? r.score : null,
-    answer: inert(r.answer ?? "", 1200),
+    answer: inert(typeof r.answer === "string" ? r.answer : "", 1200),
   }));
 
-  const lessonLines = ((lessons.data ?? []) as any[]).map(
-    (l) => `[${inert(l.topic, 60)}] ${inert(l.lesson, 300)}`,
+  const lessonLines = ((lessons.data ?? []) as AgiLessonRow[]).map(
+    (l) =>
+      `[${inert(typeof l.topic === "string" ? l.topic : "", 60)}] ${inert(typeof l.lesson === "string" ? l.lesson : "", 300)}`,
   );
 
   return { examples, lessons: lessonLines };

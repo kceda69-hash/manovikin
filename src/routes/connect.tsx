@@ -17,8 +17,7 @@ export const Route = createFileRoute("/connect")({
       { property: "og:title", content: "Connect MANOVIK to your AI assistant" },
       {
         property: "og:description",
-        content:
-          "Step-by-step instructions to connect ChatGPT or Claude to MANOVIK via MCP.",
+        content: "Step-by-step instructions to connect ChatGPT or Claude to MANOVIK via MCP.",
       },
       { property: "og:url", content: "https://manovik.in/connect" },
     ],
@@ -55,13 +54,11 @@ function ConnectPage() {
             Connect your AI assistant to MANOVIK
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Paste this URL into ChatGPT or Claude and your assistant can use
-            MANOVIK's full brain — ask anything, generate and debug production
-            code with the Quantum Engineering Protocol, reverse-engineer
-            software, run sandboxed tools, and look up MANOVIK pricing, posts
-            and pages.
+            Paste this URL into ChatGPT or Claude and your assistant can use MANOVIK's full brain —
+            ask anything, generate and debug production code with the Quantum Engineering Protocol,
+            reverse-engineer software, run sandboxed tools, and look up MANOVIK pricing, posts and
+            pages.
           </p>
-
         </div>
 
         <Card className="mb-10 border-primary/30">
@@ -108,20 +105,17 @@ function ConnectPage() {
                   >
                     ChatGPT Connector settings
                   </a>{" "}
-                  and enable <strong>Developer mode</strong> (read the risk
-                  notice first).
+                  and enable <strong>Developer mode</strong> (read the risk notice first).
                 </li>
                 <li>
                   2. In the chat composer's <strong>+</strong> menu, turn on{" "}
                   <strong>Developer mode</strong>.
                 </li>
                 <li>
-                  3. Click <strong>Add sources</strong>, then{" "}
-                  <strong>Connect more</strong>.
+                  3. Click <strong>Add sources</strong>, then <strong>Connect more</strong>.
                 </li>
                 <li>
-                  4. Name the connector <em>MANOVIK</em> and paste the URL
-                  above.
+                  4. Name the connector <em>MANOVIK</em> and paste the URL above.
                 </li>
                 <li>5. Ask ChatGPT to use MANOVIK.</li>
               </ol>
@@ -148,12 +142,10 @@ function ConnectPage() {
                   .
                 </li>
                 <li>
-                  2. Name the connector <em>MANOVIK</em> and paste the URL
-                  above.
+                  2. Name the connector <em>MANOVIK</em> and paste the URL above.
                 </li>
                 <li>
-                  3. Enable the connector from the chat composer, then ask
-                  Claude to use MANOVIK.
+                  3. Enable the connector from the chat composer, then ask Claude to use MANOVIK.
                 </li>
               </ol>
             </CardContent>
@@ -161,8 +153,7 @@ function ConnectPage() {
         </div>
 
         <p className="mt-10 text-center text-sm text-muted-foreground">
-          Works with any MCP-compatible client (Cursor, Codex, and more) — paste
-          the same URL.
+          Works with any MCP-compatible client (Cursor, Codex, and more) — paste the same URL.
         </p>
       </div>
     </div>

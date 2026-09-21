@@ -30,16 +30,12 @@ async function waitForSession(ms = 12000) {
       const { data } = await supabase.auth.getSession();
       if (data.session) return data.session;
       if (Date.now() > deadline) return null;
-      await Promise.race([
-        signal,
-        new Promise((r) => setTimeout(r, 250)),
-      ]);
+      await Promise.race([signal, new Promise((r) => setTimeout(r, 250))]);
     }
   } finally {
     sub.subscription.unsubscribe();
   }
 }
-
 
 export const Route = createFileRoute("/auth/callback")({
   component: AuthCallbackPage,
@@ -110,14 +106,13 @@ function AuthCallbackPage() {
         setState("ok");
         // Clean the URL then redirect.
         window.history.replaceState({}, "", "/auth/callback");
-        setTimeout(() => navigate({ to: next as any }), 400);
+        setTimeout(() => navigate({ to: next }), 400);
       } catch (err) {
         if (cancelled) return;
         setErrMsg(err instanceof Error ? err.message : "Sign-in failed.");
         setState("error");
       }
     }
-
 
     complete();
     return () => {
@@ -132,18 +127,14 @@ function AuthCallbackPage() {
           <>
             <Loader2 className="mx-auto h-8 w-8 animate-spin text-muted-foreground" />
             <h1 className="mt-4 text-xl font-semibold">Signing you in…</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Verifying your magic link.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Verifying your magic link.</p>
           </>
         )}
         {state === "ok" && (
           <>
             <CheckCircle2 className="mx-auto h-8 w-8 text-green-500" />
             <h1 className="mt-4 text-xl font-semibold">Signed in</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Redirecting to your workspace…
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Redirecting to your workspace…</p>
           </>
         )}
         {state === "error" && (
@@ -151,10 +142,7 @@ function AuthCallbackPage() {
             <XCircle className="mx-auto h-8 w-8 text-red-500" />
             <h1 className="mt-4 text-xl font-semibold">Sign-in failed</h1>
             <p className="mt-1 text-sm text-muted-foreground">{errMsg}</p>
-            <a
-              href="/login"
-              className="mt-6 inline-block text-sm underline"
-            >
+            <a href="/login" className="mt-6 inline-block text-sm underline">
               Back to sign in
             </a>
           </>

@@ -15,7 +15,10 @@ export const Route = createFileRoute("/vs-roo-code")({
         content:
           "Roo Code alternative, Roo Cline alternative, autonomous coding agent, sovereign AI, MANOVIK vs Roo Code, VS Code AI agent",
       },
-      { property: "og:title", content: "MANOVIK AI vs Roo Code — The Sovereign, Lifetime-Priced Alternative" },
+      {
+        property: "og:title",
+        content: "MANOVIK AI vs Roo Code — The Sovereign, Lifetime-Priced Alternative",
+      },
       {
         property: "og:description",
         content:
@@ -25,7 +28,10 @@ export const Route = createFileRoute("/vs-roo-code")({
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "MANOVIK AI vs Roo Code" },
-      { name: "twitter:description", content: "The sovereign, lifetime-priced Roo Code alternative." },
+      {
+        name: "twitter:description",
+        content: "The sovereign, lifetime-priced Roo Code alternative.",
+      },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/vs-roo-code" }],
     scripts: [
@@ -76,25 +82,58 @@ export const Route = createFileRoute("/vs-roo-code")({
 
 function VsRooCodePage() {
   const rows: Array<{ feature: string; manovik: string; roo: string }> = [
-    { feature: "Delivery model", manovik: "Managed hosted product + sovereign option", roo: "VS Code extension (self-installed)" },
-    { feature: "Pricing model", manovik: "Lifetime — one-time payment + included credits", roo: "Free extension + BYO per-token API bills" },
-    { feature: "Cost predictability", manovik: "Flat lifetime; overage priced up front", roo: "Variable — scales linearly with tokens" },
-    { feature: "Sovereign / on-prem hosting", manovik: "Managed sovereign mode", roo: "DIY: you host the model, extension stays local" },
-    { feature: "Local model support", manovik: "Yes (Ollama / vLLM / OpenAI-compatible)", roo: "Yes, via manual configuration" },
-    { feature: "Key management", manovik: "Managed — no keys to rotate", roo: "You manage every provider key" },
-    { feature: "Out-of-the-box experience", manovik: "Hosted chat UI, auth, billing, audit trail", roo: "Editor extension only; rest is DIY" },
-    { feature: "Compliance posture", manovik: "Clear path to SOC2 / HIPAA / GDPR / DPDP", roo: "Depends on chosen model provider + your setup" },
+    {
+      feature: "Delivery model",
+      manovik: "Managed hosted product + sovereign option",
+      roo: "VS Code extension (self-installed)",
+    },
+    {
+      feature: "Pricing model",
+      manovik: "Lifetime — one-time payment + included credits",
+      roo: "Free extension + BYO per-token API bills",
+    },
+    {
+      feature: "Cost predictability",
+      manovik: "Flat lifetime; overage priced up front",
+      roo: "Variable — scales linearly with tokens",
+    },
+    {
+      feature: "Sovereign / on-prem hosting",
+      manovik: "Managed sovereign mode",
+      roo: "DIY: you host the model, extension stays local",
+    },
+    {
+      feature: "Local model support",
+      manovik: "Yes (Ollama / vLLM / OpenAI-compatible)",
+      roo: "Yes, via manual configuration",
+    },
+    {
+      feature: "Key management",
+      manovik: "Managed — no keys to rotate",
+      roo: "You manage every provider key",
+    },
+    {
+      feature: "Out-of-the-box experience",
+      manovik: "Hosted chat UI, auth, billing, audit trail",
+      roo: "Editor extension only; rest is DIY",
+    },
+    {
+      feature: "Compliance posture",
+      manovik: "Clear path to SOC2 / HIPAA / GDPR / DPDP",
+      roo: "Depends on chosen model provider + your setup",
+    },
   ];
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-16 text-foreground">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:underline">Home</Link> / <span>vs Roo Code</span>
+        <Link to="/" className="hover:underline">
+          Home
+        </Link>{" "}
+        / <span>vs Roo Code</span>
       </nav>
 
-      <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-        MANOVIK AI vs Roo Code
-      </h1>
+      <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">MANOVIK AI vs Roo Code</h1>
       <p className="text-lg text-muted-foreground mb-10">
         Looking for a <strong>Roo Code alternative</strong> with managed sovereign hosting and
         predictable, lifetime pricing instead of BYO-key per-token bills? Here's the honest
@@ -104,8 +143,8 @@ function VsRooCodePage() {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">The 30-second summary</h2>
         <p className="leading-relaxed">
-          Roo Code (formerly Roo Cline) is a capable open-source autonomous coding extension for
-          VS Code, but it's a <strong>DIY setup</strong>: you install the extension, wire your own
+          Roo Code (formerly Roo Cline) is a capable open-source autonomous coding extension for VS
+          Code, but it's a <strong>DIY setup</strong>: you install the extension, wire your own
           model keys, and pay per token forever. MANOVIK AI ships the same agentic loop as a
           <strong> fully managed product</strong> — with a hosted chat UI, optional{" "}
           <strong>managed sovereign infrastructure</strong>, and a{" "}
@@ -145,12 +184,12 @@ function VsRooCodePage() {
             per-token API bills from Anthropic, OpenAI, or OpenRouter.
           </li>
           <li>
-            <strong>Managed sovereign hosting:</strong> a real on-prem option run for you, not a
-            DIY project stitched together with a local extension.
+            <strong>Managed sovereign hosting:</strong> a real on-prem option run for you, not a DIY
+            project stitched together with a local extension.
           </li>
           <li>
-            <strong>Full product, not just an extension:</strong> hosted chat UI, auth, billing,
-            and audit trail out of the box — no VS Code required.
+            <strong>Full product, not just an extension:</strong> hosted chat UI, auth, billing, and
+            audit trail out of the box — no VS Code required.
           </li>
           <li>
             <strong>Zero key management:</strong> nothing to rotate, nothing to leak from a
@@ -167,8 +206,8 @@ function VsRooCodePage() {
         <h2 className="text-2xl font-semibold mb-4">When Roo Code is still a good fit</h2>
         <p className="leading-relaxed text-muted-foreground">
           Roo Code is great if you're a solo developer who wants a free extension, already lives
-          inside VS Code, and is comfortable managing your own API keys and token spend. MANOVIK
-          AI is the better fit when you want a managed product, sovereign infrastructure, or
+          inside VS Code, and is comfortable managing your own API keys and token spend. MANOVIK AI
+          is the better fit when you want a managed product, sovereign infrastructure, or
           predictable lifetime pricing for a team.
         </p>
       </section>
@@ -179,9 +218,8 @@ function VsRooCodePage() {
           <div>
             <h3 className="font-semibold">Is MANOVIK AI a good Roo Code alternative?</h3>
             <p className="text-muted-foreground">
-              Yes — especially if you want managed sovereign hosting, predictable lifetime
-              pricing, or a fully hosted product instead of a VS Code extension you wire up
-              yourself.
+              Yes — especially if you want managed sovereign hosting, predictable lifetime pricing,
+              or a fully hosted product instead of a VS Code extension you wire up yourself.
             </p>
           </div>
           <div>

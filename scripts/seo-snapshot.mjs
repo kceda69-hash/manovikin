@@ -9,8 +9,12 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
-  ROBOTS_FILE, SITEMAP_FILE, SNAPSHOT_DIR,
-  read, parseSitemapEntries, renderSitemap,
+  ROBOTS_FILE,
+  SITEMAP_FILE,
+  SNAPSHOT_DIR,
+  read,
+  parseSitemapEntries,
+  renderSitemap,
 } from "./seo-lib.mjs";
 
 mkdirSync(SNAPSHOT_DIR, { recursive: true });
@@ -25,5 +29,5 @@ writeFileSync(join(SNAPSHOT_DIR, "sitemap.xml"), sitemap);
 
 console.log(
   `Wrote snapshots to .seo-snapshots/ — robots.txt (${robots.length} bytes), ` +
-  `sitemap.xml (${entries.length} entries).`,
+    `sitemap.xml (${entries.length} entries).`,
 );

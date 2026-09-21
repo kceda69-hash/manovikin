@@ -62,15 +62,16 @@ function KeysPage() {
             value={label}
             onChange={(e) => setLabel(e.target.value)}
           />
-          <Button onClick={() => createMut.mutate()} disabled={createMut.isPending || !label.trim()}>
+          <Button
+            onClick={() => createMut.mutate()}
+            disabled={createMut.isPending || !label.trim()}
+          >
             Create
           </Button>
         </div>
         {issued && (
           <div className="mt-4 rounded-lg border border-primary/40 bg-primary/5 p-4">
-            <p className="text-sm font-medium mb-2">
-              Copy this key now — it is shown only once.
-            </p>
+            <p className="text-sm font-medium mb-2">Copy this key now — it is shown only once.</p>
             <code className="block break-all rounded bg-muted p-3 text-sm">{issued}</code>
             <Button
               size="sm"
@@ -92,7 +93,7 @@ function KeysPage() {
         {q.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
         {q.data?.keys.length === 0 && <p className="text-sm text-muted-foreground">No keys yet.</p>}
         <ul className="divide-y">
-          {q.data?.keys.map((k: any) => (
+          {q.data?.keys.map((k) => (
             <li key={k.id} className="flex items-center justify-between py-3">
               <div>
                 <div className="font-medium">
@@ -101,7 +102,9 @@ function KeysPage() {
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {k.key_prefix}… · {k.use_count} calls ·{" "}
-                  {k.last_used_at ? `last used ${new Date(k.last_used_at).toLocaleDateString()}` : "never used"}
+                  {k.last_used_at
+                    ? `last used ${new Date(k.last_used_at).toLocaleDateString()}`
+                    : "never used"}
                 </div>
               </div>
               {!k.revoked_at && (
@@ -125,7 +128,7 @@ function KeysPage() {
       <section className="rounded-2xl border bg-card p-6">
         <h2 className="font-semibold mb-3">Usage</h2>
         <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-xs">
-{`curl https://manovik.in/api/public/v1/ask \\
+          {`curl https://manovik.in/api/public/v1/ask \\
   -H "Authorization: Bearer mnvk_your_key" \\
   -H "Content-Type: application/json" \\
   -d '{"prompt":"Explain CRDTs in 5 bullets"}'`}

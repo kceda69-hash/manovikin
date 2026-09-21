@@ -2,12 +2,25 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertAdmin } from "@/lib/admin-guard";
 import { TIER_MODEL } from "@/lib/model-router";
-import { scanSupplyChain, type ModelUsage, type ScanInput, type ScanReport } from "@/lib/supply-chain/analyzer";
+import {
+  scanSupplyChain,
+  type ModelUsage,
+  type ScanInput,
+  type ScanReport,
+} from "@/lib/supply-chain/analyzer";
 
 // Manifest + lockfile are inlined at build time — the Worker runtime has no
 // project filesystem to read them from.
-const manifestFiles = import.meta.glob("/package.json", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
-const lockFiles = import.meta.glob("/bun.lock", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
+const manifestFiles = import.meta.glob("/package.json", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+}) as Record<string, string>;
+const lockFiles = import.meta.glob("/bun.lock", {
+  query: "?raw",
+  import: "default",
+  eager: true,
+}) as Record<string, string>;
 
 function readManifest(): ScanInput["manifest"] {
   const raw = Object.values(manifestFiles)[0];
@@ -33,7 +46,12 @@ function modelSurfaces(): ModelUsage[] {
     priority: cfg.priority,
     reasoningNone: /^openai\/gpt-5\.6-/.test(cfg.model),
   }));
-  usages.push({ surface: "chat:very-hard", model: "openai/gpt-5.6-sol", priority: true, reasoningNone: true });
+  usages.push({
+    surface: "chat:very-hard",
+    model: "openai/gpt-5.6-sol",
+    priority: true,
+    reasoningNone: true,
+  });
   usages.push({ surface: "image:generate", model: "google/gemini-3-pro-image" });
   return usages;
 }

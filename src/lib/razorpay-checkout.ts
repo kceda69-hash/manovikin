@@ -1,7 +1,6 @@
 import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/payments.functions";
 import { supabase } from "@/integrations/supabase/client";
 
-
 declare global {
   interface Window {
     Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
@@ -18,7 +17,10 @@ function loadScript(): Promise<boolean> {
     s.src = "https://checkout.razorpay.com/v1/checkout.js";
     s.async = true;
     s.onload = () => resolve(true);
-    s.onerror = () => { scriptPromise = null; resolve(false); };
+    s.onerror = () => {
+      scriptPromise = null;
+      resolve(false);
+    };
     document.body.appendChild(s);
   });
   return scriptPromise;
@@ -64,7 +66,10 @@ export async function startCheckout(
     name: "MANOVIK AI",
     description: order.name,
     order_id: order.orderId,
-    prefill: { ...(callbacks.prefill ?? {}), email: callbacks.prefill?.email ?? order.prefillEmail ?? undefined },
+    prefill: {
+      ...(callbacks.prefill ?? {}),
+      email: callbacks.prefill?.email ?? order.prefillEmail ?? undefined,
+    },
     theme: { color: "#06b6d4" },
     modal: { ondismiss: () => callbacks.onDismiss?.() },
     handler: async (resp: {

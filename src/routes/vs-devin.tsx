@@ -27,7 +27,8 @@ export const Route = createFileRoute("/vs-devin")({
       { name: "twitter:title", content: "MANOVIK AI vs Devin" },
       {
         name: "twitter:description",
-        content: "Sovereign, self-hostable autonomous coding agent — a lifetime-licensed Devin alternative.",
+        content:
+          "Sovereign, self-hostable autonomous coding agent — a lifetime-licensed Devin alternative.",
       },
     ],
     links: [{ rel: "canonical", href: "https://manovik.in/vs-devin" }],
@@ -71,39 +72,72 @@ export const Route = createFileRoute("/vs-devin")({
 
 function VsDevinPage() {
   const rows: Array<{ feature: string; manovik: string; devin: string }> = [
-    { feature: "Pricing model", manovik: "Lifetime — one-time payment", devin: "Subscription (~$500/seat/mo Team tier)" },
-    { feature: "Sovereign / self-hosted deployment", manovik: "Yes — full self-host on your infra", devin: "No — SaaS only" },
-    { feature: "Autonomous agent loop", manovik: "Plan → code → run → verify, with tool calling", devin: "Yes — autonomous 'AI software engineer'" },
-    { feature: "Local model support", manovik: "Yes (Ollama, vLLM, OpenAI-compatible)", devin: "Cognition cloud only" },
-    { feature: "Code privacy", manovik: "Repos never leave your network in sovereign mode", devin: "Code, prompts, and runs live in Cognition cloud" },
-    { feature: "Model choice", manovik: "GPT, Claude, Gemini, or local Llama/Qwen", devin: "Cognition-chosen models, not user-swappable" },
-    { feature: "Compliance posture", manovik: "SOC2, HIPAA, GDPR, DPDP friendly via on-prem", devin: "Depends on Cognition's cloud certifications" },
-    { feature: "Cost predictability", manovik: "Flat lifetime cost, unlimited use", devin: "Per-seat monthly + usage overages" },
+    {
+      feature: "Pricing model",
+      manovik: "Lifetime — one-time payment",
+      devin: "Subscription (~$500/seat/mo Team tier)",
+    },
+    {
+      feature: "Sovereign / self-hosted deployment",
+      manovik: "Yes — full self-host on your infra",
+      devin: "No — SaaS only",
+    },
+    {
+      feature: "Autonomous agent loop",
+      manovik: "Plan → code → run → verify, with tool calling",
+      devin: "Yes — autonomous 'AI software engineer'",
+    },
+    {
+      feature: "Local model support",
+      manovik: "Yes (Ollama, vLLM, OpenAI-compatible)",
+      devin: "Cognition cloud only",
+    },
+    {
+      feature: "Code privacy",
+      manovik: "Repos never leave your network in sovereign mode",
+      devin: "Code, prompts, and runs live in Cognition cloud",
+    },
+    {
+      feature: "Model choice",
+      manovik: "GPT, Claude, Gemini, or local Llama/Qwen",
+      devin: "Cognition-chosen models, not user-swappable",
+    },
+    {
+      feature: "Compliance posture",
+      manovik: "SOC2, HIPAA, GDPR, DPDP friendly via on-prem",
+      devin: "Depends on Cognition's cloud certifications",
+    },
+    {
+      feature: "Cost predictability",
+      manovik: "Flat lifetime cost, unlimited use",
+      devin: "Per-seat monthly + usage overages",
+    },
   ];
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-16 text-foreground">
       <nav className="text-sm text-muted-foreground mb-6">
-        <Link to="/" className="hover:underline">Home</Link> / <span>vs Devin</span>
+        <Link to="/" className="hover:underline">
+          Home
+        </Link>{" "}
+        / <span>vs Devin</span>
       </nav>
 
-      <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-        MANOVIK AI vs Devin
-      </h1>
+      <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">MANOVIK AI vs Devin</h1>
       <p className="text-lg text-muted-foreground mb-10">
-        Considering <strong>Devin</strong>, Cognition's autonomous AI software engineer?
-        Here's an honest side-by-side with MANOVIK AI — a{" "}
-        <strong>sovereign, self-hostable, lifetime-licensed</strong> autonomous coding agent
-        built for teams that can't send their codebase to a third-party cloud.
+        Considering <strong>Devin</strong>, Cognition's autonomous AI software engineer? Here's an
+        honest side-by-side with MANOVIK AI — a{" "}
+        <strong>sovereign, self-hostable, lifetime-licensed</strong> autonomous coding agent built
+        for teams that can't send their codebase to a third-party cloud.
       </p>
 
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">The 30-second summary</h2>
         <p className="leading-relaxed">
-          Devin popularised the "AI employee" pitch — an agent that plans, writes, runs,
-          and debugs code end to end. MANOVIK gives you the same autonomous loop, but the
-          entire stack (agent, tools, and models) can run inside your network. And instead
-          of a per-seat monthly subscription, MANOVIK is a one-time lifetime payment.
+          Devin popularised the "AI employee" pitch — an agent that plans, writes, runs, and debugs
+          code end to end. MANOVIK gives you the same autonomous loop, but the entire stack (agent,
+          tools, and models) can run inside your network. And instead of a per-seat monthly
+          subscription, MANOVIK is a one-time lifetime payment.
         </p>
       </section>
 
@@ -143,11 +177,24 @@ function VsDevinPage() {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">When MANOVIK beats Devin</h2>
         <ul className="space-y-3 list-disc pl-6">
-          <li><strong>Sovereignty:</strong> code, prompts, and embeddings stay inside your network.</li>
-          <li><strong>Total cost:</strong> a lifetime license replaces $500+/seat/month, forever.</li>
-          <li><strong>Model choice:</strong> pick GPT, Claude, Gemini, or a local Llama/Qwen without switching agent.</li>
-          <li><strong>Compliance:</strong> on-prem inference simplifies SOC2, HIPAA, GDPR, and DPDP audits.</li>
-          <li><strong>No lock-in:</strong> swap models and hosting anytime — nothing is tied to Cognition's cloud.</li>
+          <li>
+            <strong>Sovereignty:</strong> code, prompts, and embeddings stay inside your network.
+          </li>
+          <li>
+            <strong>Total cost:</strong> a lifetime license replaces $500+/seat/month, forever.
+          </li>
+          <li>
+            <strong>Model choice:</strong> pick GPT, Claude, Gemini, or a local Llama/Qwen without
+            switching agent.
+          </li>
+          <li>
+            <strong>Compliance:</strong> on-prem inference simplifies SOC2, HIPAA, GDPR, and DPDP
+            audits.
+          </li>
+          <li>
+            <strong>No lock-in:</strong> swap models and hosting anytime — nothing is tied to
+            Cognition's cloud.
+          </li>
         </ul>
       </section>
 
@@ -156,22 +203,33 @@ function VsDevinPage() {
         <div className="space-y-4">
           <div>
             <h3 className="font-semibold">Is MANOVIK really autonomous like Devin?</h3>
-            <p className="text-muted-foreground">Yes — MANOVIK runs a full plan/code/run/verify loop with tool calling, not just autocomplete.</p>
+            <p className="text-muted-foreground">
+              Yes — MANOVIK runs a full plan/code/run/verify loop with tool calling, not just
+              autocomplete.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">Does MANOVIK work offline?</h3>
-            <p className="text-muted-foreground">With a local model endpoint (Ollama, vLLM, llama.cpp) MANOVIK operates entirely offline.</p>
+            <p className="text-muted-foreground">
+              With a local model endpoint (Ollama, vLLM, llama.cpp) MANOVIK operates entirely
+              offline.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold">How does the lifetime price compare to Devin?</h3>
-            <p className="text-muted-foreground">Devin is per-seat monthly (~$500/seat on Team). MANOVIK is a single lifetime payment — most teams break even in the first month.</p>
+            <p className="text-muted-foreground">
+              Devin is per-seat monthly (~$500/seat on Team). MANOVIK is a single lifetime payment —
+              most teams break even in the first month.
+            </p>
           </div>
         </div>
       </section>
 
       <section className="rounded-2xl border bg-card p-8 text-center">
         <h2 className="text-2xl font-bold mb-2">Try the sovereign Devin alternative</h2>
-        <p className="text-muted-foreground mb-6">One payment. Unlimited use. Your code stays yours.</p>
+        <p className="text-muted-foreground mb-6">
+          One payment. Unlimited use. Your code stays yours.
+        </p>
         <Link
           to="/"
           className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90"

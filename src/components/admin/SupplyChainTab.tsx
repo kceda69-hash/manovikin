@@ -51,7 +51,8 @@ export function SupplyChainTab() {
             <ShieldAlert className="size-4 text-primary" /> Supply chain &amp; model provenance
           </h2>
           <p className="text-sm text-muted-foreground">
-            Verifies dependency pinning and registry provenance, third-party AI services, and model/API configuration risks.
+            Verifies dependency pinning and registry provenance, third-party AI services, and
+            model/API configuration risks.
           </p>
         </div>
         <Button size="sm" variant="outline" onClick={() => void scan()} disabled={busy}>
@@ -89,8 +90,8 @@ export function SupplyChainTab() {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Lockfile: {report.stats.lockfile ?? "none"} · AI hosts: {report.stats.aiHosts} · Last scan:{" "}
-            {new Date(report.generatedAt).toLocaleString()}
+            Lockfile: {report.stats.lockfile ?? "none"} · AI hosts: {report.stats.aiHosts} · Last
+            scan: {new Date(report.generatedAt).toLocaleString()}
           </p>
 
           {report.findings.length === 0 ? (
