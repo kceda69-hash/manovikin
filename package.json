@@ -15,7 +15,7 @@
     "seo:snapshot": "node scripts/seo-snapshot.mjs",
     "seo:autofix": "node scripts/seo-autofix.mjs",
     "seo:autofix:check": "node scripts/seo-autofix.mjs --check",
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "tsc --noEmit",
     "verify": "bun run typecheck && bun run test"
   },
   "dependencies": {
