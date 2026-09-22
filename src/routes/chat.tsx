@@ -66,6 +66,7 @@ import {
 /** Minimal Web Speech API typings for the voice-input feature (not in TS's DOM lib). */
 interface SpeechRecognitionAlternative {
   readonly transcript: string;
+  readonly confidence: number;
 }
 
 interface SpeechRecognitionResult {
@@ -91,6 +92,7 @@ interface SpeechRecognitionInstance {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
+  maxAlternatives: number;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
   onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null;
@@ -947,6 +949,43 @@ function ChatPanel({
     },
     [setSpeaker],
   );
+
+  // Stop the mic entirely: clears sticky mode, stops recognition, and (unless
+  // we're in companion mode, which owns its own lifecycle) leaves companion
+  // mode alone. Used by the mic button toggle and the "stop listening" voice
+  // command.
+  const stopMic = useCallback(() => {
+    stickyMicRef.current = false;
+    try {
+      recognitionRef.current?.stop();
+    } catch {
+      /* already stopped */
+    }
+    setListening(false);
+    if (autoSendTimerRef.current) {
+      window.clearTimeout(autoSendTimerRef.current);
+      autoSendTimerRef.current = null;
+    }
+  }, []);
+
+  // Voice commands for mic control: "stop listening", "mic off", "microphone
+  // off", "stop mic". Returns true if handled (caller should not send to AI).
+  const handleMicVoiceCommand = useCallback(
+    (transcript: string): boolean => {
+      const t = transcript.toLowerCase().trim();
+      const stopMicCmd =
+        /\b(stop listening|mic off|microphone off|stop mic|turn off (the )?mic|disable (the )?mic)\b/.test(
+          t,
+        );
+      if (stopMicCmd) {
+        stopMic();
+        toast.success("Mic off");
+        return true;
+      }
+      return false;
+    },
+    [stopMic],
+  );
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const spokenRef = useRef<string | null>(null);
   const speakingRef = useRef(false);
@@ -970,6 +1009,11 @@ function ChatPanel({
   const recLangRef = useRef<string>("");
   const recOnTranscriptRef = useRef<((t: string, isFinal: boolean) => void) | null>(null);
   const recContinuousRef = useRef(false);
+  // Sticky mic: when the user taps the mic button, keep listening across
+  // recognition sessions until they tap again or say "stop listening" / "mic off".
+  // (The Web Speech API ends a session after each pause even in continuous mode,
+  // so onend restarts while this flag is set.)
+  const stickyMicRef = useRef(false);
   // Cached speech-synthesis voices (they load asynchronously in some browsers).
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
 
@@ -1064,6 +1108,14 @@ function ChatPanel({
       const rec = new SR();
       rec.continuous = continuous;
       rec.interimResults = true;
+      // Ask for alternatives: the top hypothesis is usually best, but having
+      // them lets the transcript builder prefer a higher-confidence pick and
+      // improves accuracy on accented/ambiguous speech.
+      try {
+        rec.maxAlternatives = 3;
+      } catch {
+        /* some browsers ignore this; harmless */
+      }
       rec.lang = lang;
       recLangRef.current = lang;
       rec.onresult = (e) => {
@@ -1071,23 +1123,36 @@ function ChatPanel({
         // own voice coming through the mic, not the user.
         if (speakingRef.current) return;
         const results = Array.from(e.results);
-        const transcript = results.map((r) => r[0].transcript).join(" ");
+        // Prefer the highest-confidence alternative for each result. The
+        // first alternative is usually best, but on accented or ambiguous
+        // speech a lower-ranked hypothesis can score higher.
+        const bestTranscript = (r: SpeechRecognitionResult): string => {
+          let best = r[0]?.transcript ?? "";
+          let bestScore = -1;
+          for (let i = 0; i < r.length; i++) {
+            const alt = r[i];
+            const score = typeof alt.confidence === "number" ? alt.confidence : i === 0 ? 1 : 0;
+            if (score > bestScore) {
+              bestScore = score;
+              best = alt.transcript;
+            }
+          }
+          return best;
+        };
+        const transcript = results.map(bestTranscript).join(" ");
         const isFinal = results.length > 0 && results[results.length - 1].isFinal;
         // Auto-detect mode: learn the user's spoken language from each final
-        // transcript and switch recognition to match it. In companion mode the
-        // switch applies immediately (the recognizer restarts on end with the
-        // new language); one-shot sessions pick it up next time.
+        // transcript and switch recognition to match it. The switch applies
+        // immediately (the recognizer restarts on end with the new language).
         if (isFinal && transcript.trim() && voiceLangRef.current === "auto") {
           const detected = detectVoiceLang(transcript);
           if (detected && detected !== recLangRef.current) {
             autoRecLangRef.current = detected;
             setAutoLang(detected);
-            if (companionRef.current) {
-              try {
-                rec.stop();
-              } catch {
-                /* onend below restarts with the new language */
-              }
+            try {
+              rec.stop();
+            } catch {
+              /* onend below restarts with the new language */
             }
           }
         }
@@ -1098,18 +1163,23 @@ function ChatPanel({
         if (err === "not-allowed" || err === "service-not-allowed") {
           toast.error("Microphone access was denied. Allow it in your browser to use voice input.");
           setCompanionMode(false);
+          stickyMicRef.current = false;
         } else if (err === "no-speech") {
-          if (!companionRef.current) toast.error("Didn't catch that — try speaking again.");
-        } else if (err && !companionRef.current) {
+          // In companion/sticky mode the mic restarts on end anyway — no need
+          // to nag the user for a silent pause.
+          if (!companionRef.current && !stickyMicRef.current)
+            toast.error("Didn't catch that — try speaking again.");
+        } else if (err && !companionRef.current && !stickyMicRef.current) {
           toast.error("Voice input failed. Try again.");
         }
       };
       rec.onend = () => {
-        // Companion mode: keep the mic open for a real conversation.
+        // Companion mode OR sticky mic: keep the mic open for a real conversation.
         // Note: we do NOT stop the mic while MANO speaks — instead we ignore
         // transcription results during speech (see onresult). This avoids a
         // dead-mic state if speech synthesis onend never fires.
-        if (companionRef.current) {
+        const keepAlive = companionRef.current || stickyMicRef.current;
+        if (keepAlive) {
           const wantLang = resolveRecognitionLang();
           // Language changed (auto-detect or the picker): restart with a
           // fresh instance, since rec.lang can't be changed reliably on a
@@ -1159,6 +1229,7 @@ function ChatPanel({
 
   const stopCompanion = useCallback(() => {
     setCompanionMode(false);
+    stickyMicRef.current = false;
     recognitionRef.current?.stop();
     setListening(false);
     if (autoSendTimerRef.current) {
@@ -1212,23 +1283,38 @@ function ChatPanel({
   const toggleListening = useCallback(() => {
     if (listening) {
       if (companionRef.current) stopCompanion();
-      else {
-        recognitionRef.current?.stop();
-        setListening(false);
-      }
+      else stopMic();
       return;
     }
-    startRecognition(false, (transcript, isFinal) => {
-      // Voice commands: handle speaker on/off locally, don't send to AI.
-      if (isFinal && transcript.trim() && handleSpeakerVoiceCommand(transcript)) {
-        setInput("");
-        return;
+    // Sticky mic: continuous mode + auto-restart on end (see onend), so the
+    // mic stays open across pauses until the user taps the button again or
+    // says "stop listening" / "mic off". Auto-send still fires after each
+    // pause so it feels like the old one-shot flow, just without re-tapping.
+    stickyMicRef.current = true;
+    const ok = startRecognition(true, (transcript, isFinal) => {
+      // Voice commands: mic off and speaker on/off are handled locally,
+      // don't send to AI.
+      if (isFinal && transcript.trim()) {
+        if (handleMicVoiceCommand(transcript) || handleSpeakerVoiceCommand(transcript)) {
+          setInput("");
+          return;
+        }
       }
       setInput(transcript);
-      // One-shot mic: auto-send when the user finishes speaking.
+      // Auto-send when the user finishes speaking.
       if (isFinal && transcript.trim()) scheduleAutoSend();
     });
-  }, [listening, startRecognition, stopCompanion, handleSpeakerVoiceCommand, scheduleAutoSend]);
+    if (!ok) stickyMicRef.current = false;
+    else toast.success("Mic on — tap again or say “mic off” to stop");
+  }, [
+    listening,
+    startRecognition,
+    stopCompanion,
+    stopMic,
+    handleMicVoiceCommand,
+    handleSpeakerVoiceCommand,
+    scheduleAutoSend,
+  ]);
 
   // Speak the latest completed assistant reply when MANO voice output is on.
   // The mic stays open while MANO talks; transcription results during speech
