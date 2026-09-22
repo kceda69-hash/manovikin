@@ -74,20 +74,45 @@ export function WakeScreen({ user, justLoggedIn, onWake, onDismiss }: WakeScreen
       aria-modal="true"
       aria-label="MANO waking up"
     >
-      <div className="relative flex h-40 w-40 items-center justify-center">
+      <div className="relative flex h-48 w-48 items-center justify-center">
+        {/* Ultron-style arc reactor orb: glowing core + rotating rings */}
         <span
-          className={`absolute inset-0 rounded-full border-2 border-primary/40 ${
+          className={`absolute inset-0 rounded-full ${
             phase === "boot" ? "animate-ping" : ""
           }`}
+          style={{
+            background: "radial-gradient(circle, rgba(255,120,30,0.25) 0%, transparent 70%)",
+          }}
           aria-hidden
         />
         <span
-          className={`absolute inset-4 rounded-full border border-primary/60 ${
-            phase === "awake" ? "animate-ping" : ""
-          }`}
+          className="absolute inset-2 rounded-full border-2 border-orange-500/50 animate-spin"
+          style={{ animationDuration: "8s", boxShadow: "0 0 20px rgba(255,120,30,0.3), inset 0 0 20px rgba(255,120,30,0.2)" }}
           aria-hidden
         />
-        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/15 text-2xl font-bold text-primary">
+        <span
+          className="absolute inset-6 rounded-full border border-orange-400/40 animate-spin"
+          style={{ animationDuration: "5s", animationDirection: "reverse" }}
+          aria-hidden
+        />
+        <span
+          className={`absolute inset-10 rounded-full ${
+            phase === "awake" ? "animate-ping" : "animate-pulse"
+          }`}
+          style={{
+            background: "radial-gradient(circle, #ffb347 0%, #ff781e 40%, #cc4400 70%, transparent 100%)",
+            boxShadow: "0 0 30px rgba(255,120,30,0.8), 0 0 60px rgba(255,120,30,0.4)",
+          }}
+          aria-hidden
+        />
+        <span
+          className="flex h-16 w-16 items-center justify-center rounded-full text-2xl font-bold text-white"
+          style={{
+            background: "radial-gradient(circle, #fff5e6 0%, #ffb347 50%, #ff781e 100%)",
+            boxShadow: "0 0 25px rgba(255,180,80,1)",
+            textShadow: "0 0 10px rgba(0,0,0,0.5)",
+          }}
+        >
           M
         </span>
       </div>

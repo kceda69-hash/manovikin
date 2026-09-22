@@ -785,12 +785,32 @@ function ChatPanel({
     [threadId],
   );
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, regenerate } = useChat({
     id: threadId,
     messages: initialMessages,
     transport,
     onError: (e) => toast.error(e.message || "Something went wrong"),
   });
+
+  // Client-side stall watchdog: if the chat stays in submitted/streaming for
+  // too long without any message updates, the stream is stuck (e.g. network
+  // dropped silently). Show a retry button instead of hanging forever.
+  const [streamStalled, setStreamStalled] = useState(false);
+  const lastActivityRef = useRef(Date.now());
+  useEffect(() => {
+    lastActivityRef.current = Date.now();
+    setStreamStalled(false);
+  }, [messages, status]);
+  useEffect(() => {
+    if (status !== "submitted" && status !== "streaming") return;
+    const STALL_LIMIT_MS = 60_000;
+    const timer = setInterval(() => {
+      if (Date.now() - lastActivityRef.current > STALL_LIMIT_MS) {
+        setStreamStalled(true);
+      }
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [status]);
 
   const [input, setInput] = useState("");
   const queryClient = useQueryClient();
@@ -1217,6 +1237,22 @@ function ChatPanel({
             <div className="flex items-center gap-2 pl-1 text-sm text-muted-foreground">
               <Sparkles className="h-4 w-4 animate-pulse text-primary" />
               <span>MANOVIK AI is thinking…</span>
+            </div>
+          )}
+          {streamStalled && (status === "submitted" || status === "streaming") && (
+            <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm">
+              <span className="text-amber-200">The response seems stuck.</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setStreamStalled(false);
+                  lastActivityRef.current = Date.now();
+                  void regenerate();
+                }}
+                className="rounded-md bg-amber-500/20 px-3 py-1 font-medium text-amber-100 hover:bg-amber-500/30"
+              >
+                Retry
+              </button>
             </div>
           )}
           <div ref={bottomRef} aria-hidden className="h-px w-full" />

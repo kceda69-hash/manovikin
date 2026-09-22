@@ -165,6 +165,11 @@ function isUnknownModelError(err: unknown): boolean {
 // fail over to the next Gemini model instead of failing the turn.
 const FIRST_CHUNK_TIMEOUT_MS = 20_000;
 
+// Mid-stream stall timeout: if the upstream stops sending chunks for this
+// long, the stream is dead — error it so the client can retry instead of
+// hanging forever. This is the permanent fix for "chat gets stuck randomly".
+const MID_STREAM_CHUNK_TIMEOUT_MS = 30_000;
+
 // Chunks the SDK emits locally before the upstream responds — they don't
 // prove the model is alive, so the probe keeps waiting past them.
 const PRE_CONTENT_CONTROL_CHUNKS = new Set(["start", "start-step", "finish-step"]);
@@ -864,7 +869,16 @@ export const Route = createFileRoute("/api/chat")({
             start(controller) {
               for (const chunk of winningBuffered) controller.enqueue(chunk);
               const pump = (): void => {
-                winningReader.read().then(
+                // Race each read against a mid-stream stall timeout. If the
+                // upstream stops sending chunks, error the stream so the
+                // client surfaces an error instead of hanging forever.
+                const stallTimeout = new Promise<never>((_, reject) =>
+                  setTimeout(
+                    () => reject(new Error(`Upstream stalled: no chunk for ${MID_STREAM_CHUNK_TIMEOUT_MS}ms`)),
+                    MID_STREAM_CHUNK_TIMEOUT_MS,
+                  ),
+                );
+                Promise.race([winningReader.read(), stallTimeout]).then(
                   ({ done, value }) => {
                     if (done) {
                       controller.close();
