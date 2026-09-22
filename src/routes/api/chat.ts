@@ -162,7 +162,10 @@ const PRE_CONTENT_CONTROL_CHUNKS = new Set(["start", "start-step", "finish-step"
 // plain model IDs that endpoint expects. The Lovable-gateway "provider/"
 // prefixed names 404 here, so they are not used in sovereign mode.
 // Zero-cost Gemini only — never a paid provider.
-const SOVEREIGN_STREAM_FALLBACKS = ["gemini-2.5-flash", "gemini-2.0-flash"] as const;
+// NOTE: keep in sync with models actually served on the Gemini OpenAI-compatible
+// endpoint. gemini-2.0-flash was retired by Google (returns 404 telling callers to
+// use gemini-3.6-flash), which is why the fallback list uses the 3.x Flash models.
+const SOVEREIGN_STREAM_FALLBACKS = ["gemini-3.7-flash", "gemini-3.6-flash"] as const;
 
 function isRateLimitedDetails(details: Record<string, unknown>): boolean {
   const errMsg = String(details.message ?? "").toLowerCase();
