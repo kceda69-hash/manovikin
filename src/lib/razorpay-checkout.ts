@@ -8,16 +8,24 @@ declare global {
 }
 
 let scriptPromise: Promise<boolean> | null = null;
-function loadScript(): Promise<boolean> {
+function loadScript(timeoutMs = 20000): Promise<boolean> {
   if (typeof window === "undefined") return Promise.resolve(false);
   if (window.Razorpay) return Promise.resolve(true);
   if (scriptPromise) return scriptPromise;
   scriptPromise = new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      scriptPromise = null;
+      resolve(false);
+    }, timeoutMs);
     const s = document.createElement("script");
     s.src = "https://checkout.razorpay.com/v1/checkout.js";
     s.async = true;
-    s.onload = () => resolve(true);
+    s.onload = () => {
+      clearTimeout(timer);
+      resolve(true);
+    };
     s.onerror = () => {
+      clearTimeout(timer);
       scriptPromise = null;
       resolve(false);
     };
@@ -37,50 +45,59 @@ export async function startCheckout(
     prefill?: { name?: string; email?: string };
   } = {},
 ) {
-  const ok = await loadScript();
-  if (!ok) return callbacks.onError?.("Could not load Razorpay. Check your internet.");
-
-  // Pre-check auth to avoid an unhandled 401 Response from the server fn
-  const { data: sessionData } = await supabase.auth.getSession();
-  if (!sessionData.session) {
-    if (typeof window !== "undefined") {
-      window.location.href = `/login?next=${encodeURIComponent("/billing")}`;
-    }
-    return;
-  }
-
-  let order: Awaited<ReturnType<typeof createRazorpayOrder>>;
   try {
-    order = await createRazorpayOrder({ data: { plan } });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Payment service unavailable";
-    callbacks.onError?.(msg);
-    return;
-  }
-  if (!order.ok) return callbacks.onError?.(order.error ?? "Payment unavailable");
+    const ok = await loadScript();
+    if (!ok) return callbacks.onError?.("Could not load Razorpay. Check your internet.");
 
-  const rzp = new window.Razorpay!({
-    key: order.keyId,
-    amount: order.amount,
-    currency: order.currency,
-    name: "MANOVIK AI",
-    description: order.name,
-    order_id: order.orderId,
-    prefill: {
-      ...(callbacks.prefill ?? {}),
-      email: callbacks.prefill?.email ?? order.prefillEmail ?? undefined,
-    },
-    theme: { color: "#06b6d4" },
-    modal: { ondismiss: () => callbacks.onDismiss?.() },
-    handler: async (resp: {
-      razorpay_order_id: string;
-      razorpay_payment_id: string;
-      razorpay_signature: string;
-    }) => {
-      const v = await verifyRazorpayPayment({ data: resp });
-      if (v.ok) callbacks.onSuccess?.(resp.razorpay_payment_id);
-      else callbacks.onError?.(v.error ?? "Payment verification failed");
-    },
-  });
-  rzp.open();
+    // Pre-check auth to avoid an unhandled 401 Response from the server fn
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      if (typeof window !== "undefined") {
+        window.location.href = `/login?next=${encodeURIComponent("/billing")}`;
+      }
+      return;
+    }
+
+    let order: Awaited<ReturnType<typeof createRazorpayOrder>>;
+    try {
+      order = await createRazorpayOrder({ data: { plan } });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Payment service unavailable";
+      callbacks.onError?.(msg);
+      return;
+    }
+    if (!order.ok) return callbacks.onError?.(order.error ?? "Payment unavailable");
+
+    if (!window.Razorpay) {
+      return callbacks.onError?.("Razorpay failed to initialize. Please refresh and try again.");
+    }
+    const rzp = new window.Razorpay({
+      key: order.keyId,
+      amount: order.amount,
+      currency: order.currency,
+      name: "MANOVIK AI",
+      description: order.name,
+      order_id: order.orderId,
+      prefill: {
+        ...(callbacks.prefill ?? {}),
+        email: callbacks.prefill?.email ?? order.prefillEmail ?? undefined,
+      },
+      theme: { color: "#06b6d4" },
+      modal: { ondismiss: () => callbacks.onDismiss?.() },
+      handler: async (resp: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+      }) => {
+        const v = await verifyRazorpayPayment({ data: resp });
+        if (v.ok) callbacks.onSuccess?.(resp.razorpay_payment_id);
+        else callbacks.onError?.(v.error ?? "Payment verification failed");
+      },
+    });
+    rzp.open();
+  } catch (e) {
+    console.error("[checkout] startCheckout failed", e);
+    const msg = e instanceof Error ? e.message : "Could not start checkout. Please try again.";
+    callbacks.onError?.(msg);
+  }
 }
