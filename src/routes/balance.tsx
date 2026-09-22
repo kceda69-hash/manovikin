@@ -31,6 +31,15 @@ export const Route = createFileRoute("/balance")({
   }),
 });
 
+function friendlyLedgerReason(reason: string): string {
+  // Ledger reasons carry a turn id suffix (chat.message:<turnId>); strip it
+  // for display and use plain-language labels.
+  const base = reason.split(":")[0];
+  if (base === "chat.message") return "Chat message";
+  if (base === "chat.refund") return "Refund — failed AI reply";
+  return reason;
+}
+
 function BalancePage() {
   const fetchBalance = useServerFn(getManovikBalance);
   const { data, isLoading, error } = useQuery({
@@ -69,7 +78,7 @@ function BalancePage() {
                   <span className={row.delta < 0 ? "text-destructive" : "text-emerald-500"}>
                     {row.delta > 0 ? `+${row.delta}` : row.delta}
                   </span>{" "}
-                  · {row.reason}
+                  · {friendlyLedgerReason(row.reason)}
                 </span>
                 <span className="text-muted-foreground">
                   {new Date(row.created_at).toLocaleString()}

@@ -323,6 +323,23 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           return new Response(`Prompt too long (max ${MAX_PROMPT_CHARS} chars)`, { status: 400 });
         }
 
+        // Map an upstream failure to a plain-text error response. Used both
+        // for init errors (catch below) and deferred stream failures (probe
+        // below) so the demo never returns 200 with an empty body.
+        const demoErrorResponse = (err: unknown): Response => {
+          const msg = String((err as Error)?.message ?? err);
+          const status = /402|credit/i.test(msg) ? 402 : /429|rate/i.test(msg) ? 429 : 500;
+          console.error("[demo-chat] stream failed", msg);
+          return new Response(
+            status === 402
+              ? "MANOVIK is temporarily out of demo credits. Try again shortly."
+              : status === 429
+                ? "Too many requests — slow down and retry."
+                : "MANOVIK could not reach the model right now.",
+            { status },
+          );
+        };
+
         try {
           const gateway = createLovableAiGatewayProvider(apiKey);
           const brain = connected ? `${modelLabel} (Claude Fable 5 session)` : modelLabel;
@@ -409,6 +426,7 @@ Rules: never invent files that weren't provided. If evidence is ambiguous, mark 
           // MANO 1.1 runs the public demo too — substrate is compute only.
           const substrate = manoStreamChain(prompt)[0]!;
           const isOpenAiSubstrate = substrate.startsWith("openai/");
+
           const result = streamText({
             model: gateway(substrate),
             system,
@@ -420,25 +438,85 @@ Rules: never invent files that weren't provided. If evidence is ambiguous, mark 
               ? { providerOptions: { lovable: { reasoningEffort: "none" } } }
               : {}),
           });
-          return result.toTextStreamResponse({
+          // Probe: wait for the first real text chunk (bounded). Upstream
+          // 5xxs/429s surface only while the stream is consumed — without this
+          // probe a deferred failure becomes a 200 with an empty body.
+          const PROBE_TIMEOUT_MS = 15_000;
+          const probeReader = result.textStream.getReader();
+          let firstText: string | null = null;
+          let probeError: unknown = null;
+          try {
+            const deadlineAt = Date.now() + PROBE_TIMEOUT_MS;
+            for (;;) {
+              const remaining = deadlineAt - Date.now();
+              if (remaining <= 0) {
+                probeError = new Error("Timed out waiting for the model");
+                break;
+              }
+              const raced = await Promise.race([
+                probeReader.read().then((r) => ({ kind: "read" as const, ...r })),
+                new Promise<{ kind: "timeout" }>((resolve) =>
+                  setTimeout(() => resolve({ kind: "timeout" as const }), remaining),
+                ),
+              ]);
+              if (raced.kind === "timeout") {
+                probeError = new Error("Timed out waiting for the model");
+                break;
+              }
+              if (raced.done) {
+                if (firstText == null) probeError = new Error("Empty response from model");
+                break;
+              }
+              if (raced.value) {
+                firstText = raced.value;
+                break;
+              }
+            }
+          } catch (err) {
+            probeError = err;
+          }
+          if (probeError || firstText == null) {
+            try {
+              await probeReader.cancel("pre-content-failure");
+            } catch {
+              // best effort
+            }
+            return demoErrorResponse(probeError ?? new Error("Empty response from model"));
+          }
+          // Replay the buffered first chunk, then keep pumping the stream.
+          const demoStream = new ReadableStream<Uint8Array>({
+            start(controller) {
+              const enc = new TextEncoder();
+              controller.enqueue(enc.encode(firstText as string));
+              const pump = (): void => {
+                probeReader.read().then(
+                  ({ done, value }: ReadableStreamReadResult<string>) => {
+                    if (done) {
+                      controller.close();
+                      return;
+                    }
+                    controller.enqueue(enc.encode(value));
+                    pump();
+                  },
+                  (err: unknown) => controller.error(err),
+                );
+              };
+              pump();
+            },
+            cancel(reason) {
+              probeReader.cancel(reason).catch(() => undefined);
+            },
+          });
+          return new Response(demoStream, {
             headers: {
               "Cache-Control": "no-store",
+              "Content-Type": "text/plain; charset=utf-8",
               "X-Manovik-Demo": "1",
               "X-Manovik-Mode": mode,
             },
           });
         } catch (err) {
-          const msg = String((err as Error)?.message ?? err);
-          const status = /402|credit/i.test(msg) ? 402 : /429|rate/i.test(msg) ? 429 : 500;
-          console.error("[demo-chat] stream failed", msg);
-          return new Response(
-            status === 402
-              ? "MANOVIK is temporarily out of demo credits. Try again shortly."
-              : status === 429
-                ? "Too many requests — slow down and retry."
-                : "MANOVIK could not reach the model right now.",
-            { status },
-          );
+          return demoErrorResponse(err);
         }
       },
     },

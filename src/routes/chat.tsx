@@ -31,6 +31,7 @@ import {
   Volume2,
   VolumeX,
   Cpu,
+  Languages,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { signOutEverywhere } from "@/lib/auth-signout";
@@ -46,6 +47,13 @@ import { Progress } from "@/components/ui/progress";
 import { getManovikDashboard, getUiPrefs, setUiPref } from "@/lib/manovik-balance.functions";
 import { streamImage } from "@/lib/streamImage";
 import { useI18n } from "@/lib/i18n";
+import {
+  VOICE_LANGS,
+  VOICE_LANG_STORAGE_KEY,
+  detectVoiceLang,
+  pickVoice,
+  voiceLangLabel,
+} from "@/lib/voice-langs";
 
 import {
   listThreads,
@@ -938,6 +946,70 @@ function ChatPanel({
   const companionRef = useRef(false);
   companionRef.current = companionMode;
 
+  // --- Multilingual voice ---
+  // voiceLang: "auto" (detect per utterance) or a BCP47 tag like "hi-IN".
+  // Persisted so Nick's choice survives reloads.
+  const [voiceLang, setVoiceLangState] = useState<string>(() => {
+    if (typeof window === "undefined") return "auto";
+    return window.localStorage.getItem(VOICE_LANG_STORAGE_KEY) || "auto";
+  });
+  const voiceLangRef = useRef(voiceLang);
+  // Auto-detected recognition language in "auto" mode (BCP47), shown in the UI.
+  const [autoLang, setAutoLang] = useState<string | null>(null);
+  const autoRecLangRef = useRef<string | null>(null);
+  // BCP47 tag of the live recognition instance (rec.lang can't be changed
+  // reliably on a started instance, so we track it and recreate on change).
+  const recLangRef = useRef<string>("");
+  const recOnTranscriptRef = useRef<((t: string, isFinal: boolean) => void) | null>(null);
+  const recContinuousRef = useRef(false);
+  // Cached speech-synthesis voices (they load asynchronously in some browsers).
+  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const synth = window.speechSynthesis;
+    const load = () => {
+      try {
+        voicesRef.current = synth.getVoices();
+      } catch {
+        /* voices stay empty; we fall back to utterance.lang only */
+      }
+    };
+    load();
+    synth.addEventListener("voiceschanged", load);
+    return () => synth.removeEventListener("voiceschanged", load);
+  }, []);
+
+  const setVoiceLang = useCallback((code: string) => {
+    voiceLangRef.current = code;
+    setVoiceLangState(code);
+    if (code !== "auto") {
+      autoRecLangRef.current = null;
+      setAutoLang(null);
+    }
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(VOICE_LANG_STORAGE_KEY, code);
+    }
+    // If the mic is open in companion mode, restart it so the new language
+    // applies immediately (onend recreates the instance with the new lang).
+    // One-shot sessions pick the new language up next time instead.
+    if (companionRef.current && recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        /* onend handles the restart */
+      }
+    }
+  }, []);
+
+  // BCP47 language for a new recognition session: the explicit choice, or in
+  // "auto" mode whatever was last detected, else the browser locale.
+  const resolveRecognitionLang = useCallback((): string => {
+    if (voiceLangRef.current !== "auto") return voiceLangRef.current;
+    if (autoRecLangRef.current) return autoRecLangRef.current;
+    return (typeof navigator !== "undefined" && navigator.language) || "en-US";
+  }, []);
+
   const generateImage = useCallback(
     async (prompt: string) => {
       const id = crypto.randomUUID();
@@ -969,8 +1041,12 @@ function ChatPanel({
 
   const handleSubmitRef = useRef<() => void>(() => {});
 
-  const startRecognition = useCallback(
-    (continuous: boolean, onTranscript: (t: string, isFinal: boolean) => void) => {
+  const beginRecognition = useCallback(
+    (
+      continuous: boolean,
+      onTranscript: (t: string, isFinal: boolean) => void,
+      lang: string,
+    ): boolean => {
       const speechWindow = window as unknown as WindowWithSpeechRecognition;
       const SR = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
       if (!SR) {
@@ -980,7 +1056,8 @@ function ChatPanel({
       const rec = new SR();
       rec.continuous = continuous;
       rec.interimResults = true;
-      rec.lang = navigator.language || "en-US";
+      rec.lang = lang;
+      recLangRef.current = lang;
       rec.onresult = (e) => {
         // Ignore anything heard while MANO itself is speaking — that's its
         // own voice coming through the mic, not the user.
@@ -988,6 +1065,24 @@ function ChatPanel({
         const results = Array.from(e.results);
         const transcript = results.map((r) => r[0].transcript).join(" ");
         const isFinal = results.length > 0 && results[results.length - 1].isFinal;
+        // Auto-detect mode: learn the user's spoken language from each final
+        // transcript and switch recognition to match it. In companion mode the
+        // switch applies immediately (the recognizer restarts on end with the
+        // new language); one-shot sessions pick it up next time.
+        if (isFinal && transcript.trim() && voiceLangRef.current === "auto") {
+          const detected = detectVoiceLang(transcript);
+          if (detected && detected !== recLangRef.current) {
+            autoRecLangRef.current = detected;
+            setAutoLang(detected);
+            if (companionRef.current) {
+              try {
+                rec.stop();
+              } catch {
+                /* onend below restarts with the new language */
+              }
+            }
+          }
+        }
         onTranscript(transcript, isFinal);
       };
       rec.onerror = (e) => {
@@ -1007,6 +1102,21 @@ function ChatPanel({
         // transcription results during speech (see onresult). This avoids a
         // dead-mic state if speech synthesis onend never fires.
         if (companionRef.current) {
+          const wantLang = resolveRecognitionLang();
+          // Language changed (auto-detect or the picker): restart with a
+          // fresh instance, since rec.lang can't be changed reliably on a
+          // live instance.
+          if (wantLang !== recLangRef.current) {
+            const next = recOnTranscriptRef.current;
+            if (next) {
+              try {
+                beginRecognition(recContinuousRef.current, next, wantLang);
+                return;
+              } catch {
+                /* fall through to a plain restart */
+              }
+            }
+          }
           try {
             rec.start();
             return;
@@ -1027,7 +1137,16 @@ function ChatPanel({
       setListening(true);
       return true;
     },
-    [],
+    [resolveRecognitionLang],
+  );
+
+  const startRecognition = useCallback(
+    (continuous: boolean, onTranscript: (t: string, isFinal: boolean) => void) => {
+      recOnTranscriptRef.current = onTranscript;
+      recContinuousRef.current = continuous;
+      return beginRecognition(continuous, onTranscript, resolveRecognitionLang());
+    },
+    [beginRecognition, resolveRecognitionLang],
   );
 
   const stopCompanion = useCallback(() => {
@@ -1120,8 +1239,29 @@ function ChatPanel({
     if (!text || spokenRef.current === last.id) return;
     spokenRef.current = last.id;
     speakingRef.current = true;
+    // Speak in the reply's language: detect the script of MANO's reply and
+    // pick the best installed voice for it. Falls back to the user's
+    // voice-language setting, then the browser locale. utter.lang is always
+    // set so even a default voice pronounces with the right language.
+    const replyLang = detectVoiceLang(text);
+    const settingLang =
+      voiceLangRef.current !== "auto"
+        ? voiceLangRef.current
+        : (typeof navigator !== "undefined" && navigator.language) || "en-US";
+    const speakLang = replyLang ?? settingLang;
+    let ttsVoices = voicesRef.current;
+    if (!ttsVoices.length) {
+      try {
+        ttsVoices = window.speechSynthesis.getVoices();
+        voicesRef.current = ttsVoices;
+      } catch {
+        /* fall back to utter.lang only */
+      }
+    }
     const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = navigator.language || "en-US";
+    utter.lang = speakLang;
+    const voice = pickVoice(ttsVoices, speakLang);
+    if (voice) utter.voice = voice;
     utter.rate = 1.03;
     const clearSpeaking = () => {
       speakingRef.current = false;
@@ -1413,6 +1553,33 @@ function ChatPanel({
           <Link to="/devices" className="mano-tool-orb" aria-label="Devices" title="Devices">
             <Cpu className="h-5 w-5 text-foreground" />
           </Link>
+          <label
+            className="mano-glass flex cursor-pointer items-center gap-1.5 rounded-full py-2 pl-3 pr-2 text-sm transition hover:scale-105"
+            title={
+              voiceLang === "auto" && autoLang
+                ? `Voice language: auto-detected ${voiceLangLabel(autoLang)}`
+                : "Voice language for speaking and listening"
+            }
+          >
+            <Languages className="h-4 w-4 shrink-0 text-foreground" aria-hidden="true" />
+            <select
+              value={voiceLang}
+              onChange={(e) => setVoiceLang(e.target.value)}
+              aria-label="Voice language"
+              className="cursor-pointer bg-transparent text-foreground outline-none [&>option]:bg-black"
+            >
+              {VOICE_LANGS.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+            {voiceLang === "auto" && autoLang && (
+              <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[11px] font-medium text-primary">
+                {autoLang}
+              </span>
+            )}
+          </label>
           {listening && (
             <div className="mano-waveform ml-2" aria-hidden="true">
               <span /><span /><span /><span /><span /><span /><span />
