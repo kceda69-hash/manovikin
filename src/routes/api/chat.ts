@@ -132,6 +132,59 @@ function isRetryableGatewayError(err: unknown): boolean {
   );
 }
 
+/**
+ * Give back the credit spent on a failed turn. The spend happens before the
+ * AI call, so a stream failure must not cost the user anything. Fire-and-forget:
+ * onError is synchronous in the AI SDK, and this is a single RPC round-trip
+ * while the stream is closing. Failures are logged, never thrown.
+ */
+function refundCredit(
+  admin: SupabaseClient<Database>,
+  userId: string,
+  threadId: string,
+  ip?: string,
+  userAgent?: string,
+) {
+  admin
+    .rpc("manovik_topup_credit", {
+      _user_id: userId,
+      _amount: 1,
+      _reason: "chat.refund:ai_error",
+    })
+    .then(
+      async ({ error }) => {
+        try {
+          if (error) {
+            log.error("chat.refund.failed", { userId, threadId, error: error.message });
+            return;
+          }
+          await audit(admin, {
+            user_id: userId,
+            thread_id: threadId,
+            event_type: "credit.refunded",
+            summary: "Refunded 1 credit after AI stream failure",
+            ip,
+            user_agent: userAgent,
+            metadata: { reason: "ai_error" },
+          });
+          log.info("chat.refund.ok", { userId, threadId });
+        } catch (e: unknown) {
+          log.error("chat.refund.exception", {
+            userId,
+            threadId,
+            error: String(e).slice(0, 200),
+          });
+        }
+      },
+      (e: unknown) =>
+        log.error("chat.refund.exception", {
+          userId,
+          threadId,
+          error: String(e).slice(0, 200),
+        }),
+    );
+}
+
 // Extract a structured, secret-free diagnostic from an unknown error.
 // Surfaces AI SDK error names, Zod issue paths, HTTP status, upstream body
 // snippets, and tool metadata so we can pinpoint *which* tool/payload field
@@ -577,6 +630,22 @@ export const Route = createFileRoute("/api/chat")({
                 model: chosenModel,
                 ...details,
               });
+              // A failed turn must not cost the user: the credit was already
+              // deducted before the AI call started.
+              if (!isAdmin) {
+                refundCredit(supabaseAdmin, userId, threadId, ip, ua);
+              }
+              // Rate limits get a plain-language message instead of the raw
+              // SDK error ("Failed after 3 attempts. Last error: …").
+              const errMsg = String(details.message ?? "").toLowerCase();
+              const rateLimited =
+                details.status === 429 ||
+                /\b(429|too many requests|rate.?limit|quota exceeded|resource exhausted)\b/.test(
+                  errMsg,
+                );
+              if (rateLimited) {
+                return "The AI is rate-limited right now. Please wait a minute and try again — this message cost you nothing.";
+              }
               // Surface a compact, non-sensitive hint to the client so the UI
               // can render the actual field/tool that failed instead of a
               // generic "invalid string".

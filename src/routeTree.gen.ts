@@ -74,6 +74,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 import { Route as ApiPublicDemoChatRouteImport } from './routes/api/public/demo-chat'
+import { Route as ApiAuthProvidersRouteImport } from './routes/api/auth/providers'
 import { Route as ApiAuthMagicLinkRouteImport } from './routes/api/auth/magic-link'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -423,6 +424,11 @@ const ApiPublicDemoChatRoute = ApiPublicDemoChatRouteImport.update({
   path: '/api/public/demo-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthProvidersRoute = ApiAuthProvidersRouteImport.update({
+  id: '/api/auth/providers',
+  path: '/api/auth/providers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthMagicLinkRoute = ApiAuthMagicLinkRouteImport.update({
   id: '/api/auth/magic-link',
   path: '/api/auth/magic-link',
@@ -579,6 +585,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
+  '/api/auth/providers': typeof ApiAuthProvidersRoute
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -662,6 +669,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
+  '/api/auth/providers': typeof ApiAuthProvidersRoute
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -746,6 +754,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
+  '/api/auth/providers': typeof ApiAuthProvidersRoute
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -831,6 +840,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
+    | '/api/auth/providers'
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
@@ -914,6 +924,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
+    | '/api/auth/providers'
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
@@ -997,6 +1008,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
+    | '/api/auth/providers'
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
@@ -1081,6 +1093,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAuthMagicLinkRoute: typeof ApiAuthMagicLinkRoute
+  ApiAuthProvidersRoute: typeof ApiAuthProvidersRoute
   ApiPublicDemoChatRoute: typeof ApiPublicDemoChatRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -1556,6 +1569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDemoChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/providers': {
+      id: '/api/auth/providers'
+      path: '/api/auth/providers'
+      fullPath: '/api/auth/providers'
+      preLoaderRoute: typeof ApiAuthProvidersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/magic-link': {
       id: '/api/auth/magic-link'
       path: '/api/auth/magic-link'
@@ -1739,6 +1759,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAuthMagicLinkRoute: ApiAuthMagicLinkRoute,
+  ApiAuthProvidersRoute: ApiAuthProvidersRoute,
   ApiPublicDemoChatRoute: ApiPublicDemoChatRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,

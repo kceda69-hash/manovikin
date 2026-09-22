@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,6 +55,27 @@ function LoginPage() {
   const [magicBusy, setMagicBusy] = useState(false);
   const [magicSent, setMagicSent] = useState(false);
   const [magicCooldown, setMagicCooldown] = useState(0);
+  // Google OAuth is only offered when the Supabase project actually has the
+  // provider enabled (it needs a Google Cloud OAuth client). The probe hides
+  // the button instead of sending users to a dead broker URL.
+  const [googleAvailable, setGoogleAvailable] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/providers")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((body) => {
+        if (!cancelled && body && typeof body.google === "boolean") {
+          setGoogleAvailable(body.google);
+        }
+      })
+      .catch(() => {
+        /* probe failed — leave the Google button hidden */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (magicCooldown <= 0) return;
@@ -96,23 +116,23 @@ function LoginPage() {
   const handleGoogleSignIn = async () => {
     setBusy(true);
     try {
-      // Keep the destination out of the redirect URI: the OAuth broker matches
-      // the registered callback exactly, so extra query params can break it.
+      // `next` is stashed out-of-band: Supabase matches the registered
+      // callback URL exactly, so extra query params can break the flow.
       try {
         sessionStorage.setItem("manovik.auth.next", next);
       } catch {
         /* storage unavailable — fall back to the default destination */
       }
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}/auth/callback`,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
-      if (result.error) {
-        toast.error(result.error.message ?? t("login.toast.googleFailed"));
-        setBusy(false);
-        return;
-      }
-      if (result.redirected) return;
-      navigate({ to: next });
+      if (error) throw error;
+      // supabase-js redirects the browser to the provider; if we are still
+      // here the redirect did not happen.
+      setBusy(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("login.toast.signinFailed"));
       setBusy(false);
@@ -206,40 +226,44 @@ function LoginPage() {
           {mode === "signin" ? t("login.signinSub") : t("login.signupSub")}
         </p>
 
-        <div className="mt-6 space-y-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full border-border/60 bg-card/40"
-            onClick={handleGoogleSignIn}
-            disabled={busy}
-          >
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.55c2.08-1.92 3.29-4.74 3.29-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.55-2.76c-.98.66-2.24 1.06-3.73 1.06-2.87 0-5.3-1.94-6.17-4.55H2.18v2.85A11 11 0 0 0 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.83 14.09a6.61 6.61 0 0 1 0-4.18V7.07H2.18a11 11 0 0 0 0 9.86l3.65-2.84z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.65 2.84C6.7 7.32 9.13 5.38 12 5.38z"
-              />
-            </svg>
-            {t("login.google")}
-          </Button>
-        </div>
+        {googleAvailable && (
+          <div className="mt-6 space-y-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-border/60 bg-card/40"
+              onClick={handleGoogleSignIn}
+              disabled={busy}
+            >
+              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.55c2.08-1.92 3.29-4.74 3.29-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.55-2.76c-.98.66-2.24 1.06-3.73 1.06-2.87 0-5.3-1.94-6.17-4.55H2.18v2.85A11 11 0 0 0 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.83 14.09a6.61 6.61 0 0 1 0-4.18V7.07H2.18a11 11 0 0 0 0 9.86l3.65-2.84z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.65 2.84C6.7 7.32 9.13 5.38 12 5.38z"
+                />
+              </svg>
+              {t("login.google")}
+            </Button>
+          </div>
+        )}
 
-        <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
-          <div className="h-px flex-1 bg-border/60" /> {t("login.or")}{" "}
-          <div className="h-px flex-1 bg-border/60" />
-        </div>
+        {googleAvailable && (
+          <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="h-px flex-1 bg-border/60" /> {t("login.or")}{" "}
+            <div className="h-px flex-1 bg-border/60" />
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
