@@ -69,8 +69,17 @@ export const createRazorpayOrder = createServerFn({ method: "POST" })
       }),
     });
     if (!res.ok) {
-      console.error("Razorpay order failed", res.status, await res.text());
-      return { ok: false as const, error: "Could not create order" };
+      const errText = await res.text();
+      console.error("Razorpay order failed", res.status, errText);
+      let detail = `Razorpay rejected the order (HTTP ${res.status})`;
+      try {
+        const parsed = JSON.parse(errText) as { error?: { description?: string; code?: string } };
+        if (parsed.error?.description) detail = `Razorpay: ${parsed.error.description}`;
+        else if (parsed.error?.code) detail = `Razorpay: ${parsed.error.code}`;
+      } catch {
+        /* keep default detail */
+      }
+      return { ok: false as const, error: detail };
     }
     const order = (await res.json()) as { id: string; amount: number; currency: string };
 
