@@ -254,8 +254,10 @@ function ChatPage() {
         if (!cancelled) {
           const msg = e instanceof Error ? e.message : "Couldn't load your conversations.";
           // If the session is invalid/expired, clear it and redirect to login
-          // instead of showing a dead error panel.
-          if (msg === "AUTH_FAILED") {
+          // instead of showing a dead error panel. The server throws a plain
+          // AUTH_FAILED error for auth problems; also match common 401-style
+          // texts in case any auth failure still arrives unwrapped.
+          if (msg === "AUTH_FAILED" || /unauthorized|invalid token|jwt expired|no authorization header/i.test(msg)) {
             try {
               await supabase.auth.signOut();
             } catch {

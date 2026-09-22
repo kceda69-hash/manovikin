@@ -8,22 +8,32 @@ function fail(tag: string, error: unknown): never {
   // If this is an auth error (expired/invalid JWT, 401/403 from PostgREST),
   // throw a distinguishable error so the client can redirect to login instead
   // of showing a generic "Request failed" panel.
+  // NOTE: PostgREST errors from supabase-js carry { code, message, details, hint }
+  // and do NOT include an HTTP `status` field, so auth detection must rely on
+  // the code/message rather than `status`.
   const err = error as { code?: string; message?: string; status?: number } | null;
-  const msg = (err?.message ?? "").toLowerCase();
-  const code = (err?.code ?? "").toLowerCase();
+  const msg = err?.message ?? "";
+  const lower = msg.toLowerCase();
+  const code = String(err?.code ?? "").toLowerCase();
   const isAuthError =
     err?.status === 401 ||
     err?.status === 403 ||
     code === "401" ||
     code === "403" ||
-    msg.includes("jwt") ||
-    msg.includes("unauthorized") ||
-    msg.includes("invalid token") ||
-    msg.includes("expired");
+    code === "pgrst301" || // PostgREST: JWT expired/invalid
+    lower.includes("jwt") ||
+    lower.includes("unauthorized") ||
+    lower.includes("invalid token") ||
+    lower.includes("invalid api key") ||
+    lower.includes("expired");
   if (isAuthError) {
     throw new Error("AUTH_FAILED");
   }
-  throw new Error("Request failed");
+  // Permanent diagnosability: never swallow the real database error behind a
+  // generic message again. PostgREST error messages contain no secrets, so it
+  // is safe to surface the code + message to help diagnose failures.
+  const detail = [err?.code, msg].filter(Boolean).join(" ").trim();
+  throw new Error(detail ? `Request failed: ${detail}` : "Request failed");
 }
 
 export const listThreads = createServerFn({ method: "GET" })

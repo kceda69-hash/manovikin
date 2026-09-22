@@ -82,23 +82,27 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
 
     const request = getRequest();
 
+    // Auth failures throw AUTH_FAILED (a plain Error, not a Response) so the
+    // message survives TanStack Start's server-function error serialization and
+    // the client can reliably redirect to /login. Throwing a Response here
+    // would surface only as raw body text on the client and bypass that logic.
     if (!request?.headers) {
-      throw new Response("Unauthorized: No request headers available", { status: 401 });
+      throw new Error("AUTH_FAILED");
     }
 
     const authHeader = request.headers.get("authorization");
 
     if (!authHeader) {
-      throw new Response("Unauthorized: No authorization header provided", { status: 401 });
+      throw new Error("AUTH_FAILED");
     }
 
     if (!authHeader.startsWith("Bearer ")) {
-      throw new Response("Unauthorized: Only Bearer tokens are supported", { status: 401 });
+      throw new Error("AUTH_FAILED");
     }
 
     const token = authHeader.replace("Bearer ", "");
     if (!token) {
-      throw new Response("Unauthorized: No token provided", { status: 401 });
+      throw new Error("AUTH_FAILED");
     }
 
     // Verify the JWT locally instead of calling supabase.auth.getClaims(),
@@ -123,7 +127,7 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       });
       const { data, error } = await supabaseForClaims.auth.getClaims(token);
       if (error || !data?.claims?.sub) {
-        throw new Response("Unauthorized: Invalid token", { status: 401 });
+        throw new Error("AUTH_FAILED");
       }
       userId = data.claims.sub;
       claims = data.claims as Record<string, unknown>;
