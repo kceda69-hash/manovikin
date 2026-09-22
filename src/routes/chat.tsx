@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { signOutEverywhere } from "@/lib/auth-signout";
+import { bootDisplayName } from "@/lib/boot-greeting";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -72,12 +73,16 @@ interface SpeechRecognitionEvent extends Event {
   readonly results: SpeechRecognitionResultList;
 }
 
+interface SpeechRecognitionErrorEvent extends Event {
+  readonly error: string;
+}
+
 interface SpeechRecognitionInstance {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null;
   start(): void;
   stop(): void;
@@ -368,6 +373,7 @@ function ChatPage() {
             threadId={activeId}
             initialMessages={initialMessages}
             historyLoading={historyLoading}
+            displayName={bootDisplayName(user)}
           />
         </div>
         <div
@@ -709,10 +715,12 @@ function ChatPanel({
   threadId,
   initialMessages,
   historyLoading,
+  displayName,
 }: {
   threadId: string;
   initialMessages: UIMessage[];
   historyLoading: boolean;
+  displayName: string | null;
 }) {
   const transport = useMemo(
     () =>
@@ -757,7 +765,10 @@ function ChatPanel({
 
   // --- JARVIS voice ---
   const [listening, setListening] = useState(false);
-  const [speakOn, setSpeakOn] = useState(false);
+  const [speakOn, setSpeakOn] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem("manovik:speak-on") === "1";
+  });
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const spokenRef = useRef<string | null>(null);
 
@@ -812,7 +823,17 @@ function ChatPanel({
         .join(" ");
       setInput(transcript);
     };
-    rec.onerror = () => setListening(false);
+    rec.onerror = (e) => {
+      setListening(false);
+      const err = e.error;
+      if (err === "not-allowed" || err === "service-not-allowed") {
+        toast.error("Microphone access was denied. Allow it in your browser to use voice input.");
+      } else if (err === "no-speech") {
+        toast.error("Didn't catch that — try speaking again.");
+      } else if (err) {
+        toast.error("Voice input failed. Try again.");
+      }
+    };
     rec.onend = () => setListening(false);
     recognitionRef.current = rec;
     rec.start();
@@ -959,7 +980,9 @@ function ChatPanel({
                 />
               </div>
               <h2 className="mt-5 text-2xl font-bold text-gradient sm:text-3xl">
-                How can I help today?
+                {displayName
+                  ? `MANO online, ${displayName}`
+                  : "MANO online. What are we working on?"}
               </h2>
               <p className="mt-2 max-w-md px-2 text-sm text-muted-foreground">
                 Ask MANOVIK AI to write code, design a feature, debug a bug, draft an API, or
@@ -1062,7 +1085,7 @@ function ChatPanel({
             aria-pressed={listening}
             aria-label={listening ? "Stop voice input" : "Start voice input"}
             onClick={toggleListening}
-            className="h-8 rounded-full"
+            className="h-8 min-h-[44px] rounded-full"
           >
             {listening ? (
               <Square className="mr-1.5 h-3.5 w-3.5" />
@@ -1078,12 +1101,20 @@ function ChatPanel({
             aria-pressed={speakOn}
             aria-label={speakOn ? "Turn off spoken replies" : "Turn on spoken replies"}
             onClick={() => {
+              if (!speakOn && (typeof window === "undefined" || !("speechSynthesis" in window))) {
+                toast.error("Spoken replies aren't supported in this browser");
+                return;
+              }
               setSpeakOn((v) => {
-                if (v && typeof window !== "undefined") window.speechSynthesis.cancel();
-                return !v;
+                const next = !v;
+                if (typeof window !== "undefined") {
+                  window.localStorage.setItem("manovik:speak-on", next ? "1" : "0");
+                  if (v) window.speechSynthesis.cancel();
+                }
+                return next;
               });
             }}
-            className="h-8 rounded-full"
+            className="h-8 min-h-[44px] rounded-full"
           >
             {speakOn ? (
               <Volume2 className="mr-1.5 h-3.5 w-3.5" />

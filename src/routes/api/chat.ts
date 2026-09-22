@@ -33,6 +33,17 @@ function summarize(msg: { parts?: Array<{ type: string; text?: string }> }): str
     .slice(0, 200);
 }
 
+/** Full plain-text extraction (longer cap) for the auto-memory extractor. */
+function plainText(msg: { parts?: Array<{ type: string; text?: string }> }, max = 3000): string {
+  if (!msg?.parts) return "";
+  return msg.parts
+    .map((p) => (p.type === "text" ? (p.text ?? "") : ""))
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max);
+}
+
 async function audit(
   supabase: SupabaseClient<Database>,
   entry: {
@@ -672,6 +683,32 @@ export const Route = createFileRoute("/api/chat")({
             metadata: { model: chosenModel, sovereign },
           });
           log.info("chat.stream.finish", { userId, threadId, model: chosenModel });
+
+          // Auto-memory (Jarvis): extract durable user facts from this turn
+          // and store them for future recall. Fire-and-forget with full error
+          // isolation — memorization must never break or delay chat.
+          void (async () => {
+            try {
+              const lastUser = [...finalMessages].reverse().find((m) => m.role === "user");
+              const { buildExchangeText, shouldAttemptExtraction, extractMemoryFacts } =
+                await import("@/lib/memory/extract.server");
+              const exchange = buildExchangeText(
+                lastUser ? plainText(lastUser, 1500) : "",
+                plainText(safeAssistant, 2500),
+              );
+              if (!shouldAttemptExtraction(exchange)) return;
+              const facts = await extractMemoryFacts(exchange, {
+                model: chosenModel,
+                apiKey,
+                sovereignKey: keys[chosenKeyIndex],
+              });
+              if (facts.length === 0) return;
+              const { storeMemoryFacts } = await import("@/lib/memory/store.server");
+              await storeMemoryFacts(userId, facts);
+            } catch (e) {
+              console.warn("[auto-memory] turn skipped:", e instanceof Error ? e.message : e);
+            }
+          })();
         };
 
         // Mid-stream failure on the winning attempt: the response is already
