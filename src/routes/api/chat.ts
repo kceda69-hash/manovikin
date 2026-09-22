@@ -12,7 +12,7 @@ import {
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database, Json } from "@/integrations/supabase/types";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
+import { createLovableAiGatewayProvider, createFreeGptProvider, FREE_GPT_MODEL } from "@/lib/ai-gateway";
 import { routeModel } from "@/lib/model-router";
 import { MANO_CHAT_SYSTEM, manoStreamChain } from "@/lib/mano/mano1";
 import { fullstackDoctrineFor } from "@/lib/fullstack-doctrine";
@@ -189,6 +189,22 @@ const PRE_CONTENT_CONTROL_CHUNKS = new Set(["start", "start-step", "finish-step"
 // endpoint. gemini-2.0-flash was retired by Google (returns 404 telling callers to
 // use gemini-3.6-flash), which is why the fallback list uses the 3.x Flash models.
 const SOVEREIGN_STREAM_FALLBACKS = ["gemini-3.7-flash", "gemini-3.6-flash"] as const;
+
+// Free GPT-class last resort, tried only after every Gemini model fails.
+// Descriptor (not a plain model id) because it needs its own provider —
+// a keyless OpenAI-compatible endpoint, not Google's. Plain-text label is
+// used for logs/audit; the model id is what the endpoint expects.
+interface FreeGptCandidate {
+  freeGpt: true;
+  label: string;
+  model: string;
+}
+const FREE_GPT_CANDIDATE: FreeGptCandidate = {
+  freeGpt: true,
+  label: "pollinations/openai",
+  model: FREE_GPT_MODEL,
+};
+type StreamCandidate = string | FreeGptCandidate;
 
 function isRateLimitedDetails(details: Record<string, unknown>): boolean {
   const errMsg = String(details.message ?? "").toLowerCase();
@@ -733,8 +749,12 @@ export const Route = createFileRoute("/api/chat")({
         // Ordered stream candidates. In sovereign mode the Lovable-gateway
         // "provider/" model names 404 on Google's OpenAI-compatible
         // endpoint, so fail over across plain Gemini model IDs instead.
-        const streamCandidates = sovereign
-          ? Array.from(new Set([primaryModel, ...SOVEREIGN_STREAM_FALLBACKS]))
+        // The free GPT-class model is always LAST: it is keyless and
+        // zero-cost, so it only fires when every Gemini model failed —
+        // the user gets a reply instead of an error, and the turn's
+        // single credit is spent on a real reply rather than refunded.
+        const streamCandidates: StreamCandidate[] = sovereign
+          ? [...new Set([primaryModel, ...SOVEREIGN_STREAM_FALLBACKS]), FREE_GPT_CANDIDATE]
           : modelCandidates;
 
         let chosenModel = primaryModel;
@@ -797,7 +817,7 @@ export const Route = createFileRoute("/api/chat")({
         // refund commits. (The old fire-and-forget refund here could be killed
         // when the worker suspended.)
         const handleMidStreamError =
-          (model: string, kIdx: number) =>
+          (model: string, kIdx: number, freeGpt: boolean) =>
           (err: unknown): string => {
             const details = describeError(err);
             log.error("chat.stream.onError", {
@@ -810,7 +830,9 @@ export const Route = createFileRoute("/api/chat")({
             });
             // NOTE: the credit refund for this path happens in the
             // response-stream wrapper below (awaited before close).
-            if (isRateLimitedDetails(details)) {
+            // The free GPT fallback is keyless — never throttle a Gemini key
+            // for its rate limits.
+            if (!freeGpt && isRateLimitedDetails(details)) {
               // Fail over: throttle this key so the next request uses the
               // backup key (if configured) until the throttle expires.
               markKeyThrottled(kIdx);
@@ -822,8 +844,13 @@ export const Route = createFileRoute("/api/chat")({
         let responseStream: ReadableStream<UIMessageChunk> | null = null;
         let attemptKeyIndex = keyIndex;
         for (const candidate of streamCandidates) {
+          const isFreeGpt = typeof candidate !== "string";
+          const candidateLabel = isFreeGpt ? candidate.label : candidate;
+          const candidateModel = isFreeGpt ? candidate.model : candidate;
           const aborter = new AbortController();
-          const attemptGateway = createLovableAiGatewayProvider(apiKey, keys[attemptKeyIndex]);
+          const attemptGateway = isFreeGpt
+            ? createFreeGptProvider()
+            : createLovableAiGatewayProvider(apiKey, keys[attemptKeyIndex]);
           let firstStreamError: unknown = null;
           let sawContent = false;
           const buffered: UIMessageChunk[] = [];
@@ -832,10 +859,14 @@ export const Route = createFileRoute("/api/chat")({
           // for the primary router pick AND only when the chosen model is
           // OpenAI — Gemini fallbacks silently ignore it and would be billed
           // at the standard rate anyway. Faster TTFT for hard/code prompts.
+          // The free GPT fallback never uses priority (keyless, best-effort).
           const usePriority =
-            candidate === route.model && route.priority && candidate.startsWith("openai/");
+            !isFreeGpt &&
+            candidateModel === route.model &&
+            route.priority &&
+            candidateModel.startsWith("openai/");
           // GPT-5.6 models reject tool calls unless reasoning effort is "none".
-          const isGpt56 = candidate.startsWith("openai/gpt-5.6");
+          const isGpt56 = !isFreeGpt && candidateModel.startsWith("openai/gpt-5.6");
           const lovableOptions: Record<string, string> = {};
           if (usePriority) lovableOptions.service_tier = "priority";
           if (isGpt56) lovableOptions.reasoningEffort = "none";
@@ -843,10 +874,13 @@ export const Route = createFileRoute("/api/chat")({
           let reader: ReadableStreamDefaultReader<UIMessageChunk>;
           try {
             const streamResult = streamText({
-              model: attemptGateway(candidate),
+              model: attemptGateway(candidateModel),
               system: systemPrompt,
               messages: modelMessages,
-              tools,
+              // The free fallback is a last-resort text reply: no sandboxed
+              // tools, so a tool-capability mismatch can never 400 the final
+              // attempt. Most turns don't use tools anyway.
+              tools: isFreeGpt ? undefined : tools,
               stopWhen: stepCountIs(50),
               // Fail fast: the AI SDK defaults to 2 retries (3 attempts), and
               // on a 429 each user message then burns 3x quota while the user
@@ -864,7 +898,7 @@ export const Route = createFileRoute("/api/chat")({
               onError: (err: unknown) => {
                 firstStreamError ??= err;
                 if (sawContent) {
-                  return handleMidStreamError(candidate, attemptKeyIndex)(err);
+                  return handleMidStreamError(candidateLabel, attemptKeyIndex, isFreeGpt)(err);
                 }
                 // Pre-content failure: the probe below fails over to the next
                 // candidate, so this string never reaches the client.
@@ -875,7 +909,7 @@ export const Route = createFileRoute("/api/chat")({
             reader = uiStream.getReader() as ReadableStreamDefaultReader<UIMessageChunk>;
           } catch (err) {
             lastErr = err;
-            log.error("chat.model.init_failed", { model: candidate, ...describeError(err) });
+            log.error("chat.model.init_failed", { model: candidateLabel, ...describeError(err) });
             if (!isRetryableGatewayError(err) && !isUnknownModelError(err)) break;
             continue;
           }
@@ -897,7 +931,7 @@ export const Route = createFileRoute("/api/chat")({
               if (raced === "timeout") {
                 lastErr = new Error(`No content from upstream within ${FIRST_CHUNK_TIMEOUT_MS}ms`);
                 log.warn("chat.stream.first_chunk_timeout", {
-                  model: candidate,
+                  model: candidateLabel,
                   userId,
                   threadId,
                 });
@@ -936,14 +970,15 @@ export const Route = createFileRoute("/api/chat")({
             }
             const details = describeError(lastErr);
             log.warn("chat.model.pre_content_failed", {
-              model: candidate,
+              model: candidateLabel,
               keyIndex: attemptKeyIndex,
               userId,
               threadId,
               ...details,
             });
-            if (isRateLimitedDetails(details)) {
+            if (!isFreeGpt && isRateLimitedDetails(details)) {
               // Throttle this key so the next attempt uses the backup key.
+              // The free GPT fallback is keyless — nothing to throttle.
               markKeyThrottled(attemptKeyIndex);
               log.warn("chat.key.throttled", { keyIndex: attemptKeyIndex, userId, threadId });
             }
@@ -951,12 +986,12 @@ export const Route = createFileRoute("/api/chat")({
             continue;
           }
 
-          chosenModel = candidate;
+          chosenModel = candidateLabel;
           chosenKeyIndex = attemptKeyIndex;
-          if (candidate !== primaryModel) {
+          if (candidateLabel !== primaryModel) {
             log.warn("chat.model.fallback", {
               from: primaryModel,
-              to: candidate,
+              to: candidateLabel,
               userId,
               threadId,
             });

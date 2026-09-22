@@ -5,12 +5,70 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./types";
 import { getServerEnv } from "@/lib/server-env";
 
+/**
+ * Verifies a Supabase JWT locally using HS256 + the project's JWT secret.
+ * This bypasses supabase.auth.getClaims(), which makes a network call to the
+ * Supabase Auth API — unreliable during Supabase's ongoing "401 errors due to
+ * JWT rejections" incident. Local verification is cryptographically equivalent
+ * for HS256 tokens: we check the HMAC signature with the shared secret and the
+ * exp claim, then let PostgREST/RLS enforce authorization on every query.
+ */
+function base64UrlDecodeToBytes(b64url: string): Uint8Array<ArrayBuffer> {
+  const b64 = b64url.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(new ArrayBuffer(binary.length));
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function verifySupabaseJwt(
+  token: string,
+  jwtSecret: string,
+): Promise<{ sub: string; claims: Record<string, unknown> } | null> {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const [headerB64, payloadB64, sigB64] = parts;
+
+    const header = JSON.parse(
+      new TextDecoder().decode(base64UrlDecodeToBytes(headerB64)),
+    ) as { alg?: string };
+    // Supabase issues HS256 tokens. Refuse anything else.
+    if (header.alg !== "HS256") return null;
+
+    const key = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(jwtSecret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"],
+    );
+    const data = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
+    const signature = base64UrlDecodeToBytes(sigB64);
+    const valid = await crypto.subtle.verify("HMAC", key, signature, data);
+    if (!valid) return null;
+
+    const claims = JSON.parse(
+      new TextDecoder().decode(base64UrlDecodeToBytes(payloadB64)),
+    ) as Record<string, unknown> & { sub?: string; exp?: number };
+    if (!claims.sub || typeof claims.sub !== "string") return null;
+    if (typeof claims.exp === "number" && claims.exp < Date.now() / 1000 - 30) {
+      return null; // expired (30s clock-skew leeway)
+    }
+    return { sub: claims.sub, claims };
+  } catch {
+    return null;
+  }
+}
+
 export const requireSupabaseAuth = createMiddleware({ type: "function" }).server(
   async ({ next }) => {
     // NOTE: reads via getServerEnv (not bare process.env) because Cloudflare
     // Workers don't populate process.env with bindings — see src/lib/server-env.ts.
     const SUPABASE_URL = getServerEnv("SUPABASE_URL");
     const SUPABASE_PUBLISHABLE_KEY = getServerEnv("SUPABASE_PUBLISHABLE_KEY");
+    const SUPABASE_JWT_SECRET = getServerEnv("SUPABASE_JWT_SECRET");
 
     if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
       const missing = [
@@ -43,6 +101,37 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       throw new Response("Unauthorized: No token provided", { status: 401 });
     }
 
+    // Verify the JWT locally instead of calling supabase.auth.getClaims(),
+    // which hits the Supabase Auth API over the network. Supabase has an
+    // ongoing incident ("401 errors due to JWT rejections") where their API
+    // rejects valid tokens; local HS256 verification is cryptographically
+    // equivalent and does not depend on their service health.
+    // Falls back to the network getClaims() only if no JWT secret is configured.
+    let userId: string;
+    let claims: Record<string, unknown>;
+    if (SUPABASE_JWT_SECRET) {
+      const verified = await verifySupabaseJwt(token, SUPABASE_JWT_SECRET);
+      if (!verified) {
+        throw new Response("Unauthorized: Invalid token", { status: 401 });
+      }
+      userId = verified.sub;
+      claims = verified.claims;
+    } else {
+      const supabaseForClaims = createClient<Database>(
+        SUPABASE_URL!,
+        SUPABASE_PUBLISHABLE_KEY!,
+        {
+          auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+        },
+      );
+      const { data, error } = await supabaseForClaims.auth.getClaims(token);
+      if (error || !data?.claims?.sub) {
+        throw new Response("Unauthorized: Invalid token", { status: 401 });
+      }
+      userId = data.claims.sub;
+      claims = data.claims as Record<string, unknown>;
+    }
+
     const supabase = createClient<Database>(SUPABASE_URL!, SUPABASE_PUBLISHABLE_KEY!, {
       global: {
         headers: {
@@ -56,20 +145,11 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       },
     });
 
-    const { data, error } = await supabase.auth.getClaims(token);
-    if (error || !data?.claims) {
-      throw new Response("Unauthorized: Invalid token", { status: 401 });
-    }
-
-    if (!data.claims.sub) {
-      throw new Response("Unauthorized: No user ID found in token", { status: 401 });
-    }
-
     return next({
       context: {
         supabase,
-        userId: data.claims.sub,
-        claims: data.claims,
+        userId,
+        claims,
       },
     });
   },

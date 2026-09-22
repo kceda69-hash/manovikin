@@ -44,3 +44,21 @@ export const createLovableAiGatewayProvider = (
     },
   });
 };
+
+/**
+ * Free GPT-class fallback provider — used as the last resort when every
+ * Gemini model fails, so the user still gets a reply instead of an error.
+ *
+ * Points at a free, keyless OpenAI-compatible endpoint (Pollinations serves
+ * OpenAI's open `gpt-oss` models here). No API key, no account, zero cost.
+ * Override with FREE_GPT_BASE_URL for self-hosting (any OpenAI-compatible
+ * endpoint works; FREE_GPT_MODEL picks the model id).
+ */
+export const createFreeGptProvider = () =>
+  createOpenAICompatible({
+    name: "manovik-free-gpt",
+    baseURL: process.env.FREE_GPT_BASE_URL ?? "https://text.pollinations.ai/openai",
+    headers: {},
+  });
+
+export const FREE_GPT_MODEL = process.env.FREE_GPT_MODEL ?? "openai";
