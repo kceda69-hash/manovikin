@@ -31,9 +31,9 @@ async function verifySupabaseJwt(
     if (parts.length !== 3) return null;
     const [headerB64, payloadB64, sigB64] = parts;
 
-    const header = JSON.parse(
-      new TextDecoder().decode(base64UrlDecodeToBytes(headerB64)),
-    ) as { alg?: string };
+    const header = JSON.parse(new TextDecoder().decode(base64UrlDecodeToBytes(headerB64))) as {
+      alg?: string;
+    };
     // Supabase issues HS256 tokens. Refuse anything else.
     if (header.alg !== "HS256") return null;
 
@@ -106,24 +106,21 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
     // ongoing incident ("401 errors due to JWT rejections") where their API
     // rejects valid tokens; local HS256 verification is cryptographically
     // equivalent and does not depend on their service health.
-    // Falls back to the network getClaims() only if no JWT secret is configured.
+    // If local verification fails (wrong algorithm, key rotation, etc.),
+    // fall back to the network getClaims() before giving up.
     let userId: string;
     let claims: Record<string, unknown>;
+    let verified: { sub: string; claims: Record<string, unknown> } | null = null;
     if (SUPABASE_JWT_SECRET) {
-      const verified = await verifySupabaseJwt(token, SUPABASE_JWT_SECRET);
-      if (!verified) {
-        throw new Response("Unauthorized: Invalid token", { status: 401 });
-      }
+      verified = await verifySupabaseJwt(token, SUPABASE_JWT_SECRET);
+    }
+    if (verified) {
       userId = verified.sub;
       claims = verified.claims;
     } else {
-      const supabaseForClaims = createClient<Database>(
-        SUPABASE_URL!,
-        SUPABASE_PUBLISHABLE_KEY!,
-        {
-          auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
-        },
-      );
+      const supabaseForClaims = createClient<Database>(SUPABASE_URL!, SUPABASE_PUBLISHABLE_KEY!, {
+        auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+      });
       const { data, error } = await supabaseForClaims.auth.getClaims(token);
       if (error || !data?.claims?.sub) {
         throw new Response("Unauthorized: Invalid token", { status: 401 });

@@ -37,6 +37,7 @@ import { Route as KeysRouteImport } from './routes/keys'
 import { Route as HowToMakeAWebsiteWithAiRouteImport } from './routes/how-to-make-a-website-with-ai'
 import { Route as ForceRouteImport } from './routes/force'
 import { Route as DevicesRouteImport } from './routes/devices'
+import { Route as DeviceAgentRouteImport } from './routes/device-agent'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConnectRouteImport } from './routes/connect'
@@ -231,6 +232,11 @@ const ForceRoute = ForceRouteImport.update({
 const DevicesRoute = DevicesRouteImport.update({
   id: '/devices',
   path: '/devices',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeviceAgentRoute = DeviceAgentRouteImport.update({
+  id: '/device-agent',
+  path: '/device-agent',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -544,6 +550,7 @@ export interface FileRoutesByFullPath {
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/device-agent': typeof DeviceAgentRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
   '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
@@ -629,6 +636,7 @@ export interface FileRoutesByTo {
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/device-agent': typeof DeviceAgentRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
   '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
@@ -715,6 +723,7 @@ export interface FileRoutesById {
   '/connect': typeof ConnectRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/device-agent': typeof DeviceAgentRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
   '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
@@ -802,6 +811,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/contact'
     | '/dashboard'
+    | '/device-agent'
     | '/devices'
     | '/force'
     | '/how-to-make-a-website-with-ai'
@@ -887,6 +897,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/contact'
     | '/dashboard'
+    | '/device-agent'
     | '/devices'
     | '/force'
     | '/how-to-make-a-website-with-ai'
@@ -972,6 +983,7 @@ export interface FileRouteTypes {
     | '/connect'
     | '/contact'
     | '/dashboard'
+    | '/device-agent'
     | '/devices'
     | '/force'
     | '/how-to-make-a-website-with-ai'
@@ -1058,6 +1070,7 @@ export interface RootRouteChildren {
   ConnectRoute: typeof ConnectRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
+  DeviceAgentRoute: typeof DeviceAgentRoute
   DevicesRoute: typeof DevicesRoute
   ForceRoute: typeof ForceRoute
   HowToMakeAWebsiteWithAiRoute: typeof HowToMakeAWebsiteWithAiRoute
@@ -1321,6 +1334,13 @@ declare module '@tanstack/react-router' {
       path: '/devices'
       fullPath: '/devices'
       preLoaderRoute: typeof DevicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/device-agent': {
+      id: '/device-agent'
+      path: '/device-agent'
+      fullPath: '/device-agent'
+      preLoaderRoute: typeof DeviceAgentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -1730,6 +1750,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConnectRoute: ConnectRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
+  DeviceAgentRoute: DeviceAgentRoute,
   DevicesRoute: DevicesRoute,
   ForceRoute: ForceRoute,
   HowToMakeAWebsiteWithAiRoute: HowToMakeAWebsiteWithAiRoute,

@@ -211,14 +211,10 @@ function ChatPage() {
   }, [loading, user, navigate]);
 
   const refreshThreads = useCallback(async () => {
-    try {
-      const { threads } = await listThreads();
-      setThreads(threads as Thread[]);
-      return threads as Thread[];
-    } catch {
-      setThreads([]);
-      return [];
-    }
+    const { threads } = await listThreads();
+    const list = (Array.isArray(threads) ? threads : []) as Thread[];
+    setThreads(list);
+    return list;
   }, []);
 
   // Bootstrap: load thread list, ensure one exists, select most recent.
@@ -237,15 +233,20 @@ function ChatPage() {
         if (cancelled) return;
         let pick = list[0];
         if (!pick) {
+          // List loaded successfully but is empty: create the first thread.
+          // (If the load itself had failed, refreshThreads would have thrown
+          // and we'd be in the catch below — never create a thread on failure.)
           const { thread } = await withTimeout(
             createThread(),
             BOOTSTRAP_TIMEOUT_MS,
             "Creating conversation",
           );
+          if (!thread) throw new Error("Couldn't create a conversation.");
           pick = thread as Thread;
           await withTimeout(refreshThreads(), BOOTSTRAP_TIMEOUT_MS, "Loading conversations");
         }
         if (pick) setActiveId(pick.id);
+        else throw new Error("Couldn't load your conversations.");
       } catch (e) {
         console.error("Chat bootstrap failed:", e);
         if (!cancelled) {
@@ -283,22 +284,30 @@ function ChatPage() {
   }, [activeId]);
 
   const handleNew = async () => {
-    const { thread } = await createThread();
-    await refreshThreads();
-    setActiveId((thread as Thread).id);
+    try {
+      const { thread } = await createThread();
+      await refreshThreads();
+      setActiveId((thread as Thread).id);
+    } catch (e) {
+      console.error("Failed to create conversation:", e);
+    }
   };
 
   const handleDelete = async (id: string) => {
-    await deleteThread({ data: { id } });
-    const list = await refreshThreads();
-    if (activeId === id) {
-      const next = list[0];
-      if (next) setActiveId(next.id);
-      else {
-        const { thread } = await createThread();
-        await refreshThreads();
-        setActiveId((thread as Thread).id);
+    try {
+      await deleteThread({ data: { id } });
+      const list = await refreshThreads();
+      if (activeId === id) {
+        const next = list[0];
+        if (next) setActiveId(next.id);
+        else {
+          const { thread } = await createThread();
+          await refreshThreads();
+          setActiveId((thread as Thread).id);
+        }
       }
+    } catch (e) {
+      console.error("Failed to delete conversation:", e);
     }
   };
 
@@ -915,8 +924,7 @@ function ChatPanel({
     (transcript: string): boolean => {
       const t = transcript.toLowerCase().trim();
       const hasSpeakerWord = /\b(speaker|voice|sound|audio)\b/.test(t);
-      const turnOn =
-        /\b(turn on|enable|unmute|speaker on|voice on)\b/.test(t) && hasSpeakerWord;
+      const turnOn = /\b(turn on|enable|unmute|speaker on|voice on)\b/.test(t) && hasSpeakerWord;
       // "turn off"/"disable" require speaker context (so "turn off the lights"
       // doesn't kill the speaker). "mute"/"shut up"/"quiet" are direct
       // commands to MANO and work standalone.
@@ -1399,7 +1407,13 @@ function ChatPanel({
                 />
                 {listening && (
                   <div className="mano-waveform absolute -bottom-12 left-1/2 -translate-x-1/2">
-                    <span /><span /><span /><span /><span /><span /><span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
                   </div>
                 )}
               </div>
@@ -1582,7 +1596,13 @@ function ChatPanel({
           </label>
           {listening && (
             <div className="mano-waveform ml-2" aria-hidden="true">
-              <span /><span /><span /><span /><span /><span /><span />
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
             </div>
           )}
         </div>
@@ -1644,7 +1664,11 @@ function MessageBubble({ message }: { message: UIMessage }) {
 
   return (
     <div className="flex gap-2 sm:gap-3 mano-message-enter">
-      <div className="mano-core mt-1 h-7 w-7 shrink-0" style={{ width: 28, height: 28 }} aria-hidden="true" />
+      <div
+        className="mano-core mt-1 h-7 w-7 shrink-0"
+        style={{ width: 28, height: 28 }}
+        aria-hidden="true"
+      />
       <div className="mano-message-assistant prose prose-invert min-w-0 max-w-none flex-1 rounded-2xl rounded-tl-sm px-4 py-3 text-foreground prose-pre:my-2 prose-pre:rounded-lg prose-pre:bg-secondary prose-pre:p-3 prose-pre:text-xs prose-code:rounded prose-code:bg-secondary prose-code:px-1.5 prose-code:py-0.5 prose-code:text-[0.85em] prose-code:before:content-[''] prose-code:after:content-['']">
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ pre: PreBlock }}>
           {text}
