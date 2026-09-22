@@ -35,6 +35,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { signOutEverywhere } from "@/lib/auth-signout";
 import { bootDisplayName } from "@/lib/boot-greeting";
+import { WakeScreen } from "@/components/mano/WakeScreen";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -61,6 +62,7 @@ interface SpeechRecognitionAlternative {
 
 interface SpeechRecognitionResult {
   readonly length: number;
+  readonly isFinal: boolean;
   readonly [index: number]: SpeechRecognitionAlternative;
 }
 
@@ -147,6 +149,24 @@ function ChatPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [wakeVisible, setWakeVisible] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return sessionStorage.getItem("manovik:wake-dismissed") !== "1";
+    } catch {
+      return true;
+    }
+  });
+  const [wakeJustLoggedIn, setWakeJustLoggedIn] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const v = sessionStorage.getItem("manovik:just-logged-in") === "1";
+      sessionStorage.removeItem("manovik:just-logged-in");
+      return v;
+    } catch {
+      return false;
+    }
+  });
   const [desktopDashboardOpen, setDesktopDashboardOpen] = useState(() => {
     if (typeof window === "undefined") return true;
     return window.localStorage.getItem("manovik:dashboard-open") !== "0";
@@ -311,6 +331,31 @@ function ChatPage() {
 
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-background">
+      {wakeVisible && (
+        <WakeScreen
+          user={user}
+          justLoggedIn={wakeJustLoggedIn}
+          onWake={(voiceMode) => {
+            try {
+              sessionStorage.setItem("manovik:wake-dismissed", "1");
+            } catch {
+              /* ignore */
+            }
+            setWakeVisible(false);
+            if (voiceMode) {
+              window.dispatchEvent(new CustomEvent("manovik:start-voice-companion"));
+            }
+          }}
+          onDismiss={() => {
+            try {
+              sessionStorage.setItem("manovik:wake-dismissed", "1");
+            } catch {
+              /* ignore */
+            }
+            setWakeVisible(false);
+          }}
+        />
+      )}
       {/* Desktop sidebar */}
       <aside className="hidden w-72 shrink-0 border-r border-border/40 bg-sidebar md:flex">
         {sidebar}
@@ -763,14 +808,17 @@ function ChatPanel({
   >([]);
   const [imageBusy, setImageBusy] = useState(false);
 
-  // --- JARVIS voice ---
+  // --- MANO voice ---
   const [listening, setListening] = useState(false);
+  const [companionMode, setCompanionMode] = useState(false);
   const [speakOn, setSpeakOn] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("manovik:speak-on") === "1";
   });
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const spokenRef = useRef<string | null>(null);
+  const companionRef = useRef(false);
+  companionRef.current = companionMode;
 
   const generateImage = useCallback(
     async (prompt: string) => {
@@ -801,53 +849,112 @@ function ChatPanel({
     [imageQuality, queryClient],
   );
 
-  const toggleListening = useCallback(() => {
-    const speechWindow = window as unknown as WindowWithSpeechRecognition;
-    const SR = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
-    if (!SR) {
-      toast.error("Voice input isn't supported in this browser");
-      return;
-    }
-    if (listening) {
-      recognitionRef.current?.stop();
-      setListening(false);
-      return;
-    }
-    const rec = new SR();
-    rec.continuous = false;
-    rec.interimResults = true;
-    rec.lang = navigator.language || "en-US";
-    rec.onresult = (e) => {
-      const transcript = Array.from(e.results)
-        .map((r) => r[0].transcript)
-        .join(" ");
-      setInput(transcript);
-    };
-    rec.onerror = (e) => {
-      setListening(false);
-      const err = e.error;
-      if (err === "not-allowed" || err === "service-not-allowed") {
-        toast.error("Microphone access was denied. Allow it in your browser to use voice input.");
-      } else if (err === "no-speech") {
-        toast.error("Didn't catch that — try speaking again.");
-      } else if (err) {
-        toast.error("Voice input failed. Try again.");
-      }
-    };
-    rec.onend = () => setListening(false);
-    recognitionRef.current = rec;
-    try {
-      rec.start();
-    } catch {
-      recognitionRef.current = null;
-      setListening(false);
-      toast.error("Voice input couldn't start. Try again.");
-      return;
-    }
-    setListening(true);
-  }, [listening]);
+  const handleSubmitRef = useRef<() => void>(() => {});
 
-  // Speak the latest completed assistant reply when JARVIS voice output is on.
+  const startRecognition = useCallback(
+    (continuous: boolean, onTranscript: (t: string, isFinal: boolean) => void) => {
+      const speechWindow = window as unknown as WindowWithSpeechRecognition;
+      const SR = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null;
+      if (!SR) {
+        toast.error("Voice input isn't supported in this browser");
+        return false;
+      }
+      const rec = new SR();
+      rec.continuous = continuous;
+      rec.interimResults = true;
+      rec.lang = navigator.language || "en-US";
+      rec.onresult = (e) => {
+        const results = Array.from(e.results);
+        const transcript = results.map((r) => r[0].transcript).join(" ");
+        const isFinal = results.length > 0 && results[results.length - 1].isFinal;
+        onTranscript(transcript, isFinal);
+      };
+      rec.onerror = (e) => {
+        const err = e.error;
+        if (err === "not-allowed" || err === "service-not-allowed") {
+          toast.error("Microphone access was denied. Allow it in your browser to use voice input.");
+          setCompanionMode(false);
+        } else if (err === "no-speech") {
+          if (!companionRef.current) toast.error("Didn't catch that — try speaking again.");
+        } else if (err && !companionRef.current) {
+          toast.error("Voice input failed. Try again.");
+        }
+      };
+      rec.onend = () => {
+        // Companion mode: keep the mic open for a real conversation.
+        if (companionRef.current) {
+          try {
+            rec.start();
+            return;
+          } catch {
+            /* fall through */
+          }
+        }
+        setListening(false);
+      };
+      recognitionRef.current = rec;
+      try {
+        rec.start();
+      } catch {
+        recognitionRef.current = null;
+        setListening(false);
+        return false;
+      }
+      setListening(true);
+      return true;
+    },
+    [],
+  );
+
+  const stopCompanion = useCallback(() => {
+    setCompanionMode(false);
+    recognitionRef.current?.stop();
+    setListening(false);
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+  }, []);
+
+  const startCompanion = useCallback(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      toast.error("Spoken replies aren't supported in this browser");
+      return;
+    }
+    setSpeakOn(true);
+    window.localStorage.setItem("manovik:speak-on", "1");
+    setCompanionMode(true);
+    const ok = startRecognition(true, (transcript, isFinal) => {
+      setInput(transcript);
+      // Real conversation: when the user pauses, send automatically.
+      if (isFinal && transcript.trim()) {
+        window.setTimeout(() => handleSubmitRef.current(), 600);
+      }
+    });
+    if (!ok) setCompanionMode(false);
+    else toast.success("Voice companion on — just talk, MANO is listening");
+  }, [startRecognition]);
+
+  // The wake screen fires this when the user taps "Wake up, MANO".
+  useEffect(() => {
+    const handler = () => startCompanion();
+    window.addEventListener("manovik:start-voice-companion", handler);
+    return () => window.removeEventListener("manovik:start-voice-companion", handler);
+  }, [startCompanion]);
+
+  const toggleListening = useCallback(() => {
+    if (listening) {
+      if (companionRef.current) stopCompanion();
+      else {
+        recognitionRef.current?.stop();
+        setListening(false);
+      }
+      return;
+    }
+    startRecognition(false, (transcript) => setInput(transcript));
+  }, [listening, startRecognition, stopCompanion]);
+
+  // Speak the latest completed assistant reply when MANO voice output is on.
+  // In companion mode the mic pauses while MANO talks, then reopens.
   useEffect(() => {
     if (!speakOn || status === "streaming" || status === "submitted") return;
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -860,9 +967,20 @@ function ChatPanel({
       .slice(0, 1200);
     if (!text || spokenRef.current === last.id) return;
     spokenRef.current = last.id;
+    if (companionRef.current) recognitionRef.current?.stop();
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = navigator.language || "en-US";
     utter.rate = 1.03;
+    utter.onend = () => {
+      // Mic reopens via the recognition onend auto-restart.
+      if (companionRef.current && recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+        } catch {
+          /* onend handler will retry */
+        }
+      }
+    };
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utter);
   }, [messages, speakOn, status]);
@@ -948,6 +1066,10 @@ function ChatPanel({
     requestAnimationFrame(() => {
       bottomRef.current?.scrollIntoView({ block: "end" });
     });
+  };
+
+  handleSubmitRef.current = () => {
+    void handleSubmit();
   };
 
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -1128,7 +1250,7 @@ function ChatPanel({
             ) : (
               <VolumeX className="mr-1.5 h-3.5 w-3.5" />
             )}
-            JARVIS voice
+            MANO voice
           </Button>
           <Button asChild type="button" size="sm" variant="outline" className="h-8 rounded-full">
             <Link to="/devices">

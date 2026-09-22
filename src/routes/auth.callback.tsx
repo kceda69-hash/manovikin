@@ -104,6 +104,11 @@ function AuthCallbackPage() {
 
         if (cancelled) return;
         setState("ok");
+        try {
+          sessionStorage.setItem("manovik:just-logged-in", "1");
+        } catch {
+          /* ignore */
+        }
         // Clean the URL then redirect.
         window.history.replaceState({}, "", "/auth/callback");
         setTimeout(() => navigate({ to: next }), 400);
