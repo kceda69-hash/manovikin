@@ -229,7 +229,7 @@ function CaseStudiesPage() {
         <section className="rounded-xl border border-border/60 bg-card/40 p-6">
           <h2 className="text-xl font-semibold">Run your own mission</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Free to start, no card needed. Pro is ₹699/month and the one-time ₹4999 lifetime plan
+            Free to start, no card needed. Pro is ₹699 one-time and the one-time ₹4999 lifetime plan
             includes self-hosting.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">

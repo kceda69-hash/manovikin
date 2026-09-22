@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { listMyPurchases, cancelRenewal } from "@/lib/payments.functions";
+import { listMyPurchases } from "@/lib/payments.functions";
 import { startCheckout } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/billing")({
       { property: "og:title", content: "Billing & receipts — MANOVIK AI" },
       {
         property: "og:description",
-        content: "Manage your MANOVIK plan, renewals, and download past receipts.",
+        content: "Manage your MANOVIK plan and download past receipts.",
       },
       { property: "og:url", content: "https://manovik.in/billing" },
       { name: "robots", content: "noindex" },
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/billing")({
 });
 
 const PLAN_LABEL: Record<string, string> = {
-  pro: "Pro (monthly)",
+  pro: "Pro (one-time)",
   sovereign: "Sovereign (lifetime)",
   free: "Free",
 };
@@ -99,27 +99,6 @@ function BillingPage() {
     });
   };
 
-  const autoRenew = (activePro?.metadata as Record<string, unknown> | null)?.auto_renew !== false;
-  const nextChargeDate = activePro
-    ? new Date(
-        new Date(activePro.created_at).getTime() + 30 * 24 * 60 * 60 * 1000,
-      ).toLocaleDateString()
-    : null;
-
-  const toggleRenewal = async (next: boolean) => {
-    try {
-      await cancelRenewal({ data: { autoRenew: next } });
-      toast.success(
-        next
-          ? "Auto-renewal resumed"
-          : "Auto-renewal cancelled — access continues until period end",
-      );
-      load();
-    } catch {
-      toast.error("Could not update renewal");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border/40">
@@ -146,34 +125,18 @@ function BillingPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 {currentPlan === "sovereign" && "Lifetime self-host. No renewals."}
                 {currentPlan === "pro" &&
-                  (autoRenew
-                    ? `Monthly subscription. Next charge ~${nextChargeDate}.`
-                    : `Auto-renewal cancelled. Access continues until ${nextChargeDate}.`)}
+                  `One-time purchase — paid ${new Date(activePro!.created_at).toLocaleDateString()}. 800 messages added, never expire.`}
                 {currentPlan === "free" && "Upgrade to unlock Pro features."}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {currentPlan === "pro" &&
-                (autoRenew ? (
-                  <Button variant="outline" onClick={() => toggleRenewal(false)}>
-                    Cancel auto-renewal
-                  </Button>
-                ) : (
-                  <Button variant="outline" onClick={() => toggleRenewal(true)}>
-                    Resume auto-renewal
-                  </Button>
-                ))}
               {currentPlan !== "sovereign" && (
                 <>
                   {currentPlan !== "pro" && (
-                    <Button onClick={() => buy("pro")}>
-                      Upgrade to Pro — <span className="line-through opacity-60 mx-1">₹777</span>{" "}
-                      ₹699/mo
-                    </Button>
+                    <Button onClick={() => buy("pro")}>Upgrade to Pro — ₹699 one-time</Button>
                   )}
                   <Button variant="outline" onClick={() => buy("sovereign")}>
-                    Buy Sovereign — <span className="line-through opacity-60 mx-1">₹6,249</span>{" "}
-                    ₹4,999
+                    Buy Sovereign — ₹4,999 lifetime
                   </Button>
                 </>
               )}
@@ -241,8 +204,8 @@ function BillingPage() {
             )}
           </Card>
           <p className="mt-3 text-xs text-muted-foreground">
-            Subscriptions renew automatically through Razorpay. To cancel renewals, email support —
-            we'll stop your next charge and your access continues until period end.
+            Pro is a one-time purchase — no subscription, no renewals, no expiry. Your messages
+            never expire.
           </p>
         </section>
       </main>

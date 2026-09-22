@@ -54,7 +54,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "MANOVIK AI: autonomous coding agent that builds apps, APIs & automations 24/7. Pro ₹699/mo (10% off). Lifetime self-host ₹4999 (20% off).",
+          "MANOVIK AI: autonomous coding agent that builds apps, APIs & automations 24/7. Pro ₹699 one-time. Lifetime self-host ₹4999.",
       },
       {
         name: "keywords",
@@ -64,7 +64,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
       {
         property: "og:description",
-        content: "Codes, builds, and ships software 24/7. Pro ₹699/mo · Sovereign lifetime ₹4999.",
+        content:
+          "Codes, builds, and ships software 24/7. Pro ₹699 one-time · Sovereign lifetime ₹4999.",
       },
       { property: "og:url", content: "https://manovik.in/" },
       { property: "og:type", content: "website" },
@@ -72,7 +73,8 @@ export const Route = createFileRoute("/")({
       { name: "twitter:title", content: "MANOVIK AI — Autonomous AI Employee for Apps & APIs" },
       {
         name: "twitter:description",
-        content: "Codes, builds, and ships software 24/7. Pro ₹699/mo · Sovereign lifetime ₹4999.",
+        content:
+          "Codes, builds, and ships software 24/7. Pro ₹699 one-time · Sovereign lifetime ₹4999.",
       },
       {
         property: "og:image",
@@ -136,7 +138,7 @@ export const Route = createFileRoute("/")({
             {
               "@type": "Product",
               name: "MANOVIK AI Pro",
-              description: "Unlimited messages and priority models for builders shipping daily.",
+              description: "800 messages with one-time payment, for builders shipping daily.",
               brand: { "@type": "Brand", name: "MANOVIK AI" },
               offers: {
                 "@type": "Offer",
@@ -269,7 +271,7 @@ const PRICING: Pricing[] = [
     price: "₹0",
     period: "forever",
     desc: "Perfect to try out MANOVIK.",
-    features: ["50 messages / month", "All core models", "Private threads", "Community support"],
+    features: ["100 free messages", "All core models", "Private threads", "Community support"],
     cta: "Start free",
     highlight: false,
   },
@@ -277,15 +279,13 @@ const PRICING: Pricing[] = [
     id: "pro",
     name: "Pro",
     price: "₹699",
-    originalPrice: "₹777",
-    discountPct: 10,
-    period: "/month",
+    period: "one-time",
     desc: "For builders shipping daily.",
     features: [
-      "Unlimited messages",
-      "Priority models (GPT-5, Gemini Pro)",
+      "800 messages — never expire",
       "File uploads",
       "Email support",
+      "One-time payment, no subscription",
     ],
     cta: "Go Pro",
     highlight: true,
@@ -294,8 +294,6 @@ const PRICING: Pricing[] = [
     id: "sovereign",
     name: "Sovereign",
     price: "₹4999",
-    originalPrice: "₹6249",
-    discountPct: 20,
     period: "lifetime",
     desc: "One-time payment. Run MANOVIK on your own infra forever.",
     features: [

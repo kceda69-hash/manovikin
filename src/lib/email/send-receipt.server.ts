@@ -12,7 +12,7 @@ const FROM_DOMAIN = "manovik.in";
 const APP_ORIGIN = process.env.APP_ORIGIN || "https://manovik.in";
 
 const PLAN_LABEL: Record<string, string> = {
-  pro: "MANOVIK Pro (monthly)",
+  pro: "MANOVIK Pro (one-time)",
   sovereign: "MANOVIK Sovereign (lifetime)",
 };
 

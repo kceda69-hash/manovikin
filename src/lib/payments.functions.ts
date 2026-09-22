@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const PLANS = {
-  pro: { amount: 69900, currency: "INR", name: "MANOVIK Pro (monthly)" },
+  pro: { amount: 69900, currency: "INR", name: "MANOVIK Pro (one-time)" },
   sovereign: { amount: 499900, currency: "INR", name: "MANOVIK Sovereign (lifetime)" },
 } as const;
 
@@ -151,6 +151,9 @@ export const verifyRazorpayPayment = createServerFn({ method: "POST" })
       .maybeSingle();
 
     if (updated?.id) {
+      // Pro is a one-time purchase: grant the credit bundle idempotently.
+      const { grantProCreditsOnce } = await import("@/lib/pro-credits.server");
+      await grantProCreditsOnce(updated.id);
       try {
         const { sendReceiptEmailForPurchase } = await import("@/lib/email/send-receipt.server");
         await sendReceiptEmailForPurchase(updated.id);
@@ -160,28 +163,6 @@ export const verifyRazorpayPayment = createServerFn({ method: "POST" })
     }
 
     return { ok: true as const };
-  });
-
-export const cancelRenewal = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { autoRenew: boolean }) => z.object({ autoRenew: z.boolean() }).parse(d))
-  .handler(async ({ data, context }) => {
-    const { data: row } = await supabaseAdmin
-      .from("purchases")
-      .select("id, metadata")
-      .eq("user_id", context.userId)
-      .eq("plan", "pro")
-      .eq("status", "paid")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (!row) return { ok: false as const, error: "No active Pro subscription" };
-    const meta = {
-      ...((row.metadata as Record<string, unknown> | null) ?? {}),
-      auto_renew: data.autoRenew,
-    };
-    await supabaseAdmin.from("purchases").update({ metadata: meta }).eq("id", row.id);
-    return { ok: true as const, autoRenew: data.autoRenew };
   });
 
 export const listMyPurchases = createServerFn({ method: "GET" })

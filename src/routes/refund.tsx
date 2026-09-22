@@ -58,12 +58,12 @@ function RefundPage() {
 
         <h2 className="text-xl font-semibold text-foreground">Cancellation</h2>
         <p>
-          Pro monthly subscriptions can be cancelled anytime from{" "}
+          Pro is a one-time purchase — there is no subscription and nothing to cancel. Your purchase
+          history lives at{" "}
           <Link to="/billing" className="text-primary">
             /billing
           </Link>
-          . Your access continues until the end of the current billing period; you will not be
-          charged again.
+          .
         </p>
 
         <h2 className="text-xl font-semibold text-foreground">Refunds</h2>

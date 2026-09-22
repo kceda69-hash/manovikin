@@ -118,7 +118,7 @@ export const template = {
   dataSchema,
   previewData: {
     name: "Jane",
-    planLabel: "MANOVIK Pro (monthly)",
+    planLabel: "MANOVIK Pro (one-time)",
     amountFormatted: "₹699",
     paymentId: "pay_ABC123",
     orderId: "order_XYZ789",

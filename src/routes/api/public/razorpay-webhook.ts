@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { grantProCreditsOnce } from "@/lib/pro-credits.server";
 
 async function verifySig(secret: string, body: string, headerSig: string) {
   const key = await crypto.subtle.importKey(
@@ -53,18 +54,30 @@ export const Route = createFileRoute("/api/public/razorpay-webhook")({
               ? "failed"
               : "pending";
 
+        const { data: existing } = await supabaseAdmin
+          .from("purchases")
+          .select("id, metadata")
+          .eq("razorpay_order_id", entity.order_id)
+          .maybeSingle();
+        const meta = {
+          ...((existing?.metadata as Record<string, unknown> | null) ?? {}),
+          webhook_event: evt.event ?? null,
+        };
+
         const { data: updated } = await supabaseAdmin
           .from("purchases")
           .update({
             status,
             razorpay_payment_id: entity.id ?? null,
-            metadata: { webhook_event: evt.event ?? null },
+            metadata: meta,
           })
           .eq("razorpay_order_id", entity.order_id)
           .select("id, status")
           .maybeSingle();
 
         if (updated?.id && updated.status === "paid") {
+          // Pro is one-time: grant the credit bundle idempotently.
+          await grantProCreditsOnce(updated.id);
           try {
             const { sendReceiptEmailForPurchase } = await import("@/lib/email/send-receipt.server");
             await sendReceiptEmailForPurchase(updated.id);

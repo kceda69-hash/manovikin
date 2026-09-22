@@ -12,7 +12,7 @@ const FAQS = [
   },
   {
     q: "How much does it cost in India?",
-    a: "You can start free. The Pro plan is ₹699/month, and there is a one-time lifetime plan at ₹4999 that also lets you self-host MANOVIK on your own server.",
+    a: "You can start free. The Pro plan is ₹699 one-time, and there is a one-time lifetime plan at ₹4999 that also lets you self-host MANOVIK on your own server.",
   },
   {
     q: "Can it build more than a landing page?",
@@ -30,7 +30,7 @@ const FAQS = [
 
 const TITLE = "AI Website Builder — Build a Site From One Prompt | MANOVIK";
 const DESCRIPTION =
-  "Describe your website in plain English and MANOVIK builds it — pages, database, login and payments included. Start free, Pro ₹699/mo, lifetime self-host ₹4999.";
+  "Describe your website in plain English and MANOVIK builds it — pages, database, login and payments included. Start free, Pro ₹699 one-time, lifetime self-host ₹4999.";
 const URL = "https://manovik.in/ai-website-builder";
 
 export const Route = createFileRoute("/ai-website-builder")({
@@ -133,7 +133,7 @@ function AiWebsiteBuilderPage() {
               {
                 icon: IndianRupee,
                 title: "Indian pricing",
-                body: "Free to start, ₹699/month Pro, or a one-time ₹4999 lifetime plan with self-hosting. Payments in INR.",
+                body: "Free to start, ₹699 one-time Pro, or a one-time ₹4999 lifetime plan with self-hosting. Payments in INR.",
               },
             ].map(({ icon: Icon, title, body }) => (
               <div key={title} className="rounded-xl border border-border/60 bg-card/40 p-5">

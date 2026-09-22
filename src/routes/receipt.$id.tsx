@@ -37,7 +37,7 @@ type Purchase = {
 };
 
 const PLAN_LABEL: Record<string, string> = {
-  pro: "MANOVIK Pro (monthly subscription)",
+  pro: "MANOVIK Pro (one-time)",
   sovereign: "MANOVIK Sovereign (lifetime self-host)",
 };
 
