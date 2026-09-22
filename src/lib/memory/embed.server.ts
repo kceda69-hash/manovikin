@@ -44,8 +44,8 @@ export async function embedTexts(inputs: string[]): Promise<number[][]> {
     body = {
       model: process.env.MANOVIK_AI_EMBED_MODEL ?? "text-embedding-004",
       input: [] as string[],
-      // Google's text-embedding-004 defaults to 768 dims; request 1536 to match the DB column.
-      outputDimensionality: EMBED_DIMS,
+      // OpenAI-compatible param name; request 1536 dims to match the DB column.
+      dimensions: EMBED_DIMS,
     };
   } else {
     if (!lovableKey) throw new Error("MANOVIK memory is not configured on this deployment.");
