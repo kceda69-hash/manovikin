@@ -2,6 +2,7 @@
 // Add new capabilities ONLY here; the sandbox refuses anything not listed.
 import { z } from "zod";
 import { Sandbox } from "./sandbox";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const sandbox = new Sandbox();
 
@@ -538,6 +539,138 @@ sandbox.register({
       aaNormal: ratio >= 4.5,
       aaLarge: ratio >= 3,
       aaaNormal: ratio >= 7,
+    };
+  },
+});
+
+// ---- Device control tools (Ultron-style multi-device commands) ----
+// These let MANO send commands to the user's paired devices directly from chat.
+// Commands are queued in manovik_device_commands; the device agent (Python script
+// or web agent at /device-agent) polls and executes them.
+
+const DEVICE_COMMAND_KINDS = ["shell", "open", "notify", "say", "script"] as const;
+
+async function getPairedDevices(userId: string) {
+  const { data, error } = await supabaseAdmin
+    .from("manovik_devices")
+    .select("id,name,platform,paired_at,last_seen_at")
+    .eq("user_id", userId)
+    .not("paired_at", "is", null)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+async function queueDeviceCommand(
+  userId: string,
+  deviceId: string,
+  kind: (typeof DEVICE_COMMAND_KINDS)[number],
+  command: string,
+) {
+  // Verify the device belongs to this user and is paired.
+  const { data: device } = await supabaseAdmin
+    .from("manovik_devices")
+    .select("id,name,paired_at")
+    .eq("id", deviceId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!device) throw new Error("Device not found");
+  if (!device.paired_at) throw new Error(`Device "${device.name}" is not paired yet`);
+  const { data: row, error } = await supabaseAdmin
+    .from("manovik_device_commands")
+    .insert({ device_id: deviceId, user_id: userId, kind, command })
+    .select("id")
+    .single();
+  if (error) throw new Error(error.message);
+  return { commandId: row.id, deviceName: device.name };
+}
+
+sandbox.register({
+  name: "device.list",
+  description:
+    "List the user's paired devices (phones, PCs, laptops) that MANO can send commands to. Returns id, name, platform, and last-seen time for each paired device.",
+  schema: z.object({}),
+  timeoutMs: 8000,
+  maxOutputBytes: 4000,
+  rateLimitPerMin: 20,
+  execute: async (_input, ctx) => {
+    const devices = await getPairedDevices(ctx.userId);
+    return {
+      count: devices.length,
+      devices: devices.map((d) => ({
+        id: d.id,
+        name: d.name,
+        platform: d.platform,
+        lastSeenAt: d.last_seen_at,
+      })),
+    };
+  },
+});
+
+sandbox.register({
+  name: "device.command",
+  description:
+    "Send a command to one of the user's paired devices. Use device.list first to get the device id. Kinds: 'open' (open a URL or app, e.g. a YouTube search URL), 'say' (speak text aloud on the device), 'notify' (show a notification), 'shell' (run a shell command on PC agents), 'script' (run a script). The device agent picks the command up within seconds.",
+  schema: z.object({
+    deviceId: z.string().uuid().describe("The device id from device.list"),
+    kind: z.enum(DEVICE_COMMAND_KINDS).describe("Command kind"),
+    command: z
+      .string()
+      .trim()
+      .min(1)
+      .max(2000)
+      .describe(
+        "The command payload: a URL for 'open', text for 'say'/'notify', a shell command for 'shell'.",
+      ),
+  }),
+  timeoutMs: 10000,
+  maxOutputBytes: 2000,
+  rateLimitPerMin: 30,
+  execute: async (input, ctx) => {
+    const result = await queueDeviceCommand(ctx.userId, input.deviceId, input.kind, input.command);
+    return {
+      ok: true,
+      ...result,
+      kind: input.kind,
+      note: "Command queued — the device agent will pick it up within seconds.",
+    };
+  },
+});
+
+sandbox.register({
+  name: "device.broadcast",
+  description:
+    "Send the same command to ALL of the user's paired devices at once — like the Ultron demo where every phone searches YouTube simultaneously. Use this when the user says 'on all my devices', 'on every device', or names no specific device. Kinds: 'open' (open a URL, e.g. a YouTube search URL), 'say', 'notify', 'shell', 'script'.",
+  schema: z.object({
+    kind: z.enum(DEVICE_COMMAND_KINDS).describe("Command kind"),
+    command: z
+      .string()
+      .trim()
+      .min(1)
+      .max(2000)
+      .describe("The command payload sent to every paired device."),
+  }),
+  timeoutMs: 15000,
+  maxOutputBytes: 4000,
+  rateLimitPerMin: 20,
+  execute: async (input, ctx) => {
+    const devices = await getPairedDevices(ctx.userId);
+    if (devices.length === 0) {
+      throw new Error(
+        "No paired devices found. Tell the user to pair a device first at /devices (enter the pairing code on their phone or PC).",
+      );
+    }
+    const results = [];
+    for (const d of devices) {
+      const r = await queueDeviceCommand(ctx.userId, d.id, input.kind, input.command);
+      results.push({ deviceName: r.deviceName, commandId: r.commandId });
+    }
+    return {
+      ok: true,
+      kind: input.kind,
+      deviceCount: results.length,
+      devices: results,
+      note: `Command queued on ${results.length} device(s) — they will execute within seconds.`,
     };
   },
 });

@@ -183,6 +183,9 @@ describe("tool registry integrity", () => {
       "crypto.utils",
       "web.search",
       "color.convert",
+      "device.list",
+      "device.command",
+      "device.broadcast",
     ]) {
       expect(names).toContain(expected);
     }
@@ -194,5 +197,40 @@ describe("tool registry integrity", () => {
     const r = await sandbox.run("shell.exec", { cmd: "rm -rf /" }, user);
     expect(r.ok).toBe(false);
     expect(r.error).toMatch(/not whitelisted/);
+  });
+});
+
+describe("device tools", () => {
+  it("device.command rejects invalid device id", async () => {
+    const r = await sandbox.run(
+      "device.command",
+      { deviceId: "not-a-uuid", kind: "open", command: "https://example.com" },
+      user,
+    );
+    expect(r.ok).toBe(false);
+  });
+  it("device.command rejects empty command", async () => {
+    const r = await sandbox.run(
+      "device.command",
+      { deviceId: "123e4567-e89b-12d3-a456-426614174000", kind: "open", command: "  " },
+      user,
+    );
+    expect(r.ok).toBe(false);
+  });
+  it("device.command rejects invalid kind", async () => {
+    const r = await sandbox.run(
+      "device.command",
+      { deviceId: "123e4567-e89b-12d3-a456-426614174000", kind: "hack", command: "x" },
+      user,
+    );
+    expect(r.ok).toBe(false);
+  });
+  it("device.broadcast rejects empty command", async () => {
+    const r = await sandbox.run("device.broadcast", { kind: "open", command: "" }, user);
+    expect(r.ok).toBe(false);
+  });
+  it("device.broadcast rejects invalid kind", async () => {
+    const r = await sandbox.run("device.broadcast", { kind: "hack", command: "x" }, user);
+    expect(r.ok).toBe(false);
   });
 });
