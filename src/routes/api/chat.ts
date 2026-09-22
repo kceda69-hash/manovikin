@@ -132,6 +132,39 @@ function isRetryableGatewayError(err: unknown): boolean {
   );
 }
 
+// Backup API key failover. Free-tier keys get throttled (429); when the key in
+// use is rate-limited we mark it throttled and subsequent requests fail over
+// to MANOVIK_AI_API_KEY_BACKUP until the throttle expires. The failed turn
+// itself still gets the friendly error + refund — failover covers the next
+// request, since a started stream cannot be restarted on another key.
+// Best-effort per isolate; safe to lose on cold start.
+const KEY_THROTTLE_MS = 15 * 60 * 1000;
+const keyThrottledUntil: number[] = [0, 0];
+
+function aiKeys(): string[] {
+  return [process.env.MANOVIK_AI_API_KEY, process.env.MANOVIK_AI_API_KEY_BACKUP].filter(
+    (k): k is string => !!k,
+  );
+}
+
+/** Index into aiKeys(): prefers the primary key unless it is throttled. */
+function pickKeyIndex(): number {
+  const now = Date.now();
+  const count = aiKeys().length;
+  for (let i = 0; i < count; i++) {
+    if (now >= (keyThrottledUntil[i] ?? 0)) return i;
+  }
+  return 0;
+}
+
+function markKeyThrottled(index: number) {
+  keyThrottledUntil[index] = Date.now() + KEY_THROTTLE_MS;
+}
+
+function clearKeyThrottled(index: number) {
+  keyThrottledUntil[index] = 0;
+}
+
 /**
  * Give back the credit spent on a failed turn. The spend happens before the
  * AI call, so a stream failure must not cost the user anything. Fire-and-forget:
@@ -457,7 +490,12 @@ export const Route = createFileRoute("/api/chat")({
           console.warn("[chat] language_memory load failed", e);
         }
 
-        const gateway = createLovableAiGatewayProvider(apiKey);
+        const keys = aiKeys();
+        const keyIndex = pickKeyIndex();
+        const gateway = createLovableAiGatewayProvider(apiKey, keys[keyIndex]);
+        if (keyIndex > 0) {
+          log.warn("chat.key.failover", { keyIndex, userId, threadId });
+        }
         // MANO 1.1 — every MANOVIK surface runs MANOVIK's own model. The
         // substrates below are interchangeable compute only; callers see
         // `manovik/mano-1.1`. Env override still wins for self-hosting.
@@ -619,6 +657,7 @@ export const Route = createFileRoute("/api/chat")({
           userId,
           threadId,
           model: chosenModel,
+          keyIndex,
           lang: langCode,
           tier: route.tier,
           priority: route.priority && chosenModel.startsWith("openai/"),
@@ -634,6 +673,7 @@ export const Route = createFileRoute("/api/chat")({
                 userId,
                 threadId,
                 model: chosenModel,
+                keyIndex,
                 ...details,
               });
               // A failed turn must not cost the user: the credit was already
@@ -650,6 +690,10 @@ export const Route = createFileRoute("/api/chat")({
                   errMsg,
                 );
               if (rateLimited) {
+                // Fail over: throttle this key so the next request uses the
+                // backup key (if configured) until the throttle expires.
+                markKeyThrottled(keyIndex);
+                log.warn("chat.key.throttled", { keyIndex, userId, threadId });
                 return "The AI is rate-limited right now. Please wait a minute and try again — this message cost you nothing.";
               }
               // Surface a compact, non-sensitive hint to the client so the UI
@@ -665,6 +709,8 @@ export const Route = createFileRoute("/api/chat")({
               return String(details.message ?? "Stream error");
             },
             onFinish: async ({ messages: finalMessages }: { messages: UIMessage[] }) => {
+              // The key worked — clear any throttle so we prefer primary again.
+              clearKeyThrottled(keyIndex);
               const lastAssistant = [...finalMessages]
                 .reverse()
                 .find((m) => m.role === "assistant");

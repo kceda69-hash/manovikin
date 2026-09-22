@@ -18,9 +18,12 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
  *
  * The gateway picks sovereign mode automatically when MANOVIK_AI_BASE_URL is set.
  */
-export const createLovableAiGatewayProvider = (lovableApiKey: string) => {
+export const createLovableAiGatewayProvider = (
+  lovableApiKey: string,
+  sovereignKeyOverride?: string,
+) => {
   const sovereignBaseUrl = process.env.MANOVIK_AI_BASE_URL;
-  const sovereignKey = process.env.MANOVIK_AI_API_KEY;
+  const sovereignKey = sovereignKeyOverride ?? process.env.MANOVIK_AI_API_KEY;
 
   if (sovereignBaseUrl) {
     return createOpenAICompatible({
