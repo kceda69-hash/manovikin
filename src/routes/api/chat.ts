@@ -684,31 +684,10 @@ export const Route = createFileRoute("/api/chat")({
           });
           log.info("chat.stream.finish", { userId, threadId, model: chosenModel });
 
-          // Auto-memory (Jarvis): extract durable user facts from this turn
-          // and store them for future recall. Fire-and-forget with full error
-          // isolation — memorization must never break or delay chat.
-          void (async () => {
-            try {
-              const lastUser = [...finalMessages].reverse().find((m) => m.role === "user");
-              const { buildExchangeText, shouldAttemptExtraction, extractMemoryFacts } =
-                await import("@/lib/memory/extract.server");
-              const exchange = buildExchangeText(
-                lastUser ? plainText(lastUser, 1500) : "",
-                plainText(safeAssistant, 2500),
-              );
-              if (!shouldAttemptExtraction(exchange)) return;
-              const facts = await extractMemoryFacts(exchange, {
-                model: chosenModel,
-                apiKey,
-                sovereignKey: keys[chosenKeyIndex],
-              });
-              if (facts.length === 0) return;
-              const { storeMemoryFacts } = await import("@/lib/memory/store.server");
-              await storeMemoryFacts(userId, facts);
-            } catch (e) {
-              console.warn("[auto-memory] turn skipped:", e instanceof Error ? e.message : e);
-            }
-          })();
+          // Auto-memory extraction is client-triggered via /api/memory/extract
+          // (called after the turn completes). The old fire-and-forget here was
+          // removed: Cloudflare Workers suspend the execution context once the
+          // streaming response completes, silently killing background work.
         };
 
         // Mid-stream failure on the winning attempt: the response is already

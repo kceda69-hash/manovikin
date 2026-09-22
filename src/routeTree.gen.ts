@@ -74,6 +74,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 import { Route as ApiPublicDemoChatRouteImport } from './routes/api/public/demo-chat'
+import { Route as ApiMemoryExtractRouteImport } from './routes/api/memory/extract'
 import { Route as ApiAuthProvidersRouteImport } from './routes/api/auth/providers'
 import { Route as ApiAuthMagicLinkRouteImport } from './routes/api/auth/magic-link'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -424,6 +425,11 @@ const ApiPublicDemoChatRoute = ApiPublicDemoChatRouteImport.update({
   path: '/api/public/demo-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMemoryExtractRoute = ApiMemoryExtractRouteImport.update({
+  id: '/api/memory/extract',
+  path: '/api/memory/extract',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthProvidersRoute = ApiAuthProvidersRouteImport.update({
   id: '/api/auth/providers',
   path: '/api/auth/providers',
@@ -586,6 +592,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
   '/api/auth/providers': typeof ApiAuthProvidersRoute
+  '/api/memory/extract': typeof ApiMemoryExtractRoute
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -670,6 +677,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
   '/api/auth/providers': typeof ApiAuthProvidersRoute
+  '/api/memory/extract': typeof ApiMemoryExtractRoute
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -755,6 +763,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/auth/magic-link': typeof ApiAuthMagicLinkRoute
   '/api/auth/providers': typeof ApiAuthProvidersRoute
+  '/api/memory/extract': typeof ApiMemoryExtractRoute
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -841,6 +850,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
     | '/api/auth/providers'
+    | '/api/memory/extract'
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
@@ -925,6 +935,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
     | '/api/auth/providers'
+    | '/api/memory/extract'
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
@@ -1009,6 +1020,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/api/auth/magic-link'
     | '/api/auth/providers'
+    | '/api/memory/extract'
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
@@ -1094,6 +1106,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAuthMagicLinkRoute: typeof ApiAuthMagicLinkRoute
   ApiAuthProvidersRoute: typeof ApiAuthProvidersRoute
+  ApiMemoryExtractRoute: typeof ApiMemoryExtractRoute
   ApiPublicDemoChatRoute: typeof ApiPublicDemoChatRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -1569,6 +1582,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDemoChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/memory/extract': {
+      id: '/api/memory/extract'
+      path: '/api/memory/extract'
+      fullPath: '/api/memory/extract'
+      preLoaderRoute: typeof ApiMemoryExtractRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/providers': {
       id: '/api/auth/providers'
       path: '/api/auth/providers'
@@ -1760,6 +1780,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAuthMagicLinkRoute: ApiAuthMagicLinkRoute,
   ApiAuthProvidersRoute: ApiAuthProvidersRoute,
+  ApiMemoryExtractRoute: ApiMemoryExtractRoute,
   ApiPublicDemoChatRoute: ApiPublicDemoChatRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,

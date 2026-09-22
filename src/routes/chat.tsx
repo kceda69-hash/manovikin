@@ -799,6 +799,49 @@ function ChatPanel({
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastUserSendRef = useRef(0);
   const pendingPromptLoadedRef = useRef(false);
+  const prevStatusRef = useRef(status);
+  const memorySentForRef = useRef<string | null>(null);
+
+  // Auto-memory trigger: after each completed turn, ask the server to extract
+  // and store durable facts. Client-triggered (not fire-and-forget in the
+  // stream handler) because Cloudflare Workers suspend the execution context
+  // once the streaming response completes, silently killing background work.
+  useEffect(() => {
+    const prev = prevStatusRef.current;
+    prevStatusRef.current = status;
+    if ((prev === "streaming" || prev === "submitted") && status === "ready") {
+      const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+      const lastUser = [...messages].reverse().find((m) => m.role === "user");
+      if (!lastAssistant || !lastUser || memorySentForRef.current === lastAssistant.id) return;
+      memorySentForRef.current = lastAssistant.id;
+      const userText = lastUser.parts
+        .map((p) => (p.type === "text" ? (p as { text: string }).text : ""))
+        .join(" ")
+        .slice(0, 1500);
+      const assistantText = lastAssistant.parts
+        .map((p) => (p.type === "text" ? (p as { text: string }).text : ""))
+        .join(" ")
+        .slice(0, 2500);
+      if (!userText.trim() || !assistantText.trim()) return;
+      void (async () => {
+        try {
+          const { data } = await supabase.auth.getSession();
+          const token = data.session?.access_token;
+          if (!token) return;
+          await fetch("/api/memory/extract", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ userText, assistantText }),
+          });
+        } catch {
+          /* memory is best-effort; chat already succeeded */
+        }
+      })();
+    }
+  }, [status, messages]);
 
   // --- Image studio ---
   const [imageMode, setImageMode] = useState(false);
