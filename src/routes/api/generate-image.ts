@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { aiKeys, clearKeyThrottled, markKeyThrottled, pickKeyIndex } from "@/lib/ai-key-failover";
 
 /**
  * MANOVIK image studio — streaming, ultra-detail image generation.
@@ -17,7 +18,6 @@ export const Route = createFileRoute("/api/generate-image")({
     handlers: {
       POST: async ({ request }: { request: Request }) => {
         const sovereignBaseUrl = process.env.MANOVIK_AI_BASE_URL;
-        const sovereignKey = process.env.MANOVIK_AI_API_KEY;
         const apiKey = process.env.LOVABLE_API_KEY;
         if (!sovereignBaseUrl && !apiKey)
           return new Response(
@@ -80,33 +80,139 @@ export const Route = createFileRoute("/api/generate-image")({
 
         const enriched = `${prompt}\n\nRendering brief: ${QUALITY_SUFFIX[quality]} Aspect ratio ${aspect}. Follow the prompt exactly — every named object, colour, count and placement must appear.`;
 
-        // Sovereign: any OpenAI-compatible /images/generations endpoint
-        // (e.g. OpenAI gpt-image-1 via MANOVIK_AI_IMAGE_MODEL). Ollama cannot
-        // generate images, so point MANOVIK_AI_BASE_URL at a capable provider
-        // for this route, or keep the Lovable gateway.
-        const imageUrl = sovereignBaseUrl
-          ? `${sovereignBaseUrl.replace(/\/$/, "")}/images/generations`
-          : "https://ai.gateway.lovable.dev/v1/images/generations";
-        const imageModel = sovereignBaseUrl
-          ? (process.env.MANOVIK_AI_IMAGE_MODEL ?? "gpt-image-1")
-          : "google/gemini-3-pro-image";
-        const upstream = await fetch(imageUrl, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${sovereignBaseUrl ? (sovereignKey ?? "manovik") : apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: imageModel,
-            messages: [{ role: "user", content: enriched }],
-            modalities: ["image", "text"],
-            stream: true,
-          }),
-        });
-        if (!upstream.ok || !upstream.body) {
-          return new Response(await upstream.text(), { status: upstream.status });
+        // Refund the 2 credits when generation fails after charging.
+        const refundImageCredit = () => {
+          supabaseAdmin
+            .rpc("manovik_topup_credit", {
+              _user_id: userId,
+              _amount: 2,
+              _reason: "image.refund:api_error",
+            })
+            .then(({ error }) => {
+              if (error) console.error("image refund failed", error.message);
+            });
+        };
+
+        if (!sovereignBaseUrl) {
+          // Legacy Lovable gateway path (self-hosted / non-sovereign mode).
+          const upstream = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-3-pro-image",
+              messages: [{ role: "user", content: enriched }],
+              modalities: ["image", "text"],
+              stream: true,
+            }),
+          });
+          if (!upstream.ok || !upstream.body) {
+            refundImageCredit();
+            return new Response(await upstream.text(), { status: upstream.status });
+          }
+          return new Response(upstream.body, {
+            headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
+          });
         }
-        return new Response(upstream.body, {
+
+        // Sovereign: Gemini native generateContent with image output.
+        // Google's OpenAI-compatible layer does not serve image models, so the
+        // old /images/generations call (with an OpenAI model name) could never
+        // work — call the native endpoint directly instead. Transparent
+        // failover: on a 429 the same request is retried on the backup key
+        // (no stream has started yet, unlike chat).
+        const nativeRoot = sovereignBaseUrl.replace(/\/openai\/?$/, "").replace(/\/$/, "");
+        const imageModel =
+          process.env.MANOVIK_AI_IMAGE_MODEL ?? "gemini-2.0-flash-preview-image-generation";
+        const url = `${nativeRoot}/models/${imageModel}:generateContent`;
+
+        interface GeminiPart {
+          text?: string;
+          inlineData?: { mimeType?: string; data?: string };
+        }
+        interface GeminiResponse {
+          candidates?: { content?: { parts?: GeminiPart[] } }[];
+          promptFeedback?: { blockReason?: string };
+          error?: { message?: string };
+        }
+
+        const keys = aiKeys();
+        const preferred = pickKeyIndex();
+        const tryOrder = [preferred, ...keys.map((_, i) => i).filter((i) => i !== preferred)];
+        let b64: string | null = null;
+        let lastErr = "no API key configured";
+        for (const ki of tryOrder) {
+          const key = keys[ki];
+          if (!key) continue;
+          let res: Response;
+          try {
+            res = await fetch(url, {
+              method: "POST",
+              headers: { "x-goog-api-key": key, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: enriched }] }],
+                generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+              }),
+            });
+          } catch (e) {
+            lastErr = e instanceof Error ? e.message : "network error";
+            break;
+          }
+          if (res.status === 429 && ki !== tryOrder[tryOrder.length - 1]) {
+            markKeyThrottled(ki);
+            lastErr = "rate limited, retrying with backup key";
+            continue;
+          }
+          if (!res.ok) {
+            lastErr = `image API ${res.status}: ${(await res.text()).slice(0, 200)}`;
+            break;
+          }
+          const data = (await res.json()) as GeminiResponse;
+          if (data.error?.message) {
+            lastErr = data.error.message.slice(0, 200);
+            break;
+          }
+          if (data.promptFeedback?.blockReason) {
+            lastErr = `Image blocked by safety filter (${data.promptFeedback.blockReason}). Try a different prompt.`;
+            break;
+          }
+          const part = data.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data);
+          if (!part?.inlineData?.data) {
+            lastErr = "The image model returned no image. Try again.";
+            break;
+          }
+          b64 = part.inlineData.data;
+          clearKeyThrottled(ki);
+          break;
+        }
+
+        if (!b64) {
+          refundImageCredit();
+          return new Response(`Image generation failed: ${lastErr}`, { status: 502 });
+        }
+
+        // Emit OpenAI-style SSE frames so the existing client works unchanged.
+        const encoder = new TextEncoder();
+        const frames = [
+          `event: image_generation.partial_image\ndata: ${JSON.stringify({
+            type: "image_generation.partial_image",
+            b64_json: b64,
+            partial_image_index: 0,
+          })}\n\n`,
+          `event: image_generation.completed\ndata: ${JSON.stringify({
+            type: "image_generation.completed",
+            b64_json: b64,
+          })}\n\n`,
+        ];
+        const stream = new ReadableStream({
+          start(controller) {
+            for (const f of frames) controller.enqueue(encoder.encode(f));
+            controller.close();
+          },
+        });
+        return new Response(stream, {
           headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
         });
       },

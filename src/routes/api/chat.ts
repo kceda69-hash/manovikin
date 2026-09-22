@@ -11,6 +11,7 @@ import { fullstackDoctrineFor } from "@/lib/fullstack-doctrine";
 import { redactMessage } from "@/lib/redact";
 import { sandbox } from "@/lib/agent-tools";
 import { log } from "@/lib/logger";
+import { aiKeys, clearKeyThrottled, markKeyThrottled, pickKeyIndex } from "@/lib/ai-key-failover";
 
 const MAX_MESSAGES = 200;
 const MAX_BODY_BYTES = 256 * 1024; // 256 KB
@@ -132,38 +133,9 @@ function isRetryableGatewayError(err: unknown): boolean {
   );
 }
 
-// Backup API key failover. Free-tier keys get throttled (429); when the key in
-// use is rate-limited we mark it throttled and subsequent requests fail over
-// to MANOVIK_AI_API_KEY_BACKUP until the throttle expires. The failed turn
-// itself still gets the friendly error + refund — failover covers the next
-// request, since a started stream cannot be restarted on another key.
-// Best-effort per isolate; safe to lose on cold start.
-const KEY_THROTTLE_MS = 15 * 60 * 1000;
-const keyThrottledUntil: number[] = [0, 0];
-
-function aiKeys(): string[] {
-  return [process.env.MANOVIK_AI_API_KEY, process.env.MANOVIK_AI_API_KEY_BACKUP].filter(
-    (k): k is string => !!k,
-  );
-}
-
-/** Index into aiKeys(): prefers the primary key unless it is throttled. */
-function pickKeyIndex(): number {
-  const now = Date.now();
-  const count = aiKeys().length;
-  for (let i = 0; i < count; i++) {
-    if (now >= (keyThrottledUntil[i] ?? 0)) return i;
-  }
-  return 0;
-}
-
-function markKeyThrottled(index: number) {
-  keyThrottledUntil[index] = Date.now() + KEY_THROTTLE_MS;
-}
-
-function clearKeyThrottled(index: number) {
-  keyThrottledUntil[index] = 0;
-}
+// Key failover helpers (aiKeys, pickKeyIndex, markKeyThrottled,
+// clearKeyThrottled) are shared from @/lib/ai-key-failover so image
+// generation fails over on the same throttle state as chat.
 
 /**
  * Give back the credit spent on a failed turn. The spend happens before the
