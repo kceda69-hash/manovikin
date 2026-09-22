@@ -5,6 +5,24 @@ import type { UIMessage } from "ai";
 
 function fail(tag: string, error: unknown): never {
   console.error(`[${tag}]`, error);
+  // If this is an auth error (expired/invalid JWT, 401/403 from PostgREST),
+  // throw a distinguishable error so the client can redirect to login instead
+  // of showing a generic "Request failed" panel.
+  const err = error as { code?: string; message?: string; status?: number } | null;
+  const msg = (err?.message ?? "").toLowerCase();
+  const code = (err?.code ?? "").toLowerCase();
+  const isAuthError =
+    err?.status === 401 ||
+    err?.status === 403 ||
+    code === "401" ||
+    code === "403" ||
+    msg.includes("jwt") ||
+    msg.includes("unauthorized") ||
+    msg.includes("invalid token") ||
+    msg.includes("expired");
+  if (isAuthError) {
+    throw new Error("AUTH_FAILED");
+  }
   throw new Error("Request failed");
 }
 

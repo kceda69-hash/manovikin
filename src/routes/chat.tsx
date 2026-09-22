@@ -252,7 +252,19 @@ function ChatPage() {
       } catch (e) {
         console.error("Chat bootstrap failed:", e);
         if (!cancelled) {
-          setBootstrapError(e instanceof Error ? e.message : "Couldn't load your conversations.");
+          const msg = e instanceof Error ? e.message : "Couldn't load your conversations.";
+          // If the session is invalid/expired, clear it and redirect to login
+          // instead of showing a dead error panel.
+          if (msg === "AUTH_FAILED") {
+            try {
+              await supabase.auth.signOut();
+            } catch {
+              /* best effort */
+            }
+            navigate({ to: "/login" });
+            return;
+          }
+          setBootstrapError(msg);
         }
       } finally {
         if (!cancelled) setBootstrapping(false);
