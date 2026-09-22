@@ -185,7 +185,7 @@ export const Route = createFileRoute("/")({
                   name: "Can I run MANOVIK on my own server?",
                   acceptedAnswer: {
                     "@type": "Answer",
-                    text: "Yes. The Sovereign lifetime plan (₹4999, 20% off) includes the self-host setup wizard, Docker support, and BYOK.",
+                    text: "Yes. The Sovereign lifetime plan (₹4999) includes the self-host setup wizard, Docker support, and BYOK.",
                   },
                 },
                 {
