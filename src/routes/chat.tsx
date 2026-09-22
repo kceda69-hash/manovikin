@@ -960,6 +960,9 @@ function ChatPanel({
       rec.interimResults = true;
       rec.lang = navigator.language || "en-US";
       rec.onresult = (e) => {
+        // Ignore anything heard while MANO itself is speaking — that's its
+        // own voice coming through the mic, not the user.
+        if (speakingRef.current) return;
         const results = Array.from(e.results);
         const transcript = results.map((r) => r[0].transcript).join(" ");
         const isFinal = results.length > 0 && results[results.length - 1].isFinal;
@@ -977,9 +980,11 @@ function ChatPanel({
         }
       };
       rec.onend = () => {
-        // Companion mode: keep the mic open for a real conversation —
-        // but NOT while MANO itself is speaking (prevents hearing its own voice).
-        if (companionRef.current && !speakingRef.current) {
+        // Companion mode: keep the mic open for a real conversation.
+        // Note: we do NOT stop the mic while MANO speaks — instead we ignore
+        // transcription results during speech (see onresult). This avoids a
+        // dead-mic state if speech synthesis onend never fires.
+        if (companionRef.current) {
           try {
             rec.start();
             return;
@@ -1077,7 +1082,9 @@ function ChatPanel({
   }, [listening, startRecognition, stopCompanion, handleSpeakerVoiceCommand, scheduleAutoSend]);
 
   // Speak the latest completed assistant reply when MANO voice output is on.
-  // In companion mode the mic pauses while MANO talks, then reopens.
+  // The mic stays open while MANO talks; transcription results during speech
+  // are ignored via speakingRef (see onresult). This avoids a dead-mic state
+  // if speech synthesis events misfire.
   useEffect(() => {
     if (!speakOn || status === "streaming" || status === "submitted") return;
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -1090,27 +1097,17 @@ function ChatPanel({
       .slice(0, 1200);
     if (!text || spokenRef.current === last.id) return;
     spokenRef.current = last.id;
-    // Mark speaking BEFORE stopping the mic so the recognition onend
-    // handler doesn't restart it while MANO is talking (own-voice feedback).
     speakingRef.current = true;
-    if (companionRef.current) recognitionRef.current?.stop();
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = navigator.language || "en-US";
     utter.rate = 1.03;
-    utter.onend = () => {
-      speakingRef.current = false;
-      // Mic reopens now that MANO has finished speaking.
-      if (companionRef.current && recognitionRef.current) {
-        try {
-          recognitionRef.current.start();
-        } catch {
-          /* onend handler will retry */
-        }
-      }
-    };
-    utter.onerror = () => {
+    const clearSpeaking = () => {
       speakingRef.current = false;
     };
+    utter.onend = clearSpeaking;
+    utter.onerror = clearSpeaking;
+    // Safety: never leave the mic muted because of a stuck flag.
+    window.setTimeout(clearSpeaking, 30000);
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utter);
   }, [messages, speakOn, status]);
