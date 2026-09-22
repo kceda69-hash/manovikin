@@ -970,8 +970,18 @@ export const Route = createFileRoute("/api/chat")({
               // AWAITED before the stream closes, so the worker stays alive
               // until the credit is durably restored (never fire-and-forget).
               let sawTerminalError = false;
+              // Set when any text content is produced. A stream that ends
+              // cleanly WITHOUT any text is a silent upstream failure: the
+              // turn must be refunded and the client must see an error, not
+              // an empty bubble that silently consumed a credit.
+              let sawText = false;
+              const isTextChunk = (c: UIMessageChunk): boolean =>
+                c.type === "text-delta" &&
+                typeof (c as { delta?: unknown }).delta === "string" &&
+                ((c as { delta?: string }).delta?.length ?? 0) > 0;
               for (const chunk of winningBuffered) {
                 if (chunk.type === "error" || chunk.type === "abort") sawTerminalError = true;
+                if (isTextChunk(chunk)) sawText = true;
                 controller.enqueue(chunk);
               }
               const pump = (): void => {
@@ -997,6 +1007,23 @@ export const Route = createFileRoute("/api/chat")({
                           ua,
                           "mid-stream",
                         ).finally(() => controller.close());
+                      } else if (!sawTerminalError && !sawText && !isAdmin) {
+                        // Silent upstream failure: the stream ended cleanly
+                        // but produced no text. Refund first, then surface an
+                        // error so the client shows the failure toast instead
+                        // of an empty bubble that cost a credit.
+                        log.warn("chat.stream.empty_output", { userId, threadId, turnId });
+                        refundCredit(
+                          supabaseAdmin,
+                          userId,
+                          threadId,
+                          turnId,
+                          ip,
+                          ua,
+                          "empty-output",
+                        ).finally(() =>
+                          controller.error(new Error("Upstream returned no content")),
+                        );
                       } else {
                         controller.close();
                       }
@@ -1005,6 +1032,7 @@ export const Route = createFileRoute("/api/chat")({
                     if (value.type === "error" || value.type === "abort") {
                       sawTerminalError = true;
                     }
+                    if (isTextChunk(value)) sawText = true;
                     controller.enqueue(value);
                     pump();
                   },
