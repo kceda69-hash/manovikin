@@ -574,6 +574,12 @@ export const Route = createFileRoute("/api/chat")({
               messages: modelMessages,
               tools,
               stopWhen: stepCountIs(50),
+              // Fail fast: the AI SDK defaults to 2 retries (3 attempts), and
+              // on a 429 each user message then burns 3x quota while the user
+              // waits through exponential backoff. On a throttled free-tier
+              // key that keeps the user rate-limited longer. Surface the error
+              // immediately (onError refunds the credit) and let the user retry.
+              maxRetries: 0,
               ...(Object.keys(lovableOptions).length
                 ? { providerOptions: { lovable: lovableOptions } }
                 : {}),
