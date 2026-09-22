@@ -899,3 +899,293 @@
     }
   }
 }
+
+/* ============ MANO GOD-LEVEL UI ============ */
+
+/* Floating MANO Core Orb */
+.mano-core {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, 
+    oklch(0.75 0.15 200 / 0.9),
+    oklch(0.55 0.2 250 / 0.7) 40%,
+    oklch(0.35 0.15 280 / 0.4) 70%,
+    transparent 100%);
+  box-shadow: 
+    0 0 60px oklch(0.65 0.2 220 / 0.5),
+    0 0 120px oklch(0.55 0.25 250 / 0.3),
+    inset 0 0 40px oklch(0.8 0.1 200 / 0.3);
+  animation: mano-core-float 6s ease-in-out infinite;
+  backdrop-filter: blur(10px);
+}
+
+.mano-core::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  border: 2px solid oklch(0.7 0.15 220 / 0.3);
+  animation: mano-core-ring 3s linear infinite;
+}
+
+.mano-core::after {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  border: 1px solid oklch(0.7 0.15 220 / 0.15);
+  animation: mano-core-ring 6s linear infinite reverse;
+}
+
+@keyframes mano-core-float {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-15px) scale(1.05); }
+}
+
+@keyframes mano-core-ring {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.8; }
+  50% { transform: rotate(180deg) scale(1.1); opacity: 0.4; }
+  100% { transform: rotate(360deg) scale(1); opacity: 0.8; }
+}
+
+/* Core states */
+.mano-core.listening {
+  animation: mano-core-float 2s ease-in-out infinite, mano-core-pulse 1s ease-in-out infinite;
+  background: radial-gradient(circle at 30% 30%, 
+    oklch(0.75 0.2 150 / 0.9),
+    oklch(0.55 0.25 160 / 0.7) 40%,
+    oklch(0.35 0.2 170 / 0.4) 70%,
+    transparent 100%);
+}
+
+.mano-core.speaking {
+  animation: mano-core-float 1.5s ease-in-out infinite, mano-core-wave 0.8s ease-in-out infinite;
+}
+
+.mano-core.thinking {
+  animation: mano-core-float 3s ease-in-out infinite, mano-core-spin 2s linear infinite;
+}
+
+@keyframes mano-core-pulse {
+  0%, 100% { box-shadow: 0 0 60px oklch(0.65 0.25 150 / 0.6), 0 0 120px oklch(0.55 0.3 160 / 0.4); }
+  50% { box-shadow: 0 0 80px oklch(0.65 0.25 150 / 0.8), 0 0 160px oklch(0.55 0.3 160 / 0.6); }
+}
+
+@keyframes mano-core-wave {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25% { transform: translateY(-5px) scale(1.08); }
+  75% { transform: translateY(5px) scale(0.95); }
+}
+
+@keyframes mano-core-spin {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+/* Floating particles background */
+.mano-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.mano-particles i {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: oklch(0.7 0.15 220 / 0.6);
+  animation: mano-particle-float 20s linear infinite;
+}
+
+@keyframes mano-particle-float {
+  0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-10vh) translateX(50px); opacity: 0; }
+}
+
+/* Glassmorphic floating panels */
+.mano-glass {
+  background: oklch(0.18 0.03 270 / 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid oklch(0.7 0.1 220 / 0.2);
+  box-shadow: 
+    0 8px 32px oklch(0.1 0.02 270 / 0.4),
+    inset 0 1px 0 oklch(1 0 0 / 0.1);
+}
+
+.mano-glass-strong {
+  background: oklch(0.15 0.03 270 / 0.8);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid oklch(0.7 0.15 220 / 0.3);
+  box-shadow: 
+    0 12px 48px oklch(0.1 0.02 270 / 0.6),
+    0 0 40px oklch(0.6 0.2 220 / 0.2),
+    inset 0 1px 0 oklch(1 0 0 / 0.15);
+}
+
+/* Message animations */
+.mano-message-enter {
+  animation: mano-message-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes mano-message-in {
+  0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.mano-message-user {
+  background: linear-gradient(135deg, 
+    oklch(0.55 0.2 250 / 0.9),
+    oklch(0.45 0.25 280 / 0.9));
+  border: 1px solid oklch(0.7 0.15 250 / 0.3);
+  box-shadow: 0 4px 20px oklch(0.5 0.2 250 / 0.3);
+}
+
+.mano-message-assistant {
+  background: oklch(0.2 0.03 270 / 0.7);
+  border: 1px solid oklch(0.7 0.1 220 / 0.15);
+  backdrop-filter: blur(10px);
+}
+
+/* Floating input bar */
+.mano-input-float {
+  position: relative;
+  background: oklch(0.16 0.03 270 / 0.8);
+  backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid oklch(0.7 0.12 220 / 0.25);
+  border-radius: 24px;
+  box-shadow: 
+    0 8px 32px oklch(0.1 0.02 270 / 0.5),
+    0 0 30px oklch(0.6 0.15 220 / 0.15),
+    inset 0 1px 0 oklch(1 0 0 / 0.1);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.mano-input-float:focus-within {
+  border-color: oklch(0.7 0.2 220 / 0.5);
+  box-shadow: 
+    0 8px 32px oklch(0.1 0.02 270 / 0.5),
+    0 0 50px oklch(0.6 0.25 220 / 0.3),
+    inset 0 1px 0 oklch(1 0 0 / 0.15);
+  transform: translateY(-2px);
+}
+
+/* Voice waveform */
+.mano-waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 40px;
+}
+
+.mano-waveform span {
+  width: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to top, oklch(0.65 0.2 220), oklch(0.75 0.15 200));
+  animation: mano-wave 1s ease-in-out infinite;
+}
+
+.mano-waveform span:nth-child(1) { animation-delay: 0s; height: 20%; }
+.mano-waveform span:nth-child(2) { animation-delay: 0.1s; height: 40%; }
+.mano-waveform span:nth-child(3) { animation-delay: 0.2s; height: 60%; }
+.mano-waveform span:nth-child(4) { animation-delay: 0.3s; height: 80%; }
+.mano-waveform span:nth-child(5) { animation-delay: 0.4s; height: 100%; }
+.mano-waveform span:nth-child(6) { animation-delay: 0.5s; height: 80%; }
+.mano-waveform span:nth-child(7) { animation-delay: 0.6s; height: 60%; }
+
+@keyframes mano-wave {
+  0%, 100% { transform: scaleY(0.5); }
+  50% { transform: scaleY(1); }
+}
+
+/* Floating tool orbs */
+.mano-tool-orb {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: oklch(0.2 0.04 270 / 0.7);
+  backdrop-filter: blur(15px);
+  border: 1px solid oklch(0.7 0.12 220 / 0.25);
+  box-shadow: 0 4px 20px oklch(0.1 0.02 270 / 0.4);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+}
+
+.mano-tool-orb:hover {
+  transform: translateY(-4px) scale(1.1);
+  box-shadow: 
+    0 8px 30px oklch(0.1 0.02 270 / 0.5),
+    0 0 25px oklch(0.6 0.2 220 / 0.4);
+  border-color: oklch(0.7 0.2 220 / 0.5);
+}
+
+.mano-tool-orb.active {
+  background: linear-gradient(135deg, oklch(0.6 0.2 220), oklch(0.5 0.25 250));
+  box-shadow: 0 0 30px oklch(0.6 0.25 220 / 0.6);
+}
+
+/* Typing indicator */
+.mano-typing {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px;
+}
+
+.mano-typing span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: oklch(0.7 0.15 220);
+  animation: mano-typing-bounce 1.4s ease-in-out infinite;
+}
+
+.mano-typing span:nth-child(1) { animation-delay: 0s; }
+.mano-typing span:nth-child(2) { animation-delay: 0.2s; }
+.mano-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes mano-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-10px); opacity: 1; }
+}
+
+/* Gradient text */
+.mano-gradient-text {
+  background: linear-gradient(135deg, 
+    oklch(0.8 0.15 200),
+    oklch(0.7 0.2 250),
+    oklch(0.75 0.15 300));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: mano-gradient-shift 4s ease infinite;
+}
+
+@keyframes mano-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .mano-core,
+  .mano-core::before,
+  .mano-core::after,
+  .mano-particles i,
+  .mano-waveform span,
+  .mano-typing span,
+  .mano-gradient-text {
+    animation: none !important;
+  }
+}

@@ -330,7 +330,20 @@ function ChatPage() {
   );
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-background">
+    <div className="flex h-[100dvh] overflow-hidden bg-background relative">
+      {/* Floating particles background */}
+      <div className="mano-particles" aria-hidden="true">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <i
+            key={i}
+            style={{
+              left: `${(i * 37) % 100}%`,
+              animationDelay: `${(i * 1.3) % 20}s`,
+              animationDuration: `${15 + ((i * 7) % 10)}s`,
+            }}
+          />
+        ))}
+      </div>
       {wakeVisible && (
         <WakeScreen
           user={user}
@@ -1235,16 +1248,22 @@ function ChatPanel({
           ) : messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center pt-10 text-center sm:pt-20">
               <div className="relative">
-                <div className="absolute inset-0 rounded-full bg-aurora opacity-30 blur-2xl" />
-                <img
-                  src={logo}
-                  alt="MANOVIK AI logo"
-                  width={72}
-                  height={72}
-                  className="relative h-16 w-16 animate-float sm:h-20 sm:w-20"
+                {/* MANO Core - floating orb that reacts to state */}
+                <div
+                  className={`mano-core ${
+                    listening ? "listening" : ""
+                  } ${speakingRef.current ? "speaking" : ""} ${
+                    status === "streaming" || status === "submitted" ? "thinking" : ""
+                  }`}
+                  aria-hidden="true"
                 />
+                {listening && (
+                  <div className="mano-waveform absolute -bottom-12 left-1/2 -translate-x-1/2">
+                    <span /><span /><span /><span /><span /><span /><span />
+                  </div>
+                )}
               </div>
-              <h2 className="mt-5 text-2xl font-bold text-gradient sm:text-3xl">
+              <h2 className="mt-16 text-2xl font-bold mano-gradient-text sm:text-3xl">
                 {displayName
                   ? `MANO online, ${displayName}`
                   : "MANO online. What are we working on?"}
@@ -1334,53 +1353,45 @@ function ChatPanel({
 
       <form
         onSubmit={handleSubmit}
-        className="border-t border-border/40 bg-background/60 px-3 py-3 backdrop-blur sm:px-4 sm:py-4"
+        className="px-3 py-3 sm:px-4 sm:py-4"
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
-        <div className="mx-auto mb-2 flex max-w-3xl flex-wrap items-center gap-2">
-          <Button
+        <div className="mx-auto mb-3 flex max-w-3xl flex-wrap items-center gap-2">
+          <button
             type="button"
-            size="sm"
-            variant={imageMode ? "default" : "outline"}
-            aria-pressed={imageMode}
             onClick={() => setImageMode((v) => !v)}
-            className="h-8 rounded-full"
+            className={`mano-tool-orb ${imageMode ? "active" : ""}`}
+            aria-pressed={imageMode}
+            aria-label="Image studio"
+            title="Image studio"
           >
-            <ImageIcon className="mr-1.5 h-3.5 w-3.5" /> Image studio
-          </Button>
+            <ImageIcon className="h-5 w-5 text-foreground" />
+          </button>
           {imageMode && (
-            <Button
+            <button
               type="button"
-              size="sm"
-              variant="outline"
-              className="h-8 rounded-full"
               onClick={() => setImageQuality((q) => (q === "8k" ? "4k" : "8k"))}
+              className="mano-glass rounded-full px-4 py-2 text-sm font-medium transition hover:scale-105"
             >
               {imageQuality.toUpperCase()} ultra-HD
-            </Button>
+            </button>
           )}
-          <Button
+          <button
             type="button"
-            size="sm"
-            variant={listening ? "default" : "outline"}
+            onClick={toggleListening}
+            className={`mano-tool-orb ${listening ? "active" : ""}`}
             aria-pressed={listening}
             aria-label={listening ? "Stop voice input" : "Start voice input"}
-            onClick={toggleListening}
-            className="h-8 min-h-[44px] rounded-full"
+            title={listening ? "Stop listening" : "Speak"}
           >
             {listening ? (
-              <Square className="mr-1.5 h-3.5 w-3.5" />
+              <Square className="h-5 w-5 text-white" />
             ) : (
-              <Mic className="mr-1.5 h-3.5 w-3.5" />
+              <Mic className="h-5 w-5 text-foreground" />
             )}
-            {listening ? "Listening…" : "Speak"}
-          </Button>
-          <Button
+          </button>
+          <button
             type="button"
-            size="sm"
-            variant={speakOn ? "default" : "outline"}
-            aria-pressed={speakOn}
-            aria-label={speakOn ? "Turn off spoken replies" : "Turn on spoken replies"}
             onClick={() => {
               if (!speakOn && (typeof window === "undefined" || !("speechSynthesis" in window))) {
                 toast.error("Spoken replies aren't supported in this browser");
@@ -1388,22 +1399,27 @@ function ChatPanel({
               }
               setSpeaker(!speakOn);
             }}
-            className="h-8 min-h-[44px] rounded-full"
+            className={`mano-tool-orb ${speakOn ? "active" : ""}`}
+            aria-pressed={speakOn}
+            aria-label={speakOn ? "Turn off spoken replies" : "Turn on spoken replies"}
+            title="MANO voice"
           >
             {speakOn ? (
-              <Volume2 className="mr-1.5 h-3.5 w-3.5" />
+              <Volume2 className="h-5 w-5 text-white" />
             ) : (
-              <VolumeX className="mr-1.5 h-3.5 w-3.5" />
+              <VolumeX className="h-5 w-5 text-foreground" />
             )}
-            MANO voice
-          </Button>
-          <Button asChild type="button" size="sm" variant="outline" className="h-8 rounded-full">
-            <Link to="/devices">
-              <Cpu className="mr-1.5 h-3.5 w-3.5" /> Devices
-            </Link>
-          </Button>
+          </button>
+          <Link to="/devices" className="mano-tool-orb" aria-label="Devices" title="Devices">
+            <Cpu className="h-5 w-5 text-foreground" />
+          </Link>
+          {listening && (
+            <div className="mano-waveform ml-2" aria-hidden="true">
+              <span /><span /><span /><span /><span /><span /><span />
+            </div>
+          )}
         </div>
-        <div className="premium-composer surface-card mx-auto flex max-w-3xl items-end gap-2 rounded-2xl p-2 shadow-lg">
+        <div className="mano-input-float mx-auto flex max-w-3xl items-end gap-2 p-2">
           <Textarea
             ref={textareaRef}
             value={input}
@@ -1451,8 +1467,8 @@ function MessageBubble({ message }: { message: UIMessage }) {
 
   if (message.role === "user") {
     return (
-      <div className="flex justify-end">
-        <div className="max-w-[90%] rounded-2xl rounded-tr-sm bg-primary px-4 py-2.5 text-primary-foreground shadow sm:max-w-[80%]">
+      <div className="flex justify-end mano-message-enter">
+        <div className="mano-message-user max-w-[90%] rounded-2xl rounded-tr-sm px-4 py-2.5 text-white shadow-lg sm:max-w-[80%]">
           <div className="whitespace-pre-wrap text-sm leading-relaxed">{text}</div>
         </div>
       </div>
@@ -1460,9 +1476,9 @@ function MessageBubble({ message }: { message: UIMessage }) {
   }
 
   return (
-    <div className="flex gap-2 sm:gap-3">
-      <img src={logo} alt="MANOVIK AI" width={28} height={28} className="mt-1 h-7 w-7 shrink-0" />
-      <div className="prose prose-invert min-w-0 max-w-none flex-1 text-foreground prose-pre:my-2 prose-pre:rounded-lg prose-pre:bg-secondary prose-pre:p-3 prose-pre:text-xs prose-code:rounded prose-code:bg-secondary prose-code:px-1.5 prose-code:py-0.5 prose-code:text-[0.85em] prose-code:before:content-[''] prose-code:after:content-['']">
+    <div className="flex gap-2 sm:gap-3 mano-message-enter">
+      <div className="mano-core mt-1 h-7 w-7 shrink-0" style={{ width: 28, height: 28 }} aria-hidden="true" />
+      <div className="mano-message-assistant prose prose-invert min-w-0 max-w-none flex-1 rounded-2xl rounded-tl-sm px-4 py-3 text-foreground prose-pre:my-2 prose-pre:rounded-lg prose-pre:bg-secondary prose-pre:p-3 prose-pre:text-xs prose-code:rounded prose-code:bg-secondary prose-code:px-1.5 prose-code:py-0.5 prose-code:text-[0.85em] prose-code:before:content-[''] prose-code:after:content-['']">
         <ReactMarkdown remarkPlugins={[remarkGfm]} components={{ pre: PreBlock }}>
           {text}
         </ReactMarkdown>
