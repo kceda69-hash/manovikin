@@ -836,7 +836,14 @@ function ChatPanel({
     };
     rec.onend = () => setListening(false);
     recognitionRef.current = rec;
-    rec.start();
+    try {
+      rec.start();
+    } catch {
+      recognitionRef.current = null;
+      setListening(false);
+      toast.error("Voice input couldn't start. Try again.");
+      return;
+    }
     setListening(true);
   }, [listening]);
 
@@ -1109,7 +1116,7 @@ function ChatPanel({
                 const next = !v;
                 if (typeof window !== "undefined") {
                   window.localStorage.setItem("manovik:speak-on", next ? "1" : "0");
-                  if (v) window.speechSynthesis.cancel();
+                  if (v && "speechSynthesis" in window) window.speechSynthesis.cancel();
                 }
                 return next;
               });
