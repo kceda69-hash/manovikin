@@ -89,6 +89,7 @@ function BillingPage() {
   const currentPlan = sovereign ? "sovereign" : activePro ? "pro" : "free";
 
   const buy = async (plan: "pro" | "sovereign") => {
+    toast.info("Starting checkout…"); // TEMP DEBUG: proves the click handler fired
     await startCheckout(plan, {
       onSuccess: () => {
         toast.success("Payment successful — receipt emailed");
