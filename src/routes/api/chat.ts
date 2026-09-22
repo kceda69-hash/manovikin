@@ -1,6 +1,14 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
-import { convertToModelMessages, streamText, stepCountIs, tool, type UIMessage } from "ai";
+import {
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+  streamText,
+  stepCountIs,
+  tool,
+  type UIMessage,
+  type UIMessageChunk,
+} from "ai";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database, Json } from "@/integrations/supabase/types";
@@ -131,6 +139,57 @@ function isRetryableGatewayError(err: unknown): boolean {
   return /\b(429|5\d\d|rate.?limit|timeout|temporarily|upstream|unavailable|fetch failed|network)\b/.test(
     msg,
   );
+}
+
+function isUnknownModelError(err: unknown): boolean {
+  const msg = String((err as Error)?.message ?? err).toLowerCase();
+  return /\b(404|no such model|model .*not found|not found.*model)\b/.test(msg);
+}
+
+// --- Streaming fallback -----------------------------------------------
+// Upstream 5xxs/timeouts surface only while the stream is consumed, so an
+// init-error-only fallback loop never caught them: the user stared at a
+// spinner for ~30s and then got an error. Instead we probe each candidate:
+// wait for the first real content chunk (bounded); on a pre-content failure
+// fail over to the next Gemini model instead of failing the turn.
+const FIRST_CHUNK_TIMEOUT_MS = 20_000;
+
+// Chunks the SDK emits locally before the upstream responds — they don't
+// prove the model is alive, so the probe keeps waiting past them.
+const PRE_CONTENT_CONTROL_CHUNKS = new Set(["start", "start-step", "finish-step"]);
+
+// Sovereign (Google OpenAI-compatible endpoint) fallback models, as the
+// plain model IDs that endpoint expects. The Lovable-gateway "provider/"
+// prefixed names 404 here, so they are not used in sovereign mode.
+// Zero-cost Gemini only — never a paid provider.
+const SOVEREIGN_STREAM_FALLBACKS = ["gemini-2.5-flash", "gemini-2.0-flash"] as const;
+
+function isRateLimitedDetails(details: Record<string, unknown>): boolean {
+  const errMsg = String(details.message ?? "").toLowerCase();
+  return (
+    details.status === 429 ||
+    /\b(429|too many requests|rate.?limit|quota exceeded|resource exhausted)\b/.test(errMsg)
+  );
+}
+
+// Plain-language, secret-free client message for a stream error.
+function friendlyStreamErrorMessage(details: Record<string, unknown>): string {
+  // Rate limits get a plain-language message instead of the raw SDK error
+  // ("Failed after 3 attempts. Last error: …").
+  if (isRateLimitedDetails(details)) {
+    return "The AI is rate-limited right now. Please wait a minute and try again — this message cost you nothing.";
+  }
+  // Surface a compact, non-sensitive hint to the client so the UI can
+  // render the actual field/tool that failed instead of a generic
+  // "invalid string".
+  const issuesList: unknown = details.issues;
+  const first: unknown = Array.isArray(issuesList) ? issuesList[0] : null;
+  if (first && typeof first === "object") {
+    const issue = first as { path?: unknown; message?: unknown };
+    return `Invalid tool argument: ${issue.path || "(root)"} — ${issue.message}`;
+  }
+  if (details.toolName) return `Tool "${details.toolName}" failed: ${details.message}`;
+  return String(details.message ?? "Stream error");
 }
 
 // Key failover helpers (aiKeys, pickKeyIndex, markKeyThrottled,
@@ -464,7 +523,6 @@ export const Route = createFileRoute("/api/chat")({
 
         const keys = aiKeys();
         const keyIndex = pickKeyIndex();
-        const gateway = createLovableAiGatewayProvider(apiKey, keys[keyIndex]);
         if (keyIndex > 0) {
           log.warn("chat.key.failover", { keyIndex, userId, threadId });
         }
@@ -559,27 +617,111 @@ export const Route = createFileRoute("/api/chat")({
             )}. Tools enforce timeouts, output caps, and host allow-lists. Never attempt unsupported tools.`;
         const modelMessages = await convertToModelMessages(messages);
 
-        // Only toUIMessageStreamResponse is used below; Pick avoids the
-        // ToolSet variance mismatch between the inferred tools and the
-        // generic default.
-        let result: Pick<ReturnType<typeof streamText>, "toUIMessageStreamResponse"> | null = null;
-        let chosenModel = modelCandidates[0];
+        // Ordered stream candidates. In sovereign mode the Lovable-gateway
+        // "provider/" model names 404 on Google's OpenAI-compatible
+        // endpoint, so fail over across plain Gemini model IDs instead.
+        const streamCandidates = sovereign
+          ? Array.from(new Set([primaryModel, ...SOVEREIGN_STREAM_FALLBACKS]))
+          : modelCandidates;
+
+        let chosenModel = primaryModel;
+        let chosenKeyIndex = keyIndex;
         let lastErr: unknown;
-        for (const candidate of modelCandidates) {
+
+        // Attached to every attempt, but only the winning attempt's stream
+        // runs to completion — so this fires exactly once per turn.
+        const handleFinish = async ({ messages: finalMessages }: { messages: UIMessage[] }) => {
+          // The key worked — clear any throttle so we prefer primary again.
+          clearKeyThrottled(chosenKeyIndex);
+          const lastAssistant = [...finalMessages].reverse().find((m) => m.role === "assistant");
+          if (!lastAssistant) return;
+          const { msg: safeAssistant, hits } = redactMessage(lastAssistant);
+          if (hits.length) {
+            await audit(supabaseAdmin, {
+              user_id: userId,
+              thread_id: threadId,
+              event_type: "secret.redacted",
+              summary: `Redacted ${hits.length} secret(s) from assistant message`,
+              ip,
+              user_agent: ua,
+              metadata: { kinds: hits, source: "assistant" },
+            });
+          }
+          const { error } = await supabase.from("messages").insert({
+            thread_id: threadId,
+            user_id: userId,
+            role: "assistant",
+            message: safeAssistant as unknown as Record<string, unknown>,
+          });
+          if (error) log.error("chat.save.assistant_failed", { error: error.message });
+          await supabase
+            .from("threads")
+            .update({ updated_at: new Date().toISOString() })
+            .eq("id", threadId);
+
+          await audit(supabaseAdmin, {
+            user_id: userId,
+            thread_id: threadId,
+            event_type: "message.assistant",
+            summary: summarize(safeAssistant),
+            ip,
+            user_agent: ua,
+            metadata: { model: chosenModel, sovereign },
+          });
+          log.info("chat.stream.finish", { userId, threadId, model: chosenModel });
+        };
+
+        // Mid-stream failure on the winning attempt: the response is already
+        // committed to the client, so we can't fail over — refund the credit
+        // (it was deducted before the AI call started) and explain.
+        const handleMidStreamError =
+          (model: string, kIdx: number) =>
+          (err: unknown): string => {
+            const details = describeError(err);
+            log.error("chat.stream.onError", {
+              userId,
+              threadId,
+              model,
+              keyIndex: kIdx,
+              ...details,
+            });
+            if (!isAdmin) {
+              refundCredit(supabaseAdmin, userId, threadId, ip, ua);
+            }
+            if (isRateLimitedDetails(details)) {
+              // Fail over: throttle this key so the next request uses the
+              // backup key (if configured) until the throttle expires.
+              markKeyThrottled(kIdx);
+              log.warn("chat.key.throttled", { keyIndex: kIdx, userId, threadId });
+            }
+            return friendlyStreamErrorMessage(details);
+          };
+
+        let responseStream: ReadableStream<UIMessageChunk> | null = null;
+        let attemptKeyIndex = keyIndex;
+        for (const candidate of streamCandidates) {
+          const aborter = new AbortController();
+          const attemptGateway = createLovableAiGatewayProvider(apiKey, keys[attemptKeyIndex]);
+          let firstStreamError: unknown = null;
+          let sawContent = false;
+          const buffered: UIMessageChunk[] = [];
+
+          // Priority tier is a Fast-mode ✓ OpenAI capability. Only enable it
+          // for the primary router pick AND only when the chosen model is
+          // OpenAI — Gemini fallbacks silently ignore it and would be billed
+          // at the standard rate anyway. Faster TTFT for hard/code prompts.
+          const usePriority =
+            candidate === route.model && route.priority && candidate.startsWith("openai/");
+          // GPT-5.6 models reject tool calls unless reasoning effort is "none".
+          const isGpt56 = candidate.startsWith("openai/gpt-5.6");
+          const lovableOptions: Record<string, string> = {};
+          if (usePriority) lovableOptions.service_tier = "priority";
+          if (isGpt56) lovableOptions.reasoningEffort = "none";
+
+          let reader: ReadableStreamDefaultReader<UIMessageChunk>;
           try {
-            // Priority tier is a Fast-mode ✓ OpenAI capability. Only enable it
-            // for the primary router pick AND only when the chosen model is
-            // OpenAI — Gemini fallbacks silently ignore it and would be billed
-            // at the standard rate anyway. Faster TTFT for hard/code prompts.
-            const usePriority =
-              candidate === route.model && route.priority && candidate.startsWith("openai/");
-            // GPT-5.6 models reject tool calls unless reasoning effort is "none".
-            const isGpt56 = candidate.startsWith("openai/gpt-5.6");
-            const lovableOptions: Record<string, string> = {};
-            if (usePriority) lovableOptions.service_tier = "priority";
-            if (isGpt56) lovableOptions.reasoningEffort = "none";
-            result = streamText({
-              model: gateway(candidate),
+            const streamResult = streamText({
+              model: attemptGateway(candidate),
               system: systemPrompt,
               messages: modelMessages,
               tools,
@@ -588,30 +730,143 @@ export const Route = createFileRoute("/api/chat")({
               // on a 429 each user message then burns 3x quota while the user
               // waits through exponential backoff. On a throttled free-tier
               // key that keeps the user rate-limited longer. Surface the error
-              // immediately (onError refunds the credit) and let the user retry.
+              // immediately and fail over to the next model/key instead.
               maxRetries: 0,
+              abortSignal: aborter.signal,
               ...(Object.keys(lovableOptions).length
                 ? { providerOptions: { lovable: lovableOptions } }
                 : {}),
             });
-
-            chosenModel = candidate;
-            if (candidate !== primaryModel) {
-              log.warn("chat.model.fallback", {
-                from: primaryModel,
-                to: candidate,
-                userId,
-                threadId,
-              });
-            }
-            break;
+            const uiStream = streamResult.toUIMessageStream({
+              originalMessages: messages,
+              onError: (err: unknown) => {
+                firstStreamError ??= err;
+                if (sawContent) {
+                  return handleMidStreamError(candidate, attemptKeyIndex)(err);
+                }
+                // Pre-content failure: the probe below fails over to the next
+                // candidate, so this string never reaches the client.
+                return "Stream failed before producing content";
+              },
+              onFinish: handleFinish,
+            });
+            reader = uiStream.getReader() as ReadableStreamDefaultReader<UIMessageChunk>;
           } catch (err) {
             lastErr = err;
             log.error("chat.model.init_failed", { model: candidate, ...describeError(err) });
-            if (!isRetryableGatewayError(err)) break;
+            if (!isRetryableGatewayError(err) && !isUnknownModelError(err)) break;
+            continue;
           }
+
+          // Probe: wait for the first real content chunk within a bounded
+          // budget. An upstream 5xx/timeout/429 surfaces here as an `error`
+          // chunk (via onError above) before any content exists.
+          let producedContent = false;
+          const deadlineAt = Date.now() + FIRST_CHUNK_TIMEOUT_MS;
+          try {
+            for (;;) {
+              const remaining = deadlineAt - Date.now();
+              const raced = await Promise.race([
+                reader.read().then((r) => ({ kind: "read" as const, ...r })),
+                new Promise<"timeout">((resolve) =>
+                  setTimeout(() => resolve("timeout"), Math.max(remaining, 0)),
+                ),
+              ]);
+              if (raced === "timeout") {
+                lastErr = new Error(`No content from upstream within ${FIRST_CHUNK_TIMEOUT_MS}ms`);
+                log.warn("chat.stream.first_chunk_timeout", {
+                  model: candidate,
+                  userId,
+                  threadId,
+                });
+                break;
+              }
+              const { done, value } = raced;
+              if (done || !value || value.type === "error" || value.type === "abort") {
+                lastErr =
+                  firstStreamError ??
+                  new Error(`Stream ${value?.type ?? "closed"} before producing content`);
+                break;
+              }
+              buffered.push(value);
+              if (!PRE_CONTENT_CONTROL_CHUNKS.has(value.type)) {
+                sawContent = true;
+                producedContent = true;
+                break;
+              }
+            }
+          } catch (err) {
+            lastErr = err;
+          }
+
+          if (!producedContent) {
+            // Pre-content failure: abandon this attempt and fail over to the
+            // next candidate. The client never sees this attempt.
+            try {
+              aborter.abort();
+            } catch {
+              // best effort
+            }
+            try {
+              await reader.cancel("pre-content-failure");
+            } catch {
+              // best effort
+            }
+            const details = describeError(lastErr);
+            log.warn("chat.model.pre_content_failed", {
+              model: candidate,
+              keyIndex: attemptKeyIndex,
+              userId,
+              threadId,
+              ...details,
+            });
+            if (isRateLimitedDetails(details)) {
+              // Throttle this key so the next attempt uses the backup key.
+              markKeyThrottled(attemptKeyIndex);
+              log.warn("chat.key.throttled", { keyIndex: attemptKeyIndex, userId, threadId });
+            }
+            attemptKeyIndex = pickKeyIndex();
+            continue;
+          }
+
+          chosenModel = candidate;
+          chosenKeyIndex = attemptKeyIndex;
+          if (candidate !== primaryModel) {
+            log.warn("chat.model.fallback", {
+              from: primaryModel,
+              to: candidate,
+              userId,
+              threadId,
+            });
+          }
+          const winningReader = reader;
+          const winningBuffered = buffered;
+          responseStream = new ReadableStream<UIMessageChunk>({
+            start(controller) {
+              for (const chunk of winningBuffered) controller.enqueue(chunk);
+              const pump = (): void => {
+                winningReader.read().then(
+                  ({ done, value }) => {
+                    if (done) {
+                      controller.close();
+                      return;
+                    }
+                    controller.enqueue(value);
+                    pump();
+                  },
+                  (err: unknown) => controller.error(err),
+                );
+              };
+              pump();
+            },
+            cancel(reason) {
+              winningReader.cancel(reason).catch(() => undefined);
+            },
+          });
+          break;
         }
-        if (!result) {
+
+        if (!responseStream) {
           log.error("chat.stream.fatal", { userId, threadId, ...describeError(lastErr) });
           await audit(supabaseAdmin, {
             user_id: userId,
@@ -622,14 +877,24 @@ export const Route = createFileRoute("/api/chat")({
             user_agent: ua,
             metadata: describeError(lastErr),
           });
-          return new Response("AI gateway error", { status: 500 });
+          // The turn produced nothing: give the credit back.
+          if (!isAdmin) {
+            refundCredit(supabaseAdmin, userId, threadId, ip, ua);
+          }
+          const hint = lastErr
+            ? friendlyStreamErrorMessage(describeError(lastErr))
+            : "Stream error";
+          return new Response(
+            `The AI service is having trouble right now (${hint}). This message cost you nothing — please try again in a bit.`,
+            { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } },
+          );
         }
 
         log.info("chat.stream.start", {
           userId,
           threadId,
           model: chosenModel,
-          keyIndex,
+          keyIndex: chosenKeyIndex,
           lang: langCode,
           tier: route.tier,
           priority: route.priority && chosenModel.startsWith("openai/"),
@@ -637,92 +902,7 @@ export const Route = createFileRoute("/api/chat")({
         });
 
         try {
-          return result.toUIMessageStreamResponse({
-            originalMessages: messages,
-            onError: (err: unknown) => {
-              const details = describeError(err);
-              log.error("chat.stream.onError", {
-                userId,
-                threadId,
-                model: chosenModel,
-                keyIndex,
-                ...details,
-              });
-              // A failed turn must not cost the user: the credit was already
-              // deducted before the AI call started.
-              if (!isAdmin) {
-                refundCredit(supabaseAdmin, userId, threadId, ip, ua);
-              }
-              // Rate limits get a plain-language message instead of the raw
-              // SDK error ("Failed after 3 attempts. Last error: …").
-              const errMsg = String(details.message ?? "").toLowerCase();
-              const rateLimited =
-                details.status === 429 ||
-                /\b(429|too many requests|rate.?limit|quota exceeded|resource exhausted)\b/.test(
-                  errMsg,
-                );
-              if (rateLimited) {
-                // Fail over: throttle this key so the next request uses the
-                // backup key (if configured) until the throttle expires.
-                markKeyThrottled(keyIndex);
-                log.warn("chat.key.throttled", { keyIndex, userId, threadId });
-                return "The AI is rate-limited right now. Please wait a minute and try again — this message cost you nothing.";
-              }
-              // Surface a compact, non-sensitive hint to the client so the UI
-              // can render the actual field/tool that failed instead of a
-              // generic "invalid string".
-              const issuesList: unknown = details.issues;
-              const first: unknown = Array.isArray(issuesList) ? issuesList[0] : null;
-              if (first && typeof first === "object") {
-                const issue = first as { path?: unknown; message?: unknown };
-                return `Invalid tool argument: ${issue.path || "(root)"} — ${issue.message}`;
-              }
-              if (details.toolName) return `Tool "${details.toolName}" failed: ${details.message}`;
-              return String(details.message ?? "Stream error");
-            },
-            onFinish: async ({ messages: finalMessages }: { messages: UIMessage[] }) => {
-              // The key worked — clear any throttle so we prefer primary again.
-              clearKeyThrottled(keyIndex);
-              const lastAssistant = [...finalMessages]
-                .reverse()
-                .find((m) => m.role === "assistant");
-              if (!lastAssistant) return;
-              const { msg: safeAssistant, hits } = redactMessage(lastAssistant);
-              if (hits.length) {
-                await audit(supabaseAdmin, {
-                  user_id: userId,
-                  thread_id: threadId,
-                  event_type: "secret.redacted",
-                  summary: `Redacted ${hits.length} secret(s) from assistant message`,
-                  ip,
-                  user_agent: ua,
-                  metadata: { kinds: hits, source: "assistant" },
-                });
-              }
-              const { error } = await supabase.from("messages").insert({
-                thread_id: threadId,
-                user_id: userId,
-                role: "assistant",
-                message: safeAssistant as unknown as Record<string, unknown>,
-              });
-              if (error) log.error("chat.save.assistant_failed", { error: error.message });
-              await supabase
-                .from("threads")
-                .update({ updated_at: new Date().toISOString() })
-                .eq("id", threadId);
-
-              await audit(supabaseAdmin, {
-                user_id: userId,
-                thread_id: threadId,
-                event_type: "message.assistant",
-                summary: summarize(safeAssistant),
-                ip,
-                user_agent: ua,
-                metadata: { model: chosenModel, sovereign },
-              });
-              log.info("chat.stream.finish", { userId, threadId, model: chosenModel });
-            },
-          });
+          return createUIMessageStreamResponse({ stream: responseStream });
         } catch (err) {
           log.error("chat.stream.error", {
             userId,
@@ -739,6 +919,9 @@ export const Route = createFileRoute("/api/chat")({
             user_agent: ua,
             metadata: describeError(err),
           });
+          if (!isAdmin) {
+            refundCredit(supabaseAdmin, userId, threadId, ip, ua);
+          }
           return new Response("AI gateway error", { status: 500 });
         }
       },
