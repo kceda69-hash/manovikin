@@ -42,8 +42,10 @@ export async function embedTexts(inputs: string[]): Promise<number[][]> {
       Authorization: `Bearer ${sovereignKey ?? "manovik"}`,
     };
     body = {
-      model: process.env.MANOVIK_AI_EMBED_MODEL ?? "nomic-embed-text",
+      model: process.env.MANOVIK_AI_EMBED_MODEL ?? "text-embedding-004",
       input: [] as string[],
+      // Google's text-embedding-004 defaults to 768 dims; request 1536 to match the DB column.
+      outputDimensionality: EMBED_DIMS,
     };
   } else {
     if (!lovableKey) throw new Error("MANOVIK memory is not configured on this deployment.");

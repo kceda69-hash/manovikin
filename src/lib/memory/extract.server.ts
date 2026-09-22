@@ -102,14 +102,78 @@ export interface ExtractDeps {
 }
 
 /**
+ * Deterministic fallback: extract obvious facts from explicit "remember" phrases
+ * without needing the LLM. Catches patterns like "my favorite X is Y, please remember that".
+ * Pure, never throws, testable.
+ */
+export function extractDeterministicFacts(userText: string): MemoryFact[] {
+  const facts: MemoryFact[] = [];
+  try {
+    const text = (userText ?? "").trim();
+    if (!text) return facts;
+
+    // Pattern: "my favorite <thing> is <value>" (with optional "please remember that")
+    const favMatch = text.match(
+      /my favorite\s+([a-zA-Z\s]{2,30}?)\s+is\s+([a-zA-Z0-9\s\-']{2,50}?)(?:\.|\s+please|\s+remember|$)/i,
+    );
+    if (favMatch) {
+      const thing = favMatch[1].trim();
+      const value = favMatch[2].trim();
+      if (thing && value) {
+        facts.push({
+          fact: `The user's favorite ${thing} is ${value}.`,
+          category: "preference",
+        });
+      }
+    }
+
+    // Pattern: "remember that my <thing> is <value>" or "remember my <thing> is <value>"
+    const remMatch = text.match(
+      /remember (?:that )?my\s+([a-zA-Z\s]{2,30}?)\s+is\s+([a-zA-Z0-9\s\-']{2,50}?)(?:\.|$)/i,
+    );
+    if (remMatch && facts.length === 0) {
+      const thing = remMatch[1].trim();
+      const value = remMatch[2].trim();
+      if (thing && value) {
+        facts.push({
+          fact: `The user's ${thing} is ${value}.`,
+          category: "preference",
+        });
+      }
+    }
+
+    // Pattern: "my name is <value>"
+    const nameMatch = text.match(/my name is\s+([a-zA-Z\s\-']{2,50}?)(?:\.|$)/i);
+    if (nameMatch) {
+      const name = nameMatch[1].trim();
+      if (name) {
+        facts.push({
+          fact: `The user's name is ${name}.`,
+          category: "identity",
+        });
+      }
+    }
+  } catch {
+    // Never throw — return what we have.
+  }
+  return facts.slice(0, MAX_FACTS);
+}
+
+/**
  * Run the extraction LLM call. Never throws — returns [] on any failure
  * (timeout, rate limit, model outage) so chat is never affected.
+ * Falls back to deterministic pattern matching for explicit remember phrases.
  */
 export async function extractMemoryFacts(
   exchangeText: string,
   deps: ExtractDeps,
 ): Promise<MemoryFact[]> {
   if (!shouldAttemptExtraction(exchangeText)) return [];
+  // Try deterministic patterns first (fast, no LLM needed for obvious cases).
+  const userPart = exchangeText.split("\n")[0]?.replace(/^User:\s*/, "") ?? "";
+  const deterministic = extractDeterministicFacts(userPart);
+  if (deterministic.length > 0) return deterministic;
+
   try {
     const provider = createLovableAiGatewayProvider(deps.apiKey, deps.sovereignKey);
     const result = await generateText({
