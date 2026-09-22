@@ -893,8 +893,17 @@ function ChatPanel({
   const handleSpeakerVoiceCommand = useCallback(
     (transcript: string): boolean => {
       const t = transcript.toLowerCase().trim();
-      const turnOn = /\b(turn on|enable|unmute|speaker on|voice on)\b/.test(t) && /\b(speaker|voice|sound|audio)\b/.test(t);
-      const turnOff = /\b(turn off|disable|mute|speaker off|voice off|shut up|quiet)\b/.test(t);
+      const hasSpeakerWord = /\b(speaker|voice|sound|audio)\b/.test(t);
+      const turnOn =
+        /\b(turn on|enable|unmute|speaker on|voice on)\b/.test(t) && hasSpeakerWord;
+      // "turn off"/"disable" require speaker context (so "turn off the lights"
+      // doesn't kill the speaker). "mute"/"shut up"/"quiet" are direct
+      // commands to MANO and work standalone.
+      const turnOff =
+        /\b(shut up|quiet)\b/.test(t) ||
+        /\bmute\b/.test(t) ||
+        /\b(speaker off|voice off)\b/.test(t) ||
+        (/\b(turn off|disable)\b/.test(t) && hasSpeakerWord);
       if (turnOn) {
         setSpeaker(true);
         toast.success("Speaker on");
