@@ -911,6 +911,8 @@ function ChatPanel({
   );
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const spokenRef = useRef<string | null>(null);
+  const speakingRef = useRef(false);
+  const autoSendTimerRef = useRef<number | null>(null);
   const companionRef = useRef(false);
   companionRef.current = companionMode;
 
@@ -975,8 +977,9 @@ function ChatPanel({
         }
       };
       rec.onend = () => {
-        // Companion mode: keep the mic open for a real conversation.
-        if (companionRef.current) {
+        // Companion mode: keep the mic open for a real conversation —
+        // but NOT while MANO itself is speaking (prevents hearing its own voice).
+        if (companionRef.current && !speakingRef.current) {
           try {
             rec.start();
             return;
@@ -1004,9 +1007,24 @@ function ChatPanel({
     setCompanionMode(false);
     recognitionRef.current?.stop();
     setListening(false);
+    if (autoSendTimerRef.current) {
+      window.clearTimeout(autoSendTimerRef.current);
+      autoSendTimerRef.current = null;
+    }
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
+    speakingRef.current = false;
+  }, []);
+
+  // Schedule an automatic send after the user finishes speaking.
+  // Debounced: a new final transcript replaces the pending send.
+  const scheduleAutoSend = useCallback(() => {
+    if (autoSendTimerRef.current) window.clearTimeout(autoSendTimerRef.current);
+    autoSendTimerRef.current = window.setTimeout(() => {
+      autoSendTimerRef.current = null;
+      handleSubmitRef.current();
+    }, 900);
   }, []);
 
   const startCompanion = useCallback(() => {
@@ -1024,13 +1042,11 @@ function ChatPanel({
       }
       setInput(transcript);
       // Real conversation: when the user pauses, send automatically.
-      if (isFinal && transcript.trim()) {
-        window.setTimeout(() => handleSubmitRef.current(), 600);
-      }
+      if (isFinal && transcript.trim()) scheduleAutoSend();
     });
     if (!ok) setCompanionMode(false);
     else toast.success("Voice companion on — just talk, MANO is listening");
-  }, [startRecognition, setSpeaker, handleSpeakerVoiceCommand]);
+  }, [startRecognition, setSpeaker, handleSpeakerVoiceCommand, scheduleAutoSend]);
 
   // The wake screen fires this when the user taps "Wake up, MANO".
   useEffect(() => {
@@ -1055,8 +1071,10 @@ function ChatPanel({
         return;
       }
       setInput(transcript);
+      // One-shot mic: auto-send when the user finishes speaking.
+      if (isFinal && transcript.trim()) scheduleAutoSend();
     });
-  }, [listening, startRecognition, stopCompanion, handleSpeakerVoiceCommand]);
+  }, [listening, startRecognition, stopCompanion, handleSpeakerVoiceCommand, scheduleAutoSend]);
 
   // Speak the latest completed assistant reply when MANO voice output is on.
   // In companion mode the mic pauses while MANO talks, then reopens.
@@ -1072,12 +1090,16 @@ function ChatPanel({
       .slice(0, 1200);
     if (!text || spokenRef.current === last.id) return;
     spokenRef.current = last.id;
+    // Mark speaking BEFORE stopping the mic so the recognition onend
+    // handler doesn't restart it while MANO is talking (own-voice feedback).
+    speakingRef.current = true;
     if (companionRef.current) recognitionRef.current?.stop();
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = navigator.language || "en-US";
     utter.rate = 1.03;
     utter.onend = () => {
-      // Mic reopens via the recognition onend auto-restart.
+      speakingRef.current = false;
+      // Mic reopens now that MANO has finished speaking.
       if (companionRef.current && recognitionRef.current) {
         try {
           recognitionRef.current.start();
@@ -1085,6 +1107,9 @@ function ChatPanel({
           /* onend handler will retry */
         }
       }
+    };
+    utter.onerror = () => {
+      speakingRef.current = false;
     };
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utter);
