@@ -878,6 +878,37 @@ function ChatPanel({
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("manovik:speak-on") === "1";
   });
+
+  // Helper to set speaker state reliably (persists to localStorage).
+  const setSpeaker = useCallback((on: boolean) => {
+    setSpeakOn(on);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("manovik:speak-on", on ? "1" : "0");
+      if (!on && "speechSynthesis" in window) window.speechSynthesis.cancel();
+    }
+  }, []);
+
+  // Voice commands for speaker control: "turn on speaker", "turn off speaker",
+  // "mute", "unmute", "speaker on", "speaker off". Returns true if handled.
+  const handleSpeakerVoiceCommand = useCallback(
+    (transcript: string): boolean => {
+      const t = transcript.toLowerCase().trim();
+      const turnOn = /\b(turn on|enable|unmute|speaker on|voice on)\b/.test(t) && /\b(speaker|voice|sound|audio)\b/.test(t);
+      const turnOff = /\b(turn off|disable|mute|speaker off|voice off|shut up|quiet)\b/.test(t);
+      if (turnOn) {
+        setSpeaker(true);
+        toast.success("Speaker on");
+        return true;
+      }
+      if (turnOff) {
+        setSpeaker(false);
+        toast.success("Speaker off");
+        return true;
+      }
+      return false;
+    },
+    [setSpeaker],
+  );
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const spokenRef = useRef<string | null>(null);
   const companionRef = useRef(false);
@@ -983,10 +1014,14 @@ function ChatPanel({
       toast.error("Spoken replies aren't supported in this browser");
       return;
     }
-    setSpeakOn(true);
-    window.localStorage.setItem("manovik:speak-on", "1");
+    setSpeaker(true);
     setCompanionMode(true);
     const ok = startRecognition(true, (transcript, isFinal) => {
+      // Voice commands: handle speaker on/off locally, don't send to AI.
+      if (isFinal && transcript.trim() && handleSpeakerVoiceCommand(transcript)) {
+        setInput("");
+        return;
+      }
       setInput(transcript);
       // Real conversation: when the user pauses, send automatically.
       if (isFinal && transcript.trim()) {
@@ -995,7 +1030,7 @@ function ChatPanel({
     });
     if (!ok) setCompanionMode(false);
     else toast.success("Voice companion on — just talk, MANO is listening");
-  }, [startRecognition]);
+  }, [startRecognition, setSpeaker, handleSpeakerVoiceCommand]);
 
   // The wake screen fires this when the user taps "Wake up, MANO".
   useEffect(() => {
@@ -1013,8 +1048,15 @@ function ChatPanel({
       }
       return;
     }
-    startRecognition(false, (transcript) => setInput(transcript));
-  }, [listening, startRecognition, stopCompanion]);
+    startRecognition(false, (transcript, isFinal) => {
+      // Voice commands: handle speaker on/off locally, don't send to AI.
+      if (isFinal && transcript.trim() && handleSpeakerVoiceCommand(transcript)) {
+        setInput("");
+        return;
+      }
+      setInput(transcript);
+    });
+  }, [listening, startRecognition, stopCompanion, handleSpeakerVoiceCommand]);
 
   // Speak the latest completed assistant reply when MANO voice output is on.
   // In companion mode the mic pauses while MANO talks, then reopens.
@@ -1313,14 +1355,7 @@ function ChatPanel({
                 toast.error("Spoken replies aren't supported in this browser");
                 return;
               }
-              setSpeakOn((v) => {
-                const next = !v;
-                if (typeof window !== "undefined") {
-                  window.localStorage.setItem("manovik:speak-on", next ? "1" : "0");
-                  if (v && "speechSynthesis" in window) window.speechSynthesis.cancel();
-                }
-                return next;
-              });
+              setSpeaker(!speakOn);
             }}
             className="h-8 min-h-[44px] rounded-full"
           >
