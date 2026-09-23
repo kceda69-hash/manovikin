@@ -1015,6 +1015,11 @@ function ChatPanel({
   );
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const spokenRef = useRef<string | null>(null);
+  // Tracks how many recognition results have been consumed. In continuous
+  // mode, e.results accumulates across utterances — without this, each new
+  // final transcript would include all previous utterances ("are you
+  // listening" + "Captain America" instead of just "Captain America").
+  const processedResultCountRef = useRef<number>(0);
   // Timestamp (ms) when MANO last stopped speaking. Used to ignore mic
   // input for a short buffer after speech ends (catches echo/tail audio).
   // While MANO is speaking, only explicit stop commands ("shut up", "stop",
@@ -1152,7 +1157,14 @@ function ChatPanel({
       rec.lang = lang;
       recLangRef.current = lang;
       rec.onresult = (e) => {
-        const results = Array.from(e.results);
+        // New recognition session (results reset): reset the consumed counter.
+        if (e.results.length < processedResultCountRef.current) {
+          processedResultCountRef.current = 0;
+        }
+        // Only process NEW results — e.results accumulates in continuous
+        // mode, so slicing from the last consumed index prevents old
+        // utterances from repeating in new transcripts.
+        const results = Array.from(e.results).slice(processedResultCountRef.current);
         // Prefer the highest-confidence alternative for each result. The
         // first alternative is usually best, but on accented or ambiguous
         // speech a lower-ranked hypothesis can score higher.
@@ -1202,6 +1214,11 @@ function ChatPanel({
               /* onend below restarts with the new language */
             }
           }
+        }
+        // Mark results as consumed when final — prevents them from being
+        // included in the next utterance's transcript (the repeat bug).
+        if (isFinal) {
+          processedResultCountRef.current = e.results.length;
         }
         onTranscript(transcript, isFinal);
       };
