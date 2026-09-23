@@ -769,13 +769,14 @@ export const Route = createFileRoute("/api/chat")({
         // Ordered stream candidates. In sovereign mode the Lovable-gateway
         // "provider/" model names 404 on Google's OpenAI-compatible
         // endpoint, so fail over across plain Gemini model IDs instead.
-        // The free GPT-class model is always LAST: it is keyless and
-        // zero-cost, so it only fires when every Gemini model failed —
-        // the user gets a reply instead of an error, and the turn's
-        // single credit is spent on a real reply rather than refunded.
+        // The free GPT-class model is always LAST in every mode: it is
+        // keyless and zero-cost, so it only fires when every Gemini model
+        // failed — the user gets a reply instead of an error, and the
+        // turn's single credit is spent on a real reply rather than
+        // refunded.
         const streamCandidates: StreamCandidate[] = sovereign
           ? [...new Set([primaryModel, ...SOVEREIGN_STREAM_FALLBACKS]), FREE_GPT_CANDIDATE]
-          : modelCandidates;
+          : [...modelCandidates, FREE_GPT_CANDIDATE];
 
         let chosenModel = primaryModel;
         let chosenKeyIndex = keyIndex;
