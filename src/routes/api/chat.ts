@@ -482,12 +482,17 @@ export const Route = createFileRoute("/api/chat")({
         } catch {
           return new Response("Bad request", { status: 400 });
         }
-        const { messages: rawMessages, threadId } = body;
-        if (!Array.isArray(rawMessages) || !threadId) {
+        // The client sends its full local history; long threads can exceed
+        // the safety cap. Truncate to the most recent messages instead of
+        // rejecting — the full history is already persisted in the DB, and
+        // the model only needs recent context. (DoS protection is handled
+        // by MAX_BODY_BYTES above.)
+        const rawMessages: UIMessage[] = Array.isArray(body.messages)
+          ? body.messages.slice(-MAX_MESSAGES)
+          : [];
+        const { threadId } = body;
+        if (!Array.isArray(body.messages) || !threadId) {
           return new Response("Bad request", { status: 400 });
-        }
-        if (rawMessages.length > MAX_MESSAGES) {
-          return new Response(`Too many messages (max ${MAX_MESSAGES})`, { status: 400 });
         }
         // Strict role allow-list: reject any client-supplied system/tool/etc.
         // messages to prevent prompt-injection via crafted message history.
