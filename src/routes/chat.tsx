@@ -948,10 +948,11 @@ function ChatPanel({
       const hasSpeakerWord = /\b(speaker|voice|sound|audio)\b/.test(t);
       const turnOn = /\b(turn on|enable|unmute|speaker on|voice on)\b/.test(t) && hasSpeakerWord;
       // "turn off"/"disable" require speaker context (so "turn off the lights"
-      // doesn't kill the speaker). "mute"/"shut up"/"quiet" are direct
-      // commands to MANO and work standalone.
+      // doesn't kill the speaker). "mute"/"shut up"/"quiet"/"stop" are direct
+      // commands to MANO and work standalone — including while MANO itself
+      // is speaking, so the user can always interrupt it by voice.
       const turnOff =
-        /\b(shut up|quiet)\b/.test(t) ||
+        /\b(shut up|quiet|stop)\b/.test(t) ||
         /\bmute\b/.test(t) ||
         /\b(speaker off|voice off)\b/.test(t) ||
         (/\b(turn off|disable)\b/.test(t) && hasSpeakerWord);
@@ -969,6 +970,12 @@ function ChatPanel({
     },
     [setSpeaker],
   );
+
+  // Ref to the latest speaker-command handler, so the mic's onresult can
+  // process "shut up"/"quiet"/"stop" even while MANO is speaking (when
+  // transcription results are otherwise ignored to avoid self-voice pickup).
+  const handleSpeakerVoiceCommandRef = useRef(handleSpeakerVoiceCommand);
+  handleSpeakerVoiceCommandRef.current = handleSpeakerVoiceCommand;
 
   // Stop the mic entirely: clears sticky mode, stops recognition, and (unless
   // we're in companion mode, which owns its own lifecycle) leaves companion
@@ -1008,6 +1015,11 @@ function ChatPanel({
   );
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const spokenRef = useRef<string | null>(null);
+  // Text MANO is currently speaking (for self-voice detection). When the mic
+  // hears speech while MANO is talking, we compare the transcript against
+  // this: if it matches, it's MANO's own voice (ignore); if not, the user
+  // is interrupting (stop MANO and listen).
+  const speakingTextRef = useRef<string>("");
   const speakingRef = useRef(false);
   const autoSendTimerRef = useRef<number | null>(null);
   const companionRef = useRef(false);
@@ -1139,9 +1151,6 @@ function ChatPanel({
       rec.lang = lang;
       recLangRef.current = lang;
       rec.onresult = (e) => {
-        // Ignore anything heard while MANO itself is speaking — that's its
-        // own voice coming through the mic, not the user.
-        if (speakingRef.current) return;
         const results = Array.from(e.results);
         // Prefer the highest-confidence alternative for each result. The
         // first alternative is usually best, but on accented or ambiguous
@@ -1161,6 +1170,42 @@ function ChatPanel({
         };
         const transcript = results.map(bestTranscript).join(" ");
         const isFinal = results.length > 0 && results[results.length - 1].isFinal;
+        // Speaker-stop commands ("shut up", "quiet", "stop", "mute") must
+        // work even while MANO is speaking — otherwise the user has no
+        // voice way to interrupt it. Check before the speaking guard below.
+        if (
+          isFinal &&
+          transcript.trim() &&
+          handleSpeakerVoiceCommandRef.current(transcript)
+        ) {
+          return;
+        }
+        // While MANO is speaking: distinguish MANO's own voice from the
+        // user interrupting. If the transcript matches what MANO is
+        // currently saying, it's self-voice pickup — ignore it (never
+        // transcribe MANO's own voice into the chat). Otherwise the user
+        // is talking over MANO: stop the speech immediately and process
+        // their input.
+        if (speakingRef.current) {
+          const heard = transcript.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+          const saying = speakingTextRef.current;
+          // Self-voice if the heard text appears in (or overlaps heavily
+          // with) what MANO is saying.
+          const isSelfVoice =
+            heard.length > 0 &&
+            saying.length > 0 &&
+            (saying.includes(heard) ||
+              heard.split(" ").filter((w) => w.length > 2 && saying.includes(w)).length >=
+                Math.max(2, Math.floor(heard.split(" ").length / 2)));
+          if (isSelfVoice) return;
+          // User interruption: stop MANO's speech now so it feels
+          // responsive, then fall through to process their input.
+          if (typeof window !== "undefined" && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+          }
+          speakingRef.current = false;
+          speakingTextRef.current = "";
+        }
         // Auto-detect mode: learn the user's spoken language from each final
         // transcript and switch recognition to match it. The switch applies
         // immediately (the recognizer restarts on end with the new language).
@@ -1379,11 +1424,14 @@ function ChatPanel({
     utter.rate = 1.03;
     const clearSpeaking = () => {
       speakingRef.current = false;
+      speakingTextRef.current = "";
     };
     utter.onend = clearSpeaking;
     utter.onerror = clearSpeaking;
     // Safety: never leave the mic muted because of a stuck flag.
     window.setTimeout(clearSpeaking, 30000);
+    // Remember what MANO is saying for self-voice detection in onresult.
+    speakingTextRef.current = text.toLowerCase();
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utter);
   }, [messages, speakOn, status]);
