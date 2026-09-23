@@ -164,13 +164,14 @@ function isUnknownModelError(err: unknown): boolean {
 // wait for the first real content chunk (bounded); on a pre-content failure
 // fail over to the next Gemini model instead of failing the turn.
 //
-// The probe budget is deliberately short (8s): a healthy Gemini Flash model
-// produces its first chunk in 1-3s, so 8s of silence means the upstream is
-// degraded and failing over fast beats waiting. Three candidates x 8s keeps
-// the worst case (~24s) well under the client's 60s watchdog — previously
-// 3 x 20s = ~60s, which is why greetings appeared to "fail" (the client gave
-// up waiting).
-const FIRST_CHUNK_TIMEOUT_MS = 8_000;
+// The probe budget: a healthy Gemini Flash model produces its first chunk
+// in 1-3s, so 8s of silence means the upstream is degraded. However, the
+// free GPT fallback (Pollinations) is slower (~10-15s for first chunk) but
+// it WORKS when Gemini is rate-limited. A slow reply beats an error, so we
+// give candidates 30s. Worst case (~90s) exceeds the client's 60s watchdog,
+// but the free GPT is the last candidate — if we reach it, Gemini has
+// already failed, and waiting for a working reply is correct.
+const FIRST_CHUNK_TIMEOUT_MS = 30_000;
 
 // Mid-stream stall timeout: if the upstream stops sending chunks for this
 // long, the stream is dead — error it so the client can retry instead of
