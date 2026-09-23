@@ -214,6 +214,21 @@ function isRateLimitedDetails(details: Record<string, unknown>): boolean {
   );
 }
 
+// A key should be throttled (fail over to the backup key) not just on 429s
+// but on any upstream failure suggesting this key's path is unhealthy:
+// timeouts, 5xx, network errors. Without this, pickKeyIndex() can select the
+// same failing key again for the next candidate, burning every 8s probe on a
+// dead key while the backup key sits unused.
+function isKeyFailureDetails(details: Record<string, unknown>): boolean {
+  if (isRateLimitedDetails(details)) return true;
+  const status = details.status;
+  if (typeof status === "number" && status >= 500 && status < 600) return true;
+  const errMsg = String(details.message ?? "").toLowerCase();
+  return /\b(5\d\d|timeout|timed out|temporarily|upstream|unavailable|fetch failed|network|econnreset|socket hang up)\b/.test(
+    errMsg,
+  );
+}
+
 // Plain-language, secret-free client message for a stream error.
 function friendlyStreamErrorMessage(details: Record<string, unknown>): string {
   // Rate limits get a plain-language message instead of the raw SDK error
@@ -832,7 +847,7 @@ export const Route = createFileRoute("/api/chat")({
             // response-stream wrapper below (awaited before close).
             // The free GPT fallback is keyless — never throttle a Gemini key
             // for its rate limits.
-            if (!freeGpt && isRateLimitedDetails(details)) {
+            if (!freeGpt && isKeyFailureDetails(details)) {
               // Fail over: throttle this key so the next request uses the
               // backup key (if configured) until the throttle expires.
               markKeyThrottled(kIdx);
@@ -976,7 +991,7 @@ export const Route = createFileRoute("/api/chat")({
               threadId,
               ...details,
             });
-            if (!isFreeGpt && isRateLimitedDetails(details)) {
+            if (!isFreeGpt && isKeyFailureDetails(details)) {
               // Throttle this key so the next attempt uses the backup key.
               // The free GPT fallback is keyless — nothing to throttle.
               markKeyThrottled(attemptKeyIndex);

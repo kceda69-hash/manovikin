@@ -835,6 +835,12 @@ function ChatPanel({
     id: threadId,
     messages: initialMessages,
     transport,
+    // Throttle UI updates during streaming. Without this, a burst of stream
+    // chunks causes a per-chunk re-render storm (each chunk replaces the
+    // messages array via useSyncExternalStore) that trips React's "Maximum
+    // update depth exceeded" (#185), which surfaces as a failed turn. This is
+    // the fix documented by the AI SDK for exactly this error.
+    experimental_throttle: 50,
     onError: (e) => toast.error(e.message || "Something went wrong"),
   });
 
