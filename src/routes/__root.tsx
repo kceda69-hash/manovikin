@@ -167,6 +167,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
+        {/* Apply the persisted theme before first paint to avoid a flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("manovik:theme");var l=t==="light";var d=document.documentElement;d.classList.toggle("light",l);d.style.colorScheme=l?"light":"dark";}catch(e){}})();`,
+          }}
+        />
         <HeadContent />
       </head>
       <body>

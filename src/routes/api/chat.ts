@@ -22,7 +22,7 @@ import { log } from "@/lib/logger";
 import { aiKeys, clearKeyThrottled, markKeyThrottled, pickKeyIndex } from "@/lib/ai-key-failover";
 
 const MAX_MESSAGES = 200;
-const MAX_BODY_BYTES = 256 * 1024; // 256 KB
+const MAX_BODY_BYTES = 20 * 1024 * 1024; // 20 MB — attachments are base64 data URLs
 
 function summarize(msg: { parts?: Array<{ type: string; text?: string }> }): string {
   if (!msg?.parts) return "";

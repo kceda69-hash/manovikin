@@ -97,6 +97,93 @@
   --shadow-card: 0 1px 0 0 oklch(1 0 0 / 0.04) inset, 0 8px 30px -12px oklch(0 0 0 / 0.6);
 }
 
+/* MANOVIK AI — light theme. Applied when <html> has the .light class
+   (toggled from the dashboard theme switcher, persisted in localStorage).
+   :root stays dark, so no class = dark mode. */
+.light {
+  color-scheme: light;
+
+  --background: oklch(0.96 0.008 260);
+  --foreground: oklch(0.22 0.02 270);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.02 270);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.02 270);
+
+  --primary: oklch(0.52 0.16 220); /* deeper cyan for contrast on light */
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.93 0.012 270);
+  --secondary-foreground: oklch(0.28 0.02 270);
+
+  --muted: oklch(0.94 0.01 270);
+  --muted-foreground: oklch(0.46 0.025 270);
+
+  --accent: oklch(0.52 0.2 305);
+  --accent-foreground: oklch(0.99 0 0);
+
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  --border: oklch(0.86 0.015 270);
+  --input: oklch(0.9 0.012 270);
+  --ring: oklch(0.52 0.16 220);
+
+  --sidebar: oklch(0.95 0.008 265);
+  --sidebar-foreground: oklch(0.25 0.02 270);
+  --sidebar-primary: oklch(0.52 0.16 220);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.92 0.012 270);
+  --sidebar-accent-foreground: oklch(0.25 0.02 270);
+  --sidebar-border: oklch(0.86 0.015 270);
+  --sidebar-ring: oklch(0.52 0.16 220);
+
+  --glow: oklch(0.52 0.16 220);
+  --glow-2: oklch(0.52 0.2 305);
+
+  --gradient-cosmos: radial-gradient(
+    ellipse at top,
+    oklch(0.99 0.004 250) 0%,
+    oklch(0.95 0.01 260) 60%,
+    oklch(0.92 0.014 265) 100%
+  );
+  --gradient-aurora: linear-gradient(135deg, oklch(0.52 0.16 220) 0%, oklch(0.52 0.2 305) 100%);
+  --gradient-text: linear-gradient(135deg, oklch(0.42 0.16 220), oklch(0.48 0.2 305));
+  --shadow-glow:
+    0 0 32px -12px oklch(0.52 0.16 220 / 0.45),
+    0 0 64px -24px oklch(0.52 0.2 305 / 0.3);
+  --shadow-card: 0 1px 0 0 oklch(1 0 0 / 0.7) inset, 0 10px 30px -14px oklch(0.4 0.04 270 / 0.35);
+}
+
+/* Hardcoded dark glass utilities need light-mode overrides. */
+.light .surface-card {
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.92), oklch(0.96 0.01 270 / 0.85));
+  border: 1px solid oklch(0.82 0.02 275 / 0.7);
+  box-shadow: var(--shadow-card);
+}
+.light .mano-glass {
+  background: oklch(1 0 0 / 0.65);
+  border: 1px solid oklch(0.6 0.12 220 / 0.25);
+  box-shadow:
+    0 8px 32px oklch(0.4 0.04 270 / 0.18),
+    inset 0 1px 0 oklch(1 0 0 / 0.7);
+}
+.light .mano-glass-strong {
+  background: oklch(1 0 0 / 0.85);
+  border: 1px solid oklch(0.6 0.14 220 / 0.3);
+  box-shadow:
+    0 12px 48px oklch(0.4 0.04 270 / 0.22),
+    0 0 32px oklch(0.5 0.16 220 / 0.15),
+    inset 0 1px 0 oklch(1 0 0 / 0.7);
+}
+.light .bg-grid {
+  background-image:
+    linear-gradient(oklch(0.52 0.16 220 / 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.52 0.16 220 / 0.1) 1px, transparent 1px);
+}
+
 .dark {
   color-scheme: dark;
 }
@@ -478,6 +565,36 @@
       0 0 0 2px oklch(0.78 0.18 200 / 0.35),
       0 0 22px -4px oklch(0.65 0.25 305 / 0.45);
     transition: box-shadow 0.25s ease;
+  }
+
+  /* JARVIS HUD corner brackets for command-center cards */
+  .hud-frame {
+    position: relative;
+  }
+  .hud-frame::before,
+  .hud-frame::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .hud-frame::before {
+    top: 8px;
+    left: 8px;
+    border-top: 2px solid var(--primary);
+    border-left: 2px solid var(--primary);
+    border-top-left-radius: 6px;
+    opacity: 0.75;
+  }
+  .hud-frame::after {
+    bottom: 8px;
+    right: 8px;
+    border-bottom: 2px solid var(--primary);
+    border-right: 2px solid var(--primary);
+    border-bottom-right-radius: 6px;
+    opacity: 0.75;
   }
 
   /* Hover scale */

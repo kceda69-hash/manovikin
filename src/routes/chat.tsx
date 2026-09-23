@@ -32,6 +32,7 @@ import {
   VolumeX,
   Cpu,
   Languages,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { signOutEverywhere } from "@/lib/auth-signout";
@@ -865,6 +866,10 @@ function ChatPanel({
   }, [status]);
 
   const [input, setInput] = useState("");
+  // Attachments: images, videos, documents selected via the "+" button.
+  // Stored as File objects; the AI SDK transport converts them to data URLs.
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -1501,15 +1506,41 @@ function ChatPanel({
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     const trimmed = input.trim();
-    if (!trimmed || isBusy) return;
+    if ((!trimmed && attachments.length === 0) || isBusy) return;
     setInput("");
+    const filesToSend = attachments;
+    setAttachments([]);
     lastUserSendRef.current = Date.now();
     if (imageMode) {
       await generateImage(trimmed);
       requestAnimationFrame(() => bottomRef.current?.scrollIntoView({ block: "end" }));
       return;
     }
-    await sendMessage({ text: trimmed });
+    // AI SDK v6: convert Files to FileUIParts with data URLs.
+    if (filesToSend.length > 0) {
+      const fileParts = await Promise.all(
+        filesToSend.map(
+          (file) =>
+            new Promise<{ type: "file"; url: string; mediaType: string; filename: string }>(
+              (resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () =>
+                  resolve({
+                    type: "file",
+                    url: reader.result as string,
+                    mediaType: file.type,
+                    filename: file.name,
+                  });
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              }
+            )
+        )
+      );
+      await sendMessage({ text: trimmed || " ", files: fileParts });
+    } else {
+      await sendMessage({ text: trimmed });
+    }
     void queryClient.invalidateQueries({ queryKey: ["manovik-dashboard"] });
     // Belt-and-braces: force scroll-into-view for mobile keyboards.
     requestAnimationFrame(() => {
@@ -1520,6 +1551,27 @@ function ChatPanel({
   handleSubmitRef.current = () => {
     void handleSubmit();
   };
+
+  // Attachment handlers for the "+" button.
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+    // 10MB per file cap to keep requests manageable.
+    const MAX_FILE_BYTES = 10 * 1024 * 1024;
+    const valid = files.filter((f) => {
+      if (f.size > MAX_FILE_BYTES) {
+        toast.error(`"${f.name}" is too large (max 10MB)`);
+        return false;
+      }
+      return true;
+    });
+    setAttachments((prev) => [...prev, ...valid].slice(0, 5)); // max 5 files
+    e.target.value = ""; // allow re-selecting the same file
+  }, []);
+
+  const removeAttachment = useCallback((index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -1758,7 +1810,60 @@ function ChatPanel({
             </div>
           )}
         </div>
+        {/* Attachment previews */}
+        {attachments.length > 0 && (
+          <div className="mx-auto flex max-w-3xl flex-wrap gap-2 px-2 pb-1">
+            {attachments.map((file, i) => (
+              <div
+                key={`${file.name}-${i}`}
+                className="flex items-center gap-2 rounded-xl border bg-card/80 py-1.5 pl-2 pr-1.5 text-xs"
+              >
+                {file.type.startsWith("image/") ? (
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={file.name}
+                    className="h-10 w-10 rounded-lg object-cover"
+                  />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-[10px] font-bold text-primary">
+                    {file.name.split(".").pop()?.toUpperCase().slice(0, 4) ?? "FILE"}
+                  </div>
+                )}
+                <span className="max-w-[120px] truncate text-muted-foreground">{file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => removeAttachment(i)}
+                  aria-label={`Remove ${file.name}`}
+                  className="rounded-full p-1 text-muted-foreground hover:bg-destructive/15 hover:text-destructive"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="mano-input-float mx-auto flex max-w-3xl items-end gap-2 p-2">
+          {/* Hidden file input for the "+" attach button */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            multiple
+            accept="image/*,video/*,.pdf,.doc,.docx,.txt,.md,.csv,.json,.xml,.zip"
+            onChange={handleFileSelect}
+            aria-label="Attach files"
+          />
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Attach images, videos or documents"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isBusy}
+            className="h-11 w-11 shrink-0 rounded-full text-muted-foreground hover:text-primary"
+          >
+            <Plus className="h-5 w-5" />
+          </Button>
           <Textarea
             ref={textareaRef}
             value={input}
@@ -1778,7 +1883,7 @@ function ChatPanel({
             type="submit"
             size="icon"
             aria-label={imageMode ? "Generate image" : "Send message"}
-            disabled={isBusy || !input.trim()}
+            disabled={isBusy || (!input.trim() && attachments.length === 0)}
             className="premium-send h-11 w-11 shrink-0 bg-aurora text-primary-foreground glow hover:opacity-90"
           >
             {isBusy ? (
@@ -1803,12 +1908,56 @@ function MessageBubble({ message }: { message: UIMessage }) {
   const text = message.parts
     .map((p) => (p.type === "text" ? (p as { text: string }).text : ""))
     .join("");
+  // File attachments (images, videos, documents) sent with the message.
+  const files = message.parts.filter((p) => p.type === "file") as Array<{
+    type: "file";
+    url: string;
+    mediaType: string;
+    filename?: string;
+  }>;
+
+  const fileAttachments = files.length > 0 && (
+    <div className="mb-2 flex flex-wrap gap-2">
+      {files.map((f, i) => {
+        const mediaType = f.mediaType ?? "";
+        const name = f.filename ?? `Attachment ${i + 1}`;
+        if (mediaType.startsWith("image/")) {
+          return (
+            <img
+              key={i}
+              src={f.url}
+              alt={name}
+              className="max-h-48 max-w-full rounded-xl border object-contain"
+              loading="lazy"
+            />
+          );
+        }
+        if (mediaType.startsWith("video/")) {
+          return (
+            <video key={i} src={f.url} controls className="max-h-48 max-w-full rounded-xl border" />
+          );
+        }
+        return (
+          <a
+            key={i}
+            href={f.url}
+            download={name}
+            className="flex items-center gap-2 rounded-xl border bg-black/20 px-3 py-2 text-xs text-white/90 hover:bg-black/30"
+          >
+            <span className="font-bold">{name.split(".").pop()?.toUpperCase().slice(0, 4) ?? "FILE"}</span>
+            <span className="max-w-[140px] truncate">{name}</span>
+          </a>
+        );
+      })}
+    </div>
+  );
 
   if (message.role === "user") {
     return (
       <div className="flex justify-end mano-message-enter">
         <div className="mano-message-user max-w-[90%] rounded-2xl rounded-tr-sm px-4 py-2.5 text-white shadow-lg sm:max-w-[80%]">
-          <div className="whitespace-pre-wrap text-sm leading-relaxed">{text}</div>
+          {fileAttachments}
+          {text && <div className="whitespace-pre-wrap text-sm leading-relaxed">{text}</div>}
         </div>
       </div>
     );
