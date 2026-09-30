@@ -64,6 +64,7 @@ import {
   pickVoice,
   voiceLangLabel,
 } from "@/lib/voice-langs";
+import { isEchoOfSpeech, isInterruptCommand } from "@/lib/voice-utils";
 
 import {
   listThreads,
@@ -1027,6 +1028,10 @@ function ChatPanel({
     },
     [stopMic],
   );
+  // Ref to the latest mic-command handler, so the mic's onresult can process
+  // "stop listening"/"mic off" first — even while MANO is speaking.
+  const handleMicVoiceCommandRef = useRef(handleMicVoiceCommand);
+  handleMicVoiceCommandRef.current = handleMicVoiceCommand;
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const spokenRef = useRef<string | null>(null);
   // Tracks how many recognition results have been consumed. In continuous
@@ -1034,13 +1039,24 @@ function ChatPanel({
   // final transcript would include all previous utterances ("are you
   // listening" + "Captain America" instead of just "Captain America").
   const processedResultCountRef = useRef<number>(0);
-  // Timestamp (ms) when MANO last stopped speaking. Used to ignore mic
-  // input for a short buffer after speech ends (catches echo/tail audio).
-  // While MANO is speaking, only explicit stop commands ("shut up", "stop",
-  // "quiet", "mute") are processed — all other speech is ignored to prevent
-  // MANO's own voice from being transcribed into the chat.
+  // Timestamp (ms) when MANO started speaking. Transcripts in the first
+  // moments of speech are ignored — the speaker is ramping up and any
+  // recognition result this early is MANO's own voice, not the user.
+  const speakStartTimeRef = useRef<number>(0);
+  // Timestamp (ms) when MANO last stopped speaking. Used to ignore echo for
+  // a short buffer after speech ends (catches speaker tail audio).
+  // While MANO is speaking, transcripts are compared against the spoken
+  // text: echo (MANO's own voice) is ignored, real user speech barges in —
+  // MANO stops talking and the transcript is handled as user input.
+  // Interrupt commands ("stop", "shut up", "quiet") always cut the current
+  // utterance without disabling the speaker.
   const speakEndTimeRef = useRef<number>(0);
   const speakingRef = useRef(false);
+  // The exact text MANO is currently speaking (or just finished). The echo
+  // matcher compares mic transcripts against this to tell MANO's voice
+  // apart from the user's. Kept through the post-speech tail buffer so
+  // lingering speaker audio is still recognized as echo.
+  const spokenTextRef = useRef<string>("");
   const autoSendTimerRef = useRef<number | null>(null);
   const companionRef = useRef(false);
   companionRef.current = companionMode;
@@ -1145,6 +1161,19 @@ function ChatPanel({
 
   const handleSubmitRef = useRef<() => void>(() => {});
 
+  // Interrupt the current utterance: stop TTS now and clear the speaking
+  // flags, but leave the speaker ON. "stop"/"shut up"/"quiet" and barge-ins
+  // silence MANO for this reply only — they never disable future spoken
+  // replies. The interruption is recorded like a speech end so the tail
+  // buffer's echo matcher keeps working against spokenTextRef.
+  const interruptSpeech = useCallback(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    speakingRef.current = false;
+    speakEndTimeRef.current = Date.now();
+  }, []);
+
   const beginRecognition = useCallback(
     (
       continuous: boolean,
@@ -1197,23 +1226,46 @@ function ChatPanel({
         };
         const transcript = results.map(bestTranscript).join(" ");
         const isFinal = results.length > 0 && results[results.length - 1].isFinal;
-        // Speaker-stop commands ("shut up", "quiet", "stop", "mute") must
-        // work even while MANO is speaking — otherwise the user has no
-        // voice way to interrupt it. Check before the speaking guard below.
-        if (
-          isFinal &&
-          transcript.trim() &&
-          handleSpeakerVoiceCommandRef.current(transcript)
-        ) {
-          return;
+        // Voice commands always win — even mid-speech. Mic commands first
+        // ("stop listening", "mic off"), so "stop listening" never kills
+        // the speaker by accident.
+        if (isFinal && transcript.trim()) {
+          if (handleMicVoiceCommandRef.current(transcript)) {
+            processedResultCountRef.current = e.results.length;
+            return;
+          }
+          // Interrupt commands ("stop", "shut up", "quiet") cut the current
+          // utterance only — the speaker stays on for future replies.
+          if (speakingRef.current && isInterruptCommand(transcript)) {
+            interruptSpeech();
+            toast.success("Interrupted");
+            processedResultCountRef.current = e.results.length;
+            return;
+          }
+          if (handleSpeakerVoiceCommandRef.current(transcript)) {
+            processedResultCountRef.current = e.results.length;
+            return;
+          }
         }
-        // While MANO is speaking, ignore all other speech — it's MANO's own
-        // voice coming through the mic, not the user. (Content-based matching
-        // was unreliable: recognition of speaker audio is too inaccurate.)
-        // For 2s after speech ends, also ignore (catches echo/tail audio).
-        // The user interrupts via stop commands above, then speaks normally.
-        if (speakingRef.current) return;
-        if (Date.now() - speakEndTimeRef.current < 2000) return;
+        // While MANO is speaking: interim results are ignored (they resolve
+        // into finals), the first moments are ignored (speaker ramp-up —
+        // anything this early is MANO's own voice), and finals are checked
+        // against the spoken text. Echo is ignored; real user speech barges
+        // in — MANO stops talking and the transcript is handled as user
+        // input below.
+        if (speakingRef.current) {
+          if (!isFinal) return;
+          if (Date.now() - speakStartTimeRef.current < 700) return;
+          const trimmed = transcript.trim();
+          if (!trimmed || isEchoOfSpeech(trimmed, spokenTextRef.current)) return;
+          interruptSpeech();
+          // Fall through: the barge-in transcript is processed as the user.
+        } else if (Date.now() - speakEndTimeRef.current < 2000) {
+          // Post-speech tail: ignore MANO's lingering speaker audio, but let
+          // the user jump in immediately with anything that isn't echo.
+          const trimmed = transcript.trim();
+          if (isFinal && trimmed && isEchoOfSpeech(trimmed, spokenTextRef.current)) return;
+        }
         // Auto-detect mode: learn the user's spoken language from each final
         // transcript and switch recognition to match it. The switch applies
         // immediately (the recognizer restarts on end with the new language).
@@ -1293,7 +1345,7 @@ function ChatPanel({
       setListening(true);
       return true;
     },
-    [resolveRecognitionLang],
+    [resolveRecognitionLang, interruptSpeech],
   );
 
   const startRecognition = useCallback(
@@ -1395,9 +1447,10 @@ function ChatPanel({
   ]);
 
   // Speak the latest completed assistant reply when MANO voice output is on.
-  // The mic stays open while MANO talks; transcription results during speech
-  // are ignored via speakingRef (see onresult). This avoids a dead-mic state
-  // if speech synthesis events misfire.
+  // The mic stays open while MANO talks: transcripts are echo-checked
+  // against the spoken text (see onresult) — MANO's own voice is ignored,
+  // real user speech barges in and becomes the next input. This avoids a
+  // dead-mic state if speech synthesis events misfire.
   useEffect(() => {
     if (!speakOn || status === "streaming" || status === "submitted") return;
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -1411,6 +1464,12 @@ function ChatPanel({
     if (!text || spokenRef.current === last.id) return;
     spokenRef.current = last.id;
     speakingRef.current = true;
+    speakStartTimeRef.current = Date.now();
+    // The exact text being spoken — the mic's echo matcher compares
+    // transcripts against this to tell MANO's voice apart from the user.
+    // Kept through the post-speech tail so lingering speaker audio is
+    // still recognized as echo.
+    spokenTextRef.current = text;
     // Speak in the reply's language: detect the script of MANO's reply and
     // pick the best installed voice for it. Falls back to the user's
     // voice-language setting, then the browser locale. utter.lang is always
