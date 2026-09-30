@@ -548,7 +548,7 @@ sandbox.register({
 // Commands are queued in manovik_device_commands; the device agent (Python script
 // or web agent at /device-agent) polls and executes them.
 
-const DEVICE_COMMAND_KINDS = ["shell", "open", "notify", "say", "script"] as const;
+const DEVICE_COMMAND_KINDS = ["shell", "open", "notify", "say", "script", "vibrate"] as const;
 
 async function getPairedDevices(userId: string) {
   const { data, error } = await supabaseAdmin
@@ -610,7 +610,7 @@ sandbox.register({
 sandbox.register({
   name: "device.command",
   description:
-    "Send a command to one of the user's paired devices. Use device.list first to get the device id. Kinds: 'open' (open a URL or app, e.g. a YouTube search URL), 'say' (speak text aloud on the device), 'notify' (show a notification), 'shell' (run a shell command on PC agents), 'script' (run a script). The device agent picks the command up within seconds.",
+    "Send a command to one of the user's paired devices. Use device.list first to get the device id. Kinds: 'open' (open a URL or app, e.g. a YouTube search URL), 'say' (speak text aloud on the device), 'notify' (show a notification), 'vibrate' (buzz the phone, payload like '200' or '200,100,200' ms), 'shell' (run a shell command on PC agents), 'script' (run a script). The device agent picks the command up within seconds.",
   schema: z.object({
     deviceId: z.string().uuid().describe("The device id from device.list"),
     kind: z.enum(DEVICE_COMMAND_KINDS).describe("Command kind"),
@@ -640,7 +640,7 @@ sandbox.register({
 sandbox.register({
   name: "device.broadcast",
   description:
-    "Send the same command to ALL of the user's paired devices at once — like the Ultron demo where every phone searches YouTube simultaneously. Use this when the user says 'on all my devices', 'on every device', or names no specific device. Kinds: 'open' (open a URL, e.g. a YouTube search URL), 'say', 'notify', 'shell', 'script'.",
+    "Send the same command to ALL of the user's paired devices at once — like the Ultron demo where every phone searches YouTube simultaneously. Use this when the user says 'on all my devices', 'on every device', or names no specific device. Kinds: 'open' (open a URL, e.g. a YouTube search URL), 'say', 'notify', 'vibrate', 'shell', 'script'.",
   schema: z.object({
     kind: z.enum(DEVICE_COMMAND_KINDS).describe("Command kind"),
     command: z

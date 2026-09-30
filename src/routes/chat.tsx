@@ -33,11 +33,20 @@ import {
   Cpu,
   Languages,
   X,
+  Camera,
+  MonitorUp,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { signOutEverywhere } from "@/lib/auth-signout";
 import { bootDisplayName } from "@/lib/boot-greeting";
 import { WakeScreen } from "@/components/mano/WakeScreen";
+import {
+  blobToFile,
+  canShareScreen,
+  canUseCamera,
+  captureVideoFrame,
+  stopStream,
+} from "@/lib/capture";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -1573,6 +1582,89 @@ function ChatPanel({
     setAttachments((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
+  // MANO's eyes: camera photos and screen captures attached as images so the
+  // vision model can see what the user sees.
+  type CaptureMode = "camera" | "screen";
+  const [capture, setCapture] = useState<{ mode: CaptureMode; stream: MediaStream } | null>(null);
+  const [capturing, setCapturing] = useState(false);
+  const previewVideoRef = useRef<HTMLVideoElement>(null);
+
+  const closeCapture = useCallback(() => {
+    setCapture((prev) => {
+      stopStream(prev?.stream);
+      return null;
+    });
+    setCapturing(false);
+  }, []);
+
+  const openCapture = useCallback(
+    async (mode: CaptureMode) => {
+      if (attachments.length >= 5) {
+        toast.error("Attachment limit reached (5). Remove one first.");
+        return;
+      }
+      try {
+        const stream =
+          mode === "camera"
+            ? await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+            : await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+        // If the user stops sharing from the browser chrome, close the modal.
+        const [track] = stream.getVideoTracks();
+        track?.addEventListener("ended", () => closeCapture());
+        setCapture({ mode, stream });
+      } catch (e) {
+        const name = e instanceof DOMException ? e.name : "";
+        if (name === "NotAllowedError") {
+          toast.error(
+            mode === "camera"
+              ? "Camera permission denied — allow it to let MANO see."
+              : "Screen share was cancelled.",
+          );
+        } else if (name !== "AbortError") {
+          toast.error(e instanceof Error ? e.message : "Could not start capture.");
+        }
+      }
+    },
+    [attachments.length, closeCapture],
+  );
+
+  const doCaptureFrame = useCallback(async () => {
+    const video = previewVideoRef.current;
+    if (!video || !capture || capturing) return;
+    setCapturing(true);
+    try {
+      const blob = await captureVideoFrame(video);
+      const file = blobToFile(
+        blob,
+        capture.mode === "camera" ? "manovik-camera" : "manovik-screen",
+      );
+      setAttachments((prev) => [...prev, file].slice(0, 5));
+      toast.success(
+        capture.mode === "camera" ? "Photo captured — MANO can see it." : "Screen captured.",
+      );
+      closeCapture();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Capture failed.");
+      setCapturing(false);
+    }
+  }, [capture, capturing, closeCapture]);
+
+  // Attach the live stream to the preview video when the modal opens.
+  useEffect(() => {
+    const video = previewVideoRef.current;
+    if (video && capture) {
+      video.srcObject = capture.stream;
+      void video.play().catch(() => {});
+    }
+  }, [capture]);
+
+  // Never leak camera/screen tracks when leaving the page mid-capture.
+  const captureRef = useRef(capture);
+  captureRef.current = capture;
+  useEffect(() => {
+    return () => stopStream(captureRef.current?.stream);
+  }, []);
+
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -1864,6 +1956,34 @@ function ChatPanel({
           >
             <Plus className="h-5 w-5" />
           </Button>
+          {canUseCamera() && (
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              aria-label="Take a photo so MANO can see"
+              title="Camera — let MANO see"
+              onClick={() => void openCapture("camera")}
+              disabled={isBusy || !!capture}
+              className="h-11 w-11 shrink-0 rounded-full text-muted-foreground hover:text-primary"
+            >
+              <Camera className="h-5 w-5" />
+            </Button>
+          )}
+          {canShareScreen() && (
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              aria-label="Share your screen with MANO"
+              title="Screen share — show MANO your screen"
+              onClick={() => void openCapture("screen")}
+              disabled={isBusy || !!capture}
+              className="h-11 w-11 shrink-0 rounded-full text-muted-foreground hover:text-primary"
+            >
+              <MonitorUp className="h-5 w-5" />
+            </Button>
+          )}
           <Textarea
             ref={textareaRef}
             value={input}
@@ -1900,6 +2020,75 @@ function ChatPanel({
           MANOVIK AI may make mistakes. Verify important information.
         </p>
       </form>
+      {/* MANO's eyes: live camera / screen preview with frame capture */}
+      {capture && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={capture.mode === "camera" ? "Camera preview" : "Screen share preview"}
+          onClick={closeCapture}
+        >
+          <div
+            className="w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3">
+              <p className="text-sm font-medium">
+                {capture.mode === "camera" ? (
+                  <>
+                    <Camera className="mr-2 inline h-4 w-4" />
+                    Let MANO see — position and capture
+                  </>
+                ) : (
+                  <>
+                    <MonitorUp className="mr-2 inline h-4 w-4" />
+                    Show MANO your screen — capture a frame
+                  </>
+                )}
+              </p>
+              <button
+                type="button"
+                onClick={closeCapture}
+                aria-label="Close capture"
+                className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <video
+              ref={previewVideoRef}
+              autoPlay
+              playsInline
+              muted
+              className="max-h-[60vh] w-full bg-black object-contain"
+            />
+            <div className="flex items-center justify-between gap-2 px-4 py-3">
+              <p className="text-xs text-muted-foreground">
+                The frame is attached to your next message — nothing is sent until you send it.
+              </p>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={closeCapture}>
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => void doCaptureFrame()}
+                  disabled={capturing}
+                  className="bg-aurora text-primary-foreground"
+                >
+                  {capturing ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="mr-2 h-4 w-4" />
+                  )}
+                  Capture
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

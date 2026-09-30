@@ -71,6 +71,19 @@ function DeviceAgentPage() {
         } else {
           result = "speech synthesis not supported";
         }
+      } else if (cmd.kind === "vibrate") {
+        if ("vibrate" in navigator) {
+          const pattern = cmd.command
+            .split(",")
+            .map((s) => parseInt(s.trim(), 10))
+            .filter((n) => Number.isFinite(n) && n > 0)
+            .slice(0, 10);
+          result = navigator.vibrate(pattern.length > 0 ? pattern : 200)
+            ? `vibrated (${(pattern.length > 0 ? pattern : [200]).join(",")}ms)`
+            : "vibration not supported on this device";
+        } else {
+          result = "vibration not supported on this device";
+        }
       } else if (cmd.kind === "notify") {
         if ("Notification" in window) {
           if (Notification.permission === "granted") {
