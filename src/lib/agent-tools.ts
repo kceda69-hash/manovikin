@@ -3,6 +3,14 @@
 import { z } from "zod";
 import { Sandbox } from "./sandbox";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import {
+  isLinked as isSmartHomeLinked,
+  listDevices as listSmartHomeDevices,
+  sendCommand as sendSmartHomeCommand,
+  NOT_LINKED_MESSAGE,
+} from "./smarthome/tuya.server";
+import { missionTool } from "./mission-tool";
+import { dossierTool } from "./dossier-tool";
 
 export const sandbox = new Sandbox();
 
@@ -812,3 +820,69 @@ sandbox.register({
     return { ok: true, note: "Routine deleted." };
   },
 });
+
+// ---- Smart home (Tuya / Smart Life) ----
+// MANO can list the user's linked smart-home devices and control them from
+// chat ("turn off the bedroom lights"). Credentials live in
+// manovik_user_integrations and are never exposed through these tools.
+
+sandbox.register({
+  name: "home.list_devices",
+  description:
+    "List the user's linked smart-home devices (Tuya/Smart Life lights, plugs, etc.). Returns id, name, category, online state and current status per device. If the smart home is not linked, tell the user to link it at /home.",
+  schema: z.object({}),
+  timeoutMs: 15000,
+  maxOutputBytes: 6000,
+  rateLimitPerMin: 20,
+  execute: async (_input, ctx) => {
+    if (!(await isSmartHomeLinked(ctx.userId))) {
+      return { linked: false, devices: [], message: NOT_LINKED_MESSAGE };
+    }
+    const devices = await listSmartHomeDevices(ctx.userId);
+    return { linked: true, count: devices.length, devices };
+  },
+});
+
+sandbox.register({
+  name: "home.command",
+  description:
+    "Send a command to a linked smart-home device. Use home.list_devices first to get the device id and match it by name (e.g. 'bedroom lights'). Actions: 'on', 'off', 'toggle', 'brightness' (needs value 10-1000), 'color_temp' (needs value 0-1000).",
+  schema: z.object({
+    deviceId: z.string().min(1).describe("The device id from home.list_devices"),
+    action: z
+      .enum(["on", "off", "toggle", "brightness", "color_temp"])
+      .describe("The action to perform"),
+    value: z
+      .number()
+      .int()
+      .min(0)
+      .max(1000)
+      .optional()
+      .describe("Required for brightness (10-1000) and color_temp (0-1000)"),
+  }),
+  timeoutMs: 15000,
+  maxOutputBytes: 2000,
+  rateLimitPerMin: 30,
+  execute: async (input, ctx) => {
+    if (!(await isSmartHomeLinked(ctx.userId))) {
+      return { linked: false, message: NOT_LINKED_MESSAGE };
+    }
+    const result = await sendSmartHomeCommand(
+      ctx.userId,
+      input.deviceId,
+      input.action,
+      input.value,
+    );
+    return { linked: true, ...result };
+  },
+});
+
+// ---- Autonomous missions (Track D) ----
+// mission.start runs the AGI goal loop server-side (research, device actions,
+// memory). Registered here by the coordinator; defined in ./mission-tool.
+sandbox.register(missionTool);
+
+// ---- Public dossier brief (Track G) ----
+// person.brief compiles a person's PUBLIC professional footprint only.
+// Private-data requests are refused with a one-line refusal + public-brief offer.
+sandbox.register(dossierTool);

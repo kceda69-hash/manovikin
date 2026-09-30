@@ -1922,6 +1922,9 @@ function ChatPanel({
           <Link to="/devices" className="mano-tool-orb" aria-label="Devices" title="Devices">
             <Cpu className="h-5 w-5 text-foreground" />
           </Link>
+          <Link to="/holo" className="mano-tool-orb" aria-label="Holo Deck" title="Holo Deck">
+            <Sparkles className="h-5 w-5 text-foreground" />
+          </Link>
           <label
             className="mano-glass flex cursor-pointer items-center gap-1.5 rounded-full py-2 pl-3 pr-2 text-sm transition hover:scale-105"
             title={

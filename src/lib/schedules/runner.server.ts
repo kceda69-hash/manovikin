@@ -3,6 +3,7 @@
 
 import { runForce } from "@/lib/force/engine.server";
 import type { ForceMode } from "@/lib/force/types";
+import { isMorningBriefingObjective, isSentinelObjective } from "./morning-briefing.server";
 
 const CADENCE_MS: Record<string, number> = {
   hourly: 60 * 60 * 1000,
@@ -36,6 +37,57 @@ export async function executeSchedule(row: ScheduleRow) {
     .single();
 
   try {
+    // Kind dispatch: special objectives bypass the FORCE swarm engine.
+    // Plain objectives still fall through to runForce below.
+    if (isMorningBriefingObjective(row.objective)) {
+      const { runMorningBriefing } = await import("./morning-briefing.server");
+      const briefing = await runMorningBriefing(row.user_id, row);
+      await supabaseAdmin
+        .from("manovik_schedule_runs")
+        .update({
+          status: "success",
+          result: briefing.slice(0, 40_000),
+          duration_ms: Date.now() - started,
+        })
+        .eq("id", run?.id ?? "");
+      const { deliverScheduleBriefing } = await import("./briefing.server");
+      await deliverScheduleBriefing(row.user_id, {
+        name: row.name,
+        objective: row.objective,
+        status: "success",
+        answer: briefing,
+        actions: [],
+        durationMs: Date.now() - started,
+      });
+      return { ok: true as const };
+    }
+    if (isSentinelObjective(row.objective)) {
+      const { runSentinelCheck } = await import("@/lib/sentinel/check.server");
+      const { alert } = await runSentinelCheck(row.user_id);
+      const note = alert ?? "Sentinel: all quiet";
+      await supabaseAdmin
+        .from("manovik_schedule_runs")
+        .update({
+          status: "success",
+          result: note.slice(0, 40_000),
+          duration_ms: Date.now() - started,
+        })
+        .eq("id", run?.id ?? "");
+      // Only deliver a briefing when there is something to report.
+      if (alert !== null) {
+        const { deliverScheduleBriefing } = await import("./briefing.server");
+        await deliverScheduleBriefing(row.user_id, {
+          name: row.name,
+          objective: row.objective,
+          status: "success",
+          answer: alert,
+          actions: [],
+          durationMs: Date.now() - started,
+        });
+      }
+      return { ok: true as const };
+    }
+
     const mode = (
       ["build", "research", "operate", "clone"].includes(row.mode) ? row.mode : "research"
     ) as ForceMode;

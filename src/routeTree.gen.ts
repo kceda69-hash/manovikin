@@ -35,6 +35,8 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KeysRouteImport } from './routes/keys'
 import { Route as HowToMakeAWebsiteWithAiRouteImport } from './routes/how-to-make-a-website-with-ai'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as HoloRouteImport } from './routes/holo'
 import { Route as ForceRouteImport } from './routes/force'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as DeviceAgentRouteImport } from './routes/device-agent'
@@ -68,6 +70,7 @@ import { Route as BlogBestAiCodingAgentsRouteImport } from './routes/blog.best-a
 import { Route as BlogAiPricingComparisonRouteImport } from './routes/blog.ai-pricing-comparison'
 import { Route as BlogAiCodingAgentBenchmarkRouteImport } from './routes/blog.ai-coding-agent-benchmark'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
+import { Route as ApiHomeRouteImport } from './routes/api/home'
 import { Route as ApiGenerateImageRouteImport } from './routes/api/generate-image'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -92,6 +95,7 @@ import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/pub
 import { Route as ApiPublicHooksRunSchedulesRouteImport } from './routes/api/public/hooks/run-schedules'
 import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
 import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
+import { Route as ApiPublicDeviceAmbientFrameRouteImport } from './routes/api/public/device/ambient-frame'
 import { Route as ApiPublicDeviceActionRouteImport } from './routes/api/public/device/$action'
 
 const VsWindsurfRoute = VsWindsurfRouteImport.update({
@@ -222,6 +226,16 @@ const KeysRoute = KeysRouteImport.update({
 const HowToMakeAWebsiteWithAiRoute = HowToMakeAWebsiteWithAiRouteImport.update({
   id: '/how-to-make-a-website-with-ai',
   path: '/how-to-make-a-website-with-ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HoloRoute = HoloRouteImport.update({
+  id: '/holo',
+  path: '/holo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForceRoute = ForceRouteImport.update({
@@ -393,6 +407,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHomeRoute = ApiHomeRouteImport.update({
+  id: '/api/home',
+  path: '/api/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGenerateImageRoute = ApiGenerateImageRouteImport.update({
   id: '/api/generate-image',
   path: '/api/generate-image',
@@ -525,6 +544,12 @@ const ApiPublicHooksManovikSelfUpdateRoute =
     path: '/api/public/hooks/manovik-self-update',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDeviceAmbientFrameRoute =
+  ApiPublicDeviceAmbientFrameRouteImport.update({
+    id: '/api/public/device/ambient-frame',
+    path: '/api/public/device/ambient-frame',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicDeviceActionRoute = ApiPublicDeviceActionRouteImport.update({
   id: '/api/public/device/$action',
   path: '/api/public/device/$action',
@@ -553,6 +578,8 @@ export interface FileRoutesByFullPath {
   '/device-agent': typeof DeviceAgentRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/holo': typeof HoloRoute
+  '/home': typeof HomeRoute
   '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
   '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
@@ -583,6 +610,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
+  '/api/home': typeof ApiHomeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
@@ -604,6 +632,7 @@ export interface FileRoutesByFullPath {
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
+  '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
@@ -639,6 +668,8 @@ export interface FileRoutesByTo {
   '/device-agent': typeof DeviceAgentRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/holo': typeof HoloRoute
+  '/home': typeof HomeRoute
   '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
   '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
@@ -669,6 +700,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
+  '/api/home': typeof ApiHomeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
@@ -690,6 +722,7 @@ export interface FileRoutesByTo {
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
+  '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
@@ -726,6 +759,8 @@ export interface FileRoutesById {
   '/device-agent': typeof DeviceAgentRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/holo': typeof HoloRoute
+  '/home': typeof HomeRoute
   '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
   '/keys': typeof KeysRoute
   '/login': typeof LoginRoute
@@ -756,6 +791,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/chat': typeof ApiChatRoute
   '/api/generate-image': typeof ApiGenerateImageRoute
+  '/api/home': typeof ApiHomeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/blog/ai-coding-agent-benchmark': typeof BlogAiCodingAgentBenchmarkRoute
   '/blog/ai-pricing-comparison': typeof BlogAiPricingComparisonRoute
@@ -777,6 +813,7 @@ export interface FileRoutesById {
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
+  '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
@@ -814,6 +851,8 @@ export interface FileRouteTypes {
     | '/device-agent'
     | '/devices'
     | '/force'
+    | '/holo'
+    | '/home'
     | '/how-to-make-a-website-with-ai'
     | '/keys'
     | '/login'
@@ -844,6 +883,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
     | '/api/generate-image'
+    | '/api/home'
     | '/auth/callback'
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
@@ -865,6 +905,7 @@ export interface FileRouteTypes {
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
     | '/api/public/device/$action'
+    | '/api/public/device/ambient-frame'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/run-schedules'
@@ -900,6 +941,8 @@ export interface FileRouteTypes {
     | '/device-agent'
     | '/devices'
     | '/force'
+    | '/holo'
+    | '/home'
     | '/how-to-make-a-website-with-ai'
     | '/keys'
     | '/login'
@@ -930,6 +973,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
     | '/api/generate-image'
+    | '/api/home'
     | '/auth/callback'
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
@@ -951,6 +995,7 @@ export interface FileRouteTypes {
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
     | '/api/public/device/$action'
+    | '/api/public/device/ambient-frame'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/run-schedules'
@@ -986,6 +1031,8 @@ export interface FileRouteTypes {
     | '/device-agent'
     | '/devices'
     | '/force'
+    | '/holo'
+    | '/home'
     | '/how-to-make-a-website-with-ai'
     | '/keys'
     | '/login'
@@ -1016,6 +1063,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/api/chat'
     | '/api/generate-image'
+    | '/api/home'
     | '/auth/callback'
     | '/blog/ai-coding-agent-benchmark'
     | '/blog/ai-pricing-comparison'
@@ -1037,6 +1085,7 @@ export interface FileRouteTypes {
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
     | '/api/public/device/$action'
+    | '/api/public/device/ambient-frame'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/run-schedules'
@@ -1073,6 +1122,8 @@ export interface RootRouteChildren {
   DeviceAgentRoute: typeof DeviceAgentRoute
   DevicesRoute: typeof DevicesRoute
   ForceRoute: typeof ForceRoute
+  HoloRoute: typeof HoloRoute
+  HomeRoute: typeof HomeRoute
   HowToMakeAWebsiteWithAiRoute: typeof HowToMakeAWebsiteWithAiRoute
   KeysRoute: typeof KeysRoute
   LoginRoute: typeof LoginRoute
@@ -1103,6 +1154,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiGenerateImageRoute: typeof ApiGenerateImageRoute
+  ApiHomeRoute: typeof ApiHomeRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
   BlogAiCodingAgentBenchmarkRoute: typeof BlogAiCodingAgentBenchmarkRoute
   BlogAiPricingComparisonRoute: typeof BlogAiPricingComparisonRoute
@@ -1124,6 +1176,7 @@ export interface RootRouteChildren {
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicDeviceActionRoute: typeof ApiPublicDeviceActionRoute
+  ApiPublicDeviceAmbientFrameRoute: typeof ApiPublicDeviceAmbientFrameRoute
   ApiPublicHooksManovikSelfUpdateRoute: typeof ApiPublicHooksManovikSelfUpdateRoute
   ApiPublicHooksResubmitSitemapRoute: typeof ApiPublicHooksResubmitSitemapRoute
   ApiPublicHooksRunSchedulesRoute: typeof ApiPublicHooksRunSchedulesRoute
@@ -1320,6 +1373,20 @@ declare module '@tanstack/react-router' {
       path: '/how-to-make-a-website-with-ai'
       fullPath: '/how-to-make-a-website-with-ai'
       preLoaderRoute: typeof HowToMakeAWebsiteWithAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/holo': {
+      id: '/holo'
+      path: '/holo'
+      fullPath: '/holo'
+      preLoaderRoute: typeof HoloRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/force': {
@@ -1553,6 +1620,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/home': {
+      id: '/api/home'
+      path: '/api/home'
+      fullPath: '/api/home'
+      preLoaderRoute: typeof ApiHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/generate-image': {
       id: '/api/generate-image'
       path: '/api/generate-image'
@@ -1721,6 +1795,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksManovikSelfUpdateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/device/ambient-frame': {
+      id: '/api/public/device/ambient-frame'
+      path: '/api/public/device/ambient-frame'
+      fullPath: '/api/public/device/ambient-frame'
+      preLoaderRoute: typeof ApiPublicDeviceAmbientFrameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/device/$action': {
       id: '/api/public/device/$action'
       path: '/api/public/device/$action'
@@ -1753,6 +1834,8 @@ const rootRouteChildren: RootRouteChildren = {
   DeviceAgentRoute: DeviceAgentRoute,
   DevicesRoute: DevicesRoute,
   ForceRoute: ForceRoute,
+  HoloRoute: HoloRoute,
+  HomeRoute: HomeRoute,
   HowToMakeAWebsiteWithAiRoute: HowToMakeAWebsiteWithAiRoute,
   KeysRoute: KeysRoute,
   LoginRoute: LoginRoute,
@@ -1784,6 +1867,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
   ApiGenerateImageRoute: ApiGenerateImageRoute,
+  ApiHomeRoute: ApiHomeRoute,
   AuthCallbackRoute: AuthCallbackRoute,
   BlogAiCodingAgentBenchmarkRoute: BlogAiCodingAgentBenchmarkRoute,
   BlogAiPricingComparisonRoute: BlogAiPricingComparisonRoute,
@@ -1806,6 +1890,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicDeviceActionRoute: ApiPublicDeviceActionRoute,
+  ApiPublicDeviceAmbientFrameRoute: ApiPublicDeviceAmbientFrameRoute,
   ApiPublicHooksManovikSelfUpdateRoute: ApiPublicHooksManovikSelfUpdateRoute,
   ApiPublicHooksResubmitSitemapRoute: ApiPublicHooksResubmitSitemapRoute,
   ApiPublicHooksRunSchedulesRoute: ApiPublicHooksRunSchedulesRoute,
