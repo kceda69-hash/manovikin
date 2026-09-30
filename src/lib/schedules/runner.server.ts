@@ -13,6 +13,7 @@ const CADENCE_MS: Record<string, number> = {
 export type ScheduleRow = {
   id: string;
   user_id: string;
+  name: string;
   objective: string;
   mode: string;
   cadence: string;
@@ -47,6 +48,17 @@ export async function executeSchedule(row: ScheduleRow) {
         duration_ms: Date.now() - started,
       })
       .eq("id", run?.id ?? "");
+    // Proactive loop: deliver the outcome (and any proposed actions) to the
+    // user's briefing thread so the result is actually seen.
+    const { deliverScheduleBriefing } = await import("./briefing.server");
+    await deliverScheduleBriefing(row.user_id, {
+      name: row.name,
+      objective: row.objective,
+      status: "success",
+      answer: outcome.answer,
+      actions: outcome.actions ?? [],
+      durationMs: Date.now() - started,
+    });
     return { ok: true as const };
   } catch (err) {
     await supabaseAdmin
@@ -57,6 +69,16 @@ export async function executeSchedule(row: ScheduleRow) {
         duration_ms: Date.now() - started,
       })
       .eq("id", run?.id ?? "");
+    const { deliverScheduleBriefing } = await import("./briefing.server");
+    await deliverScheduleBriefing(row.user_id, {
+      name: row.name,
+      objective: row.objective,
+      status: "failed",
+      answer: "",
+      actions: [],
+      error: String((err as Error)?.message ?? err).slice(0, 800),
+      durationMs: Date.now() - started,
+    });
     return { ok: false as const, error: String((err as Error)?.message ?? err) };
   } finally {
     await supabaseAdmin
@@ -75,7 +97,7 @@ export async function runDueSchedules(limit = 5) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("manovik_schedules")
-    .select("id, user_id, objective, mode, cadence, run_count")
+    .select("id, user_id, name, objective, mode, cadence, run_count")
     .eq("enabled", true)
     .lte("next_run_at", new Date().toISOString())
     .order("next_run_at", { ascending: true })

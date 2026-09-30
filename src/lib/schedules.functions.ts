@@ -96,7 +96,7 @@ export const runScheduleNow = createServerFn({ method: "POST" })
     const { supabase, userId } = context as Ctx;
     const { data: row, error } = await supabase
       .from("manovik_schedules")
-      .select("id, user_id, objective, mode, cadence, run_count")
+      .select("id, user_id, name, objective, mode, cadence, run_count")
       .eq("id", data.id)
       .eq("user_id", userId)
       .maybeSingle();

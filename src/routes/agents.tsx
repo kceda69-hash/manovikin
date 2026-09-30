@@ -17,7 +17,7 @@ import {
 
 const TITLE = "MANOVIK Scheduled Agents";
 const DESC =
-  "Run MANOVIK missions on a schedule — hourly, daily or weekly swarm runs that work while you sleep.";
+  "Run MANOVIK missions on a schedule — hourly, daily or weekly swarm runs that work while you sleep. Every run reports back in your “⚡ MANO Briefings” chat thread.";
 
 export const Route = createFileRoute("/agents")({
   component: AgentsPage,

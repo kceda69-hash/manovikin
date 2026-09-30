@@ -674,3 +674,141 @@ sandbox.register({
     };
   },
 });
+
+// ---- Proactive routines (scheduled autonomous agents) ----
+// These let MANO set up work that happens BEFORE the user asks: the user says
+// "brief me every morning at 8" and MANO creates a routine. The hourly tick
+// runs due routines with the FORCE engine, and the outcome (plus any proposed
+// device actions) is delivered to the user's "MANO Briefings" chat thread.
+
+const ROUTINE_CADENCES = ["hourly", "daily", "weekly"] as const;
+const ROUTINE_MODES = ["research", "build", "operate", "clone"] as const;
+
+async function getRoutine(userId: string, routineId: string) {
+  const { data, error } = await supabaseAdmin
+    .from("manovik_schedules")
+    .select("id,name,objective,mode,cadence,enabled,next_run_at,run_count")
+    .eq("id", routineId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Routine not found");
+  return data;
+}
+
+sandbox.register({
+  name: "routine.create",
+  description:
+    "Create a proactive routine: an autonomous agent task that runs on its own (hourly, daily or weekly) WITHOUT the user asking, and reports back in their 'MANO Briefings' chat thread. Use this when the user says things like 'brief me every morning', 'check X daily', 'remind me to ... every week'. Modes: 'research' (investigate and summarize), 'operate' (do the task), 'build' (write code), 'clone' (replicate something). A new routine runs on the next hourly tick.",
+  schema: z.object({
+    name: z.string().trim().min(1).max(120).describe("Short name, e.g. 'Morning briefing'"),
+    objective: z
+      .string()
+      .trim()
+      .min(5)
+      .max(8000)
+      .describe("What the routine should do each run, in plain language"),
+    cadence: z.enum(ROUTINE_CADENCES).default("daily").describe("How often it runs"),
+    mode: z.enum(ROUTINE_MODES).default("research").describe("Agent mode for each run"),
+  }),
+  timeoutMs: 10000,
+  maxOutputBytes: 2000,
+  rateLimitPerMin: 10,
+  execute: async (input, ctx) => {
+    const { count } = await supabaseAdmin
+      .from("manovik_schedules")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", ctx.userId);
+    if ((count ?? 0) >= 25) throw new Error("Routine limit reached (25). Cancel one first.");
+    const { data, error } = await supabaseAdmin
+      .from("manovik_schedules")
+      .insert({ ...input, user_id: ctx.userId })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      ok: true,
+      routineId: data.id,
+      note: "Routine created. It runs on the next hourly tick and reports back in the 'MANO Briefings' thread.",
+    };
+  },
+});
+
+sandbox.register({
+  name: "routine.list",
+  description:
+    "List the user's proactive routines with their cadence, mode, enabled state, next run time and run count.",
+  schema: z.object({}),
+  timeoutMs: 8000,
+  maxOutputBytes: 6000,
+  rateLimitPerMin: 20,
+  execute: async (_input, ctx) => {
+    const { data, error } = await supabaseAdmin
+      .from("manovik_schedules")
+      .select("id,name,objective,mode,cadence,enabled,next_run_at,run_count")
+      .eq("user_id", ctx.userId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return { count: data?.length ?? 0, routines: data ?? [] };
+  },
+});
+
+sandbox.register({
+  name: "routine.pause",
+  description: "Pause a proactive routine by id (use routine.list to find ids). It stops running until resumed.",
+  schema: z.object({
+    routineId: z.string().uuid().describe("The routine id from routine.list"),
+  }),
+  timeoutMs: 8000,
+  maxOutputBytes: 1000,
+  rateLimitPerMin: 20,
+  execute: async (input, ctx) => {
+    await getRoutine(ctx.userId, input.routineId);
+    const { error } = await supabaseAdmin
+      .from("manovik_schedules")
+      .update({ enabled: false })
+      .eq("id", input.routineId);
+    if (error) throw new Error(error.message);
+    return { ok: true, note: "Routine paused." };
+  },
+});
+
+sandbox.register({
+  name: "routine.resume",
+  description: "Resume a paused proactive routine by id (use routine.list to find ids).",
+  schema: z.object({
+    routineId: z.string().uuid().describe("The routine id from routine.list"),
+  }),
+  timeoutMs: 8000,
+  maxOutputBytes: 1000,
+  rateLimitPerMin: 20,
+  execute: async (input, ctx) => {
+    await getRoutine(ctx.userId, input.routineId);
+    const { error } = await supabaseAdmin
+      .from("manovik_schedules")
+      .update({ enabled: true })
+      .eq("id", input.routineId);
+    if (error) throw new Error(error.message);
+    return { ok: true, note: "Routine resumed. It runs on the next hourly tick." };
+  },
+});
+
+sandbox.register({
+  name: "routine.cancel",
+  description: "Permanently delete a proactive routine by id (use routine.list to find ids).",
+  schema: z.object({
+    routineId: z.string().uuid().describe("The routine id from routine.list"),
+  }),
+  timeoutMs: 8000,
+  maxOutputBytes: 1000,
+  rateLimitPerMin: 20,
+  execute: async (input, ctx) => {
+    await getRoutine(ctx.userId, input.routineId);
+    const { error } = await supabaseAdmin
+      .from("manovik_schedules")
+      .delete()
+      .eq("id", input.routineId);
+    if (error) throw new Error(error.message);
+    return { ok: true, note: "Routine deleted." };
+  },
+});
