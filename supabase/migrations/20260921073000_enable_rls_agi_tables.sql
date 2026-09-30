@@ -136,3 +136,16 @@ CREATE POLICY "own agi_doctrine update" ON public.manovik_agi_doctrine
 DROP POLICY IF EXISTS "own agi_doctrine delete" ON public.manovik_agi_doctrine;
 CREATE POLICY "own agi_doctrine delete" ON public.manovik_agi_doctrine
   FOR DELETE USING (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- Explicit grants (Supabase 2026-10-30 breaking change)
+-- ---------------------------------------------------------------------------
+-- From 2026-10-30, new tables in the public schema get NO automatic Data API
+-- access. service_role bypasses RLS but NOT missing grants, so without these
+-- the CREATE TABLEs above leave the AGI tables unreachable to server
+-- functions on any fresh database (self-hosted installs). Safe to re-run:
+-- re-granting on production (where the tables already carry grants) is a no-op.
+GRANT ALL ON public.manovik_agi_runs TO service_role;
+GRANT ALL ON public.manovik_agi_steps TO service_role;
+GRANT ALL ON public.manovik_agi_lessons TO service_role;
+GRANT ALL ON public.manovik_agi_doctrine TO service_role;
