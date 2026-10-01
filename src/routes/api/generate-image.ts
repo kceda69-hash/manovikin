@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { refundCreditIdempotent } from "@/lib/credit-refunds.server";
 import { aiKeys, clearKeyThrottled, markKeyThrottled, pickKeyIndex } from "@/lib/ai-key-failover";
 
 /**
@@ -59,13 +60,21 @@ export const Route = createFileRoute("/api/generate-image")({
             a: Record<string, unknown>,
           ) => Promise<{ data: boolean | null }>
         )("has_role", { _user_id: userId, _role: "admin" });
+        // Unique id for this generation: the 2-credit spend below is keyed on
+        // it, and the failure refund below is idempotent on it (awaited —
+        // never fire-and-forget — so the worker stays alive until it commits).
+        const genId = crypto.randomUUID();
         if (!isAdminData) {
           const { data: spend, error: spendErr } = await (
             supabaseAdmin.rpc as never as (
               f: string,
               a: Record<string, unknown>,
             ) => Promise<{ data: number | null; error: { message: string } | null }>
-          )("manovik_spend_credit", { _user_id: userId, _amount: 2, _reason: "image.generate" });
+          )("manovik_spend_credit", {
+            _user_id: userId,
+            _amount: 2,
+            _reason: `image.generate:${genId}`,
+          });
           if (spendErr) return new Response("Credit service unavailable", { status: 500 });
           if (typeof spend === "number" && spend < 0) {
             return new Response(
@@ -81,17 +90,15 @@ export const Route = createFileRoute("/api/generate-image")({
         const enriched = `${prompt}\n\nRendering brief: ${QUALITY_SUFFIX[quality]} Aspect ratio ${aspect}. Follow the prompt exactly — every named object, colour, count and placement must appear.`;
 
         // Refund the 2 credits when generation fails after charging.
-        const refundImageCredit = () => {
-          supabaseAdmin
-            .rpc("manovik_topup_credit", {
-              _user_id: userId,
-              _amount: 2,
-              _reason: "image.refund:api_error",
-            })
-            .then(({ error }) => {
-              if (error) console.error("image refund failed", error.message);
-            });
-        };
+        // Idempotent on genId and AWAITED before the error response is
+        // returned — a failed generation must never permanently eat credits.
+        const refundImageCredit = () =>
+          refundCreditIdempotent(supabaseAdmin, {
+            userId,
+            amount: 2,
+            refundReason: `image.refund:${genId}`,
+            context: { genId },
+          });
 
         if (!sovereignBaseUrl) {
           // Legacy Lovable gateway path (self-hosted / non-sovereign mode).
@@ -109,7 +116,7 @@ export const Route = createFileRoute("/api/generate-image")({
             }),
           });
           if (!upstream.ok || !upstream.body) {
-            refundImageCredit();
+            await refundImageCredit();
             return new Response(await upstream.text(), { status: upstream.status });
           }
           return new Response(upstream.body, {
@@ -189,7 +196,7 @@ export const Route = createFileRoute("/api/generate-image")({
         }
 
         if (!b64) {
-          refundImageCredit();
+          await refundImageCredit();
           return new Response(`Image generation failed: ${lastErr}`, { status: 502 });
         }
 

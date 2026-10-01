@@ -20,6 +20,10 @@ import { redactMessage } from "@/lib/redact";
 import { sandbox } from "@/lib/agent-tools";
 import { log } from "@/lib/logger";
 import { aiKeys, clearKeyThrottled, markKeyThrottled, pickKeyIndex } from "@/lib/ai-key-failover";
+import {
+  healLostChatCredits,
+  refundCreditIdempotent,
+} from "@/lib/credit-refunds.server";
 
 const MAX_MESSAGES = 200;
 const MAX_BODY_BYTES = 20 * 1024 * 1024; // 20 MB — attachments are base64 data URLs
@@ -263,21 +267,15 @@ function friendlyStreamErrorMessage(details: Record<string, unknown>): string {
 // generation fails over on the same throttle state as chat.
 
 /**
- * Give back the credit spent on a failed turn. The spend happens before the
- * AI call (it is the atomic reserve that gates insufficient balances), so a
- * turn that produces no usable assistant reply must release it.
+ * Give back the credit spent on a failed turn. Thin wrapper around the
+ * shared idempotent refund (src/lib/credit-refunds.server.ts): the spend
+ * happens before the AI call as the atomic reserve that gates insufficient
+ * balances, so a turn that produces no usable assistant reply must release
+ * it. The wrapper keeps the chat call-sites unchanged and records the
+ * `credit.refunded` audit row on a fresh refund.
  *
- * Durability: every caller AWAITS this promise before the response stream
- * closes (or before the error Response is returned), so the Cloudflare
- * worker stays alive until the refund is committed — never fire-and-forget.
- *
- * Idempotency: keyed by the unique turnId. A ledger row with reason
- * `chat.refund:<turnId>` is written exactly once; if it already exists the
- * refund is skipped, so retries, concurrent callbacks and double-fires can
- * never credit the user twice.
- *
- * Never throws: billing must not break error handling. All failures are
- * logged. A 10s cap keeps a slow database from hanging the response.
+ * Same signature as before: (admin, userId, threadId, turnId, ip?, ua?, source?).
+ * Never throws.
  */
 async function refundCredit(
   admin: SupabaseClient<Database>,
@@ -288,112 +286,26 @@ async function refundCredit(
   userAgent?: string,
   source?: string,
 ): Promise<"refunded" | "already-refunded" | "failed"> {
-  const refundReason = `chat.refund:${turnId}`;
-  try {
-    const outcome = await Promise.race([
-      (async (): Promise<"refunded" | "already-refunded"> => {
-        const { data: existing, error: checkErr } = await admin
-          .from("ai_balance_ledger")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("reason", refundReason)
-          .limit(1);
-        if (checkErr) throw checkErr;
-        if (existing && existing.length > 0) {
-          log.info("chat.refund.skipped_duplicate", { userId, threadId, turnId, source });
-          return "already-refunded";
-        }
-        const { error } = await admin.rpc("manovik_topup_credit", {
-          _user_id: userId,
-          _amount: 1,
-          _reason: refundReason,
-        });
-        if (error) throw error;
-        await audit(admin, {
-          user_id: userId,
-          thread_id: threadId,
-          event_type: "credit.refunded",
-          summary: "Refunded 1 credit after failed AI turn",
-          ip,
-          user_agent: userAgent,
-          metadata: { reason: source ?? "ai_error", turnId },
-        });
-        log.info("chat.refund.ok", { userId, threadId, turnId, source });
-        return "refunded";
-      })(),
-      new Promise<"failed">((resolve) => setTimeout(() => resolve("failed"), 10_000)),
-    ]);
-    if (outcome === "failed") {
-      log.error("chat.refund.timeout", { userId, threadId, turnId, source });
-    }
-    return outcome;
-  } catch (e: unknown) {
-    log.error("chat.refund.exception", {
-      userId,
-      threadId,
-      turnId,
-      source,
-      error: String(e).slice(0, 200),
+  const outcome = await refundCreditIdempotent(admin, {
+    userId,
+    amount: 1,
+    refundReason: `chat.refund:${turnId}`,
+    context: { threadId, turnId, source },
+  });
+  if (outcome === "refunded") {
+    await audit(admin, {
+      user_id: userId,
+      thread_id: threadId,
+      event_type: "credit.refunded",
+      summary: "Refunded 1 credit after failed AI turn",
+      ip,
+      user_agent: userAgent,
+      metadata: { reason: source ?? "ai_error", turnId },
     });
-    return "failed";
   }
+  return outcome;
 }
 
-/**
- * Self-healing: refund credits for turns that were charged but never
- * completed and never refunded (e.g. the worker died mid-turn before the
- * refund could commit). Runs at the start of each turn, best-effort.
- *
- * Only considers spends older than 15 minutes so a turn that is still
- * in-flight in a concurrent request is never touched. Only the new
- * `chat.message:<turnId>` reason format is eligible (older rows predate
- * turn tracking and are left alone).
- */
-async function healLostCredits(
-  admin: SupabaseClient<Database>,
-  userId: string,
-): Promise<void> {
-  try {
-    const cutoff = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-    const dayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-    const { data: spends, error: spendsErr } = await admin
-      .from("ai_balance_ledger")
-      .select("reason, created_at")
-      .eq("user_id", userId)
-      .eq("delta", -1)
-      .like("reason", "chat.message:%")
-      .gte("created_at", dayAgo)
-      .lt("created_at", cutoff)
-      .limit(20);
-    if (spendsErr) throw spendsErr;
-    if (!spends || spends.length === 0) return;
-    for (const spend of spends) {
-      const turnId = String(spend.reason ?? "").split(":")[1];
-      if (!turnId) continue;
-      const { data: refunded } = await admin
-        .from("ai_balance_ledger")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("reason", `chat.refund:${turnId}`)
-        .limit(1);
-      if (refunded && refunded.length > 0) continue;
-      // A successfully finished turn writes a message.assistant audit row
-      // carrying its turnId — if present, the charge stands.
-      const { data: completed } = await admin
-        .from("audit_logs")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("event_type", "message.assistant")
-        .filter("metadata->>turnId", "eq", turnId)
-        .limit(1);
-      if (completed && completed.length > 0) continue;
-      log.warn("chat.credits.self_heal_refund", { userId, turnId });
-      await refundCredit(admin, userId, null, turnId, undefined, undefined, "self-heal");
-    }
-  } catch (e: unknown) {
-    log.warn("chat.credits.self_heal_failed", { userId, error: String(e).slice(0, 200) });
-  }
-}
 
 // Extract a structured, secret-free diagnostic from an unknown error.
 // Surfaces AI SDK error names, Zod issue paths, HTTP status, upstream body
@@ -531,7 +443,7 @@ export const Route = createFileRoute("/api/chat")({
         if (!isAdmin) {
           // Self-healing: refund any credits lost by turns that were charged
           // but never completed and never refunded (best-effort, never throws).
-          await healLostCredits(supabaseAdmin, userId);
+          await healLostChatCredits(supabaseAdmin, userId);
           // Manovik native AI credit balance — reserve 1 credit per chat turn.
           // Released (refunded) if the turn produces no usable reply.
           const { data: spendResult, error: spendErr } = await supabaseAdmin.rpc(
@@ -773,7 +685,36 @@ export const Route = createFileRoute("/api/chat")({
             .join(
               "; ",
             )}. Tools enforce timeouts, output caps, and host allow-lists. Never attempt unsupported tools.`;
-        const modelMessages = await convertToModelMessages(messages);
+        // convertToModelMessages can throw on malformed attachment payloads.
+        // The credit is already spent at this point, so a throw here must
+        // refund immediately (not wait for the next turn's self-heal).
+        let modelMessages: Awaited<ReturnType<typeof convertToModelMessages>>;
+        try {
+          modelMessages = await convertToModelMessages(messages);
+        } catch (e) {
+          log.error("chat.model_messages.failed", {
+            userId,
+            threadId,
+            turnId,
+            ...describeError(e),
+          });
+          await audit(supabaseAdmin, {
+            user_id: userId,
+            thread_id: threadId,
+            event_type: "error.pre_stream",
+            summary: `Message conversion failed: ${String((e as Error)?.message ?? e).slice(0, 200)}`,
+            ip,
+            user_agent: ua,
+            metadata: { turnId, ...describeError(e) },
+          });
+          if (!isAdmin) {
+            await refundCredit(supabaseAdmin, userId, threadId, turnId, ip, ua, "pre-stream");
+          }
+          return new Response(
+            "Couldn't prepare your message for the AI (it may contain an attachment the model can't read). This message cost you nothing — please try again.",
+            { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } },
+          );
+        }
 
         // Ordered stream candidates. In sovereign mode the Lovable-gateway
         // "provider/" model names 404 on Google's OpenAI-compatible
