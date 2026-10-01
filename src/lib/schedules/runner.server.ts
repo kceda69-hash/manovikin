@@ -40,6 +40,44 @@ export async function executeSchedule(row: ScheduleRow) {
     // Kind dispatch: special objectives bypass the FORCE swarm engine.
     // Plain objectives still fall through to runForce below.
     if (isMorningBriefingObjective(row.objective)) {
+      // Price what burns: the briefing is several model calls, off the meter
+      // until now. One flat charge per delivery.
+      const { CREDIT_PRICES, isBillingExempt, spendCredits, utcDayKey } = await import(
+        "@/lib/credits.server"
+      );
+      if (!(await isBillingExempt(supabaseAdmin, row.user_id))) {
+        const outcome = await spendCredits(
+          supabaseAdmin,
+          row.user_id,
+          CREDIT_PRICES.briefingDaily,
+          `briefing.daily:${row.id}:${utcDayKey()}`,
+        );
+        if (outcome !== "ok") {
+          const note =
+            outcome === "insufficient"
+              ? "Morning briefing skipped: out of credits. Top up to resume your daily briefing."
+              : "Morning briefing skipped: credit service unavailable.";
+          await supabaseAdmin
+            .from("manovik_schedule_runs")
+            .update({
+              status: "skipped",
+              error: note.slice(0, 800),
+              duration_ms: Date.now() - started,
+            })
+            .eq("id", run?.id ?? "");
+          // No model call here — a plain text note to the briefing thread.
+          const { deliverScheduleBriefing } = await import("./briefing.server");
+          await deliverScheduleBriefing(row.user_id, {
+            name: row.name,
+            objective: row.objective,
+            status: "failed",
+            answer: note,
+            actions: [],
+            durationMs: Date.now() - started,
+          });
+          return { ok: true as const };
+        }
+      }
       const { runMorningBriefing } = await import("./morning-briefing.server");
       const briefing = await runMorningBriefing(row.user_id, row);
       await supabaseAdmin
@@ -91,6 +129,31 @@ export async function executeSchedule(row: ScheduleRow) {
     const mode = (
       ["build", "research", "operate", "clone"].includes(row.mode) ? row.mode : "research"
     ) as ForceMode;
+    // Price what burns: a scheduled routine is a full model run.
+    const { CREDIT_PRICES, isBillingExempt, spendCredits } = await import("@/lib/credits.server");
+    if (!(await isBillingExempt(supabaseAdmin, row.user_id))) {
+      const outcome = await spendCredits(
+        supabaseAdmin,
+        row.user_id,
+        CREDIT_PRICES.routineRun,
+        `routine.run:${row.id}:${Date.now()}`,
+      );
+      if (outcome !== "ok") {
+        const note =
+          outcome === "insufficient"
+            ? "Routine skipped: out of credits. Top up to resume scheduled runs."
+            : "Routine skipped: credit service unavailable.";
+        await supabaseAdmin
+          .from("manovik_schedule_runs")
+          .update({
+            status: "skipped",
+            error: note.slice(0, 800),
+            duration_ms: Date.now() - started,
+          })
+          .eq("id", run?.id ?? "");
+        return { ok: true as const };
+      }
+    }
     const outcome = await runForce(row.objective, mode, 3, async () => {});
     await supabaseAdmin
       .from("manovik_schedule_runs")

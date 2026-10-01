@@ -125,6 +125,53 @@ export const Route = createFileRoute("/api/public/device/ambient-frame")({
           return json({ error: "Frame must be an image" }, 400);
         }
 
+        // Price what burns: one vision call per frame. Cap daily volume so a
+        // misconfigured camera can't drain the account (or the shared key).
+        const {
+          AMBIENT_FRAMES_PER_DAY_CAP,
+          CREDIT_PRICES,
+          isBillingExempt,
+          spendCredits,
+          utcDayKey,
+        } = await import("@/lib/credits.server");
+        if (!(await isBillingExempt(db(), device.user_id))) {
+          const dayStart = new Date();
+          dayStart.setUTCHours(0, 0, 0, 0);
+          const { count: framesToday } = await db()
+            .from("ai_balance_ledger")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", device.user_id)
+            .like("reason", "ambient.frame:%")
+            .gte("created_at", dayStart.toISOString());
+          if ((framesToday ?? 0) >= AMBIENT_FRAMES_PER_DAY_CAP) {
+            return json(
+              {
+                error: "daily_cap_reached",
+                message: `Ambient Watch daily frame cap reached (${AMBIENT_FRAMES_PER_DAY_CAP}/day). Resumes tomorrow.`,
+              },
+              429,
+            );
+          }
+          const outcome = await spendCredits(
+            db(),
+            device.user_id,
+            CREDIT_PRICES.ambientFrame,
+            `ambient.frame:${device.id}:${utcDayKey()}`,
+          );
+          if (outcome === "insufficient") {
+            return json(
+              {
+                error: "insufficient_credits",
+                message: "Ambient Watch paused: out of credits. Top up to resume.",
+              },
+              402,
+            );
+          }
+          if (outcome === "failed") {
+            return json({ error: "Credit service unavailable" }, 503);
+          }
+        }
+
         // In-memory only — the raw bytes are never written to storage or the DB.
         const bytes = new Uint8Array(await frame.arrayBuffer());
         const dataUrl = `data:${mime};base64,${base64Of(bytes)}`;

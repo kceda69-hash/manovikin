@@ -21,11 +21,27 @@ export const missionTool = {
     ctx: { userId: string; signal: AbortSignal },
   ): Promise<unknown> => {
     const { runAgiMission } = await import("./mano/agi.server");
+    const { CREDIT_PRICES, isBillingExempt, spendCredits } = await import("./credits.server");
+    const missionId = crypto.randomUUID();
+    // Missions burn a model call per step: price what burns. Admins exempt.
+    const exempt = await isBillingExempt(supabaseAdmin, ctx.userId);
+    const chargeStep = exempt
+      ? undefined
+      : async (stepIdx: number): Promise<boolean> => {
+          const outcome = await spendCredits(
+            supabaseAdmin,
+            ctx.userId,
+            CREDIT_PRICES.missionStep,
+            `mission.step:${missionId}:${stepIdx}`,
+          );
+          return outcome === "ok";
+        };
     const result = await runAgiMission({
       goal,
       supabase: supabaseAdmin as unknown as SupabaseLike,
       userId: ctx.userId,
       maxSteps: 6,
+      chargeStep,
     });
     return {
       ok: true,

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, Link2, Unlink } from "lucide-react";
+import { GoogleWorkspaceCard } from "@/components/integrations/GoogleWorkspaceCard";
+import { SpotifyCard } from "@/components/integrations/SpotifyCard";
 
 export const Route = createFileRoute("/account")({
   component: AccountPage,
@@ -162,6 +164,9 @@ function AccountPage() {
         Signing in with Google using the same verified email address always returns you to this
         account — a new account is never created.
       </p>
+
+      <GoogleWorkspaceCard />
+      <SpotifyCard />
     </main>
   );
 }

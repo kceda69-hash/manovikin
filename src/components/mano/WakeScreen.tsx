@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { bootDisplayName, type BootUser } from "@/lib/boot-greeting";
+import { BootSequence } from "@/components/mano/BootSequence";
 
 type WakePhase = "boot" | "ready" | "awake" | "done";
 
@@ -42,9 +43,9 @@ export function WakeScreen({ user, justLoggedIn, onWake, onDismiss }: WakeScreen
       : "Welcome back. MANO online and ready."
     : greeting;
   const timers = useRef<number[]>([]);
+  const [bootProgress, setBootProgress] = useState(0);
 
   useEffect(() => {
-    timers.current.push(window.setTimeout(() => setPhase("ready"), 1400));
     return () => {
       timers.current.forEach((t) => window.clearTimeout(t));
       timers.current = [];
@@ -75,13 +76,15 @@ export function WakeScreen({ user, justLoggedIn, onWake, onDismiss }: WakeScreen
       aria-label="MANO waking up"
     >
       <div className="relative flex h-48 w-48 items-center justify-center">
-        {/* Ultron-style arc reactor orb: glowing core + rotating rings */}
+        {/* Ultron-style arc reactor orb: glowing core + rotating rings.
+            The halo charges up as the boot sequence progresses. */}
         <span
           className={`absolute inset-0 rounded-full ${
             phase === "boot" ? "animate-ping" : ""
           }`}
           style={{
             background: "radial-gradient(circle, rgba(255,120,30,0.25) 0%, transparent 70%)",
+            opacity: phase === "boot" ? 0.4 + bootProgress * 0.6 : 1,
           }}
           aria-hidden
         />
@@ -117,16 +120,25 @@ export function WakeScreen({ user, justLoggedIn, onWake, onDismiss }: WakeScreen
         </span>
       </div>
 
-      <h1 className="mt-8 text-center text-2xl font-semibold tracking-tight">
-        {phase === "boot" ? "Initializing MANO…" : greeting}
-      </h1>
-      <p className="mt-2 text-center text-sm text-muted-foreground">
-        {phase === "boot"
-          ? "Loading companion systems"
-          : phase === "awake"
-            ? "Good to see you."
-            : "Tap to wake her up — she'll greet you out loud."}
-      </p>
+      {phase === "boot" ? (
+        <div className="mt-8 flex w-full justify-center px-6">
+          <BootSequence
+            onProgress={setBootProgress}
+            onDone={() => setPhase("ready")}
+          />
+        </div>
+      ) : (
+        <>
+          <h1 className="mt-8 text-center text-2xl font-semibold tracking-tight">
+            {greeting}
+          </h1>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            {phase === "awake"
+              ? "Good to see you."
+              : "Tap to wake her up — she'll greet you out loud."}
+          </p>
+        </>
+      )}
 
       {phase !== "boot" && (
         <div className="mt-8 flex flex-col items-center gap-3">

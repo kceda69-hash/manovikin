@@ -97,6 +97,10 @@ import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/
 import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
 import { Route as ApiPublicDeviceAmbientFrameRouteImport } from './routes/api/public/device/ambient-frame'
 import { Route as ApiPublicDeviceActionRouteImport } from './routes/api/public/device/$action'
+import { Route as ApiIntegrationsSpotifyConnectRouteImport } from './routes/api/integrations/spotify/connect'
+import { Route as ApiIntegrationsSpotifyCallbackRouteImport } from './routes/api/integrations/spotify/callback'
+import { Route as ApiIntegrationsGoogleConnectRouteImport } from './routes/api/integrations/google/connect'
+import { Route as ApiIntegrationsGoogleCallbackRouteImport } from './routes/api/integrations/google/callback'
 
 const VsWindsurfRoute = VsWindsurfRouteImport.update({
   id: '/vs-windsurf',
@@ -555,6 +559,30 @@ const ApiPublicDeviceActionRoute = ApiPublicDeviceActionRouteImport.update({
   path: '/api/public/device/$action',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiIntegrationsSpotifyConnectRoute =
+  ApiIntegrationsSpotifyConnectRouteImport.update({
+    id: '/api/integrations/spotify/connect',
+    path: '/api/integrations/spotify/connect',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiIntegrationsSpotifyCallbackRoute =
+  ApiIntegrationsSpotifyCallbackRouteImport.update({
+    id: '/api/integrations/spotify/callback',
+    path: '/api/integrations/spotify/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiIntegrationsGoogleConnectRoute =
+  ApiIntegrationsGoogleConnectRouteImport.update({
+    id: '/api/integrations/google/connect',
+    path: '/api/integrations/google/connect',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiIntegrationsGoogleCallbackRoute =
+  ApiIntegrationsGoogleCallbackRouteImport.update({
+    id: '/api/integrations/google/callback',
+    path: '/api/integrations/google/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -631,6 +659,10 @@ export interface FileRoutesByFullPath {
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/integrations/google/callback': typeof ApiIntegrationsGoogleCallbackRoute
+  '/api/integrations/google/connect': typeof ApiIntegrationsGoogleConnectRoute
+  '/api/integrations/spotify/callback': typeof ApiIntegrationsSpotifyCallbackRoute
+  '/api/integrations/spotify/connect': typeof ApiIntegrationsSpotifyConnectRoute
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -721,6 +753,10 @@ export interface FileRoutesByTo {
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/integrations/google/callback': typeof ApiIntegrationsGoogleCallbackRoute
+  '/api/integrations/google/connect': typeof ApiIntegrationsGoogleConnectRoute
+  '/api/integrations/spotify/callback': typeof ApiIntegrationsSpotifyCallbackRoute
+  '/api/integrations/spotify/connect': typeof ApiIntegrationsSpotifyConnectRoute
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -812,6 +848,10 @@ export interface FileRoutesById {
   '/api/public/demo-chat': typeof ApiPublicDemoChatRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/api/integrations/google/callback': typeof ApiIntegrationsGoogleCallbackRoute
+  '/api/integrations/google/connect': typeof ApiIntegrationsGoogleConnectRoute
+  '/api/integrations/spotify/callback': typeof ApiIntegrationsSpotifyCallbackRoute
+  '/api/integrations/spotify/connect': typeof ApiIntegrationsSpotifyConnectRoute
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -904,6 +944,10 @@ export interface FileRouteTypes {
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/integrations/google/callback'
+    | '/api/integrations/google/connect'
+    | '/api/integrations/spotify/callback'
+    | '/api/integrations/spotify/connect'
     | '/api/public/device/$action'
     | '/api/public/device/ambient-frame'
     | '/api/public/hooks/manovik-self-update'
@@ -994,6 +1038,10 @@ export interface FileRouteTypes {
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/integrations/google/callback'
+    | '/api/integrations/google/connect'
+    | '/api/integrations/spotify/callback'
+    | '/api/integrations/spotify/connect'
     | '/api/public/device/$action'
     | '/api/public/device/ambient-frame'
     | '/api/public/hooks/manovik-self-update'
@@ -1084,6 +1132,10 @@ export interface FileRouteTypes {
     | '/api/public/demo-chat'
     | '/api/public/razorpay-webhook'
     | '/lovable/email/suppression'
+    | '/api/integrations/google/callback'
+    | '/api/integrations/google/connect'
+    | '/api/integrations/spotify/callback'
+    | '/api/integrations/spotify/connect'
     | '/api/public/device/$action'
     | '/api/public/device/ambient-frame'
     | '/api/public/hooks/manovik-self-update'
@@ -1175,6 +1227,10 @@ export interface RootRouteChildren {
   ApiPublicDemoChatRoute: typeof ApiPublicDemoChatRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiIntegrationsGoogleCallbackRoute: typeof ApiIntegrationsGoogleCallbackRoute
+  ApiIntegrationsGoogleConnectRoute: typeof ApiIntegrationsGoogleConnectRoute
+  ApiIntegrationsSpotifyCallbackRoute: typeof ApiIntegrationsSpotifyCallbackRoute
+  ApiIntegrationsSpotifyConnectRoute: typeof ApiIntegrationsSpotifyConnectRoute
   ApiPublicDeviceActionRoute: typeof ApiPublicDeviceActionRoute
   ApiPublicDeviceAmbientFrameRoute: typeof ApiPublicDeviceAmbientFrameRoute
   ApiPublicHooksManovikSelfUpdateRoute: typeof ApiPublicHooksManovikSelfUpdateRoute
@@ -1809,6 +1865,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDeviceActionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/integrations/spotify/connect': {
+      id: '/api/integrations/spotify/connect'
+      path: '/api/integrations/spotify/connect'
+      fullPath: '/api/integrations/spotify/connect'
+      preLoaderRoute: typeof ApiIntegrationsSpotifyConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/integrations/spotify/callback': {
+      id: '/api/integrations/spotify/callback'
+      path: '/api/integrations/spotify/callback'
+      fullPath: '/api/integrations/spotify/callback'
+      preLoaderRoute: typeof ApiIntegrationsSpotifyCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/integrations/google/connect': {
+      id: '/api/integrations/google/connect'
+      path: '/api/integrations/google/connect'
+      fullPath: '/api/integrations/google/connect'
+      preLoaderRoute: typeof ApiIntegrationsGoogleConnectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/integrations/google/callback': {
+      id: '/api/integrations/google/callback'
+      path: '/api/integrations/google/callback'
+      fullPath: '/api/integrations/google/callback'
+      preLoaderRoute: typeof ApiIntegrationsGoogleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -1889,6 +1973,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDemoChatRoute: ApiPublicDemoChatRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiIntegrationsGoogleCallbackRoute: ApiIntegrationsGoogleCallbackRoute,
+  ApiIntegrationsGoogleConnectRoute: ApiIntegrationsGoogleConnectRoute,
+  ApiIntegrationsSpotifyCallbackRoute: ApiIntegrationsSpotifyCallbackRoute,
+  ApiIntegrationsSpotifyConnectRoute: ApiIntegrationsSpotifyConnectRoute,
   ApiPublicDeviceActionRoute: ApiPublicDeviceActionRoute,
   ApiPublicDeviceAmbientFrameRoute: ApiPublicDeviceAmbientFrameRoute,
   ApiPublicHooksManovikSelfUpdateRoute: ApiPublicHooksManovikSelfUpdateRoute,

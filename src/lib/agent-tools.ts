@@ -2,6 +2,7 @@
 // Add new capabilities ONLY here; the sandbox refuses anything not listed.
 import { z } from "zod";
 import { Sandbox } from "./sandbox";
+import type { ToolDef } from "./sandbox";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import {
   isLinked as isSmartHomeLinked,
@@ -11,6 +12,8 @@ import {
 } from "./smarthome/tuya.server";
 import { missionTool } from "./mission-tool";
 import { dossierTool } from "./dossier-tool";
+import { googleWorkspaceTools } from "./google-workspace-tool";
+import { spotifyTools } from "./spotify-tool";
 
 export const sandbox = new Sandbox();
 
@@ -886,3 +889,17 @@ sandbox.register(missionTool);
 // person.brief compiles a person's PUBLIC professional footprint only.
 // Private-data requests are refused with a one-line refusal + public-brief offer.
 sandbox.register(dossierTool);
+
+// ---- Google Workspace command center ----
+// gmail.triage / gmail.read / gmail.send and calendar.agenda / calendar.create
+// / calendar.cancel. Defined in ./google-workspace-tool; each user links their
+// own Google account via OAuth (Account page) — tokens stay server-side.
+for (const tool of googleWorkspaceTools) sandbox.register(tool as ToolDef<unknown>);
+
+// ---- Spotify voice DJ ----
+// spotify.search / spotify.devices / spotify.now_playing / spotify.play /
+// spotify.pause / spotify.resume / spotify.skip / spotify.previous /
+// spotify.queue_add / spotify.taste / spotify.make_playlist. Defined in
+// ./spotify-tool; each user links their own Spotify account via OAuth
+// (Account page) — playback runs on their Spotify Connect devices.
+for (const tool of spotifyTools) sandbox.register(tool as ToolDef<unknown>);

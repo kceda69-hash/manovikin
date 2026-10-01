@@ -8,6 +8,7 @@
 // track/locate, family, …) is refused with a one-line refusal plus an offer
 // to compile a public brief instead.
 import { z } from "zod";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { ToolDef } from "./sandbox";
 import { compileDossier, DOSSIER_FOOTER } from "./dossier/dossier.server";
 
@@ -35,9 +36,33 @@ export const dossierTool: ToolDef<DossierInput> = {
   timeoutMs: 60_000,
   maxOutputBytes: 12_000,
   rateLimitPerMin: 10,
-  execute: async ({ name, context }, { signal }) => {
+  execute: async ({ name, context }, { signal, userId }) => {
     if (isPrivateDataRequest(name, context)) {
       return { refused: true, message: DOSSIER_REFUSAL };
+    }
+    // Price what burns: a dossier is web research plus a synthesis call.
+    const { CREDIT_PRICES, isBillingExempt, spendCredits } = await import("./credits.server");
+    if (!(await isBillingExempt(supabaseAdmin, userId))) {
+      const outcome = await spendCredits(
+        supabaseAdmin,
+        userId,
+        CREDIT_PRICES.dossierBrief,
+        `dossier.brief:${Date.now()}`,
+      );
+      if (outcome === "insufficient") {
+        return {
+          ok: false,
+          error: "insufficient_credits",
+          message: "Out of credits — top up to compile dossiers.",
+        };
+      }
+      if (outcome === "failed") {
+        return {
+          ok: false,
+          error: "billing_unavailable",
+          message: "Credit service unavailable — try again shortly.",
+        };
+      }
     }
     const { summary, facts, sources } = await compileDossier(name, context, { signal });
     const lines = [`# Public brief: ${name}`, "", summary, ""];

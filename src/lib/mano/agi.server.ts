@@ -362,6 +362,12 @@ export async function runAgiMission(args: {
   userId: string;
   maxSteps?: number;
   onStep?: (step: AgiStep) => Promise<void>;
+  /**
+   * Optional billing gate: called before each step (1-based index).
+   * Return false to stop the mission (e.g. out of credits). When absent,
+   * steps run unmetered.
+   */
+  chargeStep?: (stepIdx: number) => Promise<boolean>;
 }): Promise<AgiResult> {
   const goal = args.goal.trim();
   if (!goal) throw new Error("A mission needs a goal.");
@@ -376,8 +382,20 @@ export async function runAgiMission(args: {
   const brief = [doctrine, lessons].filter(Boolean).join("\n\n");
   const steps: AgiStep[] = [];
   let handover = "";
+  let creditBlocked = false;
 
   for (let i = 0; i < maxSteps; i += 1) {
+    // Price what burns: each step is a controller model call plus a tool run.
+    if (args.chargeStep) {
+      const allowed = await args.chargeStep(i + 1);
+      if (!allowed) {
+        creditBlocked = true;
+        handover =
+          "Mission paused: the account ran out of credits mid-mission. " +
+          "Top up to continue — completed steps are kept.";
+        break;
+      }
+    }
     const started = Date.now();
     const transcript = steps
       .map(
@@ -425,6 +443,18 @@ export async function runAgiMission(args: {
     };
     steps.push(step);
     await args.onStep?.(step);
+  }
+
+  // Out of credits: report what was found so far without burning more calls.
+  if (creditBlocked) {
+    return {
+      goal,
+      status: "stopped",
+      steps,
+      answer: handover,
+      score: 0,
+      lesson: null,
+    };
   }
 
   // Final answer: full MANO cycle over the goal plus everything the loop found.
@@ -477,7 +507,7 @@ export async function runAgiMission(args: {
 
   return {
     goal,
-    status: handover ? "done" : "stopped",
+    status: !creditBlocked && handover ? "done" : "stopped",
     steps,
     answer: final.text,
     score,
