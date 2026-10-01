@@ -37,7 +37,6 @@ export const APPROVED_MODEL_IDS = [
   "openai/gpt-5.6-terra",
   "openai/gpt-5.6-luna",
   // image
-  "google/gemini-2.5-flash-image",
   "google/gemini-3-pro-image",
   "google/gemini-3.1-flash-image",
   "google/gemini-3.1-flash-lite-image",
