@@ -15,6 +15,7 @@
 // engine. Every prompt carries the privacy shield below.
 
 import { routeModel } from "@/lib/model-router";
+import { resolveEndpointModel } from "@/lib/ai-model";
 import type { AgentResult, ForceMode, ProofItem, ProposedAction, Recon } from "@/lib/force/types";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -147,20 +148,22 @@ async function callModel(opts: {
   priority?: boolean;
   maxTokens?: number;
 }): Promise<string> {
+  // Gateway-style "provider/model" ids 404 on a sovereign endpoint.
+  const effectiveModel = resolveEndpointModel(opts.model);
   const body: Record<string, unknown> = {
-    model: opts.model,
+    model: effectiveModel,
     messages: [
       { role: "system", content: `${opts.system}\n\n${PRIVACY_SHIELD}` },
       { role: "user", content: opts.prompt },
     ],
   };
   // OpenAI models reject `max_tokens`; they require `max_completion_tokens`.
-  if (opts.model.startsWith("openai/")) {
+  if (effectiveModel.startsWith("openai/")) {
     body["max_completion_tokens"] = opts.maxTokens ?? 4000;
   } else {
     body["max_tokens"] = opts.maxTokens ?? 4000;
   }
-  if (opts.model.startsWith("openai/gpt-5.6")) body["reasoning_effort"] = "none";
+  if (effectiveModel.startsWith("openai/gpt-5.6")) body["reasoning_effort"] = "none";
   if (opts.priority) body["service_tier"] = "priority";
 
   const endpoint = resolveEndpoint();

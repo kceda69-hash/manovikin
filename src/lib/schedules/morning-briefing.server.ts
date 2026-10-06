@@ -7,6 +7,7 @@
 // gracefully and a failed model call falls back to an assembled briefing.
 
 import { buildMemoryContext } from "@/lib/memory/retrieve.server";
+import { resolveEndpointModel } from "@/lib/ai-model";
 
 export const MORNING_BRIEFING_PREFIX = "[morning-briefing]";
 export const SENTINEL_PREFIX = "[sentinel]";
@@ -74,14 +75,16 @@ async function callModel(opts: {
   model: string;
   maxTokens?: number;
 }): Promise<string> {
+  // Gateway-style "provider/model" ids 404 on a sovereign endpoint.
+  const effectiveModel = resolveEndpointModel(opts.model);
   const body: Record<string, unknown> = {
-    model: opts.model,
+    model: effectiveModel,
     messages: [
       { role: "system", content: opts.system },
       { role: "user", content: opts.prompt },
     ],
   };
-  if (opts.model.startsWith("openai/")) {
+  if (effectiveModel.startsWith("openai/")) {
     body["max_completion_tokens"] = opts.maxTokens ?? 700;
   } else {
     body["max_tokens"] = opts.maxTokens ?? 700;

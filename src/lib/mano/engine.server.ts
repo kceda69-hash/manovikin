@@ -14,6 +14,7 @@ import {
   type ManoStage,
 } from "./mano1";
 import { throttle } from "@/lib/mcp/throttle";
+import { resolveEndpointModel } from "@/lib/ai-model";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
@@ -68,16 +69,19 @@ async function callSubstrate(
 ): Promise<string> {
   const { url, headers } = authHeaders();
 
+  // Gateway-style "provider/model" ids 404 on a sovereign endpoint —
+  // resolve once and base all param decisions on the effective id.
+  const effectiveModel = resolveEndpointModel(model);
   const body: Record<string, unknown> = {
-    model,
+    model: effectiveModel,
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
     ],
   };
-  if (model.startsWith("openai/")) body.max_completion_tokens = maxTokens;
+  if (effectiveModel.startsWith("openai/")) body.max_completion_tokens = maxTokens;
   else body.max_tokens = maxTokens;
-  if (model.startsWith("openai/gpt-5.6")) body.reasoning_effort = "none";
+  if (effectiveModel.startsWith("openai/gpt-5.6")) body.reasoning_effort = "none";
 
   const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
 

@@ -3,6 +3,7 @@
 // at build time and on Worker cold start, where secrets are absent.
 
 import { routeModel } from "@/lib/model-router";
+import { resolveEndpointModel } from "@/lib/ai-model";
 // Best-effort per-isolate throttle so the public MCP endpoint cannot be used
 // as an unlimited free model proxy.
 import { throttle } from "./throttle";
@@ -87,8 +88,9 @@ export async function askManovik(opts: AskOptions): Promise<AskResult> {
     headers["Lovable-API-Key"] = lovableKey!;
   }
 
+  const effectiveModel = resolveEndpointModel(route.model);
   const body: Record<string, unknown> = {
-    model: route.model,
+    model: effectiveModel,
     messages: [
       {
         role: "system",
@@ -98,13 +100,13 @@ export async function askManovik(opts: AskOptions): Promise<AskResult> {
     ],
   };
   // OpenAI models reject `max_tokens`; they require `max_completion_tokens`.
-  if (route.model.startsWith("openai/")) {
+  if (effectiveModel.startsWith("openai/")) {
     body.max_completion_tokens = opts.maxTokens ?? 4000;
   } else {
     body.max_tokens = opts.maxTokens ?? 4000;
   }
   // GPT-5.6 models reject chat-completions unless reasoning is explicitly off.
-  if (route.model.startsWith("openai/gpt-5.6")) body.reasoning_effort = "none";
+  if (effectiveModel.startsWith("openai/gpt-5.6")) body.reasoning_effort = "none";
   if (route.priority) body.service_tier = "priority";
 
   const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });

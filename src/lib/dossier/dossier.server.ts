@@ -11,6 +11,8 @@
 
 export const DOSSIER_FOOTER = "Public sources only — no private data collected.";
 
+import { resolveEndpointModel } from "@/lib/ai-model";
+
 export type DossierResult = {
   summary: string;
   facts: string[];
@@ -252,15 +254,17 @@ async function callModel(opts: {
   model: string;
   maxTokens?: number;
 }): Promise<string> {
+  // Gateway-style "provider/model" ids 404 on a sovereign endpoint.
+  const effectiveModel = resolveEndpointModel(opts.model);
   const body: Record<string, unknown> = {
-    model: opts.model,
+    model: effectiveModel,
     messages: [
       { role: "system", content: opts.system },
       { role: "user", content: opts.prompt },
     ],
   };
   // OpenAI models reject `max_tokens`; they require `max_completion_tokens`.
-  if (opts.model.startsWith("openai/")) {
+  if (effectiveModel.startsWith("openai/")) {
     body["max_completion_tokens"] = opts.maxTokens ?? 2000;
   } else {
     body["max_tokens"] = opts.maxTokens ?? 2000;
