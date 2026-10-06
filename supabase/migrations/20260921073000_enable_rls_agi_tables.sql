@@ -149,3 +149,13 @@ GRANT ALL ON public.manovik_agi_runs TO service_role;
 GRANT ALL ON public.manovik_agi_steps TO service_role;
 GRANT ALL ON public.manovik_agi_lessons TO service_role;
 GRANT ALL ON public.manovik_agi_doctrine TO service_role;
+
+-- ---------------------------------------------------------------------------
+-- Authenticated-role grants (follow-up: the Sept 30 block above is incomplete)
+-- ---------------------------------------------------------------------------
+-- The AGI chat/server-function paths (runMission in
+-- src/lib/mano/agi.functions.ts, trainDoctrine callers) run behind
+-- requireSupabaseAuth, which builds the client with the publishable key + the
+-- user's JWT — the *authenticated* role — and lets RLS policies
+-- ("own agi_*", auth.uid() = user_id) enforce per-user access. The
+-- service_role grants above cover only the sandbox/admin path
