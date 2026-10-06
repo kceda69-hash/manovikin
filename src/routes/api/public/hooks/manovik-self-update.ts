@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { isAuthorizedHook } from "@/lib/hook-auth";
+import { log } from "@/lib/logger";
 
 export const Route = createFileRoute("/api/public/hooks/manovik-self-update")({
   server: {
@@ -9,27 +10,44 @@ export const Route = createFileRoute("/api/public/hooks/manovik-self-update")({
         if (!isAuthorizedHook(request)) {
           return Response.json({ error: "Forbidden" }, { status: 403 });
         }
-        const version = `brain-${new Date().toISOString().slice(0, 19).replace(/[-:T]/g, "")}`;
-        const { error } = await supabaseAdmin.from("manovik_brain_updates").insert({
-          version,
-          notes:
-            "MANOVIK Brain v∞ — refreshed with the world's latest models, language memory, visualization heuristics, and infinite-depth reasoning patterns.",
-          metadata: {
-            source: "cron",
-            runtime: "edge",
-            brain: "v∞",
-            capabilities: ["infinite-reasoning", "visualization", "multilingual", "self-update"],
-          },
-        });
-        if (error) {
-          return new Response(JSON.stringify({ ok: false, error: error.message }), {
+        try {
+          const { fetchTechRadar } = await import("@/lib/self-update/tech-radar.server");
+          const { refreshKnowledge } = await import("@/lib/self-update/knowledge-refresh.server");
+
+          // 1. Fetch the tech radar (models, CVEs, headlines). One source
+          //    failing never kills the run — fetchTechRadar isolates them.
+          const items = await fetchTechRadar();
+
+          // 2. Dedupe against recent brain updates and persist the new ones.
+          //    eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const summary = await refreshKnowledge(supabaseAdmin as any, items);
+
+          log.info("self_update_completed", {
+            version: summary.version,
+            newItems: summary.newItems,
+            totalItems: summary.totalItems,
+            inserted: summary.inserted,
+          });
+          return Response.json(
+            {
+              ok: true,
+              version: summary.version,
+              newItems: summary.newItems,
+              totalItems: summary.totalItems,
+              learnings: summary.learnings.length,
+              inserted: summary.inserted,
+            },
+            { headers: { "Content-Type": "application/json" } },
+          );
+        } catch (e) {
+          // Fail closed: a broken radar run must never pretend success.
+          const message = e instanceof Error ? e.message : "self-update failed";
+          log.error("self_update_failed", { error: message.slice(0, 300) });
+          return new Response(JSON.stringify({ ok: false, error: message.slice(0, 300) }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
           });
         }
-        return new Response(JSON.stringify({ ok: true, version }), {
-          headers: { "Content-Type": "application/json" },
-        });
       },
     },
   },

@@ -12,6 +12,8 @@ import {
 } from "./smarthome/tuya.server";
 import { missionTool } from "./mission-tool";
 import { dossierTool } from "./dossier-tool";
+import { locationTools } from "./location-tools";
+import { seclabWebscanTool } from "./seclab-tools";
 import { googleWorkspaceTools } from "./google-workspace-tool";
 import { spotifyTools } from "./spotify-tool";
 
@@ -559,7 +561,7 @@ sandbox.register({
 // Commands are queued in manovik_device_commands; the device agent (Python script
 // or web agent at /device-agent) polls and executes them.
 
-const DEVICE_COMMAND_KINDS = ["shell", "open", "notify", "say", "script", "vibrate"] as const;
+const DEVICE_COMMAND_KINDS = ["shell", "open", "notify", "say", "script", "vibrate", "locate"] as const;
 
 async function getPairedDevices(userId: string) {
   const { data, error } = await supabaseAdmin
@@ -898,6 +900,18 @@ sandbox.register(missionTool);
 // person.brief compiles a person's PUBLIC professional footprint only.
 // Private-data requests are refused with a one-line refusal + public-brief offer.
 sandbox.register(dossierTool);
+
+// ---- Location Tracker ----
+// geo.ip (IP geolocation) and device.locate (locate the user's own paired
+// devices). Defined in ./location-tools; device.locate enforces user_id +
+// paired_at like queueDeviceCommand. Strictly the user's own assets.
+for (const tool of locationTools) sandbox.register(tool as ToolDef<unknown>);
+
+// ---- Ethical Hacking Lab ----
+// seclab.webscan: defensive, read-only web security audit (headers, TLS,
+// exposed paths, cookies, disclosure, CORS) for targets the user owns.
+// Defined in ./seclab-tools; every fetch is SSRF-guarded.
+sandbox.register(seclabWebscanTool as ToolDef<unknown>);
 
 // ---- Google Workspace command center ----
 // gmail.triage / gmail.read / gmail.send and calendar.agenda / calendar.create

@@ -19,12 +19,14 @@ import { Route as VsClineVsWindsurfRouteImport } from './routes/vs-cline-vs-wind
 import { Route as VsClineRouteImport } from './routes/vs-cline'
 import { Route as VsBoltNewRouteImport } from './routes/vs-bolt-new'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as TrackRouteImport } from './routes/track'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as StudentsRouteImport } from './routes/students'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as SeoRouteImport } from './routes/seo'
+import { Route as SecurityRouteImport } from './routes/security'
 import { Route as RefundRouteImport } from './routes/refund'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PlaygroundRouteImport } from './routes/playground'
@@ -153,6 +155,11 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
   path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -181,6 +188,11 @@ const SetupRoute = SetupRouteImport.update({
 const SeoRoute = SeoRouteImport.update({
   id: '/seo',
   path: '/seo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RefundRoute = RefundRouteImport.update({
@@ -625,12 +637,14 @@ export interface FileRoutesByFullPath {
   '/playground': typeof PlaygroundRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
+  '/security': typeof SecurityRoute
   '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/students': typeof StudentsRoute
   '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
+  '/track': typeof TrackRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vs-bolt-new': typeof VsBoltNewRoute
   '/vs-cline': typeof VsClineRoute
@@ -720,12 +734,14 @@ export interface FileRoutesByTo {
   '/playground': typeof PlaygroundRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
+  '/security': typeof SecurityRoute
   '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/students': typeof StudentsRoute
   '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
+  '/track': typeof TrackRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vs-bolt-new': typeof VsBoltNewRoute
   '/vs-cline': typeof VsClineRoute
@@ -816,12 +832,14 @@ export interface FileRoutesById {
   '/playground': typeof PlaygroundRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
+  '/security': typeof SecurityRoute
   '/seo': typeof SeoRoute
   '/setup': typeof SetupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/students': typeof StudentsRoute
   '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
+  '/track': typeof TrackRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/vs-bolt-new': typeof VsBoltNewRoute
   '/vs-cline': typeof VsClineRoute
@@ -913,12 +931,14 @@ export interface FileRouteTypes {
     | '/playground'
     | '/privacy'
     | '/refund'
+    | '/security'
     | '/seo'
     | '/setup'
     | '/sitemap.xml'
     | '/students'
     | '/team'
     | '/terms'
+    | '/track'
     | '/unsubscribe'
     | '/vs-bolt-new'
     | '/vs-cline'
@@ -1008,12 +1028,14 @@ export interface FileRouteTypes {
     | '/playground'
     | '/privacy'
     | '/refund'
+    | '/security'
     | '/seo'
     | '/setup'
     | '/sitemap.xml'
     | '/students'
     | '/team'
     | '/terms'
+    | '/track'
     | '/unsubscribe'
     | '/vs-bolt-new'
     | '/vs-cline'
@@ -1103,12 +1125,14 @@ export interface FileRouteTypes {
     | '/playground'
     | '/privacy'
     | '/refund'
+    | '/security'
     | '/seo'
     | '/setup'
     | '/sitemap.xml'
     | '/students'
     | '/team'
     | '/terms'
+    | '/track'
     | '/unsubscribe'
     | '/vs-bolt-new'
     | '/vs-cline'
@@ -1199,12 +1223,14 @@ export interface RootRouteChildren {
   PlaygroundRoute: typeof PlaygroundRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundRoute: typeof RefundRoute
+  SecurityRoute: typeof SecurityRoute
   SeoRoute: typeof SeoRoute
   SetupRoute: typeof SetupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StudentsRoute: typeof StudentsRoute
   TeamRoute: typeof TeamRoute
   TermsRoute: typeof TermsRoute
+  TrackRoute: typeof TrackRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   VsBoltNewRoute: typeof VsBoltNewRoute
   VsClineRoute: typeof VsClineRoute
@@ -1332,6 +1358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -1372,6 +1405,13 @@ declare module '@tanstack/react-router' {
       path: '/seo'
       fullPath: '/seo'
       preLoaderRoute: typeof SeoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/refund': {
@@ -1951,12 +1991,14 @@ const rootRouteChildren: RootRouteChildren = {
   PlaygroundRoute: PlaygroundRoute,
   PrivacyRoute: PrivacyRoute,
   RefundRoute: RefundRoute,
+  SecurityRoute: SecurityRoute,
   SeoRoute: SeoRoute,
   SetupRoute: SetupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StudentsRoute: StudentsRoute,
   TeamRoute: TeamRoute,
   TermsRoute: TermsRoute,
+  TrackRoute: TrackRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   VsBoltNewRoute: VsBoltNewRoute,
   VsClineRoute: VsClineRoute,

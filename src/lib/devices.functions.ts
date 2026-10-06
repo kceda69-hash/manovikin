@@ -93,7 +93,7 @@ export const sendDeviceCommand = createServerFn({ method: "POST" })
     z
       .object({
         deviceId: z.string().uuid(),
-        kind: z.enum(["shell", "open", "notify", "say", "script", "vibrate"]).default("shell"),
+        kind: z.enum(["shell", "open", "notify", "say", "script", "vibrate", "locate"]).default("shell"),
         command: z.string().trim().min(1).max(4000),
       })
       .parse(input),
