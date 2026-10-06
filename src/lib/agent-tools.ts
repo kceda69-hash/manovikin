@@ -593,6 +593,15 @@ async function queueDeviceCommand(
     .select("id")
     .single();
   if (error) throw new Error(error.message);
+  // FIX (agent-safety audit): every queued device command is audit-logged
+  // (covers device.command and device.broadcast, which both funnel here).
+  const { logAgentAction } = await import("@/lib/agent-audit.server");
+  await logAgentAction({
+    userId,
+    action: "device.command",
+    summary: `Device command queued: ${kind} → "${device.name}"`,
+    metadata: { deviceId, deviceName: device.name, kind, commandPreview: command.slice(0, 300) },
+  });
   return { commandId: row.id, deviceName: device.name };
 }
 

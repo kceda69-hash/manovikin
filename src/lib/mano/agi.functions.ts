@@ -25,6 +25,9 @@ type Ctx = { supabase: { from: (table: string) => AgiQuery }; userId: string };
 const missionInput = z.object({
   goal: z.string().trim().min(4).max(4000),
   maxSteps: z.number().int().min(1).max(8).default(5),
+  // Explicit opt-in for real-world device actions. Defaults to false: without
+  // it the mission loop's device tool refuses (agent-safety audit fix 10).
+  allowDeviceActions: z.boolean().default(false),
 });
 
 /** Run one autonomous MANO mission end to end and persist it. */
@@ -34,6 +37,26 @@ export const runMission = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as unknown as Ctx;
     const { runAgiMission } = await import("./agi.server");
+    const { CREDIT_PRICES, isBillingExempt, spendCredits } = await import("@/lib/credits.server");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // FIX (agent-safety audit): this server-function path ran unmetered while
+    // the chat path (mission-tool.ts) charges per step. Meter identically —
+    // admins exempt — so the credit brake on autonomous device actions and
+    // fetches applies uniformly.
+    const missionId = crypto.randomUUID();
+    const exempt = await isBillingExempt(supabaseAdmin, userId);
+    const chargeStep = exempt
+      ? undefined
+      : async (stepIdx: number): Promise<boolean> => {
+          const outcome = await spendCredits(
+            supabaseAdmin,
+            userId,
+            CREDIT_PRICES.missionStep,
+            `mission.step:${missionId}:${stepIdx}`,
+          );
+          return outcome === "ok";
+        };
 
     const { data: run, error } = await supabase
       .from("manovik_agi_runs")
@@ -48,6 +71,8 @@ export const runMission = createServerFn({ method: "POST" })
         supabase,
         userId,
         maxSteps: data.maxSteps,
+        chargeStep,
+        deviceActions: data.allowDeviceActions ? "allow" : "deny",
         onStep: async (step) => {
           const { error: stepError } = await supabase.from("manovik_agi_steps").insert({
             run_id: run.id,

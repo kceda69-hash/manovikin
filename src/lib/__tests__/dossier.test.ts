@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  assertUrlSafe,
   compileDossier,
   DOSSIER_FOOTER,
   fetchVisibleText,
@@ -104,6 +105,16 @@ describe("compileDossier", () => {
           }
           return modelJson({ summary: "Jane is CTO at Acme.", facts: ["CTO at Acme since 2022"] });
         }
+        if (url.includes("cloudflare-dns.com/dns-query")) {
+          // DNS-over-HTTPS stub for the SSRF DNS-rebinding check: example.com
+          // resolves public; everything else resolves empty (fail closed).
+          const name = new URL(url).searchParams.get("name") ?? "";
+          const answers = name === "example.com" ? [{ type: 1, data: "93.184.216.34" }] : [];
+          return new Response(JSON.stringify({ Answer: answers }), {
+            status: 200,
+            headers: { "content-type": "application/dns-json" },
+          });
+        }
         fetchedUrls.push(url);
         return new Response(
           "<html><head><script>var x = 1;</script></head><body><h1>Jane</h1>" +
@@ -169,6 +180,11 @@ describe("isPrivateDataRequest", () => {
     ["Jane Doe", "get me her phone number"],
     ["Jane Doe", "what is her home address"],
     ["Jane", "track him down"],
+    ["Jane Doe", "where does she live"],
+    ["Jane Doe", "what is his salary"],
+    ["Jane Doe", "any criminal record"],
+    ["Jane Doe", "find her email"],
+    ["Jane Doe", "is he married"],
   ])("refuses private-data request (%s / %s)", (name, context) => {
     expect(isPrivateDataRequest(name, context)).toBe(true);
   });
@@ -176,6 +192,50 @@ describe("isPrivateDataRequest", () => {
   it("allows legitimate public-brief requests", () => {
     expect(isPrivateDataRequest("Jane Doe", "CTO at Acme — meeting tomorrow")).toBe(false);
     expect(isPrivateDataRequest("Jane Doe")).toBe(false);
+  });
+});
+
+describe("assertUrlSafe (DNS-rebinding defense)", () => {
+  const dnsJson = (ips: string[]) =>
+    new Response(JSON.stringify({ Answer: ips.map((ip) => ({ type: 1, data: ip })) }), {
+      status: 200,
+      headers: { "content-type": "application/dns-json" },
+    });
+
+  beforeEach(() => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: unknown) => {
+        const url = String(input);
+        if (url.includes("cloudflare-dns.com/dns-query")) {
+          const name = new URL(url).searchParams.get("name") ?? "";
+          if (name === "rebind.example") return dnsJson(["127.0.0.1"]);
+          if (name === "noresolve.example") return new Response("{}", { status: 500 });
+          return dnsJson(["93.184.216.34"]);
+        }
+        throw new Error(`unexpected fetch: ${url}`);
+      }),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("blocks a hostname that resolves to a private IP (DNS rebinding)", async () => {
+    await expect(assertUrlSafe("https://rebind.example/page")).rejects.toThrow(/private IP/);
+  });
+
+  it("fails closed when DNS resolution fails", async () => {
+    await expect(assertUrlSafe("https://noresolve.example/page")).rejects.toThrow(/DNS resolution failed/);
+  });
+
+  it("allows a hostname that resolves to a public IP", async () => {
+    await expect(assertUrlSafe("https://example.com/page")).resolves.toBeUndefined();
+  });
+
+  it("still blocks literal private IPs without DNS", async () => {
+    await expect(assertUrlSafe("http://192.168.1.10/admin")).rejects.toThrow(/private host/);
   });
 });
 

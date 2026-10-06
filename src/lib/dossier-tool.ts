@@ -16,7 +16,12 @@ export const DOSSIER_REFUSAL =
   "I can't collect private data on anyone — but I can put together a public professional brief instead. Want that?";
 
 const PRIVATE_DATA_REQUEST_RE =
-  /\b(phone|mobile|cell|telephone|email|address|home address|street address|track|tracking|locate|location|whereabouts|follow|surveil|family|wife|husband|spouse|partner|kids|children|daughter|son|dob|date of birth|birthday|aadhaar|pan card|ssn|social security|passport|private|personal data)\b/i;
+  // FIX (agent-safety audit): the old keyword list was paraphrase-trivial.
+  // Expanded with contact/family/financial/legal/medical categories and
+  // common phrasings ("where does he live", "contact number"). This is the
+  // first line of defense; fetched-text redaction (redactPrivateIdentifiers)
+  // remains the backstop for anything that slips through.
+  /\b(phone|mobile|cell|telephone|contact number|contact details|email|e-mail|mail id|address|home address|street address|residence|where (?:does|do) (?:he|she|they) live|track|tracking|locate|location|whereabouts|follow|surveil|surveillance|stalk|stalking|family|wife|husband|spouse|partner|girlfriend|boyfriend|married|marriage|divorce|divorced|kids|children|daughter|son|dob|date of birth|birth ?day|birthdate|aadhaar|aadhar|pan card|ssn|social security|passport|voter id|driving li[cs]en[cs]e|private|personal data|personal info|personally identifiable|salary|income|net worth|medical|health record|diagnosis|criminal|arrest|fir\b|police case|court case|bank account|account number|credit card|card number)\b/i;
 
 /**
  * True when the request is really asking for non-public data rather than a
@@ -65,6 +70,14 @@ export const dossierTool: ToolDef<DossierInput> = {
       }
     }
     const { summary, facts, sources } = await compileDossier(name, context, { signal });
+    // FIX (agent-safety audit): dossier compiles are audit-logged.
+    const { logAgentAction } = await import("./agent-audit.server");
+    await logAgentAction({
+      userId,
+      action: "dossier.compile",
+      summary: `Public dossier compiled for "${name}" (${sources.length} sources)`,
+      metadata: { name, sources },
+    });
     const lines = [`# Public brief: ${name}`, "", summary, ""];
     if (facts.length) {
       lines.push("## Key facts", ...facts.map((f) => `- ${f}`), "");

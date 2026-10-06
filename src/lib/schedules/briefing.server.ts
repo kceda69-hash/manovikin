@@ -42,6 +42,11 @@ export function buildBriefingText(input: BriefingInput): string {
     lines.push("**Proposed actions** — say the word (e.g. \"do 1 and 3\") and I'll run them:");
     input.actions.slice(0, 12).forEach((a, i) => {
       lines.push(`${i + 1}. **${a.label}** (${a.kind}, risk: ${a.risk}) — ${a.why}`);
+      // FIX (agent-safety audit): the approver must see the actual payload.
+      // A bare label let "do 1" approve arbitrary shell without ever showing
+      // the command. Truncated for readability; the full string is stored.
+      const cmd = a.command.length > 160 ? `${a.command.slice(0, 160)}…` : a.command;
+      lines.push(`   \`${cmd}\``);
     });
   }
   lines.push("");

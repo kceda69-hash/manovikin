@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   GW_SCOPES,
   accessTokenExpired,
@@ -91,5 +91,63 @@ describe("buildEventBody", () => {
     expect(body.start).toEqual({ date: "2026-11-08" });
     expect(body.end).toEqual({ date: "2026-11-09" });
     expect(body).not.toHaveProperty("attendees");
+  });
+});
+
+describe("gmail.send two-step confirmation (audit fix)", () => {
+  it("stages without sending on first call, executes frozen payload on confirm", async () => {
+    vi.resetModules();
+    const sent: Array<Record<string, unknown>> = [];
+    vi.doMock("@/lib/integrations/google-workspace.server", async (importOriginal) => {
+      const mod = (await importOriginal()) as Record<string, unknown>;
+      return { ...mod, gwSend: vi.fn(async (_u: string, p: Record<string, unknown>) => { sent.push(p); return { id: "m1" }; }) };
+    });
+    // In-memory pending-actions: stage stores, consume returns frozen payload once.
+    const store = new Map<string, Record<string, unknown>>();
+    vi.doMock("@/lib/pending-actions.server", () => ({
+      PendingActionsUnavailableError: class extends Error {},
+      stagePendingAction: vi.fn(async (_u: string, _k: string, p: Record<string, unknown>) => {
+        store.set("tok123", p);
+        return { id: "a1", token: "tok123", expiresAt: new Date(Date.now() + 600000).toISOString() };
+      }),
+      consumePendingAction: vi.fn(async (_u: string, _k: string, t: string) => {
+        const p = store.get(t) ?? null;
+        store.delete(t);
+        return p;
+      }),
+    }));
+    const { googleWorkspaceTools } = await import("@/lib/google-workspace-tool");
+    const tool = googleWorkspaceTools.find((t) => t.name === "gmail.send")! as {
+      execute: (
+        input: { to: string; subject: string; body: string; confirmToken?: string },
+        ctx: { userId: string; signal: AbortSignal },
+      ) => Promise<unknown>;
+    };
+    const ctx = { userId: "u1", signal: new AbortController().signal };
+
+    // Step 1: stage — nothing sent.
+    const staged = (await tool.execute({ to: "a@b.c", subject: "Hi", body: "Hello" }, ctx)) as Record<string, unknown>;
+    expect(staged.pending).toBe(true);
+    expect(staged.confirmToken).toBe("tok123");
+    expect(sent).toHaveLength(0);
+
+    // Step 2: confirm with a DIFFERENT body — frozen payload wins.
+    const done = (await tool.execute(
+      { to: "evil@x.y", subject: "Hi", body: "PWNED", confirmToken: "tok123" },
+      ctx,
+    )) as Record<string, unknown>;
+    expect(done.ok).toBe(true);
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toEqual({ to: "a@b.c", subject: "Hi", body: "Hello" });
+
+    // Step 3: replay the token — single-use.
+    const replay = (await tool.execute(
+      { to: "a@b.c", subject: "Hi", body: "Hello", confirmToken: "tok123" },
+      ctx,
+    )) as Record<string, unknown>;
+    expect(replay.ok).toBe(false);
+    expect(replay.error).toBe("confirmation_invalid");
+    expect(sent).toHaveLength(1);
+    vi.resetModules();
   });
 });

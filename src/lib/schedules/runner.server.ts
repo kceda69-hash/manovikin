@@ -25,6 +25,27 @@ export function nextRunFrom(cadence: string, from = Date.now()): string {
   return new Date(from + (CADENCE_MS[cadence] ?? CADENCE_MS["daily"]!)).toISOString();
 }
 
+/**
+ * FIX (agent-safety audit): every scheduled run outcome is audit-logged.
+ * manovik_schedule_runs holds the full record; this writes the compact
+ * trail into audit_logs alongside every other agent action.
+ */
+async function auditScheduleOutcome(
+  userId: string,
+  scheduleId: string,
+  name: string,
+  status: "success" | "failed" | "skipped",
+  detail: string,
+) {
+  const { logAgentAction } = await import("@/lib/agent-audit.server");
+  await logAgentAction({
+    userId,
+    action: "schedule.run",
+    summary: `Scheduled routine "${name}": ${status}`,
+    metadata: { scheduleId, status, detail: detail.slice(0, 300) },
+  });
+}
+
 /** Run one schedule and persist the outcome. Never throws. */
 export async function executeSchedule(row: ScheduleRow) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -75,6 +96,7 @@ export async function executeSchedule(row: ScheduleRow) {
             actions: [],
             durationMs: Date.now() - started,
           });
+          await auditScheduleOutcome(row.user_id, row.id, row.name, "skipped", note);
           return { ok: true as const };
         }
       }
@@ -97,6 +119,7 @@ export async function executeSchedule(row: ScheduleRow) {
         actions: [],
         durationMs: Date.now() - started,
       });
+      await auditScheduleOutcome(row.user_id, row.id, row.name, "success", "morning briefing delivered");
       return { ok: true as const };
     }
     if (isSentinelObjective(row.objective)) {
@@ -123,6 +146,7 @@ export async function executeSchedule(row: ScheduleRow) {
           durationMs: Date.now() - started,
         });
       }
+      await auditScheduleOutcome(row.user_id, row.id, row.name, "success", note);
       return { ok: true as const };
     }
 
@@ -151,6 +175,7 @@ export async function executeSchedule(row: ScheduleRow) {
             duration_ms: Date.now() - started,
           })
           .eq("id", run?.id ?? "");
+        await auditScheduleOutcome(row.user_id, row.id, row.name, "skipped", note);
         return { ok: true as const };
       }
     }
@@ -174,6 +199,13 @@ export async function executeSchedule(row: ScheduleRow) {
       actions: outcome.actions ?? [],
       durationMs: Date.now() - started,
     });
+    await auditScheduleOutcome(
+      row.user_id,
+      row.id,
+      row.name,
+      "success",
+      `routine completed with ${(outcome.actions ?? []).length} proposed actions`,
+    );
     return { ok: true as const };
   } catch (err) {
     await supabaseAdmin
@@ -194,6 +226,13 @@ export async function executeSchedule(row: ScheduleRow) {
       error: String((err as Error)?.message ?? err).slice(0, 800),
       durationMs: Date.now() - started,
     });
+    await auditScheduleOutcome(
+      row.user_id,
+      row.id,
+      row.name,
+      "failed",
+      String((err as Error)?.message ?? err),
+    );
     return { ok: false as const, error: String((err as Error)?.message ?? err) };
   } finally {
     await supabaseAdmin

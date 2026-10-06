@@ -15,8 +15,10 @@ function safeEqual(a: string, b: string): boolean {
 
 /**
  * Scheduled agents tick (pg_cron, hourly).
- * Authorised with `Bearer <hook-secret>` (MANOVIK_HOOK_SECRET, or
- * LOVABLE_API_KEY on Lovable-cloud deployments) — same shape as the other hooks.
+ * Authorised with `Bearer <hook-secret>` (MANOVIK_HOOK_SECRET) or the
+ * per-database RPC cron token — same shape as the other hooks.
+ * The legacy LOVABLE_API_KEY fallback was removed (agent-safety audit):
+ * set MANOVIK_HOOK_SECRET or calls fail closed with 403.
  */
 export const Route = createFileRoute("/api/public/hooks/run-schedules")({
   server: {

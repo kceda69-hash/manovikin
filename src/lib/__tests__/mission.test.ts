@@ -237,3 +237,51 @@ describe("runAgiMission 2-step loop", () => {
     expect(result.answer).toBe("FINAL ANSWER");
   });
 });
+
+describe("runAgiMission device-action policy (audit fix)", () => {
+  const deviceAction = () =>
+    JSON.stringify({
+      thought: "Notify the user on their phone.",
+      tool: "device",
+      input: JSON.stringify({ kind: "notify", payload: "Mission done" }),
+    });
+  const finishAction = () =>
+    JSON.stringify({ thought: "Done.", tool: "finish", input: "All set." });
+
+  it("blocks the device tool by default (no allowance declared)", async () => {
+    const { supabase, calls } = supabaseMock({ manovik_agi_lessons: [] });
+    mockComplete
+      .mockImplementationOnce(async () => deviceAction())
+      .mockImplementationOnce(async () => finishAction())
+      .mockImplementationOnce(async () => JSON.stringify({ score: 80, topic: "t", lesson: "l" }));
+    mockRunMano.mockResolvedValue({ text: "FINAL" } as never);
+
+    const result = await runAgiMission({ goal: "ping my phone", supabase, userId: "u1", maxSteps: 5 });
+    const deviceStep = result.steps.find((s) => s.tool === "device");
+    expect(deviceStep?.observation).toContain("device blocked");
+    expect(calls.filter((c) => c.table === "manovik_device_commands")).toHaveLength(0);
+  });
+
+  it("allows the device tool when the caller declares deviceActions: allow", async () => {
+    const { supabase, calls } = supabaseMock({
+      manovik_agi_lessons: [],
+      manovik_devices: [{ id: "d1", name: "Phone", paired_at: "2026-01-01", last_seen_at: "2026-10-06" }],
+    });
+    mockComplete
+      .mockImplementationOnce(async () => deviceAction())
+      .mockImplementationOnce(async () => finishAction())
+      .mockImplementationOnce(async () => JSON.stringify({ score: 80, topic: "t", lesson: "l" }));
+    mockRunMano.mockResolvedValue({ text: "FINAL" } as never);
+
+    const result = await runAgiMission({
+      goal: "ping my phone",
+      supabase,
+      userId: "u1",
+      maxSteps: 5,
+      deviceActions: "allow",
+    });
+    const deviceStep = result.steps.find((s) => s.tool === "device");
+    expect(deviceStep?.observation).not.toContain("device blocked");
+    expect(calls.filter((c) => c.table === "manovik_device_commands")).toHaveLength(1);
+  });
+});

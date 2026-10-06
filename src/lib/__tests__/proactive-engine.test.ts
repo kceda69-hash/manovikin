@@ -64,6 +64,27 @@ describe("buildBriefingText", () => {
     expect(text).toContain("2. **Open dashboard**");
   });
 
+  it("renders the actual command payload in each approval item (audit fix)", () => {
+    const text = buildBriefingText({
+      ...base,
+      actions: [
+        { label: "Wipe cache", kind: "shell", command: "rm -rf /tmp/cache", risk: "high", why: "Free space" },
+      ],
+    });
+    // The approver must see what "do 1" actually runs.
+    expect(text).toContain("`rm -rf /tmp/cache`");
+  });
+
+  it("truncates long commands in the approval list", () => {
+    const long = "x".repeat(500);
+    const text = buildBriefingText({
+      ...base,
+      actions: [{ label: "Big", kind: "shell", command: long, risk: "high", why: "y" }],
+    });
+    expect(text).toContain("…");
+    expect(text).not.toContain(long);
+  });
+
   it("renders a failure briefing with the error", () => {
     const text = buildBriefingText({
       ...base,

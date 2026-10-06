@@ -491,5 +491,13 @@ export async function sendCommand(
     creds,
     token.accessToken,
   );
+  // FIX (agent-safety audit): smart-home actions are audit-logged.
+  const { logAgentAction } = await import("@/lib/agent-audit.server");
+  await logAgentAction({
+    userId,
+    action: "home.command",
+    summary: `Smart-home command: ${action} on device ${deviceId.slice(0, 8)}…`,
+    metadata: { deviceId, action, value },
+  });
   return { ok: true, message: `Turned ${verb}.` };
 }

@@ -42,6 +42,9 @@ export const missionTool = {
       userId: ctx.userId,
       maxSteps: 6,
       chargeStep,
+      // Chat path: the mission starts inside an active chat turn, so the
+      // user is present — device actions are allowed (audit fix 10).
+      deviceActions: "allow",
     });
     return {
       ok: true,

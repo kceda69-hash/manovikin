@@ -130,7 +130,7 @@ export async function loadLessons(
 async function runTool(
   tool: AgiTool,
   input: string,
-  ctx: { supabase: SupabaseLike; userId: string },
+  ctx: { supabase: SupabaseLike; userId: string; deviceActions: "allow" | "deny" },
 ): Promise<string> {
   if (tool === "memory_search") {
     const { buildMemoryContext } = await import("@/lib/memory/retrieve.server");
@@ -152,6 +152,13 @@ async function runTool(
     return inert(await fetchUrlTool(input), 8000);
   }
   if (tool === "device") {
+    // FIX (agent-safety audit): device actions need an explicit allowance —
+    // either the mission started from an active chat (user present) or the
+    // caller declared allowDeviceActions at start. Otherwise the loop could
+    // act on the user's phone while they sleep.
+    if (ctx.deviceActions !== "allow") {
+      return "device blocked: this mission was not granted device-action allowance. Device actions need either an originating chat turn or allowDeviceActions=true at mission start.";
+    }
     return inert(await runMissionDeviceTool(ctx.supabase, ctx.userId, input), 1000);
   }
   if (tool === "remember") {
@@ -312,6 +319,14 @@ export async function runMissionDeviceTool(
     .from("manovik_device_commands")
     .insert({ device_id: deviceId, user_id: userId, kind, command: payload });
   if (error) return `device failed: ${error.message.slice(0, 200)}`;
+  // FIX (agent-safety audit): mission device actions are audit-logged.
+  const { logAgentAction } = await import("@/lib/agent-audit.server");
+  await logAgentAction({
+    userId,
+    action: "mission.device",
+    summary: `Mission device action: ${kind} → "${deviceName}"`,
+    metadata: { deviceId, deviceName, kind, commandPreview: payload.slice(0, 300) },
+  });
   return `Command queued (kind=${kind}) for "${deviceName}". The device agent picks it up within seconds.`;
 }
 
@@ -346,7 +361,7 @@ Tools:
 - reason: run a deep MANO sub-inference on ONE well-scoped sub-question. Use it to do real work.
 - note: store a short reusable lesson in the mission log (scratchpad, not durable memory).
 - fetch_url: fetch a PUBLIC web page (http/https only; localhost, private IPs and cloud-metadata hosts are blocked) and return up to 8000 chars of visible text. Use for research when you need current facts. Input is the URL.
-- device: act in the real world on the user's paired devices. Input = JSON {"kind":"open|say|notify|vibrate","payload":"...","deviceId":"<optional uuid>"}. Omit deviceId to target their most recently seen paired device. Use only when the mission's goal calls for a device action (e.g. notify the user, open a page on their phone).
+- device: act in the real world on the user's paired devices. Input = JSON {"kind":"open|say|notify|vibrate","payload":"...","deviceId":"<optional uuid>"}. Omit deviceId to target their most recently seen paired device. Use only when the mission's goal calls for a device action (e.g. notify the user, open a page on their phone). NOTE: the device tool is disabled unless this mission was granted device-action allowance — if it replies "device blocked", do not retry it; use notify-free tools or finish.
 - remember: save a durable learning to the user's long-term memory. Use for facts about the user, preferences, or truths established this mission that are worth keeping beyond it. Input = the note text.
 - finish: you have everything needed; input = a brief handover summary of what was established.
 
@@ -368,11 +383,22 @@ export async function runAgiMission(args: {
    * steps run unmetered.
    */
   chargeStep?: (stepIdx: number) => Promise<boolean>;
+  /**
+   * Device-action policy (agent-safety audit fix). "allow" when the mission
+   * originates from an active chat turn (user present) or the caller
+   * explicitly declared allowDeviceActions at start; "deny" (default)
+   * otherwise — the device tool then refuses with an explanatory message.
+   */
+  deviceActions?: "allow" | "deny";
 }): Promise<AgiResult> {
   const goal = args.goal.trim();
   if (!goal) throw new Error("A mission needs a goal.");
   const maxSteps = Math.min(Math.max(args.maxSteps ?? 5, 1), 8);
-  const ctx = { supabase: args.supabase, userId: args.userId };
+  const ctx = {
+    supabase: args.supabase,
+    userId: args.userId,
+    deviceActions: args.deviceActions ?? "deny",
+  };
 
   const { loadDoctrine } = await import("./training.server");
   const [lessons, doctrine] = await Promise.all([
@@ -443,6 +469,19 @@ export async function runAgiMission(args: {
     };
     steps.push(step);
     await args.onStep?.(step);
+    // FIX (agent-safety audit): every autonomous tool use is audit-logged.
+    const { logAgentAction } = await import("@/lib/agent-audit.server");
+    await logAgentAction({
+      userId: args.userId,
+      action: "mission.step",
+      summary: `Mission step ${step.idx}: ${step.tool}`,
+      metadata: {
+        tool: step.tool,
+        inputPreview: step.input.slice(0, 300),
+        observationPreview: step.observation.slice(0, 300),
+        ms: step.ms,
+      },
+    });
   }
 
   // Out of credits: report what was found so far without burning more calls.

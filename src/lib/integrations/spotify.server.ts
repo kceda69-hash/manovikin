@@ -429,6 +429,14 @@ export async function spPlay(
     query: args.deviceId ? { device_id: args.deviceId } : {},
     body: buildPlayBody(args),
   });
+  // FIX (agent-safety audit): autonomous playback is audit-logged.
+  const { logAgentAction } = await import("@/lib/agent-audit.server");
+  await logAgentAction({
+    userId,
+    action: "spotify.play",
+    summary: `Spotify playback started (${args.uris?.length ?? 0} tracks${args.contextUri ? ", context" : ""})`,
+    metadata: { uris: args.uris?.slice(0, 5), contextUri: args.contextUri, deviceId: args.deviceId },
+  });
 }
 
 export async function spPause(userId: string, deviceId?: string): Promise<void> {
@@ -436,6 +444,8 @@ export async function spPause(userId: string, deviceId?: string): Promise<void> 
     method: "PUT",
     query: deviceId ? { device_id: deviceId } : {},
   });
+  const { logAgentAction } = await import("@/lib/agent-audit.server");
+  await logAgentAction({ userId, action: "spotify.pause", summary: "Spotify playback paused" });
 }
 
 export async function spResume(userId: string, deviceId?: string): Promise<void> {
@@ -443,6 +453,8 @@ export async function spResume(userId: string, deviceId?: string): Promise<void>
     method: "PUT",
     query: deviceId ? { device_id: deviceId } : {},
   });
+  const { logAgentAction } = await import("@/lib/agent-audit.server");
+  await logAgentAction({ userId, action: "spotify.resume", summary: "Spotify playback resumed" });
 }
 
 export async function spSkip(userId: string, deviceId?: string): Promise<void> {
@@ -450,6 +462,8 @@ export async function spSkip(userId: string, deviceId?: string): Promise<void> {
     method: "POST",
     query: deviceId ? { device_id: deviceId } : {},
   });
+  const { logAgentAction } = await import("@/lib/agent-audit.server");
+  await logAgentAction({ userId, action: "spotify.skip", summary: "Spotify skipped to next track" });
 }
 
 export async function spPrevious(userId: string, deviceId?: string): Promise<void> {
@@ -457,12 +471,21 @@ export async function spPrevious(userId: string, deviceId?: string): Promise<voi
     method: "POST",
     query: deviceId ? { device_id: deviceId } : {},
   });
+  const { logAgentAction } = await import("@/lib/agent-audit.server");
+  await logAgentAction({ userId, action: "spotify.previous", summary: "Spotify went to previous track" });
 }
 
 export async function spAddToQueue(userId: string, uri: string, deviceId?: string): Promise<void> {
   await spJson(userId, "/me/player/queue", {
     method: "POST",
     query: { uri, ...(deviceId ? { device_id: deviceId } : {}) },
+  });
+  const { logAgentAction } = await import("@/lib/agent-audit.server");
+  await logAgentAction({
+    userId,
+    action: "spotify.queue_add",
+    summary: "Spotify track added to queue",
+    metadata: { uri },
   });
 }
 

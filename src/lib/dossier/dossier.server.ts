@@ -68,22 +68,57 @@ export function sanitizeFetchedText(text: string, max = 8000): string {
 }
 
 // ---------------------------------------------------------------------------
-// SSRF guard: block private hosts, metadata endpoints, non-http(s) schemes.
+// SSRF guard: block private hosts, metadata endpoints, non-http(s) schemes,
+// plus DNS-rebinding defense (resolve and check actual IPs).
 // ---------------------------------------------------------------------------
-function isBlockedHost(hostname: string): boolean {
-  const h = hostname.toLowerCase().replace(/\.$/, "");
-  if (h === "localhost" || h === "metadata.google.internal") return true;
-  if (h === "internal" || h === "local" || h.endsWith(".internal") || h.endsWith(".local")) return true;
-  if (h === "::1" || h === "[::1]" || h === "0.0.0.0") return true;
-  const v4 = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+function isBlockedIpLiteral(ip: string): boolean {
+  const v4 = ip.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
   if (v4) {
     const [, a, b] = v4.map(Number);
     if (a === 10 || a === 127 || a === 0) return true;
     if (a === 169 && b === 254) return true;
     if (a === 192 && b === 168) return true;
     if (a === 172 && b >= 16 && b <= 31) return true;
+    return false;
   }
+  const v6 = ip.toLowerCase().replace(/^\[|\]$/g, "");
+  if (v6 === "::1") return true;
+  if (v6.startsWith("fc") || v6.startsWith("fd")) return true; // fc00::/7 unique-local
+  if (v6.startsWith("fe8") || v6.startsWith("fe9") || v6.startsWith("fea") || v6.startsWith("feb"))
+    return true; // fe80::/10 link-local
   return false;
+}
+
+function isBlockedHost(hostname: string): boolean {
+  const h = hostname.toLowerCase().replace(/\.$/, "");
+  if (h === "localhost" || h === "metadata.google.internal") return true;
+  if (h === "internal" || h === "local" || h.endsWith(".internal") || h.endsWith(".local")) return true;
+  if (h === "0.0.0.0") return true;
+  return isBlockedIpLiteral(h);
+}
+
+/**
+ * Resolve a hostname via DNS-over-HTTPS and return its A/AAAA answers.
+ * Fails closed: empty on any error, and callers must treat empty as blocked.
+ */
+async function resolveHostIps(hostname: string): Promise<string[]> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 4000);
+  try {
+    const res = await fetch(
+      `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(hostname)}&type=ANY`,
+      { signal: ctrl.signal, headers: { accept: "application/dns-json" } },
+    );
+    if (!res.ok) return [];
+    const j = (await res.json()) as { Answer?: Array<{ type: number; data: string }> };
+    return (j.Answer ?? [])
+      .filter((a) => a.type === 1 || a.type === 28)
+      .map((a) => a.data);
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export function isBlockedUrl(raw: string): boolean {
@@ -95,6 +130,37 @@ export function isBlockedUrl(raw: string): boolean {
   }
   if (u.protocol !== "http:" && u.protocol !== "https:") return true;
   return isBlockedHost(u.hostname);
+}
+
+/**
+ * Full URL safety check: scheme + hostname blocklist + DNS-rebinding defense.
+ * Resolves the hostname and rejects private/loopback/link-local IPs, so a
+ * hostname that flips to 127.0.0.1 after the string check can't slip through.
+ * Fails closed when DNS resolution fails.
+ */
+export async function assertUrlSafe(raw: string): Promise<void> {
+  let u: URL;
+  try {
+    u = new URL(raw);
+  } catch {
+    throw new Error(`Blocked URL (unparseable): ${raw}`);
+  }
+  if (u.protocol !== "http:" && u.protocol !== "https:") {
+    throw new Error(`Blocked URL (non-http scheme): ${raw}`);
+  }
+  if (isBlockedHost(u.hostname)) {
+    throw new Error(`Blocked URL (private host): ${raw}`);
+  }
+  // Skip DNS for literal IPs — already checked above.
+  if (!isBlockedIpLiteral(u.hostname) && !/^\d+\.\d+\.\d+\.\d+$/.test(u.hostname)) {
+    const ips = await resolveHostIps(u.hostname);
+    if (ips.length === 0) {
+      throw new Error(`Blocked URL (DNS resolution failed, failing closed): ${raw}`);
+    }
+    if (ips.some((ip) => isBlockedIpLiteral(ip))) {
+      throw new Error(`Blocked URL (resolves to private IP): ${raw}`);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -121,7 +187,8 @@ function extractVisibleText(html: string): string {
 }
 
 export async function fetchVisibleText(url: string, signal?: AbortSignal): Promise<string> {
-  if (isBlockedUrl(url)) throw new Error(`Blocked URL (private host or scheme): ${url}`);
+  // Full safety check: scheme + hostname blocklist + DNS-rebinding defense.
+  await assertUrlSafe(url);
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(new Error("Fetch timeout")), FETCH_TIMEOUT_MS);
   const onAbort = () => ctrl.abort();
@@ -136,7 +203,8 @@ export async function fetchVisibleText(url: string, signal?: AbortSignal): Promi
       redirect: "follow",
     });
     // A real redirect lands on a real final URL; mocked Responses have an empty url.
-    if (res.url && isBlockedUrl(res.url)) throw new Error(`Blocked URL after redirect: ${res.url}`);
+    // Re-check the final URL — redirects are a classic SSRF bypass.
+    if (res.url) await assertUrlSafe(res.url);
     if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
     const ct = res.headers.get("content-type") ?? "";
     if (!/text\/(html|plain)|application\/xhtml/.test(ct)) {

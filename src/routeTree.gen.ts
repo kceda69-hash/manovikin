@@ -37,6 +37,7 @@ import { Route as KeysRouteImport } from './routes/keys'
 import { Route as HowToMakeAWebsiteWithAiRouteImport } from './routes/how-to-make-a-website-with-ai'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as HoloRouteImport } from './routes/holo'
+import { Route as GestureRouteImport } from './routes/gesture'
 import { Route as ForceRouteImport } from './routes/force'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as DeviceAgentRouteImport } from './routes/device-agent'
@@ -240,6 +241,11 @@ const HomeRoute = HomeRouteImport.update({
 const HoloRoute = HoloRouteImport.update({
   id: '/holo',
   path: '/holo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestureRoute = GestureRouteImport.update({
+  id: '/gesture',
+  path: '/gesture',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForceRoute = ForceRouteImport.update({
@@ -606,6 +612,7 @@ export interface FileRoutesByFullPath {
   '/device-agent': typeof DeviceAgentRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/gesture': typeof GestureRoute
   '/holo': typeof HoloRoute
   '/home': typeof HomeRoute
   '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
@@ -700,6 +707,7 @@ export interface FileRoutesByTo {
   '/device-agent': typeof DeviceAgentRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/gesture': typeof GestureRoute
   '/holo': typeof HoloRoute
   '/home': typeof HomeRoute
   '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
@@ -795,6 +803,7 @@ export interface FileRoutesById {
   '/device-agent': typeof DeviceAgentRoute
   '/devices': typeof DevicesRoute
   '/force': typeof ForceRoute
+  '/gesture': typeof GestureRoute
   '/holo': typeof HoloRoute
   '/home': typeof HomeRoute
   '/how-to-make-a-website-with-ai': typeof HowToMakeAWebsiteWithAiRoute
@@ -891,6 +900,7 @@ export interface FileRouteTypes {
     | '/device-agent'
     | '/devices'
     | '/force'
+    | '/gesture'
     | '/holo'
     | '/home'
     | '/how-to-make-a-website-with-ai'
@@ -985,6 +995,7 @@ export interface FileRouteTypes {
     | '/device-agent'
     | '/devices'
     | '/force'
+    | '/gesture'
     | '/holo'
     | '/home'
     | '/how-to-make-a-website-with-ai'
@@ -1079,6 +1090,7 @@ export interface FileRouteTypes {
     | '/device-agent'
     | '/devices'
     | '/force'
+    | '/gesture'
     | '/holo'
     | '/home'
     | '/how-to-make-a-website-with-ai'
@@ -1174,6 +1186,7 @@ export interface RootRouteChildren {
   DeviceAgentRoute: typeof DeviceAgentRoute
   DevicesRoute: typeof DevicesRoute
   ForceRoute: typeof ForceRoute
+  GestureRoute: typeof GestureRoute
   HoloRoute: typeof HoloRoute
   HomeRoute: typeof HomeRoute
   HowToMakeAWebsiteWithAiRoute: typeof HowToMakeAWebsiteWithAiRoute
@@ -1443,6 +1456,13 @@ declare module '@tanstack/react-router' {
       path: '/holo'
       fullPath: '/holo'
       preLoaderRoute: typeof HoloRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gesture': {
+      id: '/gesture'
+      path: '/gesture'
+      fullPath: '/gesture'
+      preLoaderRoute: typeof GestureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/force': {
@@ -1918,6 +1938,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeviceAgentRoute: DeviceAgentRoute,
   DevicesRoute: DevicesRoute,
   ForceRoute: ForceRoute,
+  GestureRoute: GestureRoute,
   HoloRoute: HoloRoute,
   HomeRoute: HomeRoute,
   HowToMakeAWebsiteWithAiRoute: HowToMakeAWebsiteWithAiRoute,

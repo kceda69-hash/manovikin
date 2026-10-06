@@ -83,27 +83,30 @@ describe("runSentinelCheck", () => {
     expect(alert).toBeNull();
   });
 
-  it("(d) returns { alert: null } when the device query errors", async () => {
+  it("(d) returns a DEGRADED alert (not silent null) when the device query errors", async () => {
     const { alert } = await runSentinelCheck(
       "user-1",
       makeClient({ devicesError: true, commandCount: 100 }),
     );
-    expect(alert).toBeNull();
+    expect(alert).toContain("couldn't complete");
+    expect(alert).toContain("UNVERIFIED");
   });
 
-  it("(d) returns { alert: null } when the command count query errors", async () => {
+  it("(d) returns a DEGRADED alert (not silent null) when the command count query errors", async () => {
     const { alert } = await runSentinelCheck(
       "user-1",
       makeClient({ devices: [], commandsError: true }),
     );
-    expect(alert).toBeNull();
+    expect(alert).toContain("couldn't complete");
+    expect(alert).toContain("UNVERIFIED");
   });
 
-  it("(d) returns { alert: null } when the client throws", async () => {
+  it("(d) returns a DEGRADED alert (not silent null) when the client throws", async () => {
     const { alert } = await runSentinelCheck(
       "user-1",
       makeClient({ throwOnQuery: true }),
     );
-    expect(alert).toBeNull();
+    expect(alert).toContain("couldn't complete");
+    expect(alert).toContain("UNVERIFIED");
   });
 });
