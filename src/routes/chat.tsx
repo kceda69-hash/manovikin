@@ -35,6 +35,7 @@ import {
   X,
   Camera,
   MonitorUp,
+  WifiOff,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { signOutEverywhere } from "@/lib/auth-signout";
@@ -65,6 +66,9 @@ import {
   voiceLangLabel,
 } from "@/lib/voice-langs";
 import { isEchoOfSpeech, isInterruptCommand } from "@/lib/voice-utils";
+import { useOfflineMano } from "@/lib/offline-mano/useOfflineMano";
+import { decideChatRoute } from "@/lib/offline-mano/routing";
+import { OfflineManoPanel } from "@/components/mano/OfflineManoPanel";
 
 import {
   listThreads,
@@ -842,7 +846,7 @@ function ChatPanel({
     [threadId],
   );
 
-  const { messages, sendMessage, status, regenerate } = useChat({
+  const { messages, sendMessage, setMessages, status, regenerate } = useChat({
     id: threadId,
     messages: initialMessages,
     transport,
@@ -854,6 +858,36 @@ function ChatPanel({
     experimental_throttle: 50,
     onError: (e) => toast.error(e.message || "Something went wrong"),
   });
+
+  // Offline MANO: on-device AI brain (WebLLM). When enabled, messages route
+  // to the local engine instead of /api/chat. Sessions are local-only.
+  const mano = useOfflineMano();
+
+  // One-time nudge: if the browser goes offline mid-chat, offer Offline MANO.
+  useEffect(() => {
+    const onOffline = () => {
+      if (mano.onlineNudgeShownRef.current || mano.enabled) return;
+      mano.onlineNudgeShownRef.current = true;
+      toast("Connection lost — switch to Offline MANO?", {
+        action: { label: "Go offline", onClick: () => mano.setEnabled(true) },
+        duration: 8000,
+      });
+    };
+    const onOnline = () => {
+      mano.onlineNudgeShownRef.current = false;
+    };
+    window.addEventListener("offline", onOffline);
+    window.addEventListener("online", onOnline);
+    return () => {
+      window.removeEventListener("offline", onOffline);
+      window.removeEventListener("online", onOnline);
+    };
+  }, [mano.enabled, mano.setEnabled, mano.onlineNudgeShownRef]);
+
+  // Cloud-only modes don't apply offline: drop image studio when enabling.
+  useEffect(() => {
+    if (mano.enabled) setImageMode(false);
+  }, [mano.enabled]);
 
   // Client-side stall watchdog: if the chat stays in submitted/streaming for
   // too long without any message updates, the stream is stuck (e.g. network
@@ -1569,12 +1603,85 @@ function ChatPanel({
     el.style.height = `${Math.min(el.scrollHeight, 192)}px`;
   }, [input]);
 
-  const isBusy = status === "submitted" || status === "streaming" || imageBusy;
+  const isBusy =
+    status === "submitted" ||
+    status === "streaming" ||
+    imageBusy ||
+    (mano.enabled && (mano.streaming || mano.engineState === "loading"));
+
+  // Send a message through the on-device engine (offline mode).
+  const sendOfflineMessage = async (text: string) => {
+    const userMsg: UIMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      parts: [{ type: "text", text }],
+    };
+    const assistantId = crypto.randomUUID();
+    const appendDelta = (delta: string) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? {
+                ...m,
+                parts: m.parts.map((p) =>
+                  p.type === "text" ? { ...p, text: p.text + delta } : p,
+                ),
+              }
+            : m,
+        ),
+      );
+    };
+    setMessages((prev) => [
+      ...prev,
+      userMsg,
+      { id: assistantId, role: "assistant", parts: [{ type: "text", text: "" }] },
+    ]);
+    lastUserSendRef.current = Date.now();
+    const history = [...messages, userMsg]
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.parts
+          .map((p) => (p.type === "text" ? (p as { text: string }).text : ""))
+          .join(""),
+      }))
+      .filter((m) => m.content.trim().length > 0)
+      .slice(-20);
+    try {
+      await mano.chat(history, appendDelta);
+    } catch {
+      toast.error(mano.error ?? "Offline MANO couldn't reply — try again.");
+    }
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ block: "end" });
+    });
+  };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     const trimmed = input.trim();
     if ((!trimmed && attachments.length === 0) || isBusy) return;
+    // Offline MANO routing: local engine instead of /api/chat.
+    const route = decideChatRoute({ offlineEnabled: mano.enabled, engineState: mano.engineState });
+    if (route !== "cloud") {
+      if (route === "offline-not-ready") {
+        if (mano.engineState === "error") {
+          toast.error(mano.error ?? "Offline MANO failed to load.");
+        } else {
+          toast.error("Offline MANO is still loading — give it a moment.");
+          void mano.ensureReady();
+        }
+        return;
+      }
+      if (attachments.length > 0) {
+        toast.error("Attachments need the cloud — offline MANO is text-only for now.");
+        return;
+      }
+      setInput("");
+      setAttachments([]);
+      await sendOfflineMessage(trimmed);
+      return;
+    }
     setInput("");
     const filesToSend = attachments;
     setAttachments([]);
@@ -1840,6 +1947,12 @@ function ChatPanel({
               <span>MANOVIK AI is thinking…</span>
             </div>
           )}
+          {mano.streaming && (
+            <div className="flex items-center gap-2 pl-1 text-sm text-muted-foreground">
+              <Sparkles className="h-4 w-4 animate-pulse text-primary" />
+              <span>Offline MANO is thinking…</span>
+            </div>
+          )}
           {streamStalled && (status === "submitted" || status === "streaming") && (
             <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm">
               <span className="text-amber-200">The response seems stuck.</span>
@@ -1865,6 +1978,7 @@ function ChatPanel({
         className="px-3 py-3 sm:px-4 sm:py-4"
         style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
       >
+        <OfflineManoPanel mano={mano} />
         <div className="mx-auto mb-3 flex max-w-3xl flex-wrap items-center gap-2">
           <button
             type="button"
@@ -1925,6 +2039,28 @@ function ChatPanel({
           <Link to="/holo" className="mano-tool-orb" aria-label="Holo Deck" title="Holo Deck">
             <Sparkles className="h-5 w-5 text-foreground" />
           </Link>
+          <button
+            type="button"
+            onClick={() => mano.setEnabled((v) => !v)}
+            className={`mano-tool-orb ${mano.enabled ? "active" : ""}`}
+            aria-pressed={mano.enabled}
+            aria-label={mano.enabled ? "Switch back to cloud MANO" : "Switch to Offline MANO"}
+            title={
+              mano.enabled
+                ? "On-device mode is on — tap to go back to cloud"
+                : "Offline MANO — on-device AI, works without internet"
+            }
+          >
+            <WifiOff className="h-5 w-5 text-foreground" />
+          </button>
+          {mano.enabled && (
+            <span
+              className="mano-glass rounded-full px-3 py-1.5 text-xs font-medium text-primary"
+              title="Chatting with the on-device model. Cloud tools (Gmail, calendar, missions, device commands) are unavailable offline."
+            >
+              On-device
+            </span>
+          )}
           <label
             className="mano-glass flex cursor-pointer items-center gap-1.5 rounded-full py-2 pl-3 pr-2 text-sm transition hover:scale-105"
             title={

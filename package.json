@@ -28,6 +28,7 @@
     "@lovable.dev/mcp-js": "^0.20.0",
     "@lovable.dev/webhooks-js": "^0.0.1",
     "@mediapipe/tasks-vision": "^1.0.1",
+    "@mlc-ai/web-llm": "^0.2.85",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-aspect-ratio": "^1.1.8",
