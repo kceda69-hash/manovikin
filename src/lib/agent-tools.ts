@@ -14,6 +14,7 @@ import { missionTool } from "./mission-tool";
 import { dossierTool } from "./dossier-tool";
 import { locationTools } from "./location-tools";
 import { seclabWebscanTool } from "./seclab-tools";
+import { agentFleetTools } from "./agent-fleet-tools";
 import { googleWorkspaceTools } from "./google-workspace-tool";
 import { spotifyTools } from "./spotify-tool";
 
@@ -912,6 +913,14 @@ for (const tool of locationTools) sandbox.register(tool as ToolDef<unknown>);
 // exposed paths, cookies, disclosure, CORS) for targets the user owns.
 // Defined in ./seclab-tools; every fetch is SSRF-guarded.
 sandbox.register(seclabWebscanTool as ToolDef<unknown>);
+
+// ---- Agent Fleet ----
+// agent.create / agent.list / agent.pause / agent.resume / agent.run_now /
+// agent.remove / agent.logs. The user's own AI workforce: hire specialists
+// (or the pre-built C-suite + team templates via the /agents page), each
+// with a job and schedule, running autonomously on the fleet tick.
+// Agents can only PROPOSE new agents (approval queue) — never create them.
+for (const tool of agentFleetTools) sandbox.register(tool as ToolDef<unknown>);
 
 // ---- Google Workspace command center ----
 // gmail.triage / gmail.read / gmail.send and calendar.agenda / calendar.create

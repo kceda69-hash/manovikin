@@ -98,6 +98,7 @@ import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/pub
 import { Route as ApiPublicHooksRunSchedulesRouteImport } from './routes/api/public/hooks/run-schedules'
 import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
 import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
+import { Route as ApiPublicHooksAgentFleetTickRouteImport } from './routes/api/public/hooks/agent-fleet-tick'
 import { Route as ApiPublicDeviceAmbientFrameRouteImport } from './routes/api/public/device/ambient-frame'
 import { Route as ApiPublicDeviceActionRouteImport } from './routes/api/public/device/$action'
 import { Route as ApiIntegrationsSpotifyConnectRouteImport } from './routes/api/integrations/spotify/connect'
@@ -566,6 +567,12 @@ const ApiPublicHooksManovikSelfUpdateRoute =
     path: '/api/public/hooks/manovik-self-update',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAgentFleetTickRoute =
+  ApiPublicHooksAgentFleetTickRouteImport.update({
+    id: '/api/public/hooks/agent-fleet-tick',
+    path: '/api/public/hooks/agent-fleet-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicDeviceAmbientFrameRoute =
   ApiPublicDeviceAmbientFrameRouteImport.update({
     id: '/api/public/device/ambient-frame',
@@ -686,6 +693,7 @@ export interface FileRoutesByFullPath {
   '/api/integrations/spotify/connect': typeof ApiIntegrationsSpotifyConnectRoute
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
+  '/api/public/hooks/agent-fleet-tick': typeof ApiPublicHooksAgentFleetTickRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
@@ -783,6 +791,7 @@ export interface FileRoutesByTo {
   '/api/integrations/spotify/connect': typeof ApiIntegrationsSpotifyConnectRoute
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
+  '/api/public/hooks/agent-fleet-tick': typeof ApiPublicHooksAgentFleetTickRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
@@ -881,6 +890,7 @@ export interface FileRoutesById {
   '/api/integrations/spotify/connect': typeof ApiIntegrationsSpotifyConnectRoute
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
+  '/api/public/hooks/agent-fleet-tick': typeof ApiPublicHooksAgentFleetTickRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
@@ -980,6 +990,7 @@ export interface FileRouteTypes {
     | '/api/integrations/spotify/connect'
     | '/api/public/device/$action'
     | '/api/public/device/ambient-frame'
+    | '/api/public/hooks/agent-fleet-tick'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/run-schedules'
@@ -1077,6 +1088,7 @@ export interface FileRouteTypes {
     | '/api/integrations/spotify/connect'
     | '/api/public/device/$action'
     | '/api/public/device/ambient-frame'
+    | '/api/public/hooks/agent-fleet-tick'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/run-schedules'
@@ -1174,6 +1186,7 @@ export interface FileRouteTypes {
     | '/api/integrations/spotify/connect'
     | '/api/public/device/$action'
     | '/api/public/device/ambient-frame'
+    | '/api/public/hooks/agent-fleet-tick'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/run-schedules'
@@ -1272,6 +1285,7 @@ export interface RootRouteChildren {
   ApiIntegrationsSpotifyConnectRoute: typeof ApiIntegrationsSpotifyConnectRoute
   ApiPublicDeviceActionRoute: typeof ApiPublicDeviceActionRoute
   ApiPublicDeviceAmbientFrameRoute: typeof ApiPublicDeviceAmbientFrameRoute
+  ApiPublicHooksAgentFleetTickRoute: typeof ApiPublicHooksAgentFleetTickRoute
   ApiPublicHooksManovikSelfUpdateRoute: typeof ApiPublicHooksManovikSelfUpdateRoute
   ApiPublicHooksResubmitSitemapRoute: typeof ApiPublicHooksResubmitSitemapRoute
   ApiPublicHooksRunSchedulesRoute: typeof ApiPublicHooksRunSchedulesRoute
@@ -1911,6 +1925,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksManovikSelfUpdateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/agent-fleet-tick': {
+      id: '/api/public/hooks/agent-fleet-tick'
+      path: '/api/public/hooks/agent-fleet-tick'
+      fullPath: '/api/public/hooks/agent-fleet-tick'
+      preLoaderRoute: typeof ApiPublicHooksAgentFleetTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/device/ambient-frame': {
       id: '/api/public/device/ambient-frame'
       path: '/api/public/device/ambient-frame'
@@ -2042,6 +2063,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiIntegrationsSpotifyConnectRoute: ApiIntegrationsSpotifyConnectRoute,
   ApiPublicDeviceActionRoute: ApiPublicDeviceActionRoute,
   ApiPublicDeviceAmbientFrameRoute: ApiPublicDeviceAmbientFrameRoute,
+  ApiPublicHooksAgentFleetTickRoute: ApiPublicHooksAgentFleetTickRoute,
   ApiPublicHooksManovikSelfUpdateRoute: ApiPublicHooksManovikSelfUpdateRoute,
   ApiPublicHooksResubmitSitemapRoute: ApiPublicHooksResubmitSitemapRoute,
   ApiPublicHooksRunSchedulesRoute: ApiPublicHooksRunSchedulesRoute,
