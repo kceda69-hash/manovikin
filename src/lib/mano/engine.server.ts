@@ -18,8 +18,24 @@ import { resolveEndpointModel } from "@/lib/ai-model";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-/** Ordered substitutes if a substrate call fails transiently. */
-const SUBSTRATE_FALLBACKS = ["google/gemini-3.7-flash", "google/gemini-3.5-flash"];
+/** Ordered substitutes if a substrate call fails transiently (gateway ids). */
+const SUBSTRATE_FALLBACKS = ["google/gemini-3.7-flash", "google/gemini-2.5-flash"];
+
+/**
+ * Build the retry chain for a substrate call. In sovereign mode the primary
+ * pins to the configured model while fallbacks resolve to genuinely
+ * different bare Gemini ids — retrying the same overloaded model would be
+ * pointless (2026-10-06: 503 overload on gemini-3.8-flash).
+ */
+function substrateChain(model: string): string[] {
+  const primary = resolveEndpointModel(model);
+  const fallbacks = SUBSTRATE_FALLBACKS.map((m) =>
+    resolveEndpointModel(m, { pinToConfigured: false }),
+  );
+  return [...new Set([primary, ...fallbacks])];
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export type ManoRunInput = {
   prompt: string;
@@ -105,9 +121,10 @@ async function callWithFallback(
   user: string,
   maxTokens: number,
 ): Promise<{ text: string; substrate: string }> {
-  const chain = [model, ...SUBSTRATE_FALLBACKS.filter((m) => m !== model)];
+  const chain = substrateChain(model);
   let last: unknown;
-  for (const candidate of chain) {
+  for (let i = 0; i < chain.length; i++) {
+    const candidate = chain[i]!;
     try {
       return {
         text: await callSubstrate(candidate, system, user, maxTokens),
@@ -116,6 +133,8 @@ async function callWithFallback(
     } catch (err) {
       last = err;
       if (!(err as { retryable?: boolean })?.retryable) throw err;
+      // Brief backoff before the next model — 503/429 overloads are transient.
+      if (i < chain.length - 1) await sleep(1000 * (i + 1));
     }
   }
   throw last instanceof Error ? last : new Error("MANO 1.1 request failed.");

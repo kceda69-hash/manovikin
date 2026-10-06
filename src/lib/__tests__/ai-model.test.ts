@@ -44,4 +44,17 @@ describe("resolveEndpointModel", () => {
     expect(resolveEndpointModel("google/gemini-3.7-flash")).toBe("gemini-3.7-flash");
     expect(resolveEndpointModel("gemini-3.8-flash")).toBe("gemini-3.8-flash");
   });
+
+  it("sovereign mode with pinToConfigured=false: strips prefix, never pins", () => {
+    // Fallback chains use this: retrying the same pinned (possibly
+    // overloaded) model would be pointless — fallbacks must differ.
+    process.env.MANOVIK_AI_BASE_URL = "https://example.com/v1";
+    process.env.MANOVIK_AI_MODEL = "gemini-3.8-flash";
+    expect(resolveEndpointModel("google/gemini-3.7-flash", { pinToConfigured: false })).toBe(
+      "gemini-3.7-flash",
+    );
+    expect(resolveEndpointModel("google/gemini-2.5-flash", { pinToConfigured: false })).toBe(
+      "gemini-2.5-flash",
+    );
+  });
 });

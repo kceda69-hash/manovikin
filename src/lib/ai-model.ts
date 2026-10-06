@@ -26,12 +26,21 @@ export function isSovereignEndpoint(): boolean {
  * - Sovereign mode: pin to the deployment's configured model
  *   (MANOVIK_AI_MODEL_ID for trained weights, else MANOVIK_AI_MODEL),
  *   falling back to the catalog id with any provider/ prefix stripped.
+ * - Sovereign mode with pinToConfigured=false: skip the configured-model
+ *   pin and just strip the provider prefix. Used for FALLBACK chains, where
+ *   retrying the same pinned model would be pointless — fallbacks must be
+ *   genuinely different models.
  */
-export function resolveEndpointModel(catalogId: string): string {
+export function resolveEndpointModel(
+  catalogId: string,
+  opts: { pinToConfigured?: boolean } = {},
+): string {
   if (!isSovereignEndpoint()) return catalogId;
+  const stripped = catalogId.replace(/^[a-z0-9_-]+\//i, "");
+  if (opts.pinToConfigured === false) return stripped;
   return (
     process.env.MANOVIK_AI_MODEL_ID?.trim() ||
     process.env.MANOVIK_AI_MODEL?.trim() ||
-    catalogId.replace(/^[a-z0-9_-]+\//i, "")
+    stripped
   );
 }
