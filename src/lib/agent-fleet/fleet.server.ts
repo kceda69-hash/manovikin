@@ -123,11 +123,16 @@ function rethrowDbError(error: { message: string } | null | undefined): void {
   throw new Error(error.message);
 }
 
-function wrapTableError<T>(fn: () => Promise<T>): Promise<T> {
-  return fn().catch((err) => {
+async function wrapTableError<T>(fn: () => Promise<T>): Promise<T> {
+  // NOTE: Supabase query builders are thenable but have NO .catch method,
+  // so `fn().catch(...)` throws "fn(...).catch is not a function" on real
+  // clients. await works on any thenable — always use try/catch here.
+  try {
+    return await fn();
+  } catch (err) {
     if (isMissingTable(err)) throw new FleetNotSetupError();
     throw err;
-  });
+  }
 }
 
 const allowlistSchema = z

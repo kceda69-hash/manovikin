@@ -34,8 +34,12 @@ function buildFake(opts: {
   log?: string[];
   inserted?: unknown[];
   updated?: unknown[];
+  /** When true, chains are thenable WITHOUT .catch — like the real Supabase
+   *  PostgREST builder. Guards against the "fn(...).catch is not a function"
+   *  production bug (2026-10-06). */
+  realisticThenable?: boolean;
 } = {}) {
-  const { rows = {}, error = null, log = [], inserted = [], updated = [] } = opts;
+  const { rows = {}, error = null, log = [], inserted = [], updated = [], realisticThenable = false } = opts;
   const resultFor = (table: string) => {
     const last = log.length > 0 ? log[log.length - 1]! : "";
     const wasSingle = last === `single:${table}`;
@@ -63,7 +67,9 @@ function buildFake(opts: {
       limit: (n: number) => (log.push(`limit:${table}:${n}`), chain),
       single: () => (log.push(`single:${table}`), chain),
       then: (resolve: (v: unknown) => void) => resolve(resultFor(table)),
-      catch: () => Promise.resolve(resultFor(table)),
+      // The real Supabase builder has .then but NO .catch — only include it
+      // in the legacy (unrealistic) mode.
+      ...(realisticThenable ? {} : { catch: () => Promise.resolve(resultFor(table)) }),
     };
     return chain;
   };
@@ -170,6 +176,20 @@ describe("createAgent validation", () => {
     await expect(createAgent(db, USER, { name: "X", job: "Do things well." })).rejects.toBeInstanceOf(
       FleetNotSetupError,
     );
+  });
+
+  it("works with thenables that have no .catch (real Supabase builder)", async () => {
+    // Regression test for the 2026-10-06 production bug: the real Supabase
+    // PostgREST builder is thenable but has no .catch method, so
+    // `fn().catch(...)` threw "fn(...).catch is not a function" on every
+    // fleet DB call. wrapTableError must use try/catch + await instead.
+    const row = agentRow({ name: "Real Client Agent" });
+    const { db } = buildFake({ rows: { manovik_agents: [row] }, realisticThenable: true });
+    const agents = await listAgents(db, USER);
+    expect(agents).toHaveLength(1);
+    expect(agents[0]!.name).toBe("Real Client Agent");
+    const created = await createAgent(db, USER, { name: "Y", job: "Do things well." });
+    expect(created.user_id).toBe(USER);
   });
 
   it("fills defaults from a template", async () => {
