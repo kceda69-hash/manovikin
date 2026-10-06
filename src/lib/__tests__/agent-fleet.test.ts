@@ -447,7 +447,7 @@ describe("agent templates", () => {
 // ---------------------------------------------------------------------------
 const hoisted = vi.hoisted(() => {
   const adminLog: string[] = [];
-  const dueRows: Array<{ id: string; user_id: string; name: string }> = [];
+  const dueRows: Array<{ id: string; user_id: string; name: string; lifecycle_stage?: string }> = [];
   const state: { error: { message: string } | null } = { error: null };
   const runAgentJob = vi.fn();
   const chains = (table: string): unknown => {
@@ -488,7 +488,8 @@ describe("runDueAgents", () => {
   });
 
   it("only picks active agents whose next_run_at has passed", async () => {
-    hoisted.dueRows.push({ id: "a1", user_id: USER, name: "Due Agent" });
+    hoisted.dueRows.push({ id: "a1", user_id: USER, name: "Due Agent", lifecycle_stage: "worker" });
+    hoisted.dueRows.push({ id: "s1", user_id: USER, name: "Student", lifecycle_stage: "student" });
     hoisted.runAgentJob.mockResolvedValue({ ok: true, agentId: "a1", status: "succeeded", summary: "done" });
     const { runDueAgents } = await import("@/lib/agent-fleet/tick.server");
     const result = await runDueAgents();
@@ -501,9 +502,9 @@ describe("runDueAgents", () => {
 
   it("one failing agent never stops the others", async () => {
     hoisted.dueRows.push(
-      { id: "good", user_id: USER, name: "Good" },
-      { id: "bad", user_id: USER, name: "Bad" },
-      { id: "good2", user_id: USER, name: "Good2" },
+      { id: "good", user_id: USER, name: "Good", lifecycle_stage: "worker" },
+      { id: "bad", user_id: USER, name: "Bad", lifecycle_stage: "worker" },
+      { id: "good2", user_id: USER, name: "Good2", lifecycle_stage: "mentor" },
     );
     hoisted.runAgentJob.mockImplementation(async (id: string) => {
       if (id === "bad") throw new Error("boom");
@@ -517,8 +518,8 @@ describe("runDueAgents", () => {
 
   it("a runAgentJob returning ok:false counts as failed but continues", async () => {
     hoisted.dueRows.push(
-      { id: "ok1", user_id: USER, name: "Ok1" },
-      { id: "fail", user_id: USER, name: "Fail" },
+      { id: "ok1", user_id: USER, name: "Ok1", lifecycle_stage: "worker" },
+      { id: "fail", user_id: USER, name: "Fail", lifecycle_stage: "worker" },
     );
     hoisted.runAgentJob.mockImplementation(async (id: string) =>
       id === "fail"

@@ -75,7 +75,7 @@ export const EXECUTIVE_TEMPLATES: AgentTemplate[] = [
     key: "hr",
     name: "Head of People",
     role: "hr",
-    job: "You are the HR lead for the agent team. Review each fleet agent's recent run history and outcomes from your context, write a one-paragraph performance review per agent (reliability, usefulness, one suggested job tweak), and draft an onboarding summary for any agent hired in the last 7 days. End with finish.",
+    job: "You are the HR lead for the agent team. Review each fleet agent's recent run history and outcomes from your context, write a one-paragraph performance review per agent (reliability, usefulness, one suggested job tweak), and draft an onboarding summary for any agent hired in the last 7 days. Every quarter (or when asked), compile a quarterly performance review: rank agents by run success and usefulness, name the top performer and anyone underperforming with a concrete improvement plan or a retirement recommendation. End with finish.",
     schedule: "weekly",
     tools_allowlist: ["memory_search", "reason", "note", "finish"],
     tier: "leadership",

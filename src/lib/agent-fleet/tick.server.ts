@@ -3,8 +3,13 @@
  *
  * Called by the hourly agent-fleet-tick hook. Sequential, bounded, and
  * failure-isolated: one agent failing never kills the tick or the others.
+ *
+ * Lifecycle gate (phase 2): only `worker` and `mentor` stages run on the
+ * tick. Applicants/students are in school (teach/graduate drive them);
+ * retired agents never run again.
  */
 import { runAgentJob } from "./runner.server";
+import { isTickableStage } from "./lifecycle.server";
 
 export interface FleetTickResult {
   ok: boolean;
@@ -24,17 +29,20 @@ export async function runDueAgents(): Promise<FleetTickResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabaseAdmin as any;
 
-  let due: Array<{ id: string; user_id: string; name: string }>;
+  let due: Array<{ id: string; user_id: string; name: string; lifecycle_stage: string }>;
   try {
     const { data, error } = await db
       .from("manovik_agents")
-      .select("id,user_id,name")
+      .select("id,user_id,name,lifecycle_stage")
       .eq("status", "active")
       .lte("next_run_at", new Date().toISOString())
       .order("next_run_at", { ascending: true })
       .limit(TICK_LIMIT);
     if (error) throw new Error(error.message);
-    due = (data ?? []) as Array<{ id: string; user_id: string; name: string }>;
+    // Lifecycle gate: applicants/students are in school, retired stay retired.
+    due = ((data ?? []) as Array<{ id: string; user_id: string; name: string; lifecycle_stage: string }>).filter(
+      (a) => isTickableStage(a.lifecycle_stage as "worker" | "mentor" | "student" | "applicant" | "retired"),
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (/42P01|relation .* does not exist/i.test(msg)) {

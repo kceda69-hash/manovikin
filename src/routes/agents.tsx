@@ -39,6 +39,16 @@ import {
   runFleetAgentNow,
   removeFleetAgent,
   fleetAgentRuns,
+  listFleetProposals,
+  listFleetProposalHistory,
+  approveFleetProposal,
+  rejectFleetProposal,
+  teachFleetStudent,
+  graduateFleetStudent,
+  enrollFleetStudent,
+  promoteFleetMentor,
+  retireFleetAgent,
+  getFleetWorldStats,
 } from "@/lib/agent-fleet/fleet.functions";
 import { describeSchedule } from "@/lib/agent-fleet/schedule";
 
@@ -109,7 +119,34 @@ interface FleetAgent {
   last_run_at: string | null;
   last_outcome: string | null;
   run_count: number;
+  lifecycle_stage: "applicant" | "student" | "worker" | "mentor" | "retired";
+  skills: string[];
+  proposed_by: string | null;
+  proposed_by_name: string | null;
+  mentor_id: string | null;
+  mentor_name: string | null;
 }
+
+interface Proposal {
+  id: string;
+  name: string;
+  role: string;
+  job: string;
+  rationale: string;
+  status: string;
+  created_at: string;
+  decided_at: string | null;
+  decision_note: string | null;
+  proposer_name: string | null;
+}
+
+const STAGE_META: Record<FleetAgent["lifecycle_stage"], { label: string; icon: string }> = {
+  applicant: { label: "Applicant", icon: "📝" },
+  student: { label: "Student", icon: "🎓" },
+  worker: { label: "Worker", icon: "⚙️" },
+  mentor: { label: "Mentor", icon: "🧙" },
+  retired: { label: "Retired", icon: "🌅" },
+};
 
 function timeAgo(iso: string | null): string {
   if (!iso) return "never";
@@ -165,18 +202,32 @@ function FleetAgentCard({
     enabled: showRuns,
   });
   const isBusy = busy === agent.id;
+  const stage = STAGE_META[agent.lifecycle_stage];
 
   return (
-    <Card>
+    <Card className={agent.lifecycle_stage === "retired" ? "opacity-70" : ""}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <div>
             <CardTitle className="text-base flex items-center gap-2">
               <Bot className="h-4 w-4" /> {agent.name}
             </CardTitle>
-            <CardDescription>{agent.role}</CardDescription>
+            <CardDescription>
+              {agent.role}
+              {agent.proposed_by_name && (
+                <span className="text-muted-foreground"> · proposed by {agent.proposed_by_name}</span>
+              )}
+              {agent.mentor_name && agent.lifecycle_stage === "student" && (
+                <span className="text-muted-foreground"> · mentored by {agent.mentor_name}</span>
+              )}
+            </CardDescription>
           </div>
-          <Badge variant={agent.status === "active" ? "default" : "secondary"}>{agent.status}</Badge>
+          <div className="flex flex-col items-end gap-1">
+            <Badge variant={agent.status === "active" ? "default" : "secondary"}>{agent.status}</Badge>
+            <Badge variant="outline">
+              {stage.icon} {stage.label}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -191,36 +242,76 @@ function FleetAgentCard({
           </span>
           <span>Last: {timeAgo(agent.last_run_at)}</span>
         </div>
+        {agent.skills.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {agent.skills.map((s) => (
+              <Badge key={s} variant="secondary" className="text-[10px]">
+                {s}
+              </Badge>
+            ))}
+          </div>
+        )}
         {agent.last_outcome && (
           <p className="text-xs line-clamp-3 rounded bg-muted p-2">{agent.last_outcome}</p>
         )}
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="outline" disabled={isBusy} onClick={() => onAction("run", agent.id)}>
-            {isBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />} Run now
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={isBusy}
-            onClick={() => onAction(agent.status === "active" ? "pause" : "resume", agent.id)}
-          >
-            {agent.status === "active" ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-            {agent.status === "active" ? "Pause" : "Resume"}
-          </Button>
+          {(agent.lifecycle_stage === "worker" || agent.lifecycle_stage === "mentor") && (
+            <>
+              <Button size="sm" variant="outline" disabled={isBusy} onClick={() => onAction("run", agent.id)}>
+                {isBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />} Run now
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={isBusy}
+                onClick={() => onAction(agent.status === "active" ? "pause" : "resume", agent.id)}
+              >
+                {agent.status === "active" ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+                {agent.status === "active" ? "Pause" : "Resume"}
+              </Button>
+            </>
+          )}
+          {agent.lifecycle_stage === "student" && (
+            <>
+              <Button size="sm" variant="outline" disabled={isBusy} onClick={() => onAction("teach", agent.id)}>
+                {isBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Bot className="h-3 w-3" />} Teach
+              </Button>
+              <Button size="sm" variant="outline" disabled={isBusy} onClick={() => onAction("graduate", agent.id)}>
+                Graduate
+              </Button>
+            </>
+          )}
+          {agent.lifecycle_stage === "applicant" && (
+            <Button size="sm" variant="outline" disabled={isBusy} onClick={() => onAction("enroll", agent.id)}>
+              Enroll in school
+            </Button>
+          )}
+          {agent.lifecycle_stage === "worker" && (
+            <Button size="sm" variant="outline" disabled={isBusy} onClick={() => onAction("promote", agent.id)}>
+              Promote to mentor
+            </Button>
+          )}
+          {(agent.lifecycle_stage === "worker" || agent.lifecycle_stage === "mentor") && (
+            <Button size="sm" variant="outline" disabled={isBusy} onClick={() => onAction("retire", agent.id)}>
+              Retire
+            </Button>
+          )}
           <Button size="sm" variant="outline" onClick={() => setShowRuns((v) => !v)}>
             History{" "}
             <ChevronDown className={`h-3 w-3 transition-transform ${showRuns ? "rotate-180" : ""}`} />
           </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            disabled={isBusy}
-            onClick={() => {
-              if (window.confirm(`Fire "${agent.name}"? This is permanent.`)) onAction("remove", agent.id);
-            }}
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
+          {agent.lifecycle_stage !== "retired" && (
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={isBusy}
+              onClick={() => {
+                if (window.confirm(`Fire "${agent.name}"? This is permanent.`)) onAction("remove", agent.id);
+              }}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          )}
         </div>
         {showRuns && (
           <div className="space-y-1 text-xs">
@@ -242,6 +333,179 @@ function FleetAgentCard({
   );
 }
 
+function WorldStatsStrip() {
+  const fetchStats = useServerFn(getFleetWorldStats);
+  const stats = useQuery({ queryKey: ["fleet-world-stats"], queryFn: () => fetchStats({}) });
+  const s = stats.data;
+  const items = [
+    { label: "Agents", value: s?.total ?? "—", icon: "🤖" },
+    { label: "In school", value: s ? (s.applicants ?? 0) + (s.students ?? 0) : "—", icon: "🎓" },
+    { label: "Mentors", value: s?.mentors ?? "—", icon: "🧙" },
+    { label: "Pending proposals", value: s?.pendingProposals ?? "—", icon: "📝" },
+    { label: "Runs today", value: s?.runsToday ?? "—", icon: "⚡" },
+  ];
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      {items.map((i) => (
+        <Card key={i.label}>
+          <CardContent className="pt-4 pb-3 text-center">
+            <div className="text-2xl font-bold">
+              {i.icon} {i.value}
+            </div>
+            <div className="text-xs text-muted-foreground">{i.label}</div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function ProposalCard({
+  proposal,
+  onDecide,
+  busy,
+}: {
+  proposal: Proposal;
+  onDecide: (kind: "approve" | "reject", id: string) => void;
+  busy: string | null;
+}) {
+  const isBusy = busy === proposal.id;
+  return (
+    <Card className="border-dashed">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Bot className="h-4 w-4" /> {proposal.name}
+          <Badge variant="outline">{proposal.role}</Badge>
+        </CardTitle>
+        <CardDescription>
+          Proposed by {proposal.proposer_name ?? "an agent"} · {timeAgo(proposal.created_at)}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <p className="text-xs text-muted-foreground line-clamp-3">
+          <span className="font-medium text-foreground">Job: </span>
+          {proposal.job}
+        </p>
+        <p className="text-xs text-muted-foreground line-clamp-3">
+          <span className="font-medium text-foreground">Why: </span>
+          {proposal.rationale}
+        </p>
+        <div className="flex gap-2 pt-1">
+          <Button size="sm" disabled={isBusy} onClick={() => onDecide("approve", proposal.id)}>
+            {isBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : null} Approve — send to school
+          </Button>
+          <Button size="sm" variant="outline" disabled={isBusy} onClick={() => onDecide("reject", proposal.id)}>
+            Reject
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProposalsSection({ onChanged }: { onChanged: () => void }) {
+  const queryClient = useQueryClient();
+  const fetchPending = useServerFn(listFleetProposals);
+  const fetchApproved = useServerFn(listFleetProposalHistory);
+  const approve = useServerFn(approveFleetProposal);
+  const reject = useServerFn(rejectFleetProposal);
+
+  const pending = useQuery({ queryKey: ["fleet-proposals"], queryFn: () => fetchPending({}) });
+  const [showHistory, setShowHistory] = useState(false);
+  const history = useQuery({
+    queryKey: ["fleet-proposal-history"],
+    queryFn: async () => {
+      const [a, r] = await Promise.all([
+        fetchApproved({ data: { status: "approved" } }),
+        fetchApproved({ data: { status: "rejected" } }),
+      ]);
+      return [...a, ...r].sort(
+        (x, y) => new Date(y.decided_at ?? y.created_at).getTime() - new Date(x.decided_at ?? x.created_at).getTime(),
+      ).slice(0, 10);
+    },
+    enabled: showHistory,
+  });
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const refreshAll = () => {
+    queryClient.invalidateQueries({ queryKey: ["fleet-proposals"] });
+    queryClient.invalidateQueries({ queryKey: ["fleet-world-stats"] });
+    onChanged();
+  };
+
+  const handleDecide = async (kind: "approve" | "reject", id: string) => {
+    if (kind === "reject") {
+      const reason = window.prompt("Why reject this proposal? (kept in history)");
+      if (!reason || !reason.trim()) return;
+      setBusy(id);
+      try {
+        await reject({ data: { id, reason: reason.trim() } });
+        toast.success("Proposal rejected.");
+        refreshAll();
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "Reject failed");
+      } finally {
+        setBusy(null);
+      }
+      return;
+    }
+    setBusy(id);
+    try {
+      const agent = await approve({ data: { id } });
+      toast.success(`"${agent.name}" born — enrolled in school.`);
+      refreshAll();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Approve failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const list: Proposal[] = pending.data ?? [];
+  return (
+    <section className="space-y-4">
+      <h2 className="text-lg font-semibold flex items-center gap-2">
+        📝 Hiring proposals {list.length > 0 && <Badge>{list.length} pending</Badge>}
+      </h2>
+      <p className="text-sm text-muted-foreground -mt-2">
+        Your agents dream up new hires — nothing is born without your word.
+      </p>
+      {pending.isLoading && <p className="text-muted-foreground text-sm">Loading proposals…</p>}
+      {!pending.isLoading && list.length === 0 && (
+        <Card>
+          <CardContent className="pt-6 text-muted-foreground text-sm">
+            No pending proposals. When a fleet agent spots a recurring job, it will file one here.
+          </CardContent>
+        </Card>
+      )}
+      <div className="grid gap-4 md:grid-cols-2">
+        {list.map((p) => (
+          <ProposalCard key={p.id} proposal={p} onDecide={handleDecide} busy={busy} />
+        ))}
+      </div>
+      <Button size="sm" variant="ghost" onClick={() => setShowHistory((v) => !v)}>
+        Past decisions{" "}
+        <ChevronDown className={`h-3 w-3 transition-transform ${showHistory ? "rotate-180" : ""}`} />
+      </Button>
+      {showHistory && (
+        <div className="space-y-2 text-sm">
+          {history.isLoading && <p className="text-muted-foreground">Loading…</p>}
+          {history.data?.map((p: Proposal) => (
+            <div key={p.id} className="flex items-center justify-between gap-2 rounded border p-2">
+              <span>
+                {p.name} <span className="text-muted-foreground">({p.role})</span>
+                {p.decision_note && <span className="text-muted-foreground"> — {p.decision_note}</span>}
+              </span>
+              <Badge variant={p.status === "approved" ? "default" : "secondary"}>{p.status}</Badge>
+            </div>
+          ))}
+          {history.data?.length === 0 && <p className="text-muted-foreground">No past decisions.</p>}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function FleetDashboard() {
   const queryClient = useQueryClient();
   const fetchTemplates = useServerFn(listAgentTemplates);
@@ -250,6 +514,11 @@ function FleetDashboard() {
   const changeStatus = useServerFn(setFleetAgentStatus);
   const runNow = useServerFn(runFleetAgentNow);
   const fire = useServerFn(removeFleetAgent);
+  const teach = useServerFn(teachFleetStudent);
+  const graduate = useServerFn(graduateFleetStudent);
+  const enroll = useServerFn(enrollFleetStudent);
+  const promote = useServerFn(promoteFleetMentor);
+  const retire = useServerFn(retireFleetAgent);
 
   const templates = useQuery({ queryKey: ["agent-templates"], queryFn: () => fetchTemplates({}) });
   const agents = useQuery({ queryKey: ["fleet-agents"], queryFn: () => fetchAgents({}) });
@@ -264,6 +533,7 @@ function FleetDashboard() {
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["fleet-agents"] });
+    queryClient.invalidateQueries({ queryKey: ["fleet-world-stats"] });
   };
 
   const handleHire = async (key: string) => {
@@ -320,6 +590,30 @@ function FleetDashboard() {
       } else if (kind === "remove") {
         await fire({ data: { id } });
         toast.success("Agent removed.");
+      } else if (kind === "teach") {
+        const r = await teach({ data: { id } });
+        toast.success(
+          r.newSkills.length > 0
+            ? `Study session done — learned: ${r.newSkills.join(", ")}`
+            : "Study session done — no new skills this time.",
+        );
+      } else if (kind === "graduate") {
+        const a = await graduate({ data: { id } });
+        toast.success(`"${a.name}" graduated — now working.`);
+      } else if (kind === "enroll") {
+        const a = await enroll({ data: { id } });
+        toast.success(`"${a.name}" enrolled in school.`);
+      } else if (kind === "promote") {
+        const a = await promote({ data: { id } });
+        toast.success(`"${a.name}" is now a mentor.`);
+      } else if (kind === "retire") {
+        const reason = window.prompt("Why retire this agent? (kept in history)");
+        if (!reason || !reason.trim()) {
+          setBusy(null);
+          return;
+        }
+        const a = await retire({ data: { id, reason: reason.trim() } });
+        toast.success(`"${a.name}" retired.`);
       }
       refresh();
     } catch (e) {
@@ -333,8 +627,30 @@ function FleetDashboard() {
   const team: Template[] = templates.data?.team ?? [];
   const list: FleetAgent[] = agents.data ?? [];
 
+  const school = list.filter((a) => a.lifecycle_stage === "applicant" || a.lifecycle_stage === "student");
+  const workers = list.filter((a) => a.lifecycle_stage === "worker");
+  const mentors = list.filter((a) => a.lifecycle_stage === "mentor");
+  const retired = list.filter((a) => a.lifecycle_stage === "retired");
+
+  const stageSection = (title: string, icon: string, agents: FleetAgent[]) =>
+    agents.length > 0 && (
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">
+          {icon} {title} ({agents.length})
+        </h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          {agents.map((a) => (
+            <FleetAgentCard key={a.id} agent={a} onAction={handleAction} busy={busy} />
+          ))}
+        </div>
+      </section>
+    );
+
   return (
     <div className="space-y-8">
+      <WorldStatsStrip />
+      <ProposalsSection onChanged={refresh} />
+
       <section className="space-y-4">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Crown className="h-5 w-5" /> Leadership
@@ -406,12 +722,11 @@ function FleetDashboard() {
             </CardContent>
           </Card>
         )}
-        <div className="grid gap-4 md:grid-cols-2">
-          {list.map((a) => (
-            <FleetAgentCard key={a.id} agent={a} onAction={handleAction} busy={busy} />
-          ))}
-        </div>
       </section>
+      {stageSection("In school", "🎓", school)}
+      {stageSection("Workers", "⚙️", workers)}
+      {stageSection("Mentors", "🧙", mentors)}
+      {stageSection("Retired", "🌅", retired)}
     </div>
   );
 }

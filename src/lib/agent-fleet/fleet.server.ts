@@ -390,6 +390,8 @@ export interface ProposalRow {
   status: "pending" | "approved" | "rejected";
   created_at: string;
   decided_at: string | null;
+  /** Human-readable reason when rejected (migration 20261006170000). */
+  decision_note: string | null;
 }
 
 const proposalInputSchema = z.object({

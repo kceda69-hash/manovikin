@@ -20,6 +20,11 @@ import {
   agentRunHistory,
   type FleetDb,
 } from "@/lib/agent-fleet/fleet.server";
+import {
+  listProposals,
+  approveProposal,
+  rejectProposal,
+} from "@/lib/agent-fleet/school.server";
 import { logAgentAction } from "@/lib/agent-audit.server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -183,6 +188,65 @@ const agentLogs: ToolDef<{ idOrName: string; limit?: number }> = {
   },
 };
 
+const agentProposals: ToolDef<object> = {
+  name: "agent.proposals",
+  description:
+    "List pending hiring proposals filed by your agents (who proposed whom, role, rationale). Nothing is born without your approval.",
+  schema: z.object({}),
+  timeoutMs: 10_000,
+  maxOutputBytes: 8_000,
+  rateLimitPerMin: 30,
+  execute: async (_input, { userId }) => {
+    const proposals = await listProposals(db, userId, "pending");
+    return proposals.map((p) => ({
+      id: p.id,
+      name: p.name,
+      role: p.role,
+      job: p.job,
+      rationale: p.rationale,
+      proposed_by: p.proposer_name ?? p.proposed_by_agent,
+      created_at: p.created_at,
+    }));
+  },
+};
+
+const agentApproveProposal: ToolDef<{ proposalId: string }> = {
+  name: "agent.approve_proposal",
+  description:
+    "Approve a pending hiring proposal: the agent is born as an applicant and auto-enrolled in school as a student under a mentor. The god-console — nothing is born without your word.",
+  schema: z.object({ proposalId: z.string().uuid() }),
+  timeoutMs: 20_000,
+  maxOutputBytes: 4_000,
+  rateLimitPerMin: 10,
+  execute: async ({ proposalId }, { userId }) => {
+    const { agent } = await approveProposal(db, userId, proposalId);
+    return {
+      ok: true,
+      id: agent.id,
+      name: agent.name,
+      role: agent.role,
+      lifecycle_stage: agent.lifecycle_stage,
+      mentor_id: agent.mentor_id,
+    };
+  },
+};
+
+const agentRejectProposal: ToolDef<{ proposalId: string; reason: string }> = {
+  name: "agent.reject_proposal",
+  description: "Reject a pending hiring proposal with a reason (kept in history).",
+  schema: z.object({
+    proposalId: z.string().uuid(),
+    reason: z.string().trim().min(1).max(500),
+  }),
+  timeoutMs: 10_000,
+  maxOutputBytes: 2_000,
+  rateLimitPerMin: 20,
+  execute: async ({ proposalId, reason }, { userId }) => {
+    const proposal = await rejectProposal(db, userId, proposalId, reason);
+    return { ok: true, name: proposal.name, status: proposal.status };
+  },
+};
+
 export const agentFleetTools = [
   agentCreate,
   agentList,
@@ -191,4 +255,7 @@ export const agentFleetTools = [
   agentRunNow,
   agentRemove,
   agentLogs,
+  agentProposals,
+  agentApproveProposal,
+  agentRejectProposal,
 ];
