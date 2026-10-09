@@ -21,17 +21,47 @@ export function isAuthorizedHook(request: Request): boolean {
     log.warn("hook_auth_no_secret_configured", {});
     return false;
   }
-  const got =
+  const got = bearerToken(request);
+  if (!got) return false;
+  return safeEqual(got, secret);
+}
+
+/** Extract the Bearer token from a request (empty string when absent). */
+export function bearerToken(request: Request): string {
+  return (
     request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ??
     request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") ??
-    "";
-  if (!got) return false;
-  const a = Buffer.from(got);
-  const b = Buffer.from(secret);
-  if (a.length !== b.length) return false;
+    ""
+  );
+}
+
+/** Constant-time string equality (false on length mismatch). */
+export function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
   try {
-    return timingSafeEqual(a, b);
+    return timingSafeEqual(ab, bb);
   } catch {
     return false;
   }
+}
+
+/**
+ * Dual-auth for pg_cron-triggered hooks: accept MANOVIK_HOOK_SECRET or the
+ * per-database RPC cron token (resolved by the caller via its vault-backed
+ * get_*_token() function, e.g. get_fleet_tick_token()). Fails closed when
+ * neither is configured or matches. This is what lets the fleet tick run on
+ * schedule even when MANOVIK_HOOK_SECRET was never set.
+ */
+export function isAuthorizedHookOrCronToken(
+  request: Request,
+  cronToken: string | null,
+): boolean {
+  const got = bearerToken(request);
+  if (!got) return false;
+  const candidates = [hookSecret(), cronToken].filter(
+    (c): c is string => typeof c === "string" && c.length > 0,
+  );
+  return candidates.some((secret) => safeEqual(got, secret));
 }

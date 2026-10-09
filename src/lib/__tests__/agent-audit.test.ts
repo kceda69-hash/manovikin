@@ -87,3 +87,52 @@ describe("hookSecret (audit fix: no LOVABLE_API_KEY fallback)", () => {
     vi.resetModules();
   });
 });
+
+describe("isAuthorizedHookOrCronToken", () => {
+  const cronToken = "fleet-tick-token-abc123";
+
+  it("authorizes the cron token when MANOVIK_HOOK_SECRET is unset (pg_cron path)", async () => {
+    vi.resetModules();
+    delete process.env.MANOVIK_HOOK_SECRET;
+    const { isAuthorizedHookOrCronToken } = await import("@/lib/hook-auth");
+    const req = new Request("https://x.test/", {
+      headers: { authorization: `Bearer ${cronToken}` },
+    });
+    expect(isAuthorizedHookOrCronToken(req, cronToken)).toBe(true);
+    const bad = new Request("https://x.test/", {
+      headers: { authorization: "Bearer wrong" },
+    });
+    expect(isAuthorizedHookOrCronToken(bad, cronToken)).toBe(false);
+    vi.resetModules();
+  });
+
+  it("authorizes either secret when both are configured", async () => {
+    vi.resetModules();
+    process.env.MANOVIK_HOOK_SECRET = "hook-s3cret";
+    const { isAuthorizedHookOrCronToken } = await import("@/lib/hook-auth");
+    const viaHook = new Request("https://x.test/", {
+      headers: { authorization: "Bearer hook-s3cret" },
+    });
+    const viaCron = new Request("https://x.test/", {
+      headers: { authorization: `Bearer ${cronToken}` },
+    });
+    expect(isAuthorizedHookOrCronToken(viaHook, cronToken)).toBe(true);
+    expect(isAuthorizedHookOrCronToken(viaCron, cronToken)).toBe(true);
+    delete process.env.MANOVIK_HOOK_SECRET;
+    vi.resetModules();
+  });
+
+  it("fails closed: no token configured, no bearer, or wrong bearer", async () => {
+    vi.resetModules();
+    delete process.env.MANOVIK_HOOK_SECRET;
+    const { isAuthorizedHookOrCronToken } = await import("@/lib/hook-auth");
+    const noBearer = new Request("https://x.test/");
+    expect(isAuthorizedHookOrCronToken(noBearer, cronToken)).toBe(false);
+    const req = new Request("https://x.test/", {
+      headers: { authorization: "Bearer nope" },
+    });
+    expect(isAuthorizedHookOrCronToken(req, cronToken)).toBe(false);
+    expect(isAuthorizedHookOrCronToken(req, null)).toBe(false);
+    vi.resetModules();
+  });
+});

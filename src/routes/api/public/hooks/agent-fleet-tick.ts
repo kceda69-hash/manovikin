@@ -1,18 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { isAuthorizedHook } from "@/lib/hook-auth";
+import { isAuthorizedHookOrCronToken } from "@/lib/hook-auth";
 import { log } from "@/lib/logger";
 
 /**
- * Agent Fleet tick (pg_cron, hourly).
- * Authorised with `Bearer <hook-secret>` (MANOVIK_HOOK_SECRET) — same shape
- * as the other hooks. Fails closed with 403 when the secret is missing or
- * wrong. Runs every due fleet agent sequentially with per-agent isolation.
+ * Agent Fleet tick (pg_cron, hourly — see 20261009160000_fleet_tick_cron.sql).
+ * Authorised with `Bearer <hook-secret>` (MANOVIK_HOOK_SECRET) or the
+ * per-database RPC cron token (vault-backed, resolved via
+ * get_fleet_tick_token()) — same dual-auth shape as run-schedules.
+ * Fails closed with 403 when neither matches. Runs every due fleet agent
+ * sequentially with per-agent isolation.
  */
 export const Route = createFileRoute("/api/public/hooks/agent-fleet-tick")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (!isAuthorizedHook(request)) {
+        // The vault token function only exists after the fleet_tick_cron
+        // migration is applied; until then, data is null and the hook-secret
+        // path still works on its own.
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: tokenData } = await supabaseAdmin.rpc("get_fleet_tick_token" as never);
+        const cronToken = typeof tokenData === "string" ? tokenData : null;
+        if (!isAuthorizedHookOrCronToken(request, cronToken)) {
           return Response.json({ error: "Forbidden" }, { status: 403 });
         }
         try {
