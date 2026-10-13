@@ -330,12 +330,15 @@ export const Route = createFileRoute("/api/public/demo-chat")({
           const msg = String((err as Error)?.message ?? err);
           const status = /402|credit/i.test(msg) ? 402 : /429|rate/i.test(msg) ? 429 : 500;
           console.error("[demo-chat] stream failed", msg);
+          // TEMP DEBUG: include the raw error so we can diagnose the outage.
+          // Remove before shipping.
+          const debug = `DEBUG: ${msg.slice(0, 500)}`;
           return new Response(
             status === 402
               ? "MANOVIK is temporarily out of demo credits. Try again shortly."
               : status === 429
                 ? "Too many requests — slow down and retry."
-                : "MANOVIK could not reach the model right now.",
+                : `MANOVIK could not reach the model right now.\n${debug}`,
             { status },
           );
         };
