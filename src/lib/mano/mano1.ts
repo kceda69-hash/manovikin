@@ -324,9 +324,17 @@ PROACTIVE ENGINE — ACT BEFORE ASKED
 export function manoStreamChain(prompt: string, hasAttachments = false): string[] {
   // Sovereign override wins: when the deployment points at its own
   // OpenAI-compatible endpoint, gateway-style substrate names won't resolve
-  // there, so pin the whole chain to the configured model.
+  // there. But pinning to ONLY the configured model is fragile — if that
+  // model is degraded, every surface using this chain fails with no fallback.
+  // So append plain-ID Gemini fallbacks (the 3.x Flash models the sovereign
+  // endpoint serves). Deduplicated: if the forced model is already a fallback,
+  // it won't repeat.
   const forced = process.env.MANOVIK_AI_MODEL_ID?.trim() || process.env.MANOVIK_AI_MODEL?.trim();
-  if (forced) return [forced];
+  if (forced) {
+    return Array.from(
+      new Set([forced, "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash"]),
+    );
+  }
   const depth = classifyMano(prompt, hasAttachments);
   const primary = routeMano(depth, classifyDomain(prompt, hasAttachments)).draft;
   const chain = [primary, MANO_SUBSTRATE_LITE.draft, "google/gemini-3.5-flash"];

@@ -180,14 +180,22 @@ function isUnknownModelError(err: unknown): boolean {
 // wait for the first real content chunk (bounded); on a pre-content failure
 // fail over to the next Gemini model instead of failing the turn.
 //
-// The probe budget: a healthy Gemini Flash model produces its first chunk
-// in 1-3s, so 8s of silence means the upstream is degraded. However, the
-// free GPT fallback (Pollinations) is slower (~10-15s for first chunk) but
-// it WORKS when Gemini is rate-limited. A slow reply beats an error, so we
-// give candidates 30s. Worst case (~90s) exceeds the client's 60s watchdog,
-// but the free GPT is the last candidate — if we reach it, Gemini has
-// already failed, and waiting for a working reply is correct.
-const FIRST_CHUNK_TIMEOUT_MS = 30_000;
+// The probe budget is per-candidate: a healthy Gemini Flash model produces
+// its first chunk in 1-3s, so 8s of silence means the upstream is degraded —
+// fail over fast. The free GPT fallback (Pollinations) is slower (~10-15s
+// for first chunk) but it WORKS when Gemini is rate-limited, so it gets a
+// longer budget. Worst case (8+8+8+25=49s) stays under the client's 60s
+// watchdog, which the old single 30s budget violated (~90s+): the free GPT
+// last resort was never reached and the user stared at a spinner until the
+// client gave up. This is the permanent fix for "chat takes long and still
+// no reply" during Gemini outages.
+export const GEMINI_FIRST_CHUNK_TIMEOUT_MS = 8_000;
+export const FREE_GPT_FIRST_CHUNK_TIMEOUT_MS = 25_000;
+// Number of Gemini candidates tried before the free GPT last resort in
+// sovereign mode (primary + SOVEREIGN_STREAM_FALLBACKS).
+export const GEMINI_CANDIDATE_COUNT = 3;
+// Client-side watchdog: the chat UI gives up waiting after this long.
+export const CLIENT_WATCHDOG_MS = 60_000;
 
 // Mid-stream stall timeout: if the upstream stops sending chunks for this
 // long, the stream is dead — error it so the client can retry instead of
@@ -893,7 +901,10 @@ export const Route = createFileRoute("/api/chat")({
           // budget. An upstream 5xx/timeout/429 surfaces here as an `error`
           // chunk (via onError above) before any content exists.
           let producedContent = false;
-          const deadlineAt = Date.now() + FIRST_CHUNK_TIMEOUT_MS;
+          const probeTimeoutMs = isFreeGpt
+            ? FREE_GPT_FIRST_CHUNK_TIMEOUT_MS
+            : GEMINI_FIRST_CHUNK_TIMEOUT_MS;
+          const deadlineAt = Date.now() + probeTimeoutMs;
           try {
             for (;;) {
               const remaining = deadlineAt - Date.now();
@@ -904,7 +915,7 @@ export const Route = createFileRoute("/api/chat")({
                 ),
               ]);
               if (raced === "timeout") {
-                lastErr = new Error(`No content from upstream within ${FIRST_CHUNK_TIMEOUT_MS}ms`);
+                lastErr = new Error(`No content from upstream within ${probeTimeoutMs}ms`);
                 log.warn("chat.stream.first_chunk_timeout", {
                   model: candidateLabel,
                   userId,

@@ -424,72 +424,92 @@ Rules: never invent files that weren't provided. If evidence is ambiguous, mark 
             ? `${MANO_CHAT_SYSTEM}\n\n${baseSystem}\n\n---\nUSER-OVERRIDE (from DNA Prompt Editor — obey unless it conflicts with safety rules above):\n${customSystem}`
             : `${MANO_CHAT_SYSTEM}\n\n${baseSystem}`;
           // MANO 1.1 runs the public demo too — substrate is compute only.
-          const substrate = manoStreamChain(prompt)[0]!;
-          const isOpenAiSubstrate = substrate.startsWith("openai/");
-
-          const result = streamText({
-            model: gateway(substrate),
-            system,
-            prompt,
-            // OpenAI substrates only accept the default temperature; gpt-5.6
-            // additionally needs reasoning switched off on the chat path.
-            ...(isOpenAiSubstrate ? {} : { temperature: mode === "plan" ? 0.5 : 0.3 }),
-            ...(substrate.startsWith("openai/gpt-5.6")
-              ? { providerOptions: { lovable: { reasoningEffort: "none" } } }
-              : {}),
-          });
-          // Probe: wait for the first real text chunk (bounded). Upstream
-          // 5xxs/429s surface only while the stream is consumed — without this
-          // probe a deferred failure becomes a 200 with an empty body.
-          const PROBE_TIMEOUT_MS = 15_000;
-          const probeReader = result.textStream.getReader();
+          // Try each substrate in the chain: if the primary model is degraded,
+          // fail over instead of returning an error. (Permanent fix for the
+          // demo hanging when the configured model doesn't respond.)
+          const chain = manoStreamChain(prompt);
+          const PROBE_TIMEOUT_MS = 10_000;
+          let probeReader: ReadableStreamDefaultReader<string> | null = null;
           let firstText: string | null = null;
-          let probeError: unknown = null;
-          try {
-            const deadlineAt = Date.now() + PROBE_TIMEOUT_MS;
-            for (;;) {
-              const remaining = deadlineAt - Date.now();
-              if (remaining <= 0) {
-                probeError = new Error("Timed out waiting for the model");
-                break;
-              }
-              const raced = await Promise.race([
-                probeReader.read().then((r) => ({ kind: "read" as const, ...r })),
-                new Promise<{ kind: "timeout" }>((resolve) =>
-                  setTimeout(() => resolve({ kind: "timeout" as const }), remaining),
-                ),
-              ]);
-              if (raced.kind === "timeout") {
-                probeError = new Error("Timed out waiting for the model");
-                break;
-              }
-              if (raced.done) {
-                if (firstText == null) probeError = new Error("Empty response from model");
-                break;
-              }
-              if (raced.value) {
-                firstText = raced.value;
-                break;
-              }
-            }
-          } catch (err) {
-            probeError = err;
-          }
-          if (probeError || firstText == null) {
+          let lastProbeError: unknown = null;
+          for (const substrate of chain) {
+            const isOpenAiSubstrate = substrate.startsWith("openai/");
+
+            const result = streamText({
+              model: gateway(substrate),
+              system,
+              prompt,
+              // OpenAI substrates only accept the default temperature; gpt-5.6
+              // additionally needs reasoning switched off on the chat path.
+              ...(isOpenAiSubstrate ? {} : { temperature: mode === "plan" ? 0.5 : 0.3 }),
+              ...(substrate.startsWith("openai/gpt-5.6")
+                ? { providerOptions: { lovable: { reasoningEffort: "none" } } }
+                : {}),
+              // Fail fast: the AI SDK's default retries would burn the whole
+              // probe budget on one degraded model instead of failing over.
+              maxRetries: 0,
+            });
+            // Probe: wait for the first real text chunk (bounded). Upstream
+            // 5xxs/429s surface only while the stream is consumed — without this
+            // probe a deferred failure becomes a 200 with an empty body.
+            const reader = result.textStream.getReader();
+            let text: string | null = null;
+            let probeError: unknown = null;
             try {
-              await probeReader.cancel("pre-content-failure");
-            } catch {
-              // best effort
+              const deadlineAt = Date.now() + PROBE_TIMEOUT_MS;
+              for (;;) {
+                const remaining = deadlineAt - Date.now();
+                if (remaining <= 0) {
+                  probeError = new Error(`Timed out waiting for ${substrate}`);
+                  break;
+                }
+                const raced = await Promise.race([
+                  reader.read().then((r) => ({ kind: "read" as const, ...r })),
+                  new Promise<{ kind: "timeout" }>((resolve) =>
+                    setTimeout(() => resolve({ kind: "timeout" as const }), remaining),
+                  ),
+                ]);
+                if (raced.kind === "timeout") {
+                  probeError = new Error(`Timed out waiting for ${substrate}`);
+                  break;
+                }
+                if (raced.done) {
+                  if (text == null) probeError = new Error(`Empty response from ${substrate}`);
+                  break;
+                }
+                if (raced.value) {
+                  text = raced.value;
+                  break;
+                }
+              }
+            } catch (err) {
+              probeError = err;
             }
-            return demoErrorResponse(probeError ?? new Error("Empty response from model"));
+            if (!probeError && text != null) {
+              probeReader = reader;
+              firstText = text;
+              break;
+            }
+            lastProbeError = probeError ?? new Error(`Empty response from ${substrate}`);
+            try {
+              await reader.cancel("pre-content-failure");
+            } catch {
+              // best effort — try the next substrate
+            }
           }
+          if (!probeReader || firstText == null) {
+            return demoErrorResponse(lastProbeError ?? new Error("Empty response from model"));
+          }
+          // Narrow for the closures below (probeReader/firstText are let-bound).
+          const activeReader: ReadableStreamDefaultReader<string> = probeReader;
+          const bufferedFirst: string = firstText;
           // Replay the buffered first chunk, then keep pumping the stream.
           const demoStream = new ReadableStream<Uint8Array>({
             start(controller) {
               const enc = new TextEncoder();
-              controller.enqueue(enc.encode(firstText as string));
+              controller.enqueue(enc.encode(bufferedFirst));
               const pump = (): void => {
-                probeReader.read().then(
+                activeReader.read().then(
                   ({ done, value }: ReadableStreamReadResult<string>) => {
                     if (done) {
                       controller.close();
@@ -504,7 +524,7 @@ Rules: never invent files that weren't provided. If evidence is ambiguous, mark 
               pump();
             },
             cancel(reason) {
-              probeReader.cancel(reason).catch(() => undefined);
+              activeReader.cancel(reason).catch(() => undefined);
             },
           });
           return new Response(demoStream, {
