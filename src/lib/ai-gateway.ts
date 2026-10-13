@@ -23,7 +23,10 @@ export const createLovableAiGatewayProvider = (
   sovereignKeyOverride?: string,
 ) => {
   const sovereignBaseUrl = process.env.MANOVIK_AI_BASE_URL;
-  const sovereignKey = sovereignKeyOverride ?? process.env.MANOVIK_AI_API_KEY;
+  // Use || (not ??): callers pass "" when no Lovable key is configured, and
+  // an empty-string override must NOT shadow the real MANOVIK_AI_API_KEY.
+  // (Bug: ?? let "" win, sending "Bearer " to Google → 401 on every call.)
+  const sovereignKey = sovereignKeyOverride || process.env.MANOVIK_AI_API_KEY;
 
   if (sovereignBaseUrl) {
     return createOpenAICompatible({
