@@ -11,7 +11,11 @@
  * public.ai_health_alerts and email admins. Recovery auto-resolves open alerts.
  */
 import { streamText } from "ai";
-import { createLovableAiGatewayProvider, createFreeGptProvider } from "@/lib/ai-gateway";
+import {
+  createLovableAiGatewayProvider,
+  createFreeGptProvider,
+  createGroqProvider,
+} from "@/lib/ai-gateway";
 import { manoStreamChain } from "@/lib/mano/mano1";
 import { log } from "@/lib/logger";
 
@@ -104,6 +108,30 @@ export async function runAiHealthProbe(): Promise<AiHealthResult> {
       const message = err instanceof Error ? err.message : String(err);
       attempts.push({ model: substrate, ok: false, latencyMs, error: message });
       log.warn("ai_health.probe_failed", { model: substrate, error: message });
+    }
+  }
+
+  // Groq fallback (free tier, fast): mirrors the chat path — tried after the
+  // Gemini chain, before the keyless free GPT. Skipped when no key is set.
+  const { GROQ_MODEL } = await import("@/lib/ai-gateway");
+  if (process.env.GROQ_API_KEY && Date.now() - startedAt <= AI_HEALTH_BUDGET_MS) {
+    const attemptStarted = Date.now();
+    try {
+      const text = await probeModel(GROQ_MODEL, createGroqProvider() as never);
+      const latencyMs = Date.now() - attemptStarted;
+      attempts.push({ model: `groq/${GROQ_MODEL}`, ok: true, latencyMs, error: null });
+      return {
+        ok: true,
+        model: `groq/${GROQ_MODEL}`,
+        latencyMs: Date.now() - startedAt,
+        error: null,
+        attempts,
+      };
+    } catch (err) {
+      const latencyMs = Date.now() - attemptStarted;
+      const message = err instanceof Error ? err.message : String(err);
+      attempts.push({ model: `groq/${GROQ_MODEL}`, ok: false, latencyMs, error: message });
+      log.warn("ai_health.probe_failed", { model: `groq/${GROQ_MODEL}`, error: message });
     }
   }
 

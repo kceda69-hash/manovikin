@@ -65,3 +65,24 @@ export const createFreeGptProvider = () =>
   });
 
 export const FREE_GPT_MODEL = process.env.FREE_GPT_MODEL ?? "openai";
+
+/**
+ * Groq fallback provider — free tier, no card, OpenAI-compatible, and
+ * dramatically faster than Gemini (custom LPU inference). Used in the chat
+ * failover chain between the Gemini models and the keyless free-GPT last
+ * resort: when every Gemini model fails, Groq answers instead of an error.
+ *
+ * Requires GROQ_API_KEY (free at console.groq.com). Override the endpoint
+ * with GROQ_BASE_URL and the model with GROQ_MODEL for self-hosting or a
+ * different Groq-served model.
+ */
+export const createGroqProvider = () =>
+  createOpenAICompatible({
+    name: "manovik-groq",
+    baseURL: process.env.GROQ_BASE_URL ?? "https://api.groq.com/openai/v1",
+    headers: {
+      Authorization: `Bearer ${process.env.GROQ_API_KEY ?? ""}`,
+    },
+  });
+
+export const GROQ_MODEL = process.env.GROQ_MODEL ?? "openai/gpt-oss-20b";

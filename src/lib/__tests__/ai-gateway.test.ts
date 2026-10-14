@@ -38,3 +38,33 @@ describe("createLovableAiGatewayProvider sovereign key resolution", () => {
     expect(resolved).toBe("override-key-456");
   });
 });
+
+describe("createGroqProvider", () => {
+  const REAL_KEY = "gsk_test_groq_key_123";
+
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    delete process.env.GROQ_API_KEY;
+    delete process.env.GROQ_BASE_URL;
+    delete process.env.GROQ_MODEL;
+  });
+
+  it("builds an OpenAI-compatible provider pointed at Groq", async () => {
+    process.env.GROQ_API_KEY = REAL_KEY;
+    const { createGroqProvider, GROQ_MODEL } = await import("@/lib/ai-gateway");
+    const provider = createGroqProvider();
+    expect(provider).toBeDefined();
+    // Default model is a Groq-served open model; override via GROQ_MODEL.
+    expect(GROQ_MODEL).toBe("openai/gpt-oss-20b");
+  });
+
+  it("GROQ_MODEL env override is respected", async () => {
+    process.env.GROQ_API_KEY = REAL_KEY;
+    process.env.GROQ_MODEL = "openai/gpt-oss-120b";
+    const { GROQ_MODEL } = await import("@/lib/ai-gateway");
+    expect(GROQ_MODEL).toBe("openai/gpt-oss-120b");
+  });
+});
