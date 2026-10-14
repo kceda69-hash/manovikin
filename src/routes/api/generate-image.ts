@@ -131,9 +131,14 @@ export const Route = createFileRoute("/api/generate-image")({
         // failover: on a 429 the same request is retried on the backup key
         // (no stream has started yet, unlike chat).
         const nativeRoot = sovereignBaseUrl.replace(/\/openai\/?$/, "").replace(/\/$/, "");
-        const imageModel =
-          process.env.MANOVIK_AI_IMAGE_MODEL ?? "gemini-2.0-flash-preview-image-generation";
-        const url = `${nativeRoot}/models/${imageModel}:generateContent`;
+        // FIX (2026-10-14): gemini-2.0-flash-preview-image-generation was shut
+        // down by Google (Nov 2025) — image gen has been 404ing since. Use the
+        // current stable model with a fallback chain.
+        const imageModels = [
+          process.env.MANOVIK_AI_IMAGE_MODEL ?? "gemini-2.5-flash-image",
+          "gemini-2.5-flash-image",
+          "gemini-3-pro-image-preview",
+        ].filter((m, i, a) => m && a.indexOf(m) === i);
 
         interface GeminiPart {
           text?: string;
@@ -150,24 +155,33 @@ export const Route = createFileRoute("/api/generate-image")({
         const tryOrder = [preferred, ...keys.map((_, i) => i).filter((i) => i !== preferred)];
         let b64: string | null = null;
         let lastErr = "no API key configured";
-        for (const ki of tryOrder) {
-          const key = keys[ki];
-          if (!key) continue;
-          let res: Response;
-          try {
-            res = await fetch(url, {
-              method: "POST",
-              headers: { "x-goog-api-key": key, "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: enriched }] }],
-                generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
-              }),
-            });
-          } catch (e) {
-            lastErr = e instanceof Error ? e.message : "network error";
-            break;
-          }
-          if (res.status === 429 && ki !== tryOrder[tryOrder.length - 1]) {
+        // Try each model x each key: model 404/403 (deprecated) moves to the
+        // next model, 429 moves to the next key.
+        outer: for (const imageModel of imageModels) {
+          const url = `${nativeRoot}/models/${imageModel}:generateContent`;
+          for (const ki of tryOrder) {
+            const key = keys[ki];
+            if (!key) continue;
+            let res: Response;
+            try {
+              res = await fetch(url, {
+                method: "POST",
+                headers: { "x-goog-api-key": key, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  contents: [{ parts: [{ text: enriched }] }],
+                  generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+                }),
+              });
+            } catch (e) {
+              lastErr = e instanceof Error ? e.message : "network error";
+              break outer;
+            }
+            // Deprecated/unknown model: try the next model in the chain.
+            if ((res.status === 404 || res.status === 403) && imageModel !== imageModels[imageModels.length - 1]) {
+              lastErr = `image model ${imageModel} unavailable (${res.status}), trying fallback`;
+              break;
+            }
+            if (res.status === 429 && ki !== tryOrder[tryOrder.length - 1]) {
             markKeyThrottled(ki);
             lastErr = "rate limited, retrying with backup key";
             continue;
@@ -179,20 +193,21 @@ export const Route = createFileRoute("/api/generate-image")({
           const data = (await res.json()) as GeminiResponse;
           if (data.error?.message) {
             lastErr = data.error.message.slice(0, 200);
-            break;
+            break outer;
           }
           if (data.promptFeedback?.blockReason) {
             lastErr = `Image blocked by safety filter (${data.promptFeedback.blockReason}). Try a different prompt.`;
-            break;
+            break outer;
           }
           const part = data.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data);
           if (!part?.inlineData?.data) {
             lastErr = "The image model returned no image. Try again.";
-            break;
+            break outer;
           }
           b64 = part.inlineData.data;
           clearKeyThrottled(ki);
-          break;
+          break outer;
+        }
         }
 
         if (!b64) {
