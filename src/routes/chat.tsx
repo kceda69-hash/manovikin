@@ -1371,9 +1371,13 @@ function ChatPanel({
       recognitionRef.current = rec;
       try {
         rec.start();
-      } catch {
+      } catch (err) {
+        // FIX (2026-10-14): this used to fail silently — the user tapped the
+        // mic and nothing happened, no toast, no indicator. Surface it.
         recognitionRef.current = null;
         setListening(false);
+        const msg = err instanceof Error ? err.message : String(err);
+        toast.error(`Couldn't start the microphone (${msg}). Tap the mic again.`);
         return false;
       }
       setListening(true);
