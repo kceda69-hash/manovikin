@@ -1324,6 +1324,9 @@ function ChatPanel({
       };
       rec.onerror = (e) => {
         const err = e.error;
+        // DIAGNOSTIC (2026-10-14): temporarily surface all mic errors so we
+        // can see why "mic on but not listening" happens. Remove after fix.
+        if (err) toast.error(`Mic error: ${err}`);
         if (err === "not-allowed" || err === "service-not-allowed") {
           toast.error("Microphone access was denied. Allow it in your browser to use voice input.");
           setCompanionMode(false);
