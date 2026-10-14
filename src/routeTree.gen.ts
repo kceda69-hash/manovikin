@@ -98,6 +98,7 @@ import { Route as ApiPublicHooksSecurityScanRouteImport } from './routes/api/pub
 import { Route as ApiPublicHooksRunSchedulesRouteImport } from './routes/api/public/hooks/run-schedules'
 import { Route as ApiPublicHooksResubmitSitemapRouteImport } from './routes/api/public/hooks/resubmit-sitemap'
 import { Route as ApiPublicHooksManovikSelfUpdateRouteImport } from './routes/api/public/hooks/manovik-self-update'
+import { Route as ApiPublicHooksAiHealthRouteImport } from './routes/api/public/hooks/ai-health'
 import { Route as ApiPublicHooksAgentFleetTickRouteImport } from './routes/api/public/hooks/agent-fleet-tick'
 import { Route as ApiPublicDeviceAmbientFrameRouteImport } from './routes/api/public/device/ambient-frame'
 import { Route as ApiPublicDeviceActionRouteImport } from './routes/api/public/device/$action'
@@ -567,6 +568,11 @@ const ApiPublicHooksManovikSelfUpdateRoute =
     path: '/api/public/hooks/manovik-self-update',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksAiHealthRoute = ApiPublicHooksAiHealthRouteImport.update({
+  id: '/api/public/hooks/ai-health',
+  path: '/api/public/hooks/ai-health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksAgentFleetTickRoute =
   ApiPublicHooksAgentFleetTickRouteImport.update({
     id: '/api/public/hooks/agent-fleet-tick',
@@ -694,6 +700,7 @@ export interface FileRoutesByFullPath {
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
   '/api/public/hooks/agent-fleet-tick': typeof ApiPublicHooksAgentFleetTickRoute
+  '/api/public/hooks/ai-health': typeof ApiPublicHooksAiHealthRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
@@ -792,6 +799,7 @@ export interface FileRoutesByTo {
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
   '/api/public/hooks/agent-fleet-tick': typeof ApiPublicHooksAgentFleetTickRoute
+  '/api/public/hooks/ai-health': typeof ApiPublicHooksAiHealthRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
@@ -891,6 +899,7 @@ export interface FileRoutesById {
   '/api/public/device/$action': typeof ApiPublicDeviceActionRoute
   '/api/public/device/ambient-frame': typeof ApiPublicDeviceAmbientFrameRoute
   '/api/public/hooks/agent-fleet-tick': typeof ApiPublicHooksAgentFleetTickRoute
+  '/api/public/hooks/ai-health': typeof ApiPublicHooksAiHealthRoute
   '/api/public/hooks/manovik-self-update': typeof ApiPublicHooksManovikSelfUpdateRoute
   '/api/public/hooks/resubmit-sitemap': typeof ApiPublicHooksResubmitSitemapRoute
   '/api/public/hooks/run-schedules': typeof ApiPublicHooksRunSchedulesRoute
@@ -991,6 +1000,7 @@ export interface FileRouteTypes {
     | '/api/public/device/$action'
     | '/api/public/device/ambient-frame'
     | '/api/public/hooks/agent-fleet-tick'
+    | '/api/public/hooks/ai-health'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/run-schedules'
@@ -1089,6 +1099,7 @@ export interface FileRouteTypes {
     | '/api/public/device/$action'
     | '/api/public/device/ambient-frame'
     | '/api/public/hooks/agent-fleet-tick'
+    | '/api/public/hooks/ai-health'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/run-schedules'
@@ -1187,6 +1198,7 @@ export interface FileRouteTypes {
     | '/api/public/device/$action'
     | '/api/public/device/ambient-frame'
     | '/api/public/hooks/agent-fleet-tick'
+    | '/api/public/hooks/ai-health'
     | '/api/public/hooks/manovik-self-update'
     | '/api/public/hooks/resubmit-sitemap'
     | '/api/public/hooks/run-schedules'
@@ -1286,6 +1298,7 @@ export interface RootRouteChildren {
   ApiPublicDeviceActionRoute: typeof ApiPublicDeviceActionRoute
   ApiPublicDeviceAmbientFrameRoute: typeof ApiPublicDeviceAmbientFrameRoute
   ApiPublicHooksAgentFleetTickRoute: typeof ApiPublicHooksAgentFleetTickRoute
+  ApiPublicHooksAiHealthRoute: typeof ApiPublicHooksAiHealthRoute
   ApiPublicHooksManovikSelfUpdateRoute: typeof ApiPublicHooksManovikSelfUpdateRoute
   ApiPublicHooksResubmitSitemapRoute: typeof ApiPublicHooksResubmitSitemapRoute
   ApiPublicHooksRunSchedulesRoute: typeof ApiPublicHooksRunSchedulesRoute
@@ -1925,6 +1938,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksManovikSelfUpdateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/ai-health': {
+      id: '/api/public/hooks/ai-health'
+      path: '/api/public/hooks/ai-health'
+      fullPath: '/api/public/hooks/ai-health'
+      preLoaderRoute: typeof ApiPublicHooksAiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/agent-fleet-tick': {
       id: '/api/public/hooks/agent-fleet-tick'
       path: '/api/public/hooks/agent-fleet-tick'
@@ -2064,6 +2084,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDeviceActionRoute: ApiPublicDeviceActionRoute,
   ApiPublicDeviceAmbientFrameRoute: ApiPublicDeviceAmbientFrameRoute,
   ApiPublicHooksAgentFleetTickRoute: ApiPublicHooksAgentFleetTickRoute,
+  ApiPublicHooksAiHealthRoute: ApiPublicHooksAiHealthRoute,
   ApiPublicHooksManovikSelfUpdateRoute: ApiPublicHooksManovikSelfUpdateRoute,
   ApiPublicHooksResubmitSitemapRoute: ApiPublicHooksResubmitSitemapRoute,
   ApiPublicHooksRunSchedulesRoute: ApiPublicHooksRunSchedulesRoute,

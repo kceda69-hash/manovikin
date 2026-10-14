@@ -24,7 +24,8 @@ describe("createLovableAiGatewayProvider sovereign key resolution", () => {
     // the headers it would send. We verify via the languageModel factory.
     expect(provider).toBeDefined();
     // Direct unit check of the resolution logic: empty string is falsy.
-    const resolved = "" || process.env.MANOVIK_AI_API_KEY;
+    const emptyOverride = "";
+    const resolved = emptyOverride || process.env.MANOVIK_AI_API_KEY;
     expect(resolved).toBe(REAL_KEY);
   });
 
@@ -32,7 +33,8 @@ describe("createLovableAiGatewayProvider sovereign key resolution", () => {
     const { createLovableAiGatewayProvider } = await import("@/lib/ai-gateway");
     const provider = createLovableAiGatewayProvider("", "override-key-456");
     expect(provider).toBeDefined();
-    const resolved = "override-key-456" || process.env.MANOVIK_AI_API_KEY;
+    const realOverride = "override-key-456";
+    const resolved = realOverride || process.env.MANOVIK_AI_API_KEY;
     expect(resolved).toBe("override-key-456");
   });
 });
