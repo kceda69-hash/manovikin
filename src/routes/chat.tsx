@@ -1374,11 +1374,22 @@ function ChatPanel({
       } catch (err) {
         // FIX (2026-10-14): this used to fail silently — the user tapped the
         // mic and nothing happened, no toast, no indicator. Surface it.
-        recognitionRef.current = null;
-        setListening(false);
-        const msg = err instanceof Error ? err.message : String(err);
-        toast.error(`Couldn't start the microphone (${msg}). Tap the mic again.`);
-        return false;
+        // A stale recognition instance can make start() throw
+        // InvalidStateError; stop any orphan before retrying once.
+        try {
+          recognitionRef.current?.stop();
+        } catch {
+          /* ignore */
+        }
+        try {
+          rec.start();
+        } catch (err2) {
+          recognitionRef.current = null;
+          setListening(false);
+          const msg = err2 instanceof Error ? err2.message : String(err2);
+          toast.error(`Couldn't start the microphone (${msg}). Tap the mic again.`);
+          return false;
+        }
       }
       setListening(true);
       return true;
