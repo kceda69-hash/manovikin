@@ -16,9 +16,8 @@ export const APPROVED_MODEL_IDS = [
   // chat / reasoning
   "google/gemini-3-flash-preview",
   "google/gemini-3.1-flash-lite",
-  "google/gemini-3.5-flash",
   "google/gemini-3.6-flash",
-  "google/gemini-3.7-flash",
+  "google/gemini-3.8-flash",
   "google/gemini-3.1-pro-preview",
   "google/gemini-2.5-pro",
   "google/gemini-2.5-flash",
@@ -38,7 +37,6 @@ export const APPROVED_MODEL_IDS = [
   "openai/gpt-5.6-luna",
   // image
   "google/gemini-3-pro-image",
-  "google/gemini-3.1-flash-image",
   "google/gemini-3.1-flash-lite-image",
   "openai/gpt-image-2",
   "openai/gpt-image-1-mini",

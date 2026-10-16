@@ -37,7 +37,7 @@ describe("model catalog", () => {
 
   it("keeps the default chat model on the latest flash tier", async () => {
     const { TIER_MODEL } = await import("@/lib/model-router");
-    expect(TIER_MODEL.standard.model).toBe("google/gemini-3.7-flash");
+    expect(TIER_MODEL.standard.model).toBe("google/gemini-3.8-flash");
     expect(approvedHas(TIER_MODEL.standard.model)).toBe(true);
   });
 });

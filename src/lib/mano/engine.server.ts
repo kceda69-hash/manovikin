@@ -19,7 +19,7 @@ import { resolveEndpointModel } from "@/lib/ai-model";
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 /** Ordered substitutes if a substrate call fails transiently (gateway ids). */
-const SUBSTRATE_FALLBACKS = ["google/gemini-3.7-flash", "google/gemini-2.5-flash"];
+const SUBSTRATE_FALLBACKS = ["google/gemini-3.8-flash", "google/gemini-2.5-flash"];
 
 /**
  * Build the retry chain for a substrate call. In sovereign mode the primary

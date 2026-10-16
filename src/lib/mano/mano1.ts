@@ -14,7 +14,7 @@ export type ManoStage = "plan" | "draft" | "adversary" | "synthesis";
 
 /** Substrate assignment per inference stage (catalog-verified ids). */
 export const MANO_SUBSTRATE: Record<ManoStage, string> = {
-  plan: "google/gemini-3.7-flash",
+  plan: "google/gemini-3.8-flash",
   draft: "openai/gpt-5.6-terra",
   adversary: "google/gemini-3.1-pro-preview",
   synthesis: "openai/gpt-5.6-sol",
@@ -23,8 +23,8 @@ export const MANO_SUBSTRATE: Record<ManoStage, string> = {
 /** Cheaper substrate map for low-complexity prompts (latency + cost). */
 export const MANO_SUBSTRATE_LITE: Record<ManoStage, string> = {
   plan: "google/gemini-3.1-flash-lite",
-  draft: "google/gemini-3.7-flash",
-  adversary: "google/gemini-3.7-flash",
+  draft: "google/gemini-3.8-flash",
+  adversary: "google/gemini-3.8-flash",
   synthesis: "openai/gpt-5.6-terra",
 };
 
@@ -332,11 +332,11 @@ export function manoStreamChain(prompt: string, hasAttachments = false): string[
   const forced = process.env.MANOVIK_AI_MODEL_ID?.trim() || process.env.MANOVIK_AI_MODEL?.trim();
   if (forced) {
     return Array.from(
-      new Set([forced, "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash"]),
+      new Set([forced, "gemini-3.8-flash", "gemini-3.6-flash", "gemini-2.5-flash"]),
     );
   }
   const depth = classifyMano(prompt, hasAttachments);
   const primary = routeMano(depth, classifyDomain(prompt, hasAttachments)).draft;
-  const chain = [primary, MANO_SUBSTRATE_LITE.draft, "google/gemini-3.5-flash"];
+  const chain = [primary, MANO_SUBSTRATE_LITE.draft, "google/gemini-3.6-flash"];
   return Array.from(new Set(chain));
 }

@@ -364,7 +364,7 @@ export async function runMorningBriefing(
     const text = await callModel({
       system: BRIEFING_SYSTEM,
       prompt,
-      model: "google/gemini-3.7-flash",
+      model: "google/gemini-3.8-flash",
       maxTokens: 700,
     });
     if (text) return text;

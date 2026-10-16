@@ -246,7 +246,7 @@ function resolveEndpoint(): { url: string; headers: Record<string, string> } {
   };
 }
 
-const DOSSIER_MODEL = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3.7-flash";
+const DOSSIER_MODEL = process.env.MANOVIK_AI_MODEL ?? "google/gemini-3.8-flash";
 
 async function callModel(opts: {
   system: string;

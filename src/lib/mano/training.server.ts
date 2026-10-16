@@ -8,7 +8,7 @@
 import { MANO_IDENTITY } from "./mano1";
 import { manoComplete } from "./engine.server";
 
-const CONTROLLER_MODEL = "google/gemini-3.7-flash";
+const CONTROLLER_MODEL = "google/gemini-3.8-flash";
 
 /** Minimal structural stand-in for the supabase client's chained query builder. */
 type SupabaseQuery = {

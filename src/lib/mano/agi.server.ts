@@ -10,7 +10,7 @@
 import { MANO_IDENTITY } from "./mano1";
 import { manoComplete, runMano } from "./engine.server";
 
-const CONTROLLER_MODEL = "google/gemini-3.7-flash";
+const CONTROLLER_MODEL = "google/gemini-3.8-flash";
 
 export const AGI_TOOLS = [
   "memory_search",
