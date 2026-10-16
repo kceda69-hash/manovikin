@@ -753,9 +753,18 @@ export const Route = createFileRoute("/api/chat")({
         // (and Groq) failed — the user gets a reply instead of an error, and
         // the turn's single credit is spent on a real reply rather than
         // refunded.
-        const groqCandidates: StreamCandidate[] = process.env.GROQ_API_KEY
-          ? [GROQ_CANDIDATE]
-          : [];
+        // Groq's served models (gpt-oss) are text-only — sending image parts
+        // gets a 400 "model does not support image input". Skip Groq for
+        // turns carrying images so the chain falls through to candidates
+        // that can handle them instead of burning the probe budget.
+        const turnHasImage = modelMessages.some((m) =>
+          Array.isArray((m as { content?: unknown }).content) &&
+          ((m as { content: Array<{ type?: string }> }).content).some(
+            (p) => p?.type === "image",
+          ),
+        );
+        const groqCandidates: StreamCandidate[] =
+          process.env.GROQ_API_KEY && !turnHasImage ? [GROQ_CANDIDATE] : [];
         const streamCandidates: StreamCandidate[] = sovereign
           ? [...new Set([primaryModel, ...SOVEREIGN_STREAM_FALLBACKS]), ...groqCandidates, FREE_GPT_CANDIDATE]
           : [...modelCandidates, ...groqCandidates, FREE_GPT_CANDIDATE];
