@@ -22,6 +22,7 @@ Disallow: /auth/
 Disallow: /email/
 Disallow: /.mcp/
 Disallow: /.well-known/
+Disallow: /.lovable/
 Disallow: /connect
 Disallow: /login
 Disallow: /setup

@@ -2,9 +2,67 @@
 
 > MANOVIK AI is an autonomous AI agent that codes in any language, builds websites, apps, and APIs, and works for you 24/7.
 
-MANOVIK AI is a futuristic AI employee: a streaming, polyglot coding agent with reasoning, private threads, and rich markdown output. It can be self-hosted on your own infrastructure (see the self-hosting guide).
+MANOVIK AI is an autonomous AI agent that plans, builds and ships websites, apps and APIs. It is a streaming, polyglot coding agent with reasoning, private threads, and rich markdown output. Threads are encrypted at rest and never used to train third-party models.
+
+## Pricing
+
+- Free tier: start building without a card.
+- MANOVIK AI Pro: 800 messages with one-time payment, for builders shipping daily. Price: 699 INR (one-time, not a subscription).
+- MANOVIK AI Sovereign (Lifetime Self-Host): run MANOVIK on your own infrastructure forever. One-time payment. Price: 4999 INR. Includes the self-host setup wizard, Docker support, and BYOK (bring your own key).
+
+## Contact
+
+- Support: support@manovik.in
+- Sales & partnerships: sales@manovik.in
+- Grievance officer: privacy@manovik.in
+- Operator: MANOVIK AI, India
 
 ## Pages
 
-- [Home](/): Product overview, features, and call to action.
-- [Sign in](/login): Sign in or create a MANOVIK AI account.
+- [Home](https://manovik.in/): Product overview, features, and call to action.
+- [AGI Roadmap](https://manovik.in/agi-roadmap): AGI roadmap for MANO 1.1 — milestones and progress.
+- [AI Coding Assistant](https://manovik.in/ai-coding-assistant): AI coding assistant 2026 — private and lifetime.
+- [AI Website Builder](https://manovik.in/ai-website-builder): Build a website from one prompt.
+- [Autonomous AI Software Engineer](https://manovik.in/autonomous-ai-software-engineer): Autonomous AI software engineer.
+- [Best AI Coding Agent](https://manovik.in/best-ai-coding-agent): Best AI coding agent 2026 — lifetime and private.
+- [How to Make a Website With AI](https://manovik.in/how-to-make-a-website-with-ai): Step-by-step guide to making a website with AI.
+- [Case Studies](https://manovik.in/case-studies): Real MANOVIK missions — AI agent case studies.
+- [MANOVIK CLI](https://manovik.in/cli): AI coding agent in your terminal.
+- [Device Agent](https://manovik.in/device-agent): Pair a device with MANOVIK.
+- [MANOVIK FORCE](https://manovik.in/force): Parallel AI agent swarm.
+- [Gesture Deck](https://manovik.in/gesture): Gesture controls for MANOVIK.
+- [Holo Deck](https://manovik.in/holo): Holo Deck virtual screens.
+- [Smart Home](https://manovik.in/home): Smart home control in MANOVIK Jarvis mode.
+- [MCP](https://manovik.in/mcp): MCP server endpoint for AI agent integrations.
+- [MCP Servers List](https://manovik.in/mcp-servers-list): Curated directory of MCP servers for AI agents.
+- [Security Lab](https://manovik.in/security): Security Lab — security testing with MANOVIK.
+- [Location Tracker](https://manovik.in/track): Location tracker.
+- [Rules Library](https://manovik.in/rules/library): Ready-to-use .manovikrules templates.
+- [Students](https://manovik.in/students): Students and educators.
+- [Contact](https://manovik.in/contact): Contact MANOVIK AI for support, sales, partnerships, and grievances.
+- [Privacy Policy](https://manovik.in/privacy): Privacy policy.
+- [Terms of Service](https://manovik.in/terms): Terms of service.
+- [Refund Policy](https://manovik.in/refund): Refund and cancellation policy.
+
+## Comparisons
+
+- [MANOVIK AI vs Cursor AI](https://manovik.in/vs-cursor): Sovereign alternative to Cursor.
+- [MANOVIK AI vs Windsurf](https://manovik.in/vs-windsurf): Sovereign alternative to Windsurf.
+- [MANOVIK AI vs Devin](https://manovik.in/vs-devin): Sovereign autonomous coding agent alternative to Devin.
+- [MANOVIK AI vs GitHub Copilot](https://manovik.in/vs-github-copilot): Sovereign alternative to GitHub Copilot.
+- [MANOVIK AI vs Cline](https://manovik.in/vs-cline): Sovereign alternative to Cline.
+- [MANOVIK AI vs Roo Code](https://manovik.in/vs-roo-code): Sovereign alternative to Roo Code.
+- [MANOVIK AI vs Bolt.new](https://manovik.in/vs-bolt-new): Lifetime-priced alternative to Bolt.new.
+- [MANOVIK AI vs Replit Agent](https://manovik.in/vs-replit-agent): Sovereign, lifetime alternative to Replit Agent.
+- [Cline vs Windsurf (2026)](https://manovik.in/vs-cline-vs-windsurf): Cline vs Windsurf comparison, and why MANOVIK beats both.
+
+## Blog
+
+- [AI Coding Agent Benchmark 2026: MANOVIK vs Cursor](https://manovik.in/blog/ai-coding-agent-benchmark)
+- [Lifetime vs Subscription AI Coding — TCO](https://manovik.in/blog/ai-pricing-comparison)
+- [Best AI Coding Agent 2026: MANOVIK AI vs Devin vs Cline](https://manovik.in/blog/best-ai-coding-agents)
+- [Claude Code vs Cursor (2026): Key Differences](https://manovik.in/blog/claude-code-vs-cursor)
+- [MCP Servers with MANOVIK — A Sovereign AI Guide](https://manovik.in/blog/mcp-guide)
+- [Self-Hosting AI Agents with Ollama and Docker](https://manovik.in/blog/self-hosting-ai-with-ollama)
+- [MANOVIK System Rules](https://manovik.in/blog/system-rules)
+- [Will AI Replace Software Engineers? An Honest 2026 Take](https://manovik.in/blog/will-ai-replace-software-engineers)

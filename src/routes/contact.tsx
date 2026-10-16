@@ -72,6 +72,11 @@ function ContactPage() {
       </header>
       <main className="mx-auto max-w-3xl px-4 py-10 space-y-6">
         <h1 className="text-3xl font-bold tracking-tight">Contact MANOVIK AI</h1>
+        <p className="text-muted-foreground">
+          MANOVIK AI is an autonomous AI agent that plans, builds and ships websites, apps and
+          APIs. It is operated from India, and ships with a free tier, a Pro plan (₹699 one-time,
+          800 messages) and a Sovereign lifetime self-host plan (₹4999).
+        </p>
         <p className="text-muted-foreground">We typically respond within one business day.</p>
 
         <div className="grid gap-4 sm:grid-cols-2">

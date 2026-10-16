@@ -1,0 +1,98 @@
+# MANOVIK AI (full)
+
+> MANOVIK AI is an autonomous AI agent that codes in any language, builds websites, apps, and APIs, and works for you 24/7.
+
+## What it is
+
+MANOVIK AI is an autonomous AI agent that plans, builds and ships websites, apps and APIs. It is a streaming, polyglot coding agent with reasoning, private threads, and rich markdown output. It codes in any major language — JavaScript, TypeScript, Python, Go, Rust, Java, Swift, Kotlin, SQL and more.
+
+Key capabilities (from the product site):
+
+- Build full-stack apps: MANOVIK scaffolds the UI, wires the database, and ships auth — all from one prompt.
+- Spin up production APIs: REST or RPC endpoints, typed validators, rate-limits and logs included.
+- MANOVIK FORCE: run parallel AI agent swarms on one brief.
+- MANOVIK CLI: the AI coding agent in your terminal, with self-fixing CI.
+- Holo Deck: virtual screens; Gesture Deck: gesture controls; Smart Home: smart-home control in Jarvis mode.
+- Device Agent: pair phones and other devices; Location Tracker: device location.
+- MCP support: MANOVIK connects to MCP servers, and ships its own MCP server endpoint at /mcp.
+- Self-hosting: the Sovereign plan includes the self-host setup wizard, Docker support, and BYOK (bring your own key).
+- Voice: MANO voice assistant with barge-in and echo suppression.
+
+## Pricing
+
+- Free tier: start building without a card.
+- MANOVIK AI Pro: 800 messages with one-time payment, for builders shipping daily. Price: 699 INR (one-time payment, not a subscription).
+- MANOVIK AI Sovereign (Lifetime Self-Host): run MANOVIK on your own infrastructure forever. One-time payment. Price: 4999 INR. Includes the self-host setup wizard, Docker support, and BYOK.
+
+## Frequently asked questions
+
+Q: What is MANOVIK AI?
+A: MANOVIK is an autonomous AI agent that codes, builds, and ships software for you.
+
+Q: Which languages does it support?
+A: Any major language — JavaScript, TypeScript, Python, Go, Rust, Java, Swift, Kotlin, SQL and more.
+
+Q: Can I run MANOVIK on my own server?
+A: Yes. The Sovereign lifetime plan (₹4999) includes the self-host setup wizard, Docker support, and BYOK.
+
+Q: Is my data private?
+A: Threads are encrypted at rest and never used to train third-party models.
+
+## Contact
+
+- Support: support@manovik.in
+- Sales & partnerships: sales@manovik.in
+- Grievance officer: privacy@manovik.in
+- Operator: MANOVIK AI, India
+- Website: https://manovik.in
+- Contact page: https://manovik.in/contact
+
+## Pages
+
+- Home: https://manovik.in/
+- AGI Roadmap: https://manovik.in/agi-roadmap
+- AI Coding Assistant: https://manovik.in/ai-coding-assistant
+- AI Website Builder: https://manovik.in/ai-website-builder
+- Autonomous AI Software Engineer: https://manovik.in/autonomous-ai-software-engineer
+- Best AI Coding Agent: https://manovik.in/best-ai-coding-agent
+- How to Make a Website With AI: https://manovik.in/how-to-make-a-website-with-ai
+- Case Studies: https://manovik.in/case-studies
+- MANOVIK CLI: https://manovik.in/cli
+- Device Agent: https://manovik.in/device-agent
+- MANOVIK FORCE: https://manovik.in/force
+- Gesture Deck: https://manovik.in/gesture
+- Holo Deck: https://manovik.in/holo
+- Smart Home: https://manovik.in/home
+- MCP server endpoint: https://manovik.in/mcp
+- MCP Servers List: https://manovik.in/mcp-servers-list
+- Security Lab: https://manovik.in/security
+- Location Tracker: https://manovik.in/track
+- Rules Library: https://manovik.in/rules/library
+- Students: https://manovik.in/students
+- Contact: https://manovik.in/contact
+- Privacy Policy: https://manovik.in/privacy
+- Terms of Service: https://manovik.in/terms
+- Refund Policy: https://manovik.in/refund
+
+## Comparisons
+
+- MANOVIK AI vs Cursor AI: https://manovik.in/vs-cursor
+- MANOVIK AI vs Windsurf: https://manovik.in/vs-windsurf
+- MANOVIK AI vs Devin: https://manovik.in/vs-devin
+- MANOVIK AI vs GitHub Copilot: https://manovik.in/vs-github-copilot
+- MANOVIK AI vs Cline: https://manovik.in/vs-cline
+- MANOVIK AI vs Roo Code: https://manovik.in/vs-roo-code
+- MANOVIK AI vs Bolt.new: https://manovik.in/vs-bolt-new
+- MANOVIK AI vs Replit Agent: https://manovik.in/vs-replit-agent
+- Cline vs Windsurf (2026): https://manovik.in/vs-cline-vs-windsurf
+
+## Blog
+
+- AI Coding Agent Benchmark 2026: MANOVIK vs Cursor: https://manovik.in/blog/ai-coding-agent-benchmark
+- Lifetime vs Subscription AI Coding — TCO: https://manovik.in/blog/ai-pricing-comparison
+- Best AI Coding Agent 2026: MANOVIK AI vs Devin vs Cline: https://manovik.in/blog/best-ai-coding-agents
+- Claude Code vs Cursor (2026): Key Differences: https://manovik.in/blog/claude-code-vs-cursor
+- MCP Servers with MANOVIK — A Sovereign AI Guide: https://manovik.in/blog/mcp-guide
+- Self-Hosting AI Agents with Ollama and Docker: https://manovik.in/blog/self-hosting-ai-with-ollama
+- MANOVIK System Rules: https://manovik.in/blog/system-rules
+- Will AI Replace Software Engineers? An Honest 2026 Take: https://manovik.in/blog/will-ai-replace-software-engineers

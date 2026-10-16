@@ -47,6 +47,7 @@ const EXCLUDED_PREFIXES = [
   "/auth",
   "/email",
   "/lovable",
+  "/.lovable",
   "/receipt",
   "/.mcp",
   "/.well-known",
