@@ -137,7 +137,7 @@ export const Route = createFileRoute("/api/generate-image")({
         const imageModels = [
           process.env.MANOVIK_AI_IMAGE_MODEL ?? "gemini-2.5-flash-image",
           "gemini-2.5-flash-image",
-          "gemini-3-pro-image-preview",
+          "gemini-3-pro-image",
         ].filter((m, i, a) => m && a.indexOf(m) === i);
 
         interface GeminiPart {
